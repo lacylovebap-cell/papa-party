@@ -1,0 +1,1 @@
+@media(max-width:700px){.header-inner{display:grid;grid-template-columns:1fr 1fr;gap:8px}.brand{justify-self:start}.login-status{justify-self:end;max-width:170px}.header-actions{grid-column:1/-1;justify-content:flex-end;flex-wrap:nowrap}.header-actions button{font-size:12px;padding:7px 10px}.offline{font-size:10px;padding:6px}}
