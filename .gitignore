@@ -3,3 +3,5 @@ deploy-schema.*
 node_modules/
 *.log
 .env*
+
+dist/

@@ -33,3 +33,5 @@ input,textarea,select{background:#100e15;color:#eeeaf3;border-color:#3a3145}inpu
 .brand-logo{width:100px;height:90px;background-size:270%;background-position:87% 45%}@media(max-width:700px){.brand-logo{width:85px;height:76px}}
 
 .room-picker{min-width:210px}.room-picker summary{cursor:pointer;padding:8px}.room-options{display:flex;flex-direction:column;max-height:220px;overflow:auto;gap:4px}.room-options button[hidden]{display:none}
+
+.event-detail{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:360px;overflow:auto}.allocation-row{margin:12px 0}
