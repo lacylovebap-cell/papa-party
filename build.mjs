@@ -7,5 +7,5 @@ for(const name of ['src/app.js','src/core.js','src/config.js'])execFileSync(proc
 for(const folder of ['src','assets'])fs.cpSync(path.join(root,folder),path.join(out,folder),{recursive:true});
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 for(const file of ['index.html','preview.html','v2.html'])fs.writeFileSync(path.join(out,file),html);
-fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'9.24-A',builtAt:new Date().toISOString()}));
-console.log('Build 9.24-A complete: static site in dist');
+fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'9.24-A.1',builtAt:new Date().toISOString()}));
+console.log('Build 9.24-A.1 complete: static site in dist');
