@@ -5,3 +5,6 @@ node_modules/
 .env*
 
 dist/
+qa-*.html
+notification-audio-test.html
+deploy-*.html
