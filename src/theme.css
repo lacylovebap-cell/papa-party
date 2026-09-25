@@ -36,3 +36,7 @@ input,textarea,select{background:#100e15;color:#eeeaf3;border-color:#3a3145}inpu
 
 /* Release B: notification settings fit existing mobile and desktop panels. */
 .notice-dialog{width:min(760px,calc(100vw - 32px));max-height:85dvh;overflow:auto}.notice-count{display:inline-block;background:#b53255;color:#fff;border-radius:99px;min-width:1.4em;text-align:center;padding:0 4px}.notice-item{padding:16px 0;border-bottom:1px solid #ffffff1c}.notice-item.unread{border-left:3px solid #ba94df;padding-left:12px}.notice-settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:20px 0}.notice-settings-grid fieldset{border:1px solid #ffffff26;border-radius:10px;padding:12px}.notice-dialog .actions{flex-wrap:wrap}.notice-dialog .check-row{margin:8px 0}.notice-dialog p{overflow-wrap:anywhere}
+
+/* Shared streamer navigation fits existing 700px mobile breakpoint. */
+.header-streamer{display:flex;align-items:center;gap:6px;margin:0;min-width:0}.header-streamer span{font-size:12px;color:var(--muted)}.header-streamer select{width:auto;max-width:160px;margin:0;padding:6px 8px}.hero-placeholder{height:210px;background:linear-gradient(110deg,#171122,#44305e)}
+@media(max-width:700px){.header-actions{flex-wrap:wrap;min-width:0}.header-streamer select{max-width:115px}.hero-placeholder{position:absolute;inset:0;height:100%}}
