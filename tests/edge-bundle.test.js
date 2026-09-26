@@ -18,4 +18,7 @@ test('complete edge bundle compiles, preserves URL validators and isolates chat 
  await assert.rejects(vm.runInContext("boardOperation({op:'boardList',rootId:fixture.id},{role:'player',playerId:'C'},upgradePlatform(empty()))",context),/無權查看/);
  await assert.rejects(vm.runInContext("boardOperation({op:'boardChange',id:fixture.id,action:'remove',version:1},{role:'player',playerId:'B'},upgradePlatform(empty()))",context),/無法修改/);
  await assert.rejects(vm.runInContext("boardOperation({op:'boardBlock',id:fixture.id},{role:'player',playerId:'B'},upgradePlatform(empty()))",context),/匿名留言/);
+ vm.runInContext("fixture.targets=['streamer:other'];actor=async()=>({role:'streamer_admin',streamer_id:'other'});load=async()=>upgradePlatform(empty());",context);
+ const boardResponse=await handler({method:'POST',json:async()=>({op:'boardList',token:'test',streamer:'papa'})});assert.equal(boardResponse.status,200);assert.equal((await boardResponse.json()).rows[0].body,'private');
+ const adminResponse=await handler({method:'POST',json:async()=>({op:'read',token:'test',streamer:'papa'})});assert.equal(adminResponse.status,400);assert.match((await adminResponse.json()).error,/自己的主播/);
 });

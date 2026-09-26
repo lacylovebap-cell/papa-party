@@ -1,4 +1,4 @@
-import {createBoard} from './board.js?v=9.24-C.2';
+import {createBoard} from './board.js?v=9.24-C.2.1';
 import {createChat} from './chat.js?v=9.24-C.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=9.24-H';
 import {openHomeEditor} from './home-editor.js?v=9.24-H';
