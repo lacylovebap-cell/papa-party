@@ -8,9 +8,9 @@ test('notification ownership comes from role and bound room, never requested rec
  assert.throws(()=>noticeIdentity(streamer,'b'));assert.throws(()=>noticeIdentity(null,'a'));
 });
 test('streamer can operate own songs and queues, cannot switch room or run global operations',()=>{
- for(const type of ['song','queue','ledger','allocate','restoreSongEdits','wishAdmin'])authorizeManagerOperation(streamer,{op:'mutate',action:{type}},'a');
+ for(const type of ['player','song','queue','ledger','allocate','restoreSongEdits','wishAdmin'])authorizeManagerOperation(streamer,{op:'mutate',action:{type}},'a');
  for(const op of ['backup','publish','migrate','setStreamerAccount','noticeSound'])assert.throws(()=>authorizeManagerOperation(streamer,{op},'a'));
- for(const type of ['player','self','streamer','cleanup'])assert.throws(()=>authorizeManagerOperation(streamer,{op:'mutate',action:{type}},'a'));
+ for(const type of ['self','streamer','cleanup'])assert.throws(()=>authorizeManagerOperation(streamer,{op:'mutate',action:{type}},'a'));
  assert.throws(()=>authorizeManagerOperation(streamer,{op:'read'},'b'));
  assert.throws(()=>authorizeManagerOperation(streamer,{op:'import',kind:'players'},'a'));
  assert.throws(()=>authorizeManagerOperation(player,{op:'read'},'a'));

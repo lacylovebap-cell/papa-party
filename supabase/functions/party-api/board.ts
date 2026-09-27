@@ -4,7 +4,7 @@ async function boardOperation(b:any,who:any,s:any){
  if(!room.active&&a.role!=='super')throw Error('此主播暫未開放');
  if(b.op==='boardRooms')return {rooms:s.streamers.filter((r:any)=>r.active).map((r:any)=>({slug:r.slug,name:r.display_name}))};
  const scope=b.scope==='global'?'global':'streamer',roomId=scope==='global'?'__global__':room.id;
- const nameOf=(key:string)=>key==='super'?'PA Party 總管理':key.startsWith('player:')?(s.players.find((p:any)=>'player:'+p.playerId===key)?.name||'玩家'):(s.streamers.find((r:any)=>'streamer:'+r.id===key)?.display_name||'主播');
+ const nameOf=(key:string)=>key==='super'?'PA Party總裁':key.startsWith('player:')?(s.players.find((p:any)=>'player:'+p.playerId===key)?.name||'玩家'):(s.streamers.find((r:any)=>'streamer:'+r.id===key)?.display_name||'主播');
  const validKey=(key:string)=>key.startsWith('player:')?s.players.some((p:any)=>'player:'+p.playerId===key):s.streamers.some((r:any)=>r.active&&'streamer:'+r.id===key);
  const blocks=(await api('/rest/v1/papa_board_blocks?owner_key=eq.'+encodeURIComponent(a.key))).map((r:any)=>r.target_key);
  const getPost=async(id:string)=>{const [p]=await api('/rest/v1/papa_board_posts?id=eq.'+boardUuid(id));if(!p||p.streamer_id!==roomId)throw Error('留言不存在或無權查看');return p;};

@@ -7,10 +7,25 @@ export function authorizeManagerOperation(who,body,room){
  if(who?.role!=='streamer_admin')throw Error('請先登入管理');
  if(['read','events','upload'].includes(body.op))return;
  if(body.op==='import'&&['songs','crowns'].includes(body.kind))return;
- if(body.op==='mutate'&&['song','songsBulk','restoreSongEdits','tag','crown','card','wishAdmin','ledger','allocate','allocateStored','queue','queueBulkDelete','onBehalf','settings','recordTime'].includes(body.action?.type)){
-  if(body.action.type==='recordTime'&&body.action.data?.table==='players')throw Error('玩家共用資料由總管理修改');return;
+ if(body.op==='mutate'&&['player','song','songsBulk','restoreSongEdits','tag','crown','card','wishAdmin','ledger','allocate','allocateStored','queue','queueBulkDelete','onBehalf','settings','recordTime'].includes(body.action?.type)){
+  if(body.action.type==='recordTime'&&body.action.data?.table==='players')throw Error('玩家共用資料由PA Party總裁修改');return;
  }
- throw Error('此操作僅限總管理');
+ throw Error('此操作僅限PA Party總裁');
+}
+// The core uses the shared admin role, so protected fields must come from the
+// full server snapshot rather than the manager's redacted player projection.
+export function prepareManagerAction(who,action,state){
+ if(who?.role!=='streamer_admin'||action?.type!=='player')return action;
+ const input=action.data||{},allowed=['playerId','name','ids','names','certification'];
+ if(typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(key=>!allowed.includes(key)))throw Error('主播只能修改玩家名稱、平台 ID、別名與認證');
+ const old=input.playerId?state.players.find(p=>p.playerId===input.playerId):null;
+ if(input.playerId&&!old)throw Error('找不到玩家，請重新整理後再試');
+ const data={};
+ for(const key of allowed)if(Object.hasOwn(input,key))data[key]=input[key];else if(old&&Object.hasOwn(old,key))data[key]=old[key];
+ // New players have no opening balance. Existing secrets and private flags
+ // stay intact when the core rebuilds its legacy player row.
+ data.note=old?.note??'';data.password=old?.password??'';data.test=!!old?.test;data.balance=0;
+ return {...action,data};
 }
 export function managementView(view,who){
  if(who?.role!=='streamer_admin')return view;
