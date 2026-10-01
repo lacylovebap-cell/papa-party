@@ -6,8 +6,8 @@ import {chatAccess,cleanChatMessage,chatCursor} from '../../../src/chat-policy.j
 async function chatPlayers(ids:string[]){
  const unique=[...new Set(ids.filter(id=>/^[A-Za-z0-9_-]{1,100}$/.test(id)))];
  if(!unique.length)return new Map();
- const rows=await api('/rest/v1/papa_v2_entities?kind=eq.players&id=in.('+unique.join(',')+')&select=id,data');
- return new Map(rows.map((row:any)=>[row.id,row.data]));
+ const rows=await api('/rest/v1/papa_v2_entities?kind=eq.players&id=in.('+unique.join(',')+')&select=id,name:data->>name');
+ return new Map(rows.map((row:any)=>[row.id,{name:row.name}]));
 }
 async function chatOperation(b:any,who:any,s:any){
  const room=scopeState(s,b.streamer||'papa').currentStreamer,a=chatAccess(who,room,b.playerId);

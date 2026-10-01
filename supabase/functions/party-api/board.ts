@@ -11,9 +11,9 @@ async function boardOperation(b:any,who:any,s:any){
  const loadPlayers=async(keys:string[])=>{
   const ids=[...new Set(keys.filter((key:string)=>key.startsWith('player:')).map((key:string)=>key.slice(7)).filter((id:string)=>/^[A-Za-z0-9_-]{1,100}$/.test(id)&&!players.has(id)))];
   if(!ids.length)return;
-  const rows=await api('/rest/v1/papa_v2_entities?kind=eq.players&id=in.('+ids.join(',')+')&select=id,data');
+  const rows=await api('/rest/v1/papa_v2_entities?kind=eq.players&id=in.('+ids.join(',')+')&select=id,name:data->>name');
   for(const id of ids)players.set(id,null);
-  for(const row of rows)players.set(row.id,row.data);
+  for(const row of rows)players.set(row.id,{name:row.name});
  };
  const nameOf=(key:string)=>key==='super'?'PA Party總裁':key.startsWith('player:')?(players.get(key.slice(7))?.name||'玩家'):(s.streamers.find((r:any)=>'streamer:'+r.id===key)?.display_name||'主播');
  const validKey=(key:string)=>key.startsWith('player:')?!!players.get(key.slice(7)):s.streamers.some((r:any)=>r.active&&'streamer:'+r.id===key);
