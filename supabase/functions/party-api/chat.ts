@@ -1,13 +1,24 @@
 import {chatAccess,cleanChatMessage,chatCursor} from '../../../src/chat-policy.js';
 // Bundled with index.ts; uses its authenticated actor, api, scopeState and push worker.
+// Only the requested player (or the visible inbox page) is needed here. In
+// particular, a four-second chat refresh must never load every song/lyric via
+// papa_v2_snapshot merely to resolve player names.
+async function chatPlayers(ids:string[]){
+ const unique=[...new Set(ids.filter(id=>/^[A-Za-z0-9_-]{1,100}$/.test(id)))];
+ if(!unique.length)return new Map();
+ const rows=await api('/rest/v1/papa_v2_entities?kind=eq.players&id=in.('+unique.join(',')+')&select=id,data');
+ return new Map(rows.map((row:any)=>[row.id,row.data]));
+}
 async function chatOperation(b:any,who:any,s:any){
  const room=scopeState(s,b.streamer||'papa').currentStreamer,a=chatAccess(who,room,b.playerId);
- const player=a.player?s.players.find((p:any)=>p.playerId===a.player):null;
- if(a.player&&!player)throw Error('找不到玩家');
  if(b.op==='chatInbox'){
   const rows=await api('/rest/v1/rpc/papa_chat_inbox',{room:room.id,owner_player:a.manager?null:a.player,reader_key:a.reader,page_number:Math.max(0,Math.min(100000,Math.floor(Number(b.page)||0)))});
-  return {rows:rows.slice(0,50).map((r:any)=>({...r,player_name:s.players.find((p:any)=>p.playerId===r.player_id)?.name||'玩家'})),hasMore:rows.length>50};
+  const visible=rows.slice(0,50),players=await chatPlayers([...visible.map((r:any)=>r.player_id),...(a.player?[a.player]:[])]);
+  if(a.player&&!players.has(a.player))throw Error('找不到玩家');
+  return {rows:visible.map((r:any)=>({...r,player_name:players.get(r.player_id)?.name||'玩家'})),hasMore:rows.length>50};
  }
+ const player=a.player?(await chatPlayers([a.player])).get(a.player):null;
+ if(a.player&&!player)throw Error('找不到玩家');
  if(!player)throw Error('請選擇玩家');
  const filter='streamer_id=eq.'+encodeURIComponent(room.id)+'&player_id=eq.'+encodeURIComponent(a.player);
  if(b.op==='chatMessages'){
