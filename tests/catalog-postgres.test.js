@@ -27,11 +27,15 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
  const migration=await readFile(new URL('../supabase/migrations/202610010001_shared_catalog.sql',import.meta.url),'utf8');
  await db.exec(migration);
  await db.exec(await readFile(new URL('../supabase/migrations/202610010004_safe_event_reads.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../supabase/migrations/202610010005_catalog_governance.sql',import.meta.url),'utf8'));
  const candidate=async id=>await one('select * from papa_catalog_candidates where song_id=$1',[id]);
  const review=async(decision,ids,variant=null,family=null,expected=null)=>{
   const hashes=expected??Object.fromEntries((await q('select id,source_hash from papa_catalog_candidates where id=any($1)',[ids])).map(c=>[c.id,c.source_hash]));
   return rpc('papa_catalog_review',[decision,ids,variant,family,'','president',hashes]);
  };
+ const versions=async ids=>Object.fromEntries((await q('select id,updated_at from papa_catalog_variants where id=any($1)',[ids])).map(v=>[v.id,v.updated_at]));
+ const govern=async(action,ids,{candidates=[],family=null,metadata={},expected=null,sources=null}={})=>rpc('papa_catalog_governance',[
+  action,ids,candidates,family,metadata,expected??await versions(ids),sources??Object.fromEntries((await q('select id,source_hash from papa_catalog_candidates where id=any($1)',[candidates])).map(c=>[c.id,c.source_hash])),'president']);
  let v1,v2;
  await t.test('migration preserves every original song and creates no automatic approvals',async()=>{
   assert.deepEqual((await q("select data from papa_v2_entities where kind='songs' order by id")).map(x=>x.data),original);
@@ -46,6 +50,7 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
    await assert.rejects(q('select * from papa_catalog_lyric_revisions'),/permission denied/);
    await assert.rejects(rpc('papa_catalog_search'),/permission denied/);
    await assert.rejects(rpc('papa_event_page',['papa',0,false]),/permission denied/);
+   await assert.rejects(rpc('papa_catalog_governance',['update_variant',[]]),/permission denied/);
    await db.exec('reset role');
   }
  });
@@ -129,6 +134,55 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
   assert(!JSON.stringify(catalog).includes('共同秘密'));
   const history=await rpc('papa_catalog_review_list',['history',50,0]);
   assert(!JSON.stringify(history).includes('私密備註'));assert(!JSON.stringify(history).includes('共同秘密'));
+ });
+ await t.test('common metadata edits update projection/search and reject stale submissions without modifying originals',async()=>{
+  const originalsBefore=await q("select id,data from papa_v2_entities where kind='songs' order by id");
+  const stale=await versions([v1]);
+  const revBefore=Number((await one('select revision from papa_v2_revision where id=1')).revision);
+  const result=await govern('update_variant',[v1],{metadata:{title:'共用新名稱',languageId:'english',versionLabel:'錄音室版'}});
+  assert.equal(result.revision,revBefore+1);
+  assert.deepEqual(await q("select id,data from papa_v2_entities where kind='songs' order by id"),originalsBefore);
+  assert.equal((await rpc('papa_catalog_song_metadata',['papa'])).find(s=>s.songId==='s4').title,'共用新名稱');
+  assert((await rpc('papa_song_search_room',['papa','共用新名稱',[],30,0])).songIds.includes('s4'));
+  assert.equal((await rpc('papa_catalog_search',['共用新名稱',30,0,'papa'])).rows[0].language,'英語');
+  const auditBefore=(await one('select count(*)::int as n from papa_catalog_audit')).n;
+  await assert.rejects(govern('update_variant',[v1],{metadata:{title:'stale'},expected:stale}),/CATALOG_SELECTION_STALE/);
+  assert.equal((await one('select count(*)::int as n from papa_catalog_audit')).n,auditBefore);
+  assert.equal(Number((await one('select revision from papa_v2_revision where id=1')).revision),result.revision);
+ });
+ await t.test('family merge changes only group association and keeps variant, lyric, and song identities',async()=>{
+  const target=(await one('select family_id from papa_catalog_variants where id=$1',[v1])).family_id;
+  const linksBefore=await q('select * from papa_catalog_song_links order by streamer_id,song_id');
+  const lyricsBefore=await q('select * from papa_catalog_lyric_revisions order by variant_id,revision');
+  await govern('merge_family',[v2],{family:target});
+  assert.equal((await one('select family_id from papa_catalog_variants where id=$1',[v2])).family_id,target);
+  assert.deepEqual(await q('select * from papa_catalog_song_links order by streamer_id,song_id'),linksBefore);
+  assert.deepEqual(await q('select * from papa_catalog_lyric_revisions order by variant_id,revision'),lyricsBefore);
+  const revision=Number((await one('select revision from papa_v2_revision where id=1')).revision);
+  assert.equal((await govern('merge_family',[v2],{family:target})).count,0);
+  assert.equal(Number((await one('select revision from papa_v2_revision where id=1')).revision),revision);
+ });
+ await t.test('split validates the entire batch and preserves private copies, notes, source IDs and old shared history',async()=>{
+  const roomCopy=await one("select song_id from papa_catalog_song_links where streamer_id='michelle' and variant_id=$1",[v1]);
+  const candidateIds=[(await candidate('s4')).id,(await candidate(roomCopy.song_id)).id];
+  await rpc('papa_catalog_lyric_choice',['papa','s4','shared',null,'拆分私人註記','streamer:papa']);
+  await rpc('papa_catalog_lyric_choice',['michelle',roomCopy.song_id,'copy','保留私人歌詞副本','另一份私註','streamer:michelle']);
+  const sourceSongs=await q("select id,data from papa_v2_entities where kind='songs' order by id");
+  const variantsBefore=(await one('select count(*)::int as n from papa_catalog_variants')).n;
+  await assert.rejects(govern('split_variant',[v1],{candidates:[candidateIds[0],'00000000-0000-4000-8000-000000000000']}),/CATALOG_CANDIDATE_MISSING/);
+  assert.equal((await one('select count(*)::int as n from papa_catalog_variants')).n,variantsBefore);
+  const oldHistory=await q('select * from papa_catalog_lyric_revisions where variant_id=$1 order by revision',[v1]);
+  const result=await govern('split_variant',[v1],{candidates:candidateIds,metadata:{versionLabel:'重新確認版本'}});
+  assert.notEqual(result.variantId,v1);assert.equal(result.count,2);
+  assert.deepEqual(await q("select id,data from papa_v2_entities where kind='songs' order by id"),sourceSongs);
+  assert.deepEqual(await q('select * from papa_catalog_lyric_revisions where variant_id=$1 order by revision',[v1]),oldHistory);
+  const local=await rpc('papa_catalog_get_lyrics',[null,'papa','s4']);
+  assert.equal(local.body,'共同秘密歌詞二');assert.equal(local.privateNote,'拆分私人註記');assert.equal(local.variantId,result.variantId);
+  const copied=await rpc('papa_catalog_get_lyrics',[null,'michelle',roomCopy.song_id]);
+  assert.equal(copied.body,'保留私人歌詞副本');assert.equal(copied.privateNote,'另一份私註');
+  await rpc('papa_catalog_save_lyric',[v1,'原版本後來更新','president',true]);
+  assert.equal((await rpc('papa_catalog_get_lyrics',[null,'papa','s4'])).body,'共同秘密歌詞二');
+  assert(!JSON.stringify(await rpc('papa_catalog_review_list',['history',50,0])).includes('保留私人歌詞副本'));
  });
  await t.test('event reads redact nested lyrics and private notes, page at 50, and retain stored history',async()=>{
   const sensitive={title:'可見歌名',lyrics:'legacy lyric secret',nested:{privateNotes:'private text',items:[{lyricsBody:'large body',value:'safe'}]}};
