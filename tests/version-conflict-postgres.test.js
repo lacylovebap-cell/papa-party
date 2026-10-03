@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+test('stale version returns nonretryable PT409, saves function recovery point and writes nothing',async t=>{
+ const db=new PGlite();t.after(()=>db.close());
+ await db.exec('create role anon;create role authenticated;create role service_role;create table papa_release_backups(release text primary key,snapshot jsonb);');
+ const original=(await readFile(new URL('../supabase/migrations/202609170001_party_v2.sql',import.meta.url),'utf8')).split('insert into storage.buckets')[0];
+ await db.exec(original);
+ const q=async(sql,args=[])=>(await db.query(sql,args)).rows;
+ const payload=[{kind:'songs',id:'s1',data:{songId:'s1',lyrics:'保留歌詞',creditCost:2}}];
+ await q('select papa_v2_commit(0,$1,$2)',[payload,[]]);
+ const before=await q('select papa_v2_snapshot() as snapshot');
+ await db.exec(await readFile(new URL('../supabase/migrations/202610040001_version_conflict_no_retry.sql',import.meta.url),'utf8'));
+ assert.deepEqual(await q('select papa_v2_snapshot() as snapshot'),before);
+ const saved=await q('select snapshot from papa_release_backups');assert.match(saved[0].snapshot.function_definition,/40001/);
+ await assert.rejects(q('select papa_v2_commit(0,$1,$2)',[[{...payload[0],data:{title:'不得覆寫'}}],[]]),e=>e.code==='PT409'&&e.message==='VERSION_CONFLICT');
+ assert.deepEqual(await q('select papa_v2_snapshot() as snapshot'),before);
+ assert.equal((await q('select papa_v2_commit(1,$1,$2) as revision',[[],[]]))[0].revision,2);
+ await db.exec('set role anon');await assert.rejects(q("select papa_v2_commit(2,'[]','[]')"),/permission denied/);await db.exec('reset role');
+});
