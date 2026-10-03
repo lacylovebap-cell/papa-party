@@ -8,7 +8,7 @@ const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const handlers=source.slice(source.indexOf('let querySequence=0;'),source.indexOf('async function start()'));
 function harness(){
  const events={},filters={q:''},pages={book:4},results=[];
- const context=vm.createContext({document:{addEventListener:(type,fn)=>events[type]=fn},WeakSet,filters,pages,isAdmin:()=>false,renderSongResults:()=>results.push(filters.q),render:()=>{throw new Error('Search must never replace the page');},toast:message=>{throw new Error(message);}});
+ const context=vm.createContext({document:{addEventListener:(type,fn)=>events[type]=fn},WeakSet,filters,pages,roomSearch:{generation:0,timer:null},clearTimeout:()=>{},setTimeout:()=>0,loadRoomSongSearch:()=>{},isAdmin:()=>false,renderSongResults:()=>results.push(filters.q),render:()=>{throw new Error('Search must never replace the page');},toast:message=>{throw new Error(message);}});
  vm.runInContext(handlers,context);
  const input={id:'song-q',value:'',matches:()=>false};
  return {events,input,filters,pages,results};
