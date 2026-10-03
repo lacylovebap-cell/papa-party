@@ -22,10 +22,13 @@ async function chatOperation(b:any,who:any,s:any){
  if(!player)throw Error('請選擇玩家');
  const filter='streamer_id=eq.'+encodeURIComponent(room.id)+'&player_id=eq.'+encodeURIComponent(a.player);
  if(b.op==='chatMessages'){
-  const before=chatCursor(b.before),rows=await api('/rest/v1/papa_chat_messages?'+filter+(before?'&seq=lt.'+before:'')+'&select=id,seq,sender_side,body,created_at&order=seq.desc&limit=51');
-  const receipts=await api('/rest/v1/papa_chat_reads?'+filter);
+  const before=chatCursor(b.before),after=b.after===0?0:chatCursor(b.after);
+  if(before!==null&&after!==null)throw Error('請選擇單一訊息讀取方向');
+  const incremental=after!==null,rows=await api('/rest/v1/papa_chat_messages?'+filter+(incremental?'&seq=gt.'+after:before?'&seq=lt.'+before:'')+'&select=id,seq,sender_side,body,created_at&order=seq.'+(incremental?'asc':'desc')+'&limit=51');
+  const receipts=await api('/rest/v1/papa_chat_reads?'+filter+'&select=reader,last_seq');
   const recipientRead=Math.max(0,...receipts.filter((r:any)=>a.manager?r.reader==='player':r.reader!=='player').map((r:any)=>Number(r.last_seq)));
-  return {rows:rows.slice(0,50).reverse(),hasMore:rows.length>50,recipientRead,playerName:player.name,streamerName:room.display_name};
+  const visible=rows.slice(0,50);
+  return {rows:incremental?visible:visible.reverse(),hasMore:rows.length>50,recipientRead,playerName:player.name,streamerName:room.display_name};
  }
  if(b.op==='chatRead'){await api('/rest/v1/rpc/papa_chat_read',{room:room.id,player:a.player,reader_key:a.reader,through_seq:chatCursor(b.through)});return {ok:true};}
  if(b.op==='chatSend'){
