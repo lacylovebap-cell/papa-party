@@ -15,10 +15,11 @@ let eventPage=0;let signatures={};let queueHistory=false;const selectedQueue=new
 let lastFullRefreshAt=0,refreshInFlight=null;
 const selectedSongs=new Set();
 let songUndo=null,songUndoTimer;
-let filters={q:'',tags:[]},pages={},adminQuery='',ledgerQuery='',galleryFilter='current';
+let filters={q:'',tags:[],language:''},pages={},adminQuery='',ledgerQuery='',galleryFilter='current';
 const catalogView={section:'pending',page:0,items:[],total:0,hasMore:false,loaded:false,loading:false,error:'',selected:new Set(),selectedSources:new Map(),selectedVariants:new Map(),search:'',templates:null,scanCursor:'',scanTotal:0,scanning:false,scanComplete:false};
 const sharedBrowse={q:'',page:0,items:[],total:0,hasMore:false,loading:false,error:'',selected:new Set(),selectedRows:new Map(),generation:0,reviewIds:null};
 let sharedLyricHistory={variantId:null,rows:[]};
+const roomLanguages={data:null,loadedAt:0,loading:false};
 const roomSearch={book:null,home:null,songs:null,unsupported:false,generation:0,timer:null,cache:new Map()};
 if(admin?.until<Date.now()){admin=null;put('admin',null);}if(!admin)draft=null;
 const isSuperAdmin=()=>!!admin&&admin.role!=='streamer_admin';
@@ -85,7 +86,7 @@ async function refresh(force=false){
 async function dispatch(type,data){if(busy)throw new Error('上一筆還在處理');busy=true;try{if(demo||draft&&isAdmin()){const before=structuredClone(full);full=mutate(full,{type,data,streamer:streamerSlug},actor(),clock());notifications.localChange(before,full,{type,data,streamer:streamerSlug},actor());if(draft&&isAdmin()){draft.state=full;put('draft',draft);}else put('demo',full);state=publicView(full,actor(),clock(),streamerSlug);}else{const r=await api({op:'mutate',revision:state.revision,action:{type,data}});state={...state,...r.state};}render();notifications.refresh().catch(()=>{});}finally{busy=false;}}
 function switchStreamer(slug){if(slug===streamerSlug)return;location.href=streamerDestination(location.href,slug,{role:admin?.role,managedSlug:admin?.streamerSlug,subtab,adminTab:tab});}
 document.addEventListener('change',e=>{if(e.target.id==='header-streamer')switchStreamer(e.target.value);if(e.target.id==='fate-category'){fateCategory=e.target.value;fateSeen=[];fateId=null;$('#fate-result').innerHTML=fateResultHtml();}});
-async function go(next){if(next==='admin'&&admin?.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(location.href);u.hash='admin';location.href=streamerDestination(u.href,admin.streamerSlug,{role:admin.role,managedSlug:admin.streamerSlug});return;}signatures={};route=next;location.hash=next;filters={q:'',tags:[]};pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);if(next==='admin'&&!admin){route='home';await adminLogin();return;}if(next==='center'&&!session){route='home';await loginDialog();return;}await refresh(true);}
+async function go(next){if(next==='admin'&&admin?.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(location.href);u.hash='admin';location.href=streamerDestination(u.href,admin.streamerSlug,{role:admin.role,managedSlug:admin.streamerSlug});return;}signatures={};route=next;location.hash=next;filters={q:'',tags:[],language:''};pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);if(next==='admin'&&!admin){route='home';await adminLogin();return;}if(next==='center'&&!session){route='home';await loginDialog();return;}await refresh(true);}
 const notifications=createNotifications({api:b=>api({...b,management:!!admin,streamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug}),apiUrl:API,apiKey:PUBLISHABLE_KEY,context:()=>({demo:demo||!!(draft&&isAdmin()),role:admin?(admin.role||'super_admin'):'player',recipient:admin?(isSuperAdmin()?'__super__':'__admin__'):session?.playerId,streamer:admin?(isSuperAdmin()?'__global__':admin.streamerSlug):streamerSlug,streamerName:admin&&isSuperAdmin()?'全部主播':state.currentStreamer?.display_name}),toast,onUpdate:()=>{chat.refresh().catch(()=>{});if(!busy&&!$('#dialog').open&&!document.activeElement?.matches('input,textarea,select'))refresh().catch(()=>{});}});
 const chat=createChat({api,context:()=>({manager:isAdmin(),role:isAdmin()?admin?.role:'player',playerId:session?.playerId,streamer:streamerSlug,streamerName:hostName(),demo:demo||!!draft}),toast,onRead:()=>notifications.refresh().catch(()=>{})});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-chat]'))chat.open().catch(e=>toast(e.message));});
@@ -120,8 +121,8 @@ function renderHome(){
 }
 function recommendSongs(s,id){const history=s.queue.flatMap(q=>q.items?q.items.map(i=>({...q,songId:i.songId})):q).filter(q=>q.playerId===id&&q.status==='completed'&&!q.selfProvided&&!q.test),artists=new Set(),tags=new Set();for(const q of history){const item=s.songs.find(x=>x.songId===q.songId);if(item){item.artist.split(/[／/,，]/).forEach(x=>artists.add(x.trim()));item.tags.forEach(x=>tags.add(x));}}const seed=id||'guest',hash=str=>{let n=2166136261;for(const char of str)n=Math.imul(n^char.charCodeAt(0),16777619);return n>>>0;};return [...s.songs].sort((a,b)=>{const score=x=>x.artist.split(/[／/,，]/).filter(y=>artists.has(y.trim())).length*3+x.tags.filter(y=>tags.has(y)).length*2;return score(b)-score(a)||hash(seed+liveDay(clock())+a.songId)-hash(seed+liveDay(clock())+b.songId);}).slice(0,5);}
 
-function filteredSongs(){return state.songs.filter(s=>matchesSong(s,filters.q,filters.tags));}
-function roomSearchKey(q,tags,page,view='book'){return JSON.stringify([streamerSlug,state.revision,view,String(q).trim(),[...tags].sort(),page]);}
+function filteredSongs(){return state.songs.filter(s=>(!filters.language||s.cat===filters.language)&&matchesSong(s,filters.q,filters.tags));}
+function roomSearchKey(q,tags,page,view='book'){return JSON.stringify([streamerSlug,state.revision,view,String(q).trim(),[...tags].sort(),page,view==='home'?'':filters.language||'']);}
 function bookSearchResult(){
  if(!filters.q.trim()||demo||draft)return null;
  const view=isAdmin()?'songs':'book',current=roomSearch[view];
@@ -142,7 +143,7 @@ async function loadRoomSongSearch(view,q,tags=[],page=0){
  let response;
  if(cached&&Date.now()-cached.at<30000)response=cached.data;
  else if(roomSearch.unsupported)response={localFallback:true};
- else try{response=await api({op:'songSearchRoom',q:text,tags,limit:view==='home'?5:20,offset:page*(view==='home'?5:20)});
+ else try{response=await api({op:'songSearchRoom',q:text,tags,limit:view==='home'?5:20,offset:page*(view==='home'?5:20),...(view!=='home'&&filters.language?{language:filters.language}:{})});
   if(roomSearch.cache.size>50)roomSearch.cache.clear();roomSearch.cache.set(key,{at:Date.now(),data:response});
  }catch(err){response={localFallback:true};if(/未知操作|不支援|unsupported|unknown op/i.test(err.message))roomSearch.unsupported=true;}
  if(roomSearch.pendingKey===key)roomSearch.pendingKey=null;
@@ -151,7 +152,31 @@ async function loadRoomSongSearch(view,q,tags=[],page=0){
  if(view==='home'){const holder=$('#home-results');if(holder)holder.innerHTML=songRows(result.localFallback?state.songs.filter(s=>matchesSong(s,text)).slice(0,5):result.songIds.map(id=>song(id)).filter(Boolean));}
  else renderSongResults();
 }
-function songToolbar(adminMode=false){return `<div class="toolbar"><input id="song-q" aria-label="搜尋歌曲" placeholder="歌名、歌手、語言、歌詞、標籤都能搜…" value="${h(filters.q)}">${button('清除','clearFilters')}${adminMode?button('新增歌曲','editSong')+button('批量匯入','import','songs'):''}</div><div class="chips search-tags" role="group" aria-label="標籤多選">${state.settings.tags.map(t=>`<label><input type="checkbox" data-filter-tag="${h(t)}" ${filters.tags.includes(t)?'checked':''}>${h(t)}</label>`).join('')}<small>可多選，符合任一標籤即可</small></div>`;}
+function visibleLanguages(){
+ if(roomLanguages.data?.mode==='custom')return roomLanguages.data.languages||[];
+ const used=[...new Set(state.songs.map(row=>String(row.cat||'')).filter(Boolean))],listed=roomLanguages.data?.languages||[];
+ return used.map(name=>listed.find(row=>row.name===name)||{name,sortOrder:9999}).sort((a,b)=>(a.sortOrder??9999)-(b.sortOrder??9999)||a.name.localeCompare(b.name,'zh-TW'));
+}
+function languageOptionsHtml(){return '<option value="">全部語言</option>'+visibleLanguages().map(row=>'<option value="'+h(row.name)+'" '+(filters.language===row.name?'selected':'')+'>'+h(row.name)+'</option>').join('');}
+function scheduleRoomLanguages(){
+ if(demo||draft||roomLanguages.loading||Date.now()-roomLanguages.loadedAt<300000)return;
+ roomLanguages.loading=true;setTimeout(async()=>{
+  try{roomLanguages.data=await api({op:'catalogLanguageFilter'});}catch{ /* Metadata-only local filters keep older deployments usable. */ }
+  finally{roomLanguages.loadedAt=Date.now();roomLanguages.loading=false;const select=$('#song-language');if(select){if(filters.language&&!visibleLanguages().some(row=>row.name===filters.language)){filters.language='';roomSearch.generation++;renderSongResults();}select.innerHTML=languageOptionsHtml();}}
+ },0);
+}
+async function editLanguageFilters(){
+ if(!isAdmin())return;
+ if(demo||draft)return toast('語言篩選設定請在正式主播後台使用');
+ const [settings,templates]=await Promise.all([api({op:'catalogLanguageFilter',management:true}),api({op:'catalogTemplates',management:true})]);
+ const selected=new Set(settings.languageIds||[]),choices=(templates.languages||[]).filter(row=>row.active!==false||selected.has(row.id));
+ modal('本主播歌本的語言篩選',nativeSelect('mode','顯示方式',[['auto','只顯示本主播已有的語言'],['custom','自行選擇要顯示的語言']],settings.mode||'auto')+'<p class="muted">只調整歌本篩選選項，不會刪除歌曲或修改歌曲語言。</p><div class="chips">'+choices.map(row=>check('languageIds',row.name+(row.active===false?'（已停用）':''),selected.has(row.id)).replace('name="languageIds"','name="languageIds" value="'+h(row.id)+'"')).join('')+'</div>',async f=>{
+  const data=await api({op:'catalogLanguageFilterSave',mode:f.get('mode'),languageIds:f.get('mode')==='custom'?f.getAll('languageIds'):[],management:true});
+  roomLanguages.data=data;roomLanguages.loadedAt=Date.now();filters.language='';roomSearch.generation++;render();toast('語言篩選已更新');
+ });
+}
+
+function songToolbar(adminMode=false){scheduleRoomLanguages();return `<div class="toolbar"><input id="song-q" aria-label="搜尋歌曲" placeholder="歌名、歌手、語言、歌詞、標籤都能搜…" value="${h(filters.q)}"><label>語言<select id="song-language" aria-label="篩選歌曲語言">${languageOptionsHtml()}</select></label>${button('清除','clearFilters')}${adminMode?button('語言篩選設定','languageFilterSettings')+button('新增歌曲','editSong')+button('批量匯入','import','songs'):''}</div><div class="chips search-tags" role="group" aria-label="標籤多選">${state.settings.tags.map(t=>`<label><input type="checkbox" data-filter-tag="${h(t)}" ${filters.tags.includes(t)?'checked':''}>${h(t)}</label>`).join('')}<small>可多選，符合任一標籤即可</small></div>`;}
 function renderBook(){const found=bookSearchResult(),p=found||paginate(filteredSongs(),'book',20);$('#app').innerHTML=card('🎵 歌本',songToolbar()+`<div id="song-list">${found?.loading?blank('搜尋中…'):songRows(p.rows)}${p.nav||''}</div>`,true);}
 function renderGallery(){const rows=state.cards.filter(c=>galleryFilter==='history'||galleryFilter==='current'&&currentCards().includes(c)||galleryFilter==='expired'&&c.expiresAt&&timeValue(c.expiresAt)<=Date.now()+offset);$('#app').innerHTML=card('🖼️ 卡片牆',`<div class="tabs">${[['current','目前卡片'],['history','歷史卡片'],['expired','已過期']].map(([id,label])=>button(label,'galleryFilter',id,galleryFilter===id?'active':'')).join('')}</div><div class="gallery">${rows.map(photoHtml).join('')||blank()}</div>`,true);}
 function playerTabs(id,manager=false){const p=state.players.find(x=>x.playerId===id);if(!p)return blank('找不到玩家');const qs=state.queue.filter(q=>q.playerId===id),done=qs.filter(q=>q.status==='completed'&&!q.test&&!q.selfProvided),cs=state.crowns.filter(c=>c.playerId===id),cards=state.cards.filter(c=>c.playerId===id),wishes=state.wishes.filter(w=>w.playerId===id),names=[['overview',manager?'基本資料':'總覽'],['ledger','存歌'],['queue','目前點歌／歷史'],['crowns','冠歌'],['cards','卡片'],['wishes','許願']];let body='';if(subtab==='overview'){const counts=done.flatMap(q=>q.items?q.items.flatMap(i=>Array(i.performances).fill({...q,songId:i.songId})):q).reduce((a,q)=>(a[q.songId]=(a[q.songId]||0)+1,a),{});body=`<div class="stats"><div class="stat">💾 存歌<b>${balance(state,id)}</b></div><div class="stat">🎤 已唱<b>${qs.filter(q=>q.status==='completed'&&!q.test).length}</b></div><div class="stat">👑 冠歌<b>${cs.length}</b></div><div class="stat">🖼️ 卡片<b>${cards.length}</b></div></div><div class="notice">${h(p.certification?'🐯 平台認證：'+p.certification:say('center'))}</div><div class="chips achievement-badges">${(manager?achievements(state,id,clock()):state.badges||[]).slice(0,3).map(x=>`<span class="tag">${h(x)}</span>`).join('')}</div><h3 style="margin-top:20px">我最常聽的歌</h3>${Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([id,n])=>`<div class="song"><div class="info">${h(song(id)?.title||'舊歌曲')}</div><b>×${n}</b></div>`).join('')||blank()}<div class="notice">ID：${h(p.ids.join('、')||'尚未填寫')}<br>曾用名：${h(p.names.join('、'))}</div>${manager?button('編輯玩家／密碼','editPlayer',id):button('我的名稱與密碼','self')}`;}if(subtab==='ledger')body=ledgerRows(id,manager);if(subtab==='queue')body='<h3>我的目前操作</h3>'+queueRows(qs.filter(q=>['pending','waiting'].includes(q.status)),manager)+'<h3>歷史紀錄</h3>'+queueRows(qs.filter(q=>!['pending','waiting'].includes(q.status)),manager);if(subtab==='crowns')body=crownsHtml(cs,manager);if(subtab==='cards')body=`<div class="gallery">${cards.map(photoHtml).join('')||blank()}</div>`;if(subtab==='wishes')body=wishRows(wishes,manager);return `<h2>${h(p.name)}</h2><div class="tabs">${names.map(([k,n])=>button(n,'subtab',k,subtab===k?'active':'')).join('')}</div>${body}`;}
@@ -283,9 +308,10 @@ case 'undoSongBatch':await undoSongBatch();break;
  case 'catalogMetadata':await editCatalogMetadata(id);break;case 'catalogMerge':await mergeCatalogFamilies();break;case 'catalogSplit':await splitCatalogVariant();break;case 'catalogLyricRestore':restoreSharedLyric(id,Number(b.dataset.revision));break;
  case 'catalogTemplateAdd':editCatalogTemplate(id);break;case 'catalogTemplateEdit':editCatalogTemplate(b.dataset.kind,id);break;
  case 'catalogSharedLyrics':await editSharedLyrics(id);break;case 'catalogLyricHistory':await showSharedLyricHistory(id,Number(b.dataset.page)||0);break;
+ case 'languageFilterSettings':await editLanguageFilters();break;
  case 'catalogScan':await scanCatalogCandidates();break;
  case 'roomSearchPage':{const view=isAdmin()?'songs':'book';await loadRoomSongSearch(view,filters.q,filters.tags,(roomSearch[view]?.page||0)+Number(id));break;}
-case 'clearFilters':filters={q:'',tags:[]};render();break;
+case 'clearFilters':filters={q:'',tags:[],language:''};render();break;
 case 'deleteTag':if(confirm('刪除標籤「'+id+'」並從歌曲移除？'))await dispatch('tag',{tag:id,remove:true});break;
 case 'addTag':modal('新增標籤',field('tag','標籤名稱'),async f=>dispatch('tag',{tag:f.get('tag')}));break;
 case 'editCrown':editCrown(id);break;case 'deleteCrown':if(confirm('刪除冠歌？')){await dispatch('crown',{id,remove:true});$('#dialog').close();}break;
@@ -360,7 +386,7 @@ start();
 
 function jumpPage(input){if(!input)return;const n=Number(input.value),max=Number(input.max);if(!Number.isInteger(n)||n<1||n>max){toast('請輸入 1～'+max+' 的頁碼');return;}pages[input.dataset.pageKey]=n;render();}
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[data-page-key]')){e.preventDefault();jumpPage(e.target);}});
-document.addEventListener('change',e=>{if(e.target.matches('[data-filter-tag]')){filters.tags=Array.from(document.querySelectorAll('[data-filter-tag]:checked'),x=>x.dataset.filterTag);pages={};roomSearch.generation++;render();if((route==='book'||isAdmin()&&tab==='songs')&&filters.q.trim())loadRoomSongSearch(isAdmin()?'songs':'book',filters.q,filters.tags,0);}});
+document.addEventListener('change',e=>{if(e.target.id==='song-language'){filters.language=e.target.value;pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);renderSongResults();if(filters.q.trim())loadRoomSongSearch(isAdmin()?'songs':'book',filters.q,filters.tags,0);}if(e.target.matches('[data-filter-tag]')){filters.tags=Array.from(document.querySelectorAll('[data-filter-tag]:checked'),x=>x.dataset.filterTag);pages={};roomSearch.generation++;render();if((route==='book'||isAdmin()&&tab==='songs')&&filters.q.trim())loadRoomSongSearch(isAdmin()?'songs':'book',filters.q,filters.tags,0);}});
 
 function select(name,label,values,value){if(!['playerId','songId'].includes(name))return nativeSelect(name,label,values,value);const match=values.find(v=>String(v[0])===String(value)),optional=label.includes('選填');return `<div class="entity-picker" data-entity-kind="${name}"><label>${h(label)}<input type="search" data-entity-query autocomplete="off" placeholder="${name==='playerId'?'搜尋玩家名稱、ID、曾用名':'搜尋歌名、歌手、語言、標籤'}" value="${h(match?.[0]?match[1]:'')}" aria-label="${h(label)}搜尋" ${optional?'':'required'}></label><input type="hidden" name="${name}" value="${h(value||'')}"><div class="entity-results"></div></div>`;}
 function showEntityResults(box){const input=box.querySelector('[data-entity-query]'),q=input.value.trim(),kind=box.dataset.entityKind,rows=q?(kind==='playerId'?playerSearch(state,q):state.songs.filter(s=>matchesSong(s,q))):[];box.querySelector('.entity-results').innerHTML=q?(rows.slice(0,12).map(r=>button(h(kind==='playerId'?r.name+' · '+(r.ids.join('、')||'無平台 ID'):r.title+'－'+r.artist),'pickEntity',kind==='playerId'?r.playerId:r.songId,'entity-option')).join('')||'<small>沒有符合的資料</small>')+(rows.length>12?'<small>再輸入幾個字，縮小搜尋範圍 ♡</small>':''):'';}

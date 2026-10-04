@@ -217,3 +217,32 @@ test('restoring lyrics creates a new revision with escaped preview and preserves
  assert.deepEqual(JSON.parse(JSON.stringify(u.calls[0])),{op:'catalogLyricSave',variantId:'v1',body:'<old lyrics>',active:true,management:true});
  assert.equal(u.calls.length,1);
 });
+
+
+test('language filters use existing room categories in auto mode and chosen templates in custom mode',()=>{
+ const roomLanguages={data:{mode:'auto',languages:[{name:'華語',sortOrder:1},{name:'日語',sortOrder:2}]}};
+ const context=vm.createContext({Set,String,roomLanguages,state:{songs:[{cat:'華語'},{cat:'華語'},{cat:'客語'}]},filters:{language:'客語'},h:escape});
+ vm.runInContext(segment('function visibleLanguages()','function scheduleRoomLanguages()'),context);
+ assert.deepEqual(JSON.parse(JSON.stringify(vm.runInContext('visibleLanguages().map(row=>row.name)',context))),['華語','客語']);
+ roomLanguages.data={mode:'custom',languages:[{name:'日語',sortOrder:2}]};assert.deepEqual(JSON.parse(JSON.stringify(vm.runInContext('visibleLanguages().map(row=>row.name)',context))),['日語']);
+ assert.match(vm.runInContext('languageOptionsHtml()',context),/全部語言/);
+});
+
+test('language is sent to server before pagination and participates in search cache identity',async()=>{
+ const calls=[],roomSearch={book:null,generation:0,cache:new Map()},filters={q:'愛',tags:[],language:'日語'};
+ const context=vm.createContext({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters,state:{revision:2,songs:[]},route:'book',demo:false,draft:null,
+  isAdmin:()=>false,api:async body=>{calls.push(body);return {songIds:[],total:0};},song:()=>null,renderSongResults:()=>{},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:()=>null});
+ vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
+ await vm.runInContext("loadRoomSongSearch('book','愛',[],1)",context);filters.language='華語';await vm.runInContext("loadRoomSongSearch('book','愛',[],1)",context);
+ assert.equal(calls.length,2);assert.equal(calls[0].language,'日語');assert.equal(calls[1].language,'華語');assert.equal(calls[0].offset,20);
+});
+
+test('saving room language choices uses the dedicated scoped endpoint without modifying songs',async()=>{
+ const calls=[],roomLanguages={};let submit;
+ const context=vm.createContext({Set,Promise,Date,roomLanguages,filters:{language:'華語'},roomSearch:{generation:0},demo:false,draft:null,isAdmin:()=>true,
+  api:async body=>{calls.push(body);return body.op==='catalogTemplates'?{languages:[{id:'zh',name:'華語',active:true}]}:{mode:'custom',languageIds:['zh'],languages:[{id:'zh',name:'華語'}]};},nativeSelect:()=>'',h:escape,check:()=>'<input name="languageIds">',modal:(_title,_html,fn)=>{submit=fn;},render:()=>{},toast:()=>{}});
+ vm.runInContext(segment('async function editLanguageFilters()','function songToolbar('),context);
+ await vm.runInContext('editLanguageFilters()',context);await submit({get:name=>name==='mode'?'custom':null,getAll:()=>['zh']});
+ assert.deepEqual(JSON.parse(JSON.stringify(calls[2])),{op:'catalogLanguageFilterSave',mode:'custom',languageIds:['zh'],management:true});
+ assert.equal(context.filters.language,'');assert.equal(calls.some(row=>row.op==='mutate'),false);
+});
