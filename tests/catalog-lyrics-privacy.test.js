@@ -36,7 +36,7 @@ test('bundled read and songSearch APIs never return lyric text to anonymous/play
  let handler;const context=vm.createContext({URL,crypto,structuredClone,TextEncoder,console,Date,Response,Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://example.supabase.co':'test'},serve:h=>handler=h},EdgeRuntime:{waitUntil:()=>{}},fetch:()=>{throw Error('unexpected network');}});
  vm.runInContext(stripTypeScriptTypes(code),context);
  context.snapshot=fixture();context.testActor=null;
- vm.runInContext('actor=async()=>testActor;load=async()=>structuredClone(snapshot);',context);
+ vm.runInContext('actor=async()=>testActor;load=async()=>structuredClone(snapshot);api=async()=>[];',context);
  for(const actor of [null,{role:'player',playerId:'P1'}]){
    context.testActor=actor;
    for(const op of ['read','songSearch']){
@@ -47,7 +47,7 @@ test('bundled read and songSearch APIs never return lyric text to anonymous/play
  }
  for(const actor of [{role:'super_admin'},{role:'streamer_admin',streamer_id:'papa'}]){
    context.testActor=actor;const response=await handler({method:'POST',json:async()=>({op:'read',streamer:'papa'})});
-   assert.equal(response.status,200);assert.equal((await response.text()).includes(secret),true);
+   assert.equal(response.status,200);assert.equal((await response.text()).includes(secret),false,'ordinary manager lists also load lyrics on demand');
  }
  context.testActor={role:'streamer_admin',streamer_id:'other'};
  assert.equal((await handler({method:'POST',json:async()=>({op:'read',streamer:'papa'})})).status,400);

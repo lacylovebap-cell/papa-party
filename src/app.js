@@ -1,12 +1,12 @@
-import {fateCategories,drawSong} from './fate.js?v=9.27-P1';
-import {createBoard} from './board.js?v=9.27-P1';
-import {createChat} from './chat.js?v=9.27-P1';
+import {fateCategories,drawSong} from './fate.js?v=10.04-CATALOG';
+import {createBoard} from './board.js?v=10.04-CATALOG';
+import {createChat} from './chat.js?v=10.04-CATALOG';
 import {normalizeHome,themePalette} from './home-settings.js?v=9.24-H';
 import {openHomeEditor} from './home-editor.js?v=9.24-H';
 import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=9.24-B.2';
-import {createNotifications} from './notifications.js?v=9.27-P1';
+import {createNotifications} from './notifications.js?v=10.04-CATALOG';
 import {API,PUBLISHABLE_KEY} from './config.js';
-import {empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour} from './core.js?v=9.28-P2';
+import {empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour} from './core.js?v=10.04-CATALOG';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const demo=new URLSearchParams(location.search).has('demo')||location.pathname.endsWith('/preview.html'),roomCacheKey=k=>['draft','adminTab'].includes(k)?k+'-'+(new URLSearchParams(location.search).get('streamer')||'papa'):k,get=k=>{try{return JSON.parse(localStorage.getItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k)));}catch{return null;}},put=(k,v)=>localStorage.setItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k),JSON.stringify(v));
 let state=empty(),full=null,session=get('player'),admin=get('admin'),draft=get('draft'),offset=0,busy=false,route=location.hash.slice(1)||'home',tab=new URLSearchParams(location.search).get('adminTab')||get('adminTab')||'dashboard',subtab=new URLSearchParams(location.search).get('tab')||'overview',selectedPlayer=new URLSearchParams(location.search).get('player')||null,photoIndex=0,fateId=null,fateSeen=[],fateCategory='all',importRows=[],importKind='players',importText='',migrationPreview=null;
@@ -433,8 +433,12 @@ function catalogReviewHtml(){
  if(catalogView.section==='templates')return tabs+catalogTemplateHtml();
  const rows=catalogView.items||[],status=catalogView.section,reviewable=['pending','approved'].includes(status);
  const entries=rows.map(row=>{
-  const id=String(row.candidateId||row.id||''),name=[row.title,row.artist].filter(Boolean).join('｜'),suggestions=(row.suggestedVariants||[]).slice(0,3).map(x=>[x.title,x.artist,x.versionLabel].filter(Boolean).join(' · ')).join('；');
-  return `<div class="song catalog-row">${reviewable?`<label class="catalog-check"><input type="checkbox" data-catalog-review="${h(id)}" ${catalogView.selected.has(id)?'checked':''} aria-label="選取 ${h(name)}"></label>`:''}<div class="info"><b>${h(name||'待審歌曲')}</b><small>${h([row.streamerName,row.language,row.performerType,row.variantLabel||row.versionLabel].filter(Boolean).join(' · '))}</small>${suggestions?`<small>可能相關：${h(suggestions)}</small>`:''}${status==='history'?`<small>${h([row.decision||row.action,row.at||row.created_at].filter(Boolean).join(' · '))}</small>`:''}</div></div>`;
+  const roomLabel=id=>state.streamers.find(r=>r.id===id)?.display_name||id||'';
+  const labels={approve_new:'建立共同歌曲',link_variant:'關聯共同版本',create_variant:'建立新版本',reject:'拒絕候選',remove:'移除候選',unlink:'解除共同關聯',update_variant:'更新共同主資料',merge_family:'調整作品群組',split_variant:'拆分共同版本',language_filter:'更新語言篩選',lyric_save:'儲存共同歌詞',lyric_choice:'更新主播歌詞',batch_add:'批量加入歌本',template_change:'更新模板'};
+  const id=String(row.candidateId||row.id||''),name=status==='history'?(labels[row.action]||row.action||'共同曲庫操作'):[row.title,row.artist].filter(Boolean).join('｜'),suggestions=(row.suggestedVariants||[]).slice(0,3).map(x=>[x.title,x.artist,x.versionLabel].filter(Boolean).join(' · ')).join('；');
+  const peers=(row.suggestedCandidates||[]).slice(0,3).map(x=>[({possible_same:'疑似同曲',possible_version:'可能不同版本',same_title:'僅同名'})[x.matchType]||'待比較',x.title,x.artist,roomLabel(x.streamerId),x.language,x.versionLabel].filter(Boolean).join(' · ')).join('；');
+  const actorLabel=row.actorId==='president'?'PA Party總裁':row.actorId?.startsWith('streamer:')?roomLabel(row.actorId.slice(9)):row.actorId;
+  return `<div class="song catalog-row">${reviewable?`<label class="catalog-check"><input type="checkbox" data-catalog-review="${h(id)}" ${catalogView.selected.has(id)?'checked':''} aria-label="選取 ${h(name)}"></label>`:''}<div class="info"><b>${h(name||'待審歌曲')}</b><small>${h([row.streamerName||roomLabel(row.streamerId),row.language,row.performerType,row.variantLabel||row.versionLabel].filter(Boolean).join(' · '))}</small>${suggestions?`<small>可能相關：${h(suggestions)}</small>`:''}${peers?`<small>候選比較：${h(peers)}</small>`:''}${status==='history'?`<small>${h([actorLabel,time(row.createdAt||row.at||row.created_at)].filter(Boolean).join(' · '))}</small>`:''}</div></div>`;
  }).join('')||blank(catalogView.loading?'正在讀取…':'這一頁沒有資料');
  const actions=status==='pending'?`<div class="actions">${button('建立為新的共同歌曲','catalogReviewAction','approve_new','',''+(catalogView.selected.size?'':'disabled'))}${button('連到既有版本','catalogReviewLink','','tiny',catalogView.selected.size?'':'disabled')}${button('拒絕','catalogReviewAction','reject','tiny danger',catalogView.selected.size?'':'disabled')}${button('移除候選','catalogReviewAction','remove','tiny danger',catalogView.selected.size?'':'disabled')}</div>`:status==='approved'?`<div class="actions">${button('解除共同關聯','catalogReviewAction','unlink','tiny danger',catalogView.selected.size?'':'disabled')+button('拆為另一個版本','catalogSplit','','tiny',catalogView.selected.size?'':'disabled')}</div>`:'';
  const nav=`<div class="pagination">${button('上一頁','catalogPage','-1','tiny',catalogView.page?'':'disabled')}<small>第 ${catalogView.page+1} 頁${catalogView.total?' · 共 '+catalogView.total+' 筆':''}</small>${button('下一頁','catalogPage','1','tiny',catalogView.hasMore?'':'disabled')}</div>`;

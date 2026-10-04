@@ -1,0 +1,150 @@
+// Catalog endpoints use targeted service-role queries. Never call load() or add
+// catalog/lyrics rows to the generic platform snapshot or ordinary read view.
+const CATALOG_OPS=new Set(['catalogSearch','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom']);
+const catalogUuid=(v:any)=>typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);
+const catalogPage=(b:any)=>({limit:Math.max(1,Math.min(50,Math.floor(Number(b.limit)||20))),offset:Math.max(0,Math.min(10000,Math.floor(Number(b.offset)||0)))});
+const catalogActor=(who:any)=>isSuper(who)?'president':who?.role==='streamer_admin'?'streamer:'+who.streamer_id:'player:'+String(who?.playerId||'anonymous');
+const CATALOG_COMMON_FIELDS=['title','artist','cat','artistType','version','catalogVariantId'];
+function catalogMetadataView(view:any,rows:any[]){
+ const byId=new Map(rows.map((r:any)=>[r.songId,r]));
+ return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries(CATALOG_COMMON_FIELDS.filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;})};
+}
+// A local tag/note edit must not persist the displayed shared metadata into the
+// original song. Explicitly changed common fields still become new candidates.
+function catalogPreserveSource(action:any,state:any,room:string,rows:any[]){
+ if(action?.type!=='song'||!action.data?.songId||action.data.remove)return action;
+ const source=state.songs.find((s:any)=>s.songId===action.data.songId&&s.streamer_id===room),common=rows.find((s:any)=>s.songId===action.data.songId);
+ if(!source||!common)return action;
+ const data={...action.data};
+ for(const field of CATALOG_COMMON_FIELDS)if(field!=='catalogVariantId'&&data[field]===common[field]){
+  if(Object.hasOwn(source,field))data[field]=source[field];else delete data[field];
+ }
+ return {...action,data};
+}
+
+async function catalogRoom(who:any,requested:any,allowInactive=false){
+ const rooms=await api('/rest/v1/rpc/papa_streamer_directory',{});
+ const room=rooms.find((r:any)=>r.id===requested||r.slug===requested);
+ if(!room)throw Error('找不到主播');
+ requireRoom(who,room.id);
+ if(!room.active&&!allowInactive&&!isManager(who))throw Error('主播頁暫未開放');
+ return room;
+}
+
+async function catalogOperation(b:any,who:any){
+ const page=catalogPage(b),op=b.op;
+ if(op==='catalogScan'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');
+  const cursor=String(b.afterSongId||'');if(cursor.length>200)throw Error('掃描位置不正確');
+  return await api('/rest/v1/rpc/papa_catalog_reconcile_songs',{after_song_id:cursor,page_limit:Math.max(1,Math.min(100,Math.floor(Number(b.limit)||50)))});
+ }
+ if(op==='songSearchRoom'){
+  const room=await catalogRoom(who,b.streamer||'papa');
+  const q=String(b.q||'').trim();if(q.length>100)throw Error('搜尋文字過長');
+  const tags=Array.isArray(b.tags)?b.tags.filter((x:any)=>typeof x==='string'&&x.length<=50).slice(0,20):[];
+  const language=b.language==null?null:String(b.language);if(language&&language.length>100)throw Error('語言名稱過長');
+  return await api('/rest/v1/rpc/papa_song_search_room',{room_id:room.id,query_text:q,tags,page_limit:page.limit,page_offset:page.offset,language_name:language||null});
+ }
+ if(op==='catalogLanguageFilter'||op==='catalogLanguageFilterSave'){
+  if(op==='catalogLanguageFilterSave'&&!isManager(who))throw Error('請先登入主播管理');
+  const room=await catalogRoom(who,b.streamer||who?.streamer_id||'papa');
+  if(op==='catalogLanguageFilter')return await api('/rest/v1/rpc/papa_catalog_language_filter',{room_id:room.id});
+  if(!['auto','custom'].includes(b.mode)||!Array.isArray(b.languageIds)||b.languageIds.length>100||b.languageIds.some((id:any)=>typeof id!=='string'||!/^[a-z0-9_-]{1,100}$/.test(id))||new Set(b.languageIds).size!==b.languageIds.length)throw Error('請選擇有效語言');
+  return await api('/rest/v1/rpc/papa_catalog_language_filter_save',{room_id:room.id,mode:b.mode,language_ids:b.languageIds,actor_id:catalogActor(who)});
+ }
+ if(op==='catalogGovernance'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');
+  if(!['update_variant','merge_family','split_variant'].includes(b.action))throw Error('共同曲庫管理操作不正確');
+  const ids=b.variantIds,candidates=b.candidateIds||[],versions=b.expectedVersions,sources=b.expectedSources||{};
+  if(!Array.isArray(ids)||!ids.length||ids.length>50||ids.some((id:any)=>!catalogUuid(id))||new Set(ids).size!==ids.length||b.action!=='merge_family'&&ids.length!==1)throw Error('請選擇有效共同版本（最多 50 個）');
+  if(!versions||typeof versions!=='object'||Array.isArray(versions)||ids.some((id:any)=>typeof versions[id]!=='string'||versions[id].length>50||!Number.isFinite(Date.parse(versions[id]))))throw Error('共同版本已更新，請重新選取');
+  if(!Array.isArray(candidates)||candidates.length>50||candidates.some((id:any)=>!catalogUuid(id))||new Set(candidates).size!==candidates.length||b.action==='split_variant'&&!candidates.length)throw Error('請選擇有效來源歌曲');
+  if(!sources||typeof sources!=='object'||Array.isArray(sources)||candidates.some((id:any)=>typeof sources[id]!=='string'||!/^[a-f0-9]{32}$/.test(sources[id])))throw Error('來源歌曲已更新，請重新選取');
+  if(b.action==='merge_family'&&!catalogUuid(b.targetFamilyId))throw Error('請選擇有效歌曲家族');
+  const metadata=b.metadata||{},allowed=['title','artist','languageId','performerTypeId','versionLabel','active'];
+  if(typeof metadata!=='object'||Array.isArray(metadata)||Object.keys(metadata).some(k=>!allowed.includes(k)))throw Error('共同歌曲欄位不正確');
+  for(const [key,value] of Object.entries(metadata)){
+   if(key==='active'){if(typeof value!=='boolean')throw Error('歌曲狀態不正確');}
+   else if(key==='languageId'||key==='performerTypeId'){if(value!=null&&(typeof value!=='string'||!/^[a-z0-9_-]{1,100}$/.test(value)))throw Error('歌曲模板不正確');}
+   else if(typeof value!=='string'||value.length>(key==='versionLabel'?120:300)||key==='title'&&!value.trim())throw Error('共同歌曲內容不正確');
+  }
+  return await api('/rest/v1/rpc/papa_catalog_governance',{action:b.action,variant_ids:ids,candidate_ids:candidates,target_family:b.action==='merge_family'?b.targetFamilyId:null,metadata,expected_versions:Object.fromEntries(ids.map((id:any)=>[id,versions[id]])),expected_sources:Object.fromEntries(candidates.map((id:any)=>[id,sources[id]])),actor_id:catalogActor(who)});
+ }
+ if(op==='catalogSearch'){
+  if(!isManager(who))throw Error('請先登入管理');
+  const room=who?.role==='streamer_admin'||b.streamer?await catalogRoom(who,b.streamer||who.streamer_id,true):null;
+  const q=String(b.q||'').trim();if(q.length>100)throw Error('搜尋文字過長');
+  const r=await api('/rest/v1/rpc/papa_catalog_search',{query_text:q,page_limit:page.limit,page_offset:page.offset,room_id:room?.id||null});
+  return {items:(r.rows||[]).map((x:any)=>({...x,variantId:x.id})),total:r.total||0,hasMore:!!r.hasMore};
+ }
+ if(op==='catalogReviewList'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');
+  const status=['pending','approved','rejected','removed','history'].includes(b.status)?b.status:'pending';
+  const r=await api('/rest/v1/rpc/papa_catalog_review_list',{status,page_limit:page.limit,page_offset:page.offset});
+  return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore};
+ }
+ if(op==='catalogReview'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');
+  const decisions=['approve_new','link_variant','create_variant','reject','remove','unlink'];
+  if(!decisions.includes(b.decision))throw Error('此審核操作尚未開放');
+  const ids=Array.isArray(b.candidateIds)?[...new Set(b.candidateIds)].filter(catalogUuid).slice(0,50):[];
+  if(!ids.length||ids.length!==b.candidateIds?.length)throw Error('請選擇有效候選歌曲（最多 50 首）');
+  const sources=b.expectedSources;
+  if(!sources||typeof sources!=='object'||Array.isArray(sources)||ids.some((id:any)=>typeof sources[id]!=='string'||!/^[a-f0-9]{32}$/.test(sources[id])))throw Error('候選資料已更新，請重新選取後審核');
+  const targetVariant=b.variantId==null?null:catalogUuid(b.variantId)?b.variantId:null;
+  const targetFamily=b.familyId==null?null:catalogUuid(b.familyId)?b.familyId:null;
+  if(b.variantId!=null&&!targetVariant||b.familyId!=null&&!targetFamily)throw Error('共同歌曲識別碼錯誤');
+  return await api('/rest/v1/rpc/papa_catalog_review',{decision:b.decision,candidate_ids:ids,target_variant:targetVariant,target_family:targetFamily,version_label:String(b.variantLabel||'').slice(0,100),actor_id:catalogActor(who),expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]]))});
+ }
+ if(op==='catalogTemplates'){
+  if(!isManager(who))throw Error('請先登入管理');
+  const [languages,performerTypes]=await Promise.all([
+   api('/rest/v1/papa_catalog_languages?select=id,name,sort_order,active&order=sort_order.asc,id.asc&limit=100'),
+   api('/rest/v1/papa_catalog_performer_types?select=id,name,sort_order,active&order=sort_order.asc,id.asc&limit=100')
+  ]);
+  return {languages,performerTypes};
+ }
+ if(op==='catalogTemplateChange'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');
+  const actions:any={create:'create',update:'update',rename:'update',reorder:'update',enable:'activate',disable:'deactivate'};
+  if(!['language','performerType'].includes(b.kind)||!actions[b.action])throw Error('模板操作不正確');
+  const id=b.action==='create'?'custom_'+crypto.randomUUID().replaceAll('-',''):String(b.id||'');
+  if(!/^[a-z0-9_-]{1,100}$/.test(id)||b.name!=null&&(typeof b.name!=='string'||b.name.length>100)||b.sortOrder!=null&&!Number.isInteger(b.sortOrder))throw Error('模板內容不正確');
+  return await api('/rest/v1/rpc/papa_catalog_template_change',{kind:b.kind==='performerType'?'performer_type':'language',action:actions[b.action],template_id:id,template_name:b.name||null,sort_order:b.sortOrder??null,active:b.active??null,actor_id:catalogActor(who)});
+ }
+ if(op==='catalogLyrics'){
+  if(!isManager(who))throw Error('歌詞僅供主播與總裁查看');
+  if(b.includeHistory&&!isSuper(who))throw Error('僅限 PA Party總裁查看共同歌詞歷史');
+  const room=who?.role==='streamer_admin'?await catalogRoom(who,b.streamer||who.streamer_id,true):b.streamer?await catalogRoom(who,b.streamer,true):null;
+  if(who?.role==='streamer_admin'&&!b.streamerSongId)throw Error('請先選擇自己的歌曲');
+  // The RPC resolves a room song against its current source hash. Do not trust
+  // a raw link (or caller-supplied variant) after a local metadata edit.
+  const roomSong=room&&typeof b.streamerSongId==='string'&&b.streamerSongId.length>0&&b.streamerSongId.length<=200;
+  const variantId=roomSong?null:b.variantId;
+  if(variantId&&!catalogUuid(variantId)||!variantId&&!roomSong)throw Error('共同版本識別碼錯誤');
+  const r=await api('/rest/v1/rpc/papa_catalog_get_lyrics',{variant_id:variantId||null,room_id:room?.id||null,song_id:b.streamerSongId||null});
+  const resolvedVariant=r.variantId||null;
+  if(b.includeHistory){if(!resolvedVariant)throw Error('這首尚未連結共同歌詞');const history=await api('/rest/v1/rpc/papa_catalog_lyric_history',{variant_id:resolvedVariant,page_limit:page.limit,page_offset:page.offset});return {...r,linked:true,variantId:resolvedVariant,history:history.rows||[],historyTotal:history.total||0,historyHasMore:!!history.hasMore};}
+  return {...r,linked:!!resolvedVariant,variantId:resolvedVariant};
+ }
+ if(op==='catalogLyricSave'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');
+  if(!catalogUuid(b.variantId)||typeof b.body!=='string'||b.body.length>100000)throw Error('歌詞內容不正確');
+  return await api('/rest/v1/rpc/papa_catalog_save_lyric',{variant_id:b.variantId,body:b.body,actor_id:catalogActor(who),active:b.active!==false});
+ }
+ if(op==='catalogLyricChoice'){
+  if(!isManager(who))throw Error('請先登入主播管理');
+  const room=await catalogRoom(who,b.streamer||who.streamer_id,true);
+  if(!['shared','copy','own'].includes(b.mode)||typeof b.streamerSongId!=='string'||!b.streamerSongId)throw Error('歌詞模式或歌曲錯誤');
+  if(typeof b.body!=='string'&&b.body!=null||String(b.body||'').length>100000||String(b.privateNote||'').length>5000)throw Error('歌詞或註記過長');
+  return await api('/rest/v1/rpc/papa_catalog_lyric_choice',{room_id:room.id,song_id:b.streamerSongId,mode:b.mode,body:b.body??null,private_note:b.privateNote??null,actor_id:catalogActor(who)});
+ }
+ if(op==='catalogBatchAdd'){
+  if(!isManager(who))throw Error('請先登入主播管理');
+  const room=await catalogRoom(who,b.streamer||who.streamer_id,true);
+  const ids=Array.isArray(b.variantIds)?[...new Set(b.variantIds)].filter(catalogUuid).slice(0,50):[];
+  if(!ids.length||ids.length!==b.variantIds?.length||!['shared','copy','own'].includes(b.lyricsMode))throw Error('請選擇有效歌曲與歌詞模式（最多 50 首）');
+  return await api('/rest/v1/rpc/papa_catalog_batch_add',{room_id:room.id,variant_ids:ids,lyrics_mode:b.lyricsMode,actor_id:catalogActor(who)});
+ }
+ throw Error('未知共同曲庫操作');
+}

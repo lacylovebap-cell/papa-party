@@ -7,6 +7,17 @@ const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const segment=(start,end)=>source.slice(source.indexOf(start),source.indexOf(end));
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+test('pending peer hints use safe room labels and history uses readable operation metadata',()=>{
+ const catalogView={section:'pending',selected:new Set(),items:[{id:'c1',title:'歌名',artist:'歌手',streamerId:'papa',suggestedCandidates:[{title:'<另一首>',artist:'歌手',streamerId:'michelle',matchType:'possible_version',lyrics:'PRIVATE_BODY'}]}]};
+ const context=vm.createContext({catalogView,state:{streamers:[{id:'papa',display_name:'怕怕'},{id:'michelle',display_name:'米雪'}]},h:escape,button:()=>'',blank:()=>'',time:x=>'DATE:'+x});
+ vm.runInContext(segment('function catalogReviewHtml()','async function scanCatalogCandidates()'),context);
+ const html=vm.runInContext('catalogReviewHtml()',context);
+ assert.match(html,/可能不同版本/);assert.match(html,/米雪/);assert.match(html,/&lt;另一首&gt;/);assert.doesNotMatch(html,/PRIVATE_BODY/);
+ catalogView.section='history';catalogView.items=[{id:1,action:'update_variant',actorId:'president',createdAt:'2026-10-04'}];
+ const history=vm.runInContext('catalogReviewHtml()',context);
+ assert.match(history,/更新共同主資料/);assert.match(history,/PA Party總裁/);assert.match(history,/DATE:2026-10-04/);
+});
+
 test('room lyric search is debounced by caller, bounded, room-scoped and cached without downloading lyrics',async()=>{
  const calls=[],roomSearch={book:null,home:null,unsupported:false,generation:0,timer:null,cache:new Map()},songs=[{songId:'a',title:'夜',artist:'歌手',lyrics:'MUST_NOT_TRAVEL'}];
  const context=vm.createContext({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters:{q:'夜',tags:[]},state:{songs},route:'book',demo:false,draft:null,
