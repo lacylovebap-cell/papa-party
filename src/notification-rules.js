@@ -12,14 +12,14 @@ export function deriveNotices(before,after,context,t=new Date().toISOString()){
  const prior=new Map(before.queue.filter(q=>q.streamer_id===roomId).map(q=>[q.id,q]));
  for(const q of after.queue.filter(q=>q.streamer_id===roomId)){
   const old=prior.get(q.id),title=`《${q.title||'歌曲'}》`,player=after.players.find(p=>p.playerId===q.playerId)?.name||'玩家';
-  if(!old){if(context.role==='player')add('__admin__',q.kind==='saved'?'saved':'live',`${player}${q.kind==='saved'?'提出存歌':'現點'}${title}`,q.id);if(q.kind==='saved'&&q.status==='waiting')add(q.playerId,'accepted',`${title}提歌成功，已加入待播`,q.id);continue;}
+  if(!old){if(context.role==='player')add('__admin__',q.kind==='saved'?'saved':'live',`${player}${q.kind==='saved'?'提出存歌':'現點'}${title}`,q.id);if(q.kind==='saved'&&q.status==='waiting')add(q.playerId,'accepted',q.awaitingAcknowledgment?`${title}已收到你的提歌囉，正在等待主播回應`:`${title}提歌成功，已加入待播`,q.id);continue;}
   if(old.status!==q.status){
    if(q.status==='cancelled'){add(context.role==='player'?'__admin__':q.playerId,'cancel',`${player}的${title}已取消`,q.id);}
    else if(q.status==='completed')add(q.playerId,'completed',`${title}已完成演唱`,q.id);
    else if(q.status==='stored')add(q.playerId,'status',`${title}已轉為存歌`,q.id);
    else if(q.status==='waiting')add(q.playerId,'accepted',`${title}已確認，加入待播`,q.id);
   }
-  if(q.status==='waiting'&&(old.stage!==q.stage||old.preparationMinutes!==q.preparationMinutes))add(q.playerId,q.preparationMinutes===0||q.stage==='✨ 準備上台'?'ready':'status',q.preparationMinutes===0?`${title}準備好了，即將演唱`:`${title}：${q.stage}，準備約 ${q.preparationMinutes??5} 分鐘`,q.id);
+  if(q.status==='waiting'&&(old.preparationStartedAt!==q.preparationStartedAt||old.stage!==q.stage||old.preparationMinutes!==q.preparationMinutes))add(q.playerId,q.preparationMinutes===0?'ready':'status',q.preparationMinutes===0?`${title}準備好了，即將演唱`:`${title}已確認收到，準備約 ${q.preparationMinutes??5} 分鐘`,q.id);
  }
  const oldLedger=new Map(before.ledger.filter(x=>x.streamer_id===roomId).map(x=>[x.id,x]));
  for(const x of after.ledger.filter(x=>x.streamer_id===roomId)){const old=oldLedger.get(x.id);if(!old||old.amount!==x.amount){const delta=Number(x.amount)-Number(old?.amount||0);add(x.playerId,'credit',`${delta>=0?'新增':'扣除'} ${Math.abs(delta)} 首存歌${x.openingBalance?'（初始存歌）':''}`,x.id);}else if(old.note!==x.note||old.at!==x.at)add(x.playerId,'credit','存歌紀錄已修改',x.id);oldLedger.delete(x.id);}

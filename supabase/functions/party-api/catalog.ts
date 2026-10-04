@@ -1,6 +1,6 @@
 // Catalog endpoints use targeted service-role queries. Never call load() or add
 // catalog/lyrics rows to the generic platform snapshot or ordinary read view.
-const CATALOG_OPS=new Set(['catalogSearch','catalogMergeSame','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom']);
+const CATALOG_OPS=new Set(['catalogRooms','catalogSearch','catalogMergeSame','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom']);
 const catalogUuid=(v:any)=>typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);
 const catalogPage=(b:any)=>({limit:Math.max(1,Math.min(50,Math.floor(Number(b.limit)||20))),offset:Math.max(0,Math.min(10000,Math.floor(Number(b.offset)||0)))});
 const catalogActor=(who:any)=>isSuper(who)?'president':who?.role==='streamer_admin'?'streamer:'+who.streamer_id:'player:'+String(who?.playerId||'anonymous');
@@ -33,6 +33,10 @@ async function catalogRoom(who:any,requested:any,allowInactive=false){
 
 async function catalogOperation(b:any,who:any){
  const page=catalogPage(b),op=b.op;
+ if(op==='catalogRooms'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');if(!catalogUuid(b.variantId))throw Error('共同版本不正確');
+  return await api('/rest/v1/rpc/papa_catalog_variant_rooms',{chosen_variant:b.variantId,page_limit:page.limit,page_offset:page.offset});
+ }
  if(op==='catalogScan'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
   const cursor=String(b.afterSongId||'');if(cursor.length>200)throw Error('掃描位置不正確');

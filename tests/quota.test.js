@@ -7,7 +7,7 @@ const run=(s,type,data,actor=admin,t=now,streamer='papa')=>mutate(s,{type,data,s
 const player=s=>({role:'player',playerId:s.players[0].playerId});
 function setup(){let s=run(empty(),'player',{name:'額度玩家',ids:['quota'],balance:20});for(const [title,cost] of [['長歌',2],['一般歌',1],['半首甲',0.5],['半首乙',0.5]])s=run(s,'song',{title,artist:'歌手',creditCost:cost});return s;}
 const request=(s,index=0,extra={},t=now)=>run(s,'request',{songId:s.songs[index].songId,kind:'saved',...extra},player(s),t);
-const complete=(s,id=s.queue[0].id,t=now)=>run(s,'queue',{id,operation:'complete'},admin,t);
+const complete=(s,id=s.queue[0].id,t=now)=>{if(s.queue.find(q=>q.id===id).awaitingAcknowledgment)s=run(s,'queue',{id,operation:'acknowledge',preparationMinutes:0},admin,t);return run(s,'queue',{id,operation:'complete'},admin,t);};
 const quota=(s,t=now)=>[usedHour(s,t),reservedHour(s,t)];
 
 test('two-credit request reserves two slots and becomes two used slots without a second charge',()=>{
@@ -60,9 +60,9 @@ test('historical requests use snapshotted credit cost and missing legacy cost de
 test('live requests never consume saved quota across approval, completion or conversion',()=>{
  let s=request(setup());
  s=request(s,0,{kind:'live',giftConfirmed:true});let live=s.queue.at(-1).id;assert.deepEqual(quota(s),[0,2]);
- s=run(s,'queue',{id:live,operation:'approve'});s=complete(s,live);assert.deepEqual(quota(s),[0,2]);
+ s=run(s,'queue',{id:live,operation:'approve',preparationMinutes:0});s=complete(s,live);assert.deepEqual(quota(s),[0,2]);
  s=request(s,0,{kind:'live',giftConfirmed:true});live=s.queue.at(-1).id;
- s=run(s,'queue',{id:live,operation:'approve'});s=run(s,'queue',{id:live,operation:'store'});
+ s=run(s,'queue',{id:live,operation:'approve',preparationMinutes:0});s=run(s,'queue',{id:live,operation:'store'});
  assert.deepEqual(quota(s),[0,2]);assert.equal(balance(s,player(s).playerId),22);
 });
 

@@ -7,7 +7,7 @@ for(const name of ['src/catalog-tools.js','src/fate.js','src/board-feed.js','src
 for(const folder of ['src','assets'])fs.cpSync(path.join(root,folder),path.join(out,folder),{recursive:true});
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 for(const file of ['index.html','preview.html','v2.html'])fs.writeFileSync(path.join(out,file),html);
-fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'10.05-CATALOG.2.1',builtAt:new Date().toISOString()}));
-console.log('Build 10.05-CATALOG.2.1 complete: static site in dist');
+fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'10.05-P0',builtAt:new Date().toISOString()}));
+console.log('Build 10.05-P0 complete: static site in dist');
 
 for(const file of ['sw.js','manifest.webmanifest'])fs.copyFileSync(path.join(root,file),path.join(out,file));
