@@ -29,6 +29,8 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
  await db.exec(await readFile(new URL('../supabase/migrations/202610010004_safe_event_reads.sql',import.meta.url),'utf8'));
  await db.exec(await readFile(new URL('../supabase/migrations/202610010005_catalog_governance.sql',import.meta.url),'utf8'));
  await db.exec(await readFile(new URL('../supabase/migrations/202610010007_catalog_language_filters.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../supabase/migrations/202610010008_catalog_exact_suggestions.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../supabase/migrations/202610010009_validated_room_lyrics.sql',import.meta.url),'utf8'));
  const candidate=async id=>await one('select * from papa_catalog_candidates where song_id=$1',[id]);
  const review=async(decision,ids,variant=null,family=null,expected=null)=>{
   const hashes=expected??Object.fromEntries((await q('select id,source_hash from papa_catalog_candidates where id=any($1)',[ids])).map(c=>[c.id,c.source_hash]));
@@ -50,6 +52,8 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
    await db.exec('set role '+role);
    await assert.rejects(q('select * from papa_catalog_lyric_revisions'),/permission denied/);
    await assert.rejects(rpc('papa_catalog_search'),/permission denied/);
+   await assert.rejects(rpc('papa_catalog_review_list'),/permission denied/);
+   await assert.rejects(rpc('papa_catalog_get_lyrics',[null,'papa','s1']),/permission denied/);
    await assert.rejects(rpc('papa_event_page',['papa',0,false]),/permission denied/);
    await assert.rejects(rpc('papa_catalog_governance',['update_variant',[]]),/permission denied/);
    await assert.rejects(rpc('papa_catalog_language_filter',['papa']),/permission denied/);
@@ -264,5 +268,62 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
   assert(!(await rpc('papa_song_search_room',['papa','共同秘密歌詞二',[],30,0])).songIds.includes('s4'));
   assert(!(await rpc('papa_song_search_room',['papa','',[],30,0,'英語'])).songIds.includes('s4'));
   assert((await rpc('papa_song_search_room',['papa','secret_s4',[],30,0,'國語'])).songIds.includes('s4'));
+  const shown=await rpc('papa_catalog_get_lyrics',[null,'papa','s4']);
+  assert.equal(shown.body,'舊版歌詞 secret_s4');assert.equal(shown.mode,'own');assert.equal(shown.variantId,null);
+  assert.equal(shown.privateNote,'拆分私人註記');
+ });
+ await t.test('stale room lyric reads preserve own/copy bodies and do not alter review or batch-add guards',async()=>{
+  const copied=await one("select song_id from papa_catalog_lyric_selections where streamer_id='michelle' and body='保留私人歌詞副本'");
+  const oldOwnCandidate=await candidate('s2');
+  await rpc('papa_catalog_lyric_choice',['papa','s2','own','主播專用歌詞','專用備註','streamer:papa']);
+  for(const id of ['s2',copied.song_id]) await q("update papa_v2_entities set data=jsonb_set(data,'{title}','\"後續編輯\"') where kind='songs' and id=$1",[id]);
+  const before={links:await q('select * from papa_catalog_song_links order by streamer_id,song_id'),
+   candidates:await q('select * from papa_catalog_candidates order by id'),
+   revision:Number((await one('select revision from papa_v2_revision where id=1')).revision)};
+  const own=await rpc('papa_catalog_get_lyrics',[null,'papa','s2']);
+  assert.equal(own.body,'主播專用歌詞');assert.equal(own.privateNote,'專用備註');assert.equal(own.mode,'own');assert.equal(own.variantId,null);
+  const copy=await rpc('papa_catalog_get_lyrics',[null,'michelle',copied.song_id]);
+  assert.equal(copy.body,'保留私人歌詞副本');assert.equal(copy.privateNote,'另一份私註');assert.equal(copy.mode,'copy');assert.equal(copy.variantId,null);
+  assert.deepEqual(await q('select * from papa_catalog_song_links order by streamer_id,song_id'),before.links);
+  assert.deepEqual(await q('select * from papa_catalog_candidates order by id'),before.candidates);
+  await assert.rejects(review('approve_new',[oldOwnCandidate.id],null,null,{[oldOwnCandidate.id]:oldOwnCandidate.source_hash}),/CATALOG_SELECTION_STALE/);
+  await assert.rejects(review('link_variant',[oldOwnCandidate.id],v2),/CATALOG_ALREADY_LINKED/);
+  const skipped=await rpc('papa_catalog_batch_add',['papa',[v2],'shared','streamer:papa']);
+  assert.equal(skipped.added,0);assert.equal(skipped.revision,before.revision);
+  await assert.rejects(rpc('papa_catalog_get_lyrics',[null,'papa',copied.song_id]),/CATALOG_SONG_MISSING/);
+ });
+ await t.test('room lyric reads require an active family/version and ignore a supplied catalog version override',async()=>{
+  const source=song('lyric-validity','papa','檢驗歌詞有效性',{lyrics:'這首主播原始歌詞'});
+  await q('insert into papa_v2_entities values($1,$2,$3)',['songs',source.songId,source]);
+  await review('approve_new',[(await candidate(source.songId)).id]);
+  const link=await one('select variant_id from papa_catalog_song_links where song_id=$1',[source.songId]);
+  const family=(await one('select family_id from papa_catalog_variants where id=$1',[link.variant_id])).family_id;
+  await rpc('papa_catalog_save_lyric',[link.variant_id,'此有效共同版本歌詞','president',true]);
+  await rpc('papa_catalog_lyric_choice',['papa',source.songId,'shared',null,'這首房間私註','streamer:papa']);
+  const effective=async()=>rpc('papa_catalog_get_lyrics',[v1,'papa',source.songId]);
+  const shared=await effective();
+  assert.equal(shared.body,'此有效共同版本歌詞');assert.equal(shared.mode,'shared');assert.equal(shared.variantId,link.variant_id);
+  for(const [table,id] of [['papa_catalog_variants',link.variant_id],['papa_catalog_families',family]]) {
+   await q(`update ${table} set active=false where id=$1`,[id]);
+   const fallback=await effective();
+   assert.equal(fallback.body,source.lyrics);assert.equal(fallback.mode,'own');assert.equal(fallback.variantId,null);
+   assert.equal(fallback.privateNote,'這首房間私註');
+   assert(!(await rpc('papa_song_search_room',['papa','此有效共同版本歌詞',[],30,0])).songIds.includes(source.songId));
+   assert((await rpc('papa_song_search_room',['papa',source.lyrics,[],30,0])).songIds.includes(source.songId));
+   await q(`update ${table} set active=true where id=$1`,[id]);
+   assert.equal((await effective()).body,'此有效共同版本歌詞');
+  }
+  await q("update papa_v2_entities set data=jsonb_set(data,'{title}','\"再次編輯需重審\"') where kind='songs' and id=$1",[source.songId]);
+  const before=await q(`select kind,id,data from papa_v2_entities order by kind,id`);
+  const stale=await effective();
+  assert.equal(stale.body,source.lyrics);assert.equal(stale.variantId,null);assert.equal(stale.privateNote,'這首房間私註');
+  assert.deepEqual(await q('select kind,id,data from papa_v2_entities order by kind,id'),before);
+  const catalog=await rpc('papa_catalog_get_lyrics',[link.variant_id]);
+  assert.equal(catalog.body,'此有效共同版本歌詞');assert.equal(catalog.privateNote,'');
+  await db.exec('set role service_role');
+  try {assert.equal((await effective()).body,source.lyrics);}
+  finally {await db.exec('reset role');}
+  await assert.rejects(rpc('papa_catalog_get_lyrics'),/CATALOG_LYRIC_INVALID/);
+  await assert.rejects(rpc('papa_catalog_get_lyrics',[link.variant_id,'michelle',source.songId]),/CATALOG_SONG_MISSING/);
  });
 });
