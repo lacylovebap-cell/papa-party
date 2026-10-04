@@ -2,7 +2,8 @@
 
 Updated: 2026-10-04 (Asia/Taipei).
 Branch: feature/shared-catalog-v1. Integrated source commit: 8a8f618.
-Production frontend baseline: 28811065e178dd8069ce0a9e11129f65e5a07792 (9.28-P2).
+Pre-release frontend baseline: 28811065e178dd8069ce0a9e11129f65e5a07792 (9.28-P2).
+Deployed frontend commit: 12f0e4edab57569ed10aceca668e16cad62b73fc (10.04-CATALOG).
 
 ## Verified deployment status
 
@@ -10,7 +11,9 @@ Production frontend baseline: 28811065e178dd8069ce0a9e11129f65e5a07792 (9.28-P2)
 - Live verification after the hotfix showed CPU 2%, Postgres errors 0 in the last 60 minutes, and no active commit queries. These are observations at verification time.
 - Catalog migrations 001–011 and the existing party-api Edge function are now deployed successfully.
 - Postmigration verification: revision 2319, existing entities 2214, original rows unchanged, candidates 0 and links 0 before the initial scan. Anonymous review execution and authenticated direct lyric execution were both denied.
-- The new frontend is built and ready. Its main push / Pages deployment is still pending. A build or release.json alone is not evidence of frontend deployment.
+- Frontend commit 12f0e4edab57569ed10aceca668e16cad62b73fc is pushed. GitHub Pages run 37183303249 completed successfully. The served release.json and public index both verified 10.04-CATALOG with HTTP 200.
+- The authenticated president UI completed reconciliation of 1704 songs, in batches of at most 100. Final catalog counts are 1705 candidates, 1694 pending, 11 approved and 11 links; live user actions occurred during verification. One obsolete candidate remains retained, so total candidates are not identical to the number of songs processed. The scan does not automatically approve candidates.
+- Final preservation checks are complete: current revision 2335 and 2216 entity rows, with two new queue rows from live activity. No original entity is missing in any kind; all original 1704 songs remain. Comparisons found only serialization-order (_order) changes in 1334 songs, 247 ledger rows, 129 queue rows and 7 cards, plus one meta.streamerSettings update. No other original song, credit or history content changed. The complete raw hash differs after live user activity; do not claim it still equals the pre-release hash. The immediately postmigration hash comparison was unchanged.
 
 ## Recovery points
 
@@ -74,13 +77,13 @@ These are raw JSON response sizes, not compressed Supabase billing amounts. The 
 - Realtime remains enabled. Notification fallback remains approximately every 30 seconds; bounded board fallback remains approximately every 8 seconds. Reliability was not sacrificed to remove every request.
 - One- or two-character queries without useful trigrams retain a scoped exact fallback. Broad searches and total counts still have a cost.
 - Chinese normalization uses conservative format / selected orthographic mappings, not a comprehensive simplified/traditional conversion dictionary. Uncertain links require manual review.
-- The complete production candidate backfill and frontend Pages verification remain pending. Do not infer a pending-candidate count of zero after the scan from the pre-scan zero.
+- Production backfill, frontend Pages verification and final preservation checks are complete. Raw-hash equality is not claimed after concurrent user activity; preservation was verified by original-entity and content comparison as detailed above.
 - Live private-message / push delivery cannot be claimed solely from mock browser QA. Do not send messages to other people merely to test.
 
 ## Next steps
 
-1. Push the tested frontend and root 10.04-CATALOG manifest to main; confirm Pages deployment and the served release.
-2. Run bounded resumable candidate reconciliation, record processed / pending counts and verify it preserves original songs and business revision. Never auto-approve.
+1. Preserve the deployed release and both database recovery points; no remaining deployment or preservation step is pending for this release.
+2. Preserve the completed 1704-song scan checkpoint and the verified catalog counts. Continue manual review rather than auto-approving suggestions.
 3. Check live scoped searches and room switching, notification / chat / board / queue regressions, and update the Egress report with observed production results and limitations.
 4. Record final deployment commit, scan counts and verification evidence here and in the external handoff. Do not restart completed work or mix unrelated P3 changes.
 
@@ -90,5 +93,6 @@ Repo: C:/Users/Administrator/Documents/Codex/2026-10-01/referenced-chatgpt-conve
 QA/report/images: C:/Users/Administrator/Documents/Codex/2026-09-17/referenced-chatgpt-conversation-this-is-an-4/outputs/
 Browser report: catalog-browser-qa.md
 Database recovery proof: database-recovered-2026-10-04.png
+Production scan proof: catalog-production-scan-complete.png
 Egress report: PA-Party-Supabase-Egress-Audit-2026-10-01.md
 External handoff: C:/Users/Administrator/Documents/Codex/2026-10-01/referenced-chatgpt-conversation-this-is-an/outputs/PA-Party-Issue-1-handoff.md
