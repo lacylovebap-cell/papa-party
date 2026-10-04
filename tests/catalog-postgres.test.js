@@ -28,6 +28,7 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
  await db.exec(migration);
  await db.exec(await readFile(new URL('../supabase/migrations/202610010004_safe_event_reads.sql',import.meta.url),'utf8'));
  await db.exec(await readFile(new URL('../supabase/migrations/202610010005_catalog_governance.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../supabase/migrations/202610010007_catalog_language_filters.sql',import.meta.url),'utf8'));
  const candidate=async id=>await one('select * from papa_catalog_candidates where song_id=$1',[id]);
  const review=async(decision,ids,variant=null,family=null,expected=null)=>{
   const hashes=expected??Object.fromEntries((await q('select id,source_hash from papa_catalog_candidates where id=any($1)',[ids])).map(c=>[c.id,c.source_hash]));
@@ -51,6 +52,9 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
    await assert.rejects(rpc('papa_catalog_search'),/permission denied/);
    await assert.rejects(rpc('papa_event_page',['papa',0,false]),/permission denied/);
    await assert.rejects(rpc('papa_catalog_governance',['update_variant',[]]),/permission denied/);
+   await assert.rejects(rpc('papa_catalog_language_filter',['papa']),/permission denied/);
+   await assert.rejects(rpc('papa_catalog_language_filter_save',['papa','auto',[],'forged']),/permission denied/);
+   await assert.rejects(rpc('papa_song_search_room',['papa','',[],30,0,'英語']),/permission denied/);
    await db.exec('reset role');
   }
  });
@@ -199,5 +203,66 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
   assert.equal((await rpc('papa_event_page',['papa',1,true])).rows.length,3);
   assert.deepEqual((await one("select after_data from papa_events where entity_id='0'")).after_data,sensitive);
   await assert.rejects(rpc('papa_event_page',['papa',201,false]),/EVENT_PAGE_INVALID/);
+ });
+ await t.test('automatic language filters use effective room metadata and retain unmatched legacy names without private fields',async()=>{
+  await q('insert into papa_v2_entities values($1,$2,$3)',['songs','legacy-language',song('legacy-language','papa','舊語言歌曲',{cat:'自訂舊語言'})]);
+  const papa=await rpc('papa_catalog_language_filter',['papa']);
+  assert.equal(papa.mode,'auto');assert.deepEqual(papa.languageIds,[]);
+  assert(papa.languages.some(l=>l.name==='英語'&&l.id==='english'));
+  assert(papa.languages.some(l=>l.name==='自訂舊語言'&&l.id===null));
+  assert(papa.languages.some(l=>l.name==='國語'));
+  assert(!JSON.stringify(papa).includes('lyrics'));assert(!JSON.stringify(papa).includes('secret_'));
+  const michelle=await rpc('papa_catalog_language_filter',['michelle']);
+  assert(!michelle.languages.some(l=>l.name==='自訂舊語言'));
+  await db.exec('set role service_role');
+  try {assert.equal((await rpc('papa_catalog_language_filter',['papa'])).mode,'auto');}
+  finally {await db.exec('reset role');}
+  await assert.rejects(rpc('papa_catalog_language_filter',['unknown-room']),/CATALOG_ROOM_MISSING/);
+ });
+ await t.test('custom language filters are room scoped, ordered, idempotent and timestamped without altering songs',async()=>{
+  const originalSongs=await q("select id,data from papa_v2_entities where kind='songs' order by id");
+  const before=Number((await one('select revision from papa_v2_revision where id=1')).revision);
+  const selected=await rpc('papa_catalog_language_filter_save',['papa','custom',['japanese','english'],'streamer:papa']);
+  assert.equal(selected.changed,true);assert.equal(selected.revision,before+1);
+  assert.deepEqual(selected.languageIds,['english','japanese']);
+  assert.deepEqual(selected.languages.map(l=>l.name),['英語','日語']);
+  const timestamp=(await one("select updated_at from papa_catalog_language_filters where streamer_id='papa'")).updated_at;
+  const unchanged=await rpc('papa_catalog_language_filter_save',['papa','custom',['english','japanese'],'streamer:papa']);
+  assert.equal(unchanged.changed,false);assert.equal(unchanged.revision,selected.revision);
+  assert.deepEqual((await one("select updated_at from papa_catalog_language_filters where streamer_id='papa'")).updated_at,timestamp);
+  assert.equal((await rpc('papa_catalog_language_filter',['michelle'])).mode,'auto');
+  assert.deepEqual(await q("select id,data from papa_v2_entities where kind='songs' order by id"),originalSongs);
+  const audit=(await one("select details from papa_catalog_audit where action='language_filter' order by id desc limit 1")).details;
+  assert.equal(audit.streamerId,'papa');assert.deepEqual(audit.after.languageIds,['english','japanese']);
+  await assert.rejects(rpc('papa_catalog_language_filter_save',['papa','custom',['english','unknown'],'streamer:papa']),/CATALOG_TEMPLATE_MISSING/);
+  await assert.rejects(rpc('papa_catalog_language_filter_save',['papa','custom',['english','english'],'streamer:papa']),/CATALOG_LANGUAGE_FILTER_INVALID/);
+  assert.deepEqual((await rpc('papa_catalog_language_filter',['papa'])).languageIds,['english','japanese']);
+  assert.equal(Number((await one('select revision from papa_v2_revision where id=1')).revision),selected.revision);
+  await rpc('papa_catalog_template_change',['language','deactivate','japanese',null,null,null,'president']);
+  assert.equal((await rpc('papa_catalog_language_filter_save',['papa','custom',['english','japanese'],'streamer:papa'])).changed,false);
+  await assert.rejects(rpc('papa_catalog_language_filter_save',['michelle','custom',['japanese'],'streamer:michelle']),/CATALOG_TEMPLATE_MISSING/);
+  const auto=await rpc('papa_catalog_language_filter_save',['papa','auto',[],'streamer:papa']);
+  assert.equal(auto.mode,'auto');assert.deepEqual(auto.languageIds,[]);assert.equal(auto.changed,true);
+  assert(new Date((await one("select updated_at from papa_catalog_language_filters where streamer_id='papa'")).updated_at)>new Date(timestamp));
+ });
+ await t.test('language search applies before pagination and uses shared renamed categories with no cross-room matches',async()=>{
+  const expected=await rpc('papa_song_search_room',['papa','',[],30,0,'英語']);
+  assert(expected.songIds.includes('s4'));
+  const page=await rpc('papa_song_search_room',['papa','',[],1,0,'英語']);
+  assert.equal(page.total,expected.total);assert.equal(page.songIds.length,1);assert.deepEqual(page.songIds,expected.songIds.slice(0,1));
+  if(expected.total>1) assert.equal(page.hasMore,true);
+  assert.equal((await rpc('papa_song_search_room',['papa','',[],30,0,'國語'])).songIds.includes('s4'),false);
+  assert.deepEqual((await rpc('papa_song_search_room',['papa','',[],30,0,'自訂舊語言'])).songIds,['legacy-language']);
+  assert.equal((await rpc('papa_song_search_room',['michelle','',[],30,0,'自訂舊語言'])).total,0);
+  const renamed=await rpc('papa_song_search_room',['papa','',[],30,0,'華語']);assert(renamed.songIds.includes('s2'));
+  await assert.rejects(rpc('papa_song_search_room',['papa','',[],30,0,'x'.repeat(121)]),/CATALOG_SEARCH_LIMIT/);
+ });
+ await t.test('stale common links do not contribute shared lyrics or category matches to room search',async()=>{
+  assert((await rpc('papa_song_search_room',['papa','共同秘密歌詞二',[],30,0])).songIds.includes('s4'));
+  await q("update papa_v2_entities set data=jsonb_set(data,'{title}','\"主播修改後需重審\"') where kind='songs' and id='s4'");
+  assert.equal((await candidate('s4')).status,'pending');
+  assert(!(await rpc('papa_song_search_room',['papa','共同秘密歌詞二',[],30,0])).songIds.includes('s4'));
+  assert(!(await rpc('papa_song_search_room',['papa','',[],30,0,'英語'])).songIds.includes('s4'));
+  assert((await rpc('papa_song_search_room',['papa','secret_s4',[],30,0,'國語'])).songIds.includes('s4'));
  });
 });
