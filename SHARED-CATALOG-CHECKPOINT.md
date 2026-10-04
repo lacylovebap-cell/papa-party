@@ -1,4 +1,4 @@
-# Shared catalog — 10.05-CATALOG.2 checkpoint
+# Shared catalog — 10.05-CATALOG.2.1 checkpoint
 
 Updated: 2026-10-05 (Asia/Taipei). Previous stable source: 8b76042793eca1641ac9f7596734b613c10cb2be.
 
@@ -17,7 +17,7 @@ Updated: 2026-10-05 (Asia/Taipei). Previous stable source: 8b76042793eca1641ac9f
 - Before/after: 1709 songs, 2237 entities, 11 approved candidates, 11 links and 9 active shared versions. No automatic approval or merge occurred.
 - Compared all 2237 backup entities with live rows: 0 missing, 0 changed non-language song fields, 0 changed other records. Only the requested song language value changed. Anonymous review and authenticated direct event RPC execution remain denied.
 - Updated existing `party-api` Edge function successfully. Live read-only API QA: 29/29 passed; current room raw JSON read 111863 bytes, unchanged read 58 bytes. This is raw response size, not a claim about Supabase billing compression or monthly savings.
-- Final automated suite: 238/238 passed, zero skips/failures. Frontend Build, Edge/schema bundles and diff checks passed.
+- Final automated suite: 239/239 passed, zero skips/failures. Frontend Build, Edge/schema bundles and diff checks passed. A production browser check found a search arriving during an older review load; the 2.1 follow-up discards outdated query/page-size responses, with a dedicated deferred-response regression test. Database and Edge release remain the same tested 2 schema/bundle.
 - Isolated browser fixture QA passed 43-row cross-page selection, first/last paging, conflicting common-field choices, separate version-source selection, tag selection/search, tap explanation and self queue insertion. Fixture self item has null player, zero credit cost and no ledger entries. At 390px viewport the admin song page had no horizontal overflow.
 - Pages verification and final release SHA are recorded in the external release handoff after publication. Notification/chat/push code and existing fallbacks remain; no private message was sent to a real user just to test delivery.
 

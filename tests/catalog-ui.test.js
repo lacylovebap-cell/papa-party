@@ -25,6 +25,18 @@ test('different-version group asks for one source instead of combining different
  assert.match(shown.body,/其餘來源保留待審/);
 });
 
+test('an older review response cannot replace a newer search or page-size filter',async()=>{
+ let finish;const calls=[],catalogView={section:'pending',page:0,pageSize:20,search:'',loaded:false,loading:false,items:[]};
+ const context=contextWithCatalog({catalogView,tab:'catalog',demo:false,draft:null,isSuperAdmin:()=>true,render:()=>{},api:b=>{calls.push(b);return new Promise(resolve=>finish=resolve);}});
+ vm.runInContext(segment('async function loadCatalogReview()','async function catalogReviewAction('),context);
+ let pending=vm.runInContext('loadCatalogReview()',context);catalogView.search='野心家';finish({items:[{title:'old'}],total:1699});await pending;
+ assert.equal(catalogView.loaded,false);assert.equal(catalogView.items.length,0);
+ pending=vm.runInContext('loadCatalogReview()',context);assert.equal(calls[1].q,'野心家');catalogView.pageSize=50;finish({items:[{title:'old-size'}],total:3});await pending;
+ assert.equal(catalogView.loaded,false);assert.equal(catalogView.items.length,0);
+ pending=vm.runInContext('loadCatalogReview()',context);assert.equal(calls[2].limit,50);finish({items:[{title:'野心家'}],total:1});await pending;
+ assert.equal(catalogView.loaded,true);assert.equal(catalogView.items[0].title,'野心家');assert.equal(catalogView.total,1);
+});
+
 test('pending peer hints use safe room labels and history uses readable operation metadata',()=>{
  const catalogView={section:'pending',selected:new Set(),items:[{id:'c1',title:'歌名',artist:'歌手',streamerId:'papa',suggestedCandidates:[{title:'<另一首>',artist:'歌手',streamerId:'michelle',matchType:'possible_version',lyrics:'PRIVATE_BODY'}]}]};
  const context=contextWithCatalog({catalogView,state:{streamers:[{id:'papa',display_name:'怕怕'},{id:'michelle',display_name:'米雪'}]},h:escape,button:()=>'',blank:()=>'',time:x=>'DATE:'+x});

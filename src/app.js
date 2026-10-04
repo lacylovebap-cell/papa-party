@@ -1,13 +1,13 @@
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints} from './catalog-tools.js?v=10.05-CATALOG.2';
-import {fateCategories,drawSong} from './fate.js?v=10.05-CATALOG.2';
-import {createBoard} from './board.js?v=10.05-CATALOG.2';
-import {createChat} from './chat.js?v=10.05-CATALOG.2';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints} from './catalog-tools.js?v=10.05-CATALOG.2.1';
+import {fateCategories,drawSong} from './fate.js?v=10.05-CATALOG.2.1';
+import {createBoard} from './board.js?v=10.05-CATALOG.2.1';
+import {createChat} from './chat.js?v=10.05-CATALOG.2.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=9.24-H';
 import {openHomeEditor} from './home-editor.js?v=9.24-H';
 import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=9.24-B.2';
-import {createNotifications} from './notifications.js?v=10.05-CATALOG.2';
+import {createNotifications} from './notifications.js?v=10.05-CATALOG.2.1';
 import {API,PUBLISHABLE_KEY} from './config.js';
-import {empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour} from './core.js?v=10.05-CATALOG.2';
+import {empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour} from './core.js?v=10.05-CATALOG.2.1';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const demo=new URLSearchParams(location.search).has('demo')||location.pathname.endsWith('/preview.html'),roomCacheKey=k=>['draft','adminTab'].includes(k)?k+'-'+(new URLSearchParams(location.search).get('streamer')||'papa'):k,get=k=>{try{return JSON.parse(localStorage.getItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k)));}catch{return null;}},put=(k,v)=>localStorage.setItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k),JSON.stringify(v));
 let state=empty(),full=null,session=get('player'),admin=get('admin'),draft=get('draft'),offset=0,busy=false,route=location.hash.slice(1)||'home',tab=new URLSearchParams(location.search).get('adminTab')||get('adminTab')||'dashboard',subtab=new URLSearchParams(location.search).get('tab')||'overview',selectedPlayer=new URLSearchParams(location.search).get('player')||null,photoIndex=0,fateId=null,fateSeen=[],fateCategory='all',importRows=[],importKind='players',importText='',migrationPreview=null;
@@ -471,9 +471,9 @@ async function loadCatalogReview(){
  if(catalogView.section==='confirmed'){catalogView.loaded=true;render();return;}
  if(demo||draft){catalogView.error='預覽模式不會寫入正式共同曲庫';catalogView.loaded=true;render();return;}
  catalogView.loading=true;catalogView.error='';
- const section=catalogView.section,page=catalogView.page;
- const current=()=>isSuperAdmin()&&tab==='catalog'&&catalogView.section===section&&catalogView.page===page;
- try{const response=section==='templates'?await api({op:'catalogTemplates',management:true}):await api({op:'catalogReviewList',status:section,limit:catalogView.pageSize||20,offset:page*(catalogView.pageSize||20),q:catalogView.search||'',management:true});
+ const section=catalogView.section,page=catalogView.page,size=catalogView.pageSize||20,query=catalogView.search||'';
+ const current=()=>isSuperAdmin()&&tab==='catalog'&&catalogView.section===section&&catalogView.page===page&&(catalogView.pageSize||20)===size&&(catalogView.search||'')===query;
+ try{const response=section==='templates'?await api({op:'catalogTemplates',management:true}):await api({op:'catalogReviewList',status:section,limit:size,offset:page*size,q:query,management:true});
   if(!current())return;
   if(section==='templates')catalogView.templates=response;
   else{catalogView.items=response.items||[];catalogView.total=response.total||0;catalogView.hasMore=!!response.hasMore;}
