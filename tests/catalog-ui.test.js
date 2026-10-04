@@ -172,3 +172,48 @@ test('a background revision change refreshes active search results once without 
  finish({songIds:[],total:0});await new Promise(resolve=>setImmediate(resolve));
  assert.equal(vm.runInContext('bookSearchResult().loading',context),false);
 });
+
+
+function governanceHarness({president=true}={}){
+ const calls=[],view={section:'approved',selected:new Set(),selectedSources:new Map(),selectedVariants:new Map(),templates:{languages:[{id:'zh',name:'華語',active:true}],performerTypes:[]}},browse={items:[],selected:new Set(),selectedRows:new Map()};let captured;
+ const context=vm.createContext({Object,Map,Set,Number,String,demo:false,draft:null,catalogView:view,sharedBrowse:browse,sharedLyricHistory:{variantId:null,rows:[]},
+  isSuperAdmin:()=>president,api:async body=>{calls.push(body);return {};},refresh:async()=>{},loadCatalogReview:async()=>{},toast:()=>{},h:escape,
+  field:(name,_label,value='')=>'<input name="'+name+'" value="'+escape(value)+'">',nativeSelect:(name,_label,options)=>'<select name="'+name+'">'+options.map(([id,label])=>'<option value="'+id+'">'+label+'</option>').join('')+'</select>',check:()=>'',modal:(title,html,submit)=>{captured={title,html,submit};}});
+ vm.runInContext(segment('function catalogVersions(','function editCatalogTemplate('),context);
+ return {context,calls,view,browse,get modal(){return captured;},run:code=>vm.runInContext(code,context)};
+}
+
+test('shared metadata edit keeps exact concurrency token and leaves unchanged legacy classifications intact',async()=>{
+ const u=governanceHarness(),updatedAt='2026-10-04T01:02:03.123456+00:00';
+ u.browse.items=[{id:'v1',title:'Song',artist:'Singer',language:'舊分類',updatedAt}];
+ await u.run("editCatalogMetadata('v1')");
+ await u.modal.submit(new Map([['title','New'],['artist','Singer'],['versionLabel','Live'],['languageId','__keep__'],['performerTypeId','__keep__']]));
+ const call=u.calls[0];assert.equal(call.op,'catalogGovernance');assert.equal(call.action,'update_variant');assert.equal(call.expectedVersions.v1,updatedAt);
+ assert.equal('languageId' in call.metadata,false);assert.equal('performerTypeId' in call.metadata,false);assert.equal(call.metadata.title,'New');
+ const denied=governanceHarness({president:false});await denied.run("editCatalogMetadata('v1')");assert.equal(denied.modal,undefined);assert.equal(denied.calls.length,0);
+});
+
+test('version grouping uses selected metadata across pages and an existing family selector',async()=>{
+ const u=governanceHarness();u.browse.selected=new Set(['v1','v2']);u.browse.selectedRows=new Map([['v1',{id:'v1',title:'Song',familyId:'f1',updatedAt:'t1'}],['v2',{id:'v2',title:'Other version',familyId:'f2',updatedAt:'t2'}]]);
+ await u.run('mergeCatalogFamilies()');assert.match(u.modal.html,/<select name="targetFamilyId">/);assert.doesNotMatch(u.modal.html,/<input/);
+ await u.modal.submit(new Map([['targetFamilyId','f1']]));
+ assert.equal(u.calls[0].action,'merge_family');assert.deepEqual(JSON.parse(JSON.stringify(u.calls[0].variantIds)),['v1','v2']);assert.deepEqual(JSON.parse(JSON.stringify(u.calls[0].expectedVersions)),{v1:'t1',v2:'t2'});
+ assert.equal(u.browse.selected.size,0);
+});
+
+test('splitting links rejects mixed variants and sends both candidate and version concurrency tokens',async()=>{
+ const u=governanceHarness();u.view.selected=new Set(['c1','c2']);u.view.selectedSources=new Map([['c1','hash1'],['c2','hash2']]);
+ u.view.selectedVariants=new Map([['c1',{variantId:'v1',updatedAt:'precise1'}],['c2',{variantId:'v2',updatedAt:'precise2'}]]);
+ await assert.rejects(u.run('splitCatalogVariant()'),/同一共同版本/);assert.equal(u.calls.length,0);
+ u.view.selectedVariants.set('c2',{variantId:'v1',updatedAt:'precise1'});await u.run('splitCatalogVariant()');await u.modal.submit(new Map([['versionLabel','翻唱版']]));
+ assert.equal(u.calls[0].action,'split_variant');assert.deepEqual(JSON.parse(JSON.stringify(u.calls[0].expectedVersions)),{v1:'precise1'});assert.deepEqual(JSON.parse(JSON.stringify(u.calls[0].expectedSources)),{c1:'hash1',c2:'hash2'});
+ assert.equal(u.calls[0].metadata.versionLabel,'翻唱版');
+});
+
+test('restoring lyrics creates a new revision with escaped preview and preserves historical rows',async()=>{
+ const u=governanceHarness();u.context.sharedLyricHistory={variantId:'v1',rows:[{revision:2,body:'<old lyrics>'}]};
+ u.run("restoreSharedLyric('v1',2)");assert.match(u.modal.html,/&lt;old lyrics&gt;/);assert.doesNotMatch(u.modal.html,/<old lyrics>/);
+ await u.modal.submit(new Map([['active','on']]));
+ assert.deepEqual(JSON.parse(JSON.stringify(u.calls[0])),{op:'catalogLyricSave',variantId:'v1',body:'<old lyrics>',active:true,management:true});
+ assert.equal(u.calls.length,1);
+});

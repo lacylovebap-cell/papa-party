@@ -16,8 +16,9 @@ let lastFullRefreshAt=0,refreshInFlight=null;
 const selectedSongs=new Set();
 let songUndo=null,songUndoTimer;
 let filters={q:'',tags:[]},pages={},adminQuery='',ledgerQuery='',galleryFilter='current';
-const catalogView={section:'pending',page:0,items:[],total:0,hasMore:false,loaded:false,loading:false,error:'',selected:new Set(),selectedSources:new Map(),search:'',templates:null,scanCursor:'',scanTotal:0,scanning:false,scanComplete:false};
-const sharedBrowse={q:'',page:0,items:[],total:0,hasMore:false,loading:false,error:'',selected:new Set(),generation:0,reviewIds:null};
+const catalogView={section:'pending',page:0,items:[],total:0,hasMore:false,loaded:false,loading:false,error:'',selected:new Set(),selectedSources:new Map(),selectedVariants:new Map(),search:'',templates:null,scanCursor:'',scanTotal:0,scanning:false,scanComplete:false};
+const sharedBrowse={q:'',page:0,items:[],total:0,hasMore:false,loading:false,error:'',selected:new Set(),selectedRows:new Map(),generation:0,reviewIds:null};
+let sharedLyricHistory={variantId:null,rows:[]};
 const roomSearch={book:null,home:null,songs:null,unsupported:false,generation:0,timer:null,cache:new Map()};
 if(admin?.until<Date.now()){admin=null;put('admin',null);}if(!admin)draft=null;
 const isSuperAdmin=()=>!!admin&&admin.role!=='streamer_admin';
@@ -276,9 +277,10 @@ case 'undoSongBatch':await undoSongBatch();break;
  case 'editSong':await editSong(id);break;case 'streamerLyrics':await editStreamerLyrics(id);break;case 'deleteSong':if(confirm('刪除這首歌曲？既有點歌歷史會保留。'))await dispatch('song',{songId:id,remove:true});break;
  case 'catalogBrowse':await openSharedBrowse();break;case 'catalogBrowsePage':await loadSharedBrowse(sharedBrowse.page+Number(id));break;
  case 'catalogBatchAdd':await addSharedSongs();break;case 'catalogChooseTarget':await chooseCatalogTarget(id,b.dataset.mode);break;
- case 'catalogSection':catalogView.section=id;catalogView.page=0;catalogView.selected.clear();catalogView.selectedSources.clear();catalogView.loaded=false;render();break;
+ case 'catalogSection':catalogView.section=id;catalogView.page=0;catalogView.selected.clear();catalogView.selectedSources.clear();catalogView.selectedVariants?.clear();catalogView.loaded=false;render();break;
  case 'catalogPage':catalogView.page=Math.max(0,catalogView.page+Number(id));catalogView.loaded=false;render();break;
  case 'catalogReviewAction':await catalogReviewAction(id);break;case 'catalogReviewLink':await openSharedBrowse([...catalogView.selected]);break;
+ case 'catalogMetadata':await editCatalogMetadata(id);break;case 'catalogMerge':await mergeCatalogFamilies();break;case 'catalogSplit':await splitCatalogVariant();break;case 'catalogLyricRestore':restoreSharedLyric(id,Number(b.dataset.revision));break;
  case 'catalogTemplateAdd':editCatalogTemplate(id);break;case 'catalogTemplateEdit':editCatalogTemplate(b.dataset.kind,id);break;
  case 'catalogSharedLyrics':await editSharedLyrics(id);break;case 'catalogLyricHistory':await showSharedLyricHistory(id,Number(b.dataset.page)||0);break;
  case 'catalogScan':await scanCatalogCandidates();break;
@@ -408,7 +410,7 @@ function catalogReviewHtml(){
   const id=String(row.candidateId||row.id||''),name=[row.title,row.artist].filter(Boolean).join('｜'),suggestions=(row.suggestedVariants||[]).slice(0,3).map(x=>[x.title,x.artist,x.versionLabel].filter(Boolean).join(' · ')).join('；');
   return `<div class="song catalog-row">${reviewable?`<label class="catalog-check"><input type="checkbox" data-catalog-review="${h(id)}" ${catalogView.selected.has(id)?'checked':''} aria-label="選取 ${h(name)}"></label>`:''}<div class="info"><b>${h(name||'待審歌曲')}</b><small>${h([row.streamerName,row.language,row.performerType,row.variantLabel||row.versionLabel].filter(Boolean).join(' · '))}</small>${suggestions?`<small>可能相關：${h(suggestions)}</small>`:''}${status==='history'?`<small>${h([row.decision||row.action,row.at||row.created_at].filter(Boolean).join(' · '))}</small>`:''}</div></div>`;
  }).join('')||blank(catalogView.loading?'正在讀取…':'這一頁沒有資料');
- const actions=status==='pending'?`<div class="actions">${button('建立為新的共同歌曲','catalogReviewAction','approve_new','',''+(catalogView.selected.size?'':'disabled'))}${button('連到既有版本','catalogReviewLink','','tiny',catalogView.selected.size?'':'disabled')}${button('拒絕','catalogReviewAction','reject','tiny danger',catalogView.selected.size?'':'disabled')}${button('移除候選','catalogReviewAction','remove','tiny danger',catalogView.selected.size?'':'disabled')}</div>`:status==='approved'?`<div class="actions">${button('解除共同關聯','catalogReviewAction','unlink','tiny danger',catalogView.selected.size?'':'disabled')}</div>`:'';
+ const actions=status==='pending'?`<div class="actions">${button('建立為新的共同歌曲','catalogReviewAction','approve_new','',''+(catalogView.selected.size?'':'disabled'))}${button('連到既有版本','catalogReviewLink','','tiny',catalogView.selected.size?'':'disabled')}${button('拒絕','catalogReviewAction','reject','tiny danger',catalogView.selected.size?'':'disabled')}${button('移除候選','catalogReviewAction','remove','tiny danger',catalogView.selected.size?'':'disabled')}</div>`:status==='approved'?`<div class="actions">${button('解除共同關聯','catalogReviewAction','unlink','tiny danger',catalogView.selected.size?'':'disabled')+button('拆為另一個版本','catalogSplit','','tiny',catalogView.selected.size?'':'disabled')}</div>`:'';
  const nav=`<div class="pagination">${button('上一頁','catalogPage','-1','tiny',catalogView.page?'':'disabled')}<small>第 ${catalogView.page+1} 頁${catalogView.total?' · 共 '+catalogView.total+' 筆':''}</small>${button('下一頁','catalogPage','1','tiny',catalogView.hasMore?'':'disabled')}</div>`;
  return tabs+`<p class="muted">既有主播歌本不會因共同曲庫審核而被刪除或覆寫；核准前只建立候選。</p><div class="actions">${button('搜尋正式共同曲庫','catalogBrowse')}${button(catalogView.scanning?'掃描中…':catalogView.scanComplete?'重新掃描既有歌本':catalogView.scanCursor?'掃描下一批 100 首':'掃描既有歌本（每批 100 首）','catalogScan','','tiny',catalogView.scanning?'disabled':'')}</div>${catalogView.scanTotal?`<p class="muted">本輪已檢查 ${catalogView.scanTotal} 首${catalogView.scanComplete?'，掃描完成':'；按「掃描下一批」繼續'}。只建立待審候選，原歌本保持不變。</p>`:''}${actions}${catalogView.error?`<p class="error">${h(catalogView.error)}</p>`:''}<div id="catalog-review-list">${entries}</div>${nav}`;
 }
@@ -448,22 +450,22 @@ async function catalogReviewAction(decision,ids=[...catalogView.selected],target
  if(Object.values(expectedSources).some(value=>!value))throw Error('選取的候選資料已更新，請重新選取後審核');
  if(!confirm(`${label} ${ids.length} 首？主播原歌本與歷史紀錄會保留。`))return;
  await api({op:'catalogReview',decision,candidateIds:ids,expectedSources,...target,management:true});
- catalogView.selected.clear();catalogView.selectedSources.clear();catalogView.loaded=false;await loadCatalogReview();toast(`已${label} ${ids.length} 首`);
+ catalogView.selected.clear();catalogView.selectedSources.clear();catalogView.selectedVariants?.clear();catalogView.loaded=false;await loadCatalogReview();toast(`已${label} ${ids.length} 首`);
 }
 async function openSharedBrowse(reviewIds=null){
  if(!isAdmin())return;
  clearTimeout(catalogBrowseTimer);
  sharedBrowse.reviewIds=Array.isArray(reviewIds)&&reviewIds.length?reviewIds:null;
- sharedBrowse.selected.clear();sharedBrowse.q='';sharedBrowse.page=0;sharedBrowse.items=[];sharedBrowse.error='';
+ sharedBrowse.selected.clear();sharedBrowse.selectedRows.clear();sharedBrowse.q='';sharedBrowse.page=0;sharedBrowse.items=[];sharedBrowse.error='';
  modal(sharedBrowse.reviewIds?'選擇共同歌曲關聯目標':'從共同曲庫加入歌曲',`<p class="muted">在伺服器搜尋正式曲庫；只載入目前這一頁，不下載歌詞。</p><input type="search" id="catalog-browse-q" value="" placeholder="搜尋歌名或歌手" aria-label="搜尋共同曲庫"><div id="catalog-browse-list" aria-live="polite">${blank('讀取中…')}</div>`);
  await loadSharedBrowse(0);
 }
 function sharedBrowseHtml(){
  if(sharedBrowse.error)return `<p class="error">${h(sharedBrowse.error)}</p><p class="muted">本主播仍可從「新增歌曲」建立新歌。</p>`;
  const rows=sharedBrowse.items.map(row=>{const id=String(row.variantId||row.id||''),label=[row.title,row.artist,row.language,row.performerType,row.versionLabel].filter(Boolean).join(' · ');
-  return `<div class="song catalog-row">${sharedBrowse.reviewIds?'':`<label class="catalog-check"><input type="checkbox" data-catalog-variant="${h(id)}" ${sharedBrowse.selected.has(id)?'checked':''} ${row.alreadyAdded?'disabled':''} aria-label="選取 ${h(label)}"></label>`}<div class="info"><b>${h(row.title)}</b><small>${h([row.artist,row.language,row.performerType,row.versionLabel].filter(Boolean).join(' · '))}</small>${row.alreadyAdded?'<small>已在本主播歌本</small>':''}</div><div class="actions">${isSuperAdmin()?button('編輯共同歌詞','catalogSharedLyrics',id):''}${sharedBrowse.reviewIds?button('關聯此版本','catalogChooseTarget',id,'tiny','data-mode="link_variant"')+button('歸為新版本','catalogChooseTarget',id,'tiny','data-mode="create_variant"'):''}</div></div>`;
+  return `<div class="song catalog-row">${sharedBrowse.reviewIds?'':`<label class="catalog-check"><input type="checkbox" data-catalog-variant="${h(id)}" ${sharedBrowse.selected.has(id)?'checked':''} ${row.alreadyAdded&&!isSuperAdmin()?'disabled':''} aria-label="選取 ${h(label)}"></label>`}<div class="info"><b>${h(row.title)}</b><small>${h([row.artist,row.language,row.performerType,row.versionLabel].filter(Boolean).join(' · '))}</small>${row.alreadyAdded?'<small>已在本主播歌本</small>':''}</div><div class="actions">${isSuperAdmin()?button('編輯主資料','catalogMetadata',id)+button('編輯共同歌詞','catalogSharedLyrics',id):''}${sharedBrowse.reviewIds?button('關聯此版本','catalogChooseTarget',id,'tiny','data-mode="link_variant"')+button('歸為新版本','catalogChooseTarget',id,'tiny','data-mode="create_variant"'):''}</div></div>`;
  }).join('')||blank(sharedBrowse.loading?'搜尋中…':'查無符合的共同歌曲');
- return `<div class="catalog-list">${rows}</div><div class="pagination">${button('上一頁','catalogBrowsePage','-1','tiny',sharedBrowse.page?'':'disabled')}<small>第 ${sharedBrowse.page+1} 頁${sharedBrowse.total?' · 共 '+sharedBrowse.total+' 首':''}</small>${button('下一頁','catalogBrowsePage','1','tiny',sharedBrowse.hasMore?'':'disabled')}</div>${sharedBrowse.reviewIds?'':`<div class="actions catalog-add-actions"><small>已選 ${sharedBrowse.selected.size} 首</small>${button('批量加入本主播歌本','catalogBatchAdd','','tiny primary',sharedBrowse.selected.size?'':'disabled')}</div>`}`;
+ return `<div class="catalog-list">${rows}</div><div class="pagination">${button('上一頁','catalogBrowsePage','-1','tiny',sharedBrowse.page?'':'disabled')}<small>第 ${sharedBrowse.page+1} 頁${sharedBrowse.total?' · 共 '+sharedBrowse.total+' 首':''}</small>${button('下一頁','catalogBrowsePage','1','tiny',sharedBrowse.hasMore?'':'disabled')}</div>${sharedBrowse.reviewIds?'':`<div class="actions catalog-add-actions"><small>已選 ${sharedBrowse.selected.size} 首</small>${button('批量加入本主播歌本','catalogBatchAdd','','tiny primary',sharedBrowse.selected.size?'':'disabled')}${isSuperAdmin()?button('歸為同一歌曲的版本','catalogMerge','','tiny',sharedBrowse.selected.size>1?'':'disabled'):''}</div>`}`;
 }
 function renderSharedBrowse(){const holder=$('#catalog-browse-list');if(holder)holder.innerHTML=sharedBrowseHtml();}
 async function loadSharedBrowse(page=0){
@@ -498,6 +500,60 @@ async function editStreamerLyrics(songId){
  });
  if(linked){const select=$('#modal-form [name=mode]'),body=$('#modal-form [name=body]');const sync=()=>{body.readOnly=select.value==='shared';body.title=body.readOnly?'跟隨共同歌詞；切換成自訂後才可編輯':'';};select.addEventListener('change',sync);sync();}
 }
+function catalogVersions(rows){
+ const versions=Object.fromEntries(rows.map(row=>[String(row.variantId||row.id||''),row.updatedAt]));
+ if(rows.length===0||Object.keys(versions).length!==rows.length||Object.values(versions).some(value=>!value))throw Error('共同資料已更新，請重新搜尋後選取');
+ return versions;
+}
+async function editCatalogMetadata(variantId){
+ if(!isSuperAdmin())return;
+ const row=sharedBrowse.items.find(row=>String(row.variantId||row.id)===variantId);if(!row)return;
+ const expectedVersions=catalogVersions([row]);
+ const templates=catalogView.templates||(catalogView.templates=await api({op:'catalogTemplates',management:true}));
+ const options=(rows,current)=>[['__keep__','保留目前：'+(current||'未分類')],['','不分類'],...rows.filter(row=>row.active!==false).map(row=>[row.id,row.name])];
+ modal('編輯共同歌曲主資料',field('title','歌名',row.title,'text','required maxlength="300"')+field('artist','演唱者',row.artist,'text','maxlength="300"')+field('versionLabel','版本名稱',row.versionLabel||'','text','maxlength="120"')+nativeSelect('languageId','語言',options(templates.languages||[],row.language),'__keep__')+nativeSelect('performerTypeId','演唱者類型',options(templates.performerTypes||[],row.performerType),'__keep__')+'<p class="muted">只調整共同主資料；主播自己的標籤、扣歌設定、歌詞與註記會保留。</p>',async f=>{
+  if(demo||draft)throw Error('預覽模式無法修改共同主資料');
+  const metadata={title:f.get('title'),artist:f.get('artist'),versionLabel:f.get('versionLabel')};
+  for(const name of ['languageId','performerTypeId'])if(f.get(name)!=='__keep__')metadata[name]=f.get(name)||null;
+  await api({op:'catalogGovernance',action:'update_variant',variantIds:[variantId],metadata,expectedVersions,management:true});
+  sharedBrowse.selected.clear();sharedBrowse.selectedRows.clear();catalogView.loaded=false;await refresh(true);toast('共同主資料已更新');
+ });
+}
+async function mergeCatalogFamilies(){
+ if(!isSuperAdmin())return;
+ const rows=[...sharedBrowse.selected].map(id=>sharedBrowse.selectedRows.get(id));if(rows.length<2)return toast('請至少選擇兩個共同版本');
+ if(rows.some(row=>!row))throw Error('請重新搜尋後選取版本');
+ const expectedVersions=catalogVersions(rows),ids=rows.map(row=>String(row.variantId||row.id));
+ const families=[...new Map(rows.map(row=>[row.familyId,[row.familyId,row.title+' · '+(row.versionLabel||row.artist||'原版')]])).values()];
+ modal('歸為同一歌曲的版本',nativeSelect('targetFamilyId','歸到哪首歌曲',families,families[0][0])+'<p>已選 '+rows.length+' 個版本。保留各版本歌詞、主播關聯與歷史，只調整版本所屬歌曲。</p>',async f=>{
+  if(demo||draft)throw Error('預覽模式無法變更共同關聯');
+  if(!families.some(([id])=>id===f.get('targetFamilyId')))throw Error('請選擇有效歌曲');
+  await api({op:'catalogGovernance',action:'merge_family',variantIds:ids,targetFamilyId:f.get('targetFamilyId'),expectedVersions,management:true});
+  sharedBrowse.selected.clear();sharedBrowse.selectedRows.clear();catalogView.loaded=false;await refresh(true);toast('共同歌曲版本已整理');
+ });
+}
+async function splitCatalogVariant(){
+ if(!isSuperAdmin()||catalogView.section!=='approved'||!catalogView.selected.size)return;
+ const candidateIds=[...catalogView.selected],rows=candidateIds.map(id=>catalogView.selectedVariants.get(id));
+ if(rows.some(row=>!row?.variantId||!row.updatedAt)||new Set(rows.map(row=>row.variantId)).size!==1||new Set(rows.map(row=>row.updatedAt)).size!==1)throw Error('請選擇同一共同版本的已關聯歌曲，再拆為新版本');
+ const variantId=rows[0].variantId,expectedVersions={[variantId]:rows[0].updatedAt},expectedSources=Object.fromEntries(candidateIds.map(id=>[id,catalogView.selectedSources.get(id)]));
+ if(Object.values(expectedSources).some(value=>!value))throw Error('候選資料已更新，請重新選取');
+ modal('拆為另一個共同版本',field('versionLabel','新版本名稱','','text','required maxlength="120"')+'<p>只移動已選的 '+candidateIds.length+' 筆主播歌曲關聯。原歌曲、演唱歷史、自訂歌詞與私人註記保留。</p>',async f=>{
+  if(demo||draft)throw Error('預覽模式無法拆分共同版本');
+  await api({op:'catalogGovernance',action:'split_variant',variantIds:[variantId],candidateIds,metadata:{versionLabel:f.get('versionLabel')},expectedVersions,expectedSources,management:true});
+  catalogView.selected.clear();catalogView.selectedSources.clear();catalogView.selectedVariants.clear();catalogView.loaded=false;await loadCatalogReview();await refresh(true);toast('已拆為新的共同版本');
+ });
+}
+function restoreSharedLyric(variantId,revision){
+ if(!isSuperAdmin()||sharedLyricHistory.variantId!==variantId)return;
+ const row=sharedLyricHistory.rows.find(row=>Number(row.revision||row.version)===revision);if(!row)throw Error('請重新開啟歌詞歷史');
+ const body=String(row.body||'');
+ modal('復原共同歌詞版本 '+revision,'<p>會以這份內容建立新的版本，舊的修改歷史仍保留。</p><pre>'+h(body)+'</pre>'+check('active','啟用此份共同歌詞',true),async f=>{
+  if(demo||draft)throw Error('預覽模式無法復原共同歌詞');
+  await api({op:'catalogLyricSave',variantId,body,active:f.has('active'),management:true});sharedLyricHistory={variantId:null,rows:[]};toast('已建立復原版本');
+ });
+}
+
 function editCatalogTemplate(kind,id=''){
  if(!isSuperAdmin())return;
  const collection=kind==='language'?'languages':'performerTypes',row=id?(catalogView.templates?.[collection]||[]).find(x=>String(x.id)===String(id)):null;
@@ -512,9 +568,10 @@ async function editSharedLyrics(variantId){if(!isSuperAdmin())return;const r=awa
  });
 }
 async function showSharedLyricHistory(variantId,page=0){if(!isSuperAdmin())return;page=Math.max(0,page);const r=await api({op:'catalogLyrics',variantId,includeHistory:true,limit:10,offset:page*10,management:true});
- modal('共同歌詞修改歷史',`<div class="catalog-history">${(r.history||[]).map(row=>`<details class="notice"><summary>版本 ${h(row.revision||row.version)} · ${h(row.createdAt||row.created_at||'')}</summary><pre>${h(row.body||'')}</pre></details>`).join('')||blank('尚無修改歷史')}</div><div class="pagination">${button('上一頁','catalogLyricHistory',variantId,'tiny',`data-page="${page-1}" ${page?'':'disabled'}`)}<small>第 ${page+1} 頁</small>${button('下一頁','catalogLyricHistory',variantId,'tiny',`data-page="${page+1}" ${r.historyHasMore?'':'disabled'}`)}</div>`);
+ sharedLyricHistory={variantId,rows:r.history||[]};
+ modal('共同歌詞修改歷史',`<div class="catalog-history">${(r.history||[]).map(row=>`<details class="notice"><summary>版本 ${h(row.revision||row.version)} · ${h(row.createdAt||row.created_at||'')}</summary><pre>${h(row.body||'')}</pre>${button('以此內容建立復原版本','catalogLyricRestore',variantId,'tiny',`data-revision="${h(row.revision||row.version)}"`)}</details>`).join('')||blank('尚無修改歷史')}</div><div class="pagination">${button('上一頁','catalogLyricHistory',variantId,'tiny',`data-page="${page-1}" ${page?'':'disabled'}`)}<small>第 ${page+1} 頁</small>${button('下一頁','catalogLyricHistory',variantId,'tiny',`data-page="${page+1}" ${r.historyHasMore?'':'disabled'}`)}</div>`);
 }
-document.addEventListener('change',e=>{if(e.target.matches('[data-catalog-review]')){const id=e.target.dataset.catalogReview;if(e.target.checked){const row=catalogView.items.find(row=>String(row.candidateId||row.id)===id);catalogView.selected.add(id);catalogView.selectedSources.set(id,row?.sourceHash);}else{catalogView.selected.delete(id);catalogView.selectedSources.delete(id);}if(tab==='catalog')render();}if(e.target.matches('[data-catalog-variant]')){const id=e.target.dataset.catalogVariant;if(e.target.checked&&sharedBrowse.selected.size>=50){e.target.checked=false;toast('一次最多加入 50 首');return;}e.target.checked?sharedBrowse.selected.add(id):sharedBrowse.selected.delete(id);renderSharedBrowse();}});
+document.addEventListener('change',e=>{if(e.target.matches('[data-catalog-review]')){const id=e.target.dataset.catalogReview;if(e.target.checked){const row=catalogView.items.find(row=>String(row.candidateId||row.id)===id);catalogView.selected.add(id);catalogView.selectedSources.set(id,row?.sourceHash);catalogView.selectedVariants.set(id,{variantId:row?.variantId,updatedAt:row?.variantUpdatedAt});}else{catalogView.selected.delete(id);catalogView.selectedSources.delete(id);catalogView.selectedVariants.delete(id);}if(tab==='catalog')render();}if(e.target.matches('[data-catalog-variant]')){const id=e.target.dataset.catalogVariant;if(e.target.checked&&sharedBrowse.selected.size>=50){e.target.checked=false;toast('一次最多加入 50 首');return;}if(e.target.checked){sharedBrowse.selected.add(id);sharedBrowse.selectedRows.set(id,sharedBrowse.items.find(row=>String(row.variantId||row.id)===id));}else{sharedBrowse.selected.delete(id);sharedBrowse.selectedRows.delete(id);}renderSharedBrowse();}});
 let catalogBrowseTimer;function scheduleSharedBrowse(input){sharedBrowse.q=input.value;sharedBrowse.generation++;clearTimeout(catalogBrowseTimer);catalogBrowseTimer=setTimeout(()=>loadSharedBrowse(0),350);}
 document.addEventListener('input',e=>{if(e.target.id==='catalog-browse-q'&&!e.isComposing)scheduleSharedBrowse(e.target);});
 document.addEventListener('compositionend',e=>{if(e.target.id==='catalog-browse-q')scheduleSharedBrowse(e.target);});
