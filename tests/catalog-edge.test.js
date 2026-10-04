@@ -79,7 +79,7 @@ test('language preferences read publicly but can only be changed for an authoriz
  assert.equal(calls.at(-1).body.room_id,'papa');
  assert.equal(calls.at(-1).body.actor_id,'streamer:papa');
  await request({op:'songSearchRoom',streamer:'papa',q:'歌詞',language:'國語'});
- assert.equal(calls.at(-1).body.language_name,'國語');
+ assert.equal(calls.at(-1).body.language_name,'華語');
 });
 
 test('common metadata projection never mutates original song data or private fields',()=>{

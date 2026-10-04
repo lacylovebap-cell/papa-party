@@ -2,14 +2,32 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {catalogGroupKey,canonicalLanguage,eventDescription} from '../src/catalog-tools.js';
 
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const segment=(start,end)=>source.slice(source.indexOf(start),source.indexOf(end));
+function contextWithCatalog(values){
+ if(values.catalogView){values.catalogView.selectedRows??=new Map();values.catalogView.selectedVariants??=new Map();}
+ if(values.sharedBrowse)values.sharedBrowse.selectedRows??=new Map();
+ const context=vm.createContext({playerName:()=>'玩家',song:()=>null,...values,catalogGroupKey,canonicalLanguage,eventDescription});
+ vm.runInContext(segment('function catalogPager(','function selectCatalogRows('),context);
+ return context;
+}
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+test('different-version group asks for one source instead of combining different singers into one version',()=>{
+ const items=[{id:'a',title:'作品',artist:'歌手甲',streamerId:'papa'},{id:'b',title:'作品',artist:'歌手乙',streamerId:'michelle'},{id:'c',title:'別首',artist:'第三人'}];let shown;
+ const context=contextWithCatalog({catalogView:{items},state:{streamers:[]},h:escape,modal:(title,body)=>shown={title,body},button:(label,act,id)=>`<button data-act="${act}" data-id="${id}">${label}</button>`});
+ vm.runInContext(segment('function chooseDifferentVersion(','function catalogReviewHtml()'),context);
+ vm.runInContext("chooseDifferentVersion('a')",context);
+ assert.match(shown.body,/歌手甲/);assert.match(shown.body,/歌手乙/);assert.doesNotMatch(shown.body,/第三人/);
+ assert.equal((shown.body.match(/data-act="catalogVersionSource"/g)||[]).length,2);
+ assert.match(shown.body,/其餘來源保留待審/);
+});
 
 test('pending peer hints use safe room labels and history uses readable operation metadata',()=>{
  const catalogView={section:'pending',selected:new Set(),items:[{id:'c1',title:'歌名',artist:'歌手',streamerId:'papa',suggestedCandidates:[{title:'<另一首>',artist:'歌手',streamerId:'michelle',matchType:'possible_version',lyrics:'PRIVATE_BODY'}]}]};
- const context=vm.createContext({catalogView,state:{streamers:[{id:'papa',display_name:'怕怕'},{id:'michelle',display_name:'米雪'}]},h:escape,button:()=>'',blank:()=>'',time:x=>'DATE:'+x});
+ const context=contextWithCatalog({catalogView,state:{streamers:[{id:'papa',display_name:'怕怕'},{id:'michelle',display_name:'米雪'}]},h:escape,button:()=>'',blank:()=>'',time:x=>'DATE:'+x});
  vm.runInContext(segment('function catalogReviewHtml()','async function scanCatalogCandidates()'),context);
  const html=vm.runInContext('catalogReviewHtml()',context);
  assert.match(html,/可能不同版本/);assert.match(html,/米雪/);assert.match(html,/&lt;另一首&gt;/);assert.doesNotMatch(html,/PRIVATE_BODY/);
@@ -20,7 +38,7 @@ test('pending peer hints use safe room labels and history uses readable operatio
 
 test('room lyric search is debounced by caller, bounded, room-scoped and cached without downloading lyrics',async()=>{
  const calls=[],roomSearch={book:null,home:null,unsupported:false,generation:0,timer:null,cache:new Map()},songs=[{songId:'a',title:'夜',artist:'歌手',lyrics:'MUST_NOT_TRAVEL'}];
- const context=vm.createContext({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters:{q:'夜',tags:[]},state:{songs},route:'book',demo:false,draft:null,
+ const context=contextWithCatalog({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters:{q:'夜',tags:[]},state:{songs},route:'book',demo:false,draft:null,
   isAdmin:()=>false,api:async body=>{calls.push(body);return {songIds:['a'],total:21,hasMore:body.offset===0};},song:id=>songs.find(s=>s.songId===id),renderSongResults:()=>{},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:()=>null});
  vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
  await vm.runInContext("loadRoomSongSearch('book','夜',[],0)",context);
@@ -35,7 +53,7 @@ test('room lyric search is debounced by caller, bounded, room-scoped and cached 
 
 test('shared catalog browse loads only one page and never renders lyric text from search metadata',async()=>{
  const calls=[],holder={innerHTML:''},sharedBrowse={q:'愛',page:0,items:[],total:0,hasMore:false,loading:false,error:'',selected:new Set(),generation:0,reviewIds:null};
- const context=vm.createContext({JSON,Set,sharedBrowse,demo:false,draft:null,h:escape,blank:()=>'<i>empty</i>',button:(label)=>`<button>${label}</button>`,$:()=>holder,isSuperAdmin:()=>false,
+ const context=contextWithCatalog({JSON,Set,sharedBrowse,demo:false,draft:null,h:escape,blank:()=>'<i>empty</i>',button:(label)=>`<button>${label}</button>`,$:()=>holder,isSuperAdmin:()=>false,
   api:async body=>{calls.push(body);return {items:[{variantId:'v1',title:'愛你',artist:'歌手',lyrics:'HIDDEN_LYRICS'}],total:31,hasMore:true};}});
  vm.runInContext(segment('function sharedBrowseHtml()','async function chooseCatalogTarget('),context);
  await vm.runInContext('loadSharedBrowse(0)',context);
@@ -47,7 +65,7 @@ test('shared catalog browse loads only one page and never renders lyric text fro
 
 test('unchanged reads coalesce and a full refresh is forced at most five minutes apart',async()=>{
  let now=1000000,resolvePending,reads=0;const requests=[],app={innerHTML:''};
- const context=vm.createContext({Date:{now:()=>now},demo:false,draft:null,busy:false,refreshInFlight:null,lastFullRefreshAt:0,state:{revision:7},
+ const context=contextWithCatalog({Date:{now:()=>now},demo:false,draft:null,busy:false,refreshInFlight:null,lastFullRefreshAt:0,state:{revision:7},
   api:async body=>{requests.push(body);reads++;if(reads===2)return new Promise(resolve=>{resolvePending=resolve;});return {state:{revision:7},ready:true};},render:()=>{},isAdmin:()=>false,$:()=>app,button:()=>''});
  vm.runInContext(segment('async function refresh(','async function dispatch('),context);
  await vm.runInContext('refresh(true)',context);
@@ -64,7 +82,7 @@ test('unchanged reads coalesce and a full refresh is forced at most five minutes
 
 test('home and book search caches are separated by result limit and song revision',async()=>{
  const calls=[],roomSearch={book:null,home:null,unsupported:false,generation:0,cache:new Map()},state={revision:1,songs:[]};
- const context=vm.createContext({JSON,Date,Set,Map,streamerSlug:'michelle',roomSearch,filters:{q:'愛',tags:[]},state,route:'home',demo:false,draft:null,
+ const context=contextWithCatalog({JSON,Date,Set,Map,streamerSlug:'michelle',roomSearch,filters:{q:'愛',tags:[]},state,route:'home',demo:false,draft:null,
   isAdmin:()=>false,api:async body=>{calls.push(body);return {songIds:[],total:0};},song:()=>null,renderSongResults:()=>{},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:selector=>selector==='#home-search'?{value:'愛'}:{innerHTML:''}});
  vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
  await vm.runInContext("loadRoomSongSearch('home','愛',[],0)",context);
@@ -75,7 +93,7 @@ test('home and book search caches are separated by result limit and song revisio
 });
 
 test('president can create lyrics for a metadata-only catalog result',()=>{
- const context=vm.createContext({sharedBrowse:{items:[{id:'v',title:'新歌',artist:'歌手'}],selected:new Set(),page:0},h:escape,blank:()=>'',button:(label,action)=>`<button data-act="${action}">${label}</button>`,isSuperAdmin:()=>true});
+ const context=contextWithCatalog({sharedBrowse:{items:[{id:'v',title:'新歌',artist:'歌手'}],selected:new Set(),page:0},h:escape,blank:()=>'',button:(label,action)=>`<button data-act="${action}">${label}</button>`,isSuperAdmin:()=>true});
  vm.runInContext(segment('function sharedBrowseHtml()','function renderSharedBrowse()'),context);
  assert.match(vm.runInContext('sharedBrowseHtml()',context),/data-act="catalogSharedLyrics"/);
  context.isSuperAdmin=()=>false;
@@ -84,7 +102,7 @@ test('president can create lyrics for a metadata-only catalog result',()=>{
 
 test('candidate scan is explicit, one bounded batch, and does not overlap or auto-continue',async()=>{
  const calls=[],catalogView={scanCursor:'',scanTotal:0,scanning:false,scanComplete:false};let finish;
- const context=vm.createContext({catalogView,tab:'catalog',demo:false,draft:null,isSuperAdmin:()=>true,render:()=>{},toast:()=>{},loadCatalogReview:async()=>{},api:body=>{calls.push(body);return new Promise(resolve=>{finish=resolve;});}});
+ const context=contextWithCatalog({catalogView,tab:'catalog',demo:false,draft:null,isSuperAdmin:()=>true,render:()=>{},toast:()=>{},loadCatalogReview:async()=>{},api:body=>{calls.push(body);return new Promise(resolve=>{finish=resolve;});}});
  vm.runInContext(segment('async function scanCatalogCandidates()','function catalogTemplateHtml()'),context);
  const first=vm.runInContext('scanCatalogCandidates()',context);await vm.runInContext('scanCatalogCandidates()',context);
  assert.equal(calls.length,1);
@@ -97,7 +115,7 @@ test('candidate scan is explicit, one bounded batch, and does not overlap or aut
 
 test('changing review section while loading cannot display the old section response',async()=>{
  const catalogView={section:'pending',page:0,loading:false,loaded:false,items:[]};let finish;
- const context=vm.createContext({catalogView,tab:'catalog',demo:false,draft:null,isSuperAdmin:()=>true,render:()=>{},api:()=>new Promise(resolve=>{finish=resolve;})});
+ const context=contextWithCatalog({catalogView,tab:'catalog',demo:false,draft:null,isSuperAdmin:()=>true,render:()=>{},api:()=>new Promise(resolve=>{finish=resolve;})});
  vm.runInContext(segment('async function loadCatalogReview()','async function catalogReviewAction('),context);
  const loading=vm.runInContext('loadCatalogReview()',context);catalogView.section='approved';
  finish({items:[{id:'old-pending'}],total:1});await loading;
@@ -106,7 +124,7 @@ test('changing review section while loading cannot display the old section respo
 
 test('batch-add feedback uses the confirmed count when existing songs are skipped',async()=>{
  let submit;const messages=[],calls=[];
- const context=vm.createContext({sharedBrowse:{selected:new Set(['a','b'])},demo:false,draft:null,isAdmin:()=>true,nativeSelect:()=>'',modal:(_title,_body,fn)=>{submit=fn;},api:async body=>{calls.push(body);return {added:1,songIds:['new']};},refresh:async()=>{},toast:message=>messages.push(message)});
+ const context=contextWithCatalog({sharedBrowse:{selected:new Set(['a','b'])},demo:false,draft:null,isAdmin:()=>true,nativeSelect:()=>'',modal:(_title,_body,fn)=>{submit=fn;},api:async body=>{calls.push(body);return {added:1,songIds:['new']};},refresh:async()=>{},toast:message=>messages.push(message)});
  vm.runInContext(segment('async function addSharedSongs()','async function editStreamerLyrics('),context);
  await vm.runInContext('addSharedSongs()',context);await submit(new Map([['lyricsMode','shared']]));
  assert.match(messages[0],/已加入 1 首/);assert.equal(calls[0].variantIds.length,2);
@@ -114,7 +132,7 @@ test('batch-add feedback uses the confirmed count when existing songs are skippe
 
 test('review sends the hashes seen at selection time even after paging or a newer list response',async()=>{
  const calls=[],catalogView={selected:new Set(['a','b']),selectedSources:new Map([['a','selected-a'],['b','selected-b']]),items:[{id:'b',sourceHash:'new-b'}],loaded:true};
- const context=vm.createContext({Object,catalogView,demo:false,draft:null,isSuperAdmin:()=>true,toast:()=>{},confirm:()=>true,api:async body=>{calls.push(body);},loadCatalogReview:async()=>{}});
+ const context=contextWithCatalog({Object,catalogView,demo:false,draft:null,isSuperAdmin:()=>true,toast:()=>{},confirm:()=>true,api:async body=>{calls.push(body);},loadCatalogReview:async()=>{}});
  vm.runInContext(segment('async function catalogReviewAction(','async function openSharedBrowse('),context);
  await vm.runInContext("catalogReviewAction('approve_new')",context);
  assert.deepEqual(JSON.parse(JSON.stringify(calls[0].expectedSources)),{a:'selected-a',b:'selected-b'});
@@ -126,7 +144,7 @@ test('review sends the hashes seen at selection time even after paging or a newe
 
 test('queue lyrics are fetched on demand once per distinct song and stale modal results are discarded',async()=>{
  const song={songId:'a',title:'歌名',artist:'歌手'},calls=[];let finish,holder={innerHTML:''};
- const context=vm.createContext({Map,demo:false,draft:null,h:escape,state:{queue:[{id:'q',items:[song,song]}]},song:()=>song,toast:()=>{},modal:()=>{},$:()=>holder,
+ const context=contextWithCatalog({Map,demo:false,draft:null,h:escape,state:{queue:[{id:'q',items:[song,song]}]},song:()=>song,toast:()=>{},modal:()=>{},$:()=>holder,
   api:body=>{calls.push(body);return new Promise(resolve=>{finish=resolve;});}});
  vm.runInContext(segment('async function queueLyrics(','function editQueue('),context);
  const request=vm.runInContext("queueLyrics('q')",context);assert.equal(calls.length,1);assert.equal(calls[0].op,'catalogLyrics');
@@ -139,7 +157,7 @@ test('queue lyrics are fetched on demand once per distinct song and stale modal 
 
 test('manager song search uses server IDs after lyric bodies are omitted from ordinary reads',async()=>{
  const calls=[],roomSearch={songs:null,generation:0,cache:new Map()},songs=[{songId:'metadata-only',title:'Different title',artist:'歌手'}];
- const context=vm.createContext({JSON,Date,Set,Map,streamerSlug:'michelle',roomSearch,filters:{q:'共同歌詞內容',tags:[]},state:{revision:5,songs},route:'admin',tab:'songs',demo:false,draft:null,
+ const context=contextWithCatalog({JSON,Date,Set,Map,streamerSlug:'michelle',roomSearch,filters:{q:'共同歌詞內容',tags:[]},state:{revision:5,songs},route:'admin',tab:'songs',demo:false,draft:null,
   isAdmin:()=>true,api:async body=>{calls.push(body);return {songIds:['metadata-only'],total:1,hasMore:false};},song:id=>songs.find(s=>s.songId===id),renderSongResults:()=>{},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:()=>null});
  vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
  await vm.runInContext("loadRoomSongSearch('songs','共同歌詞內容',[],0)",context);
@@ -150,7 +168,7 @@ test('manager song search uses server IDs after lyric bodies are omitted from or
 
 test('outdated manager search response cannot replace a later query or a different admin page',async()=>{
  const roomSearch={songs:null,generation:0,cache:new Map()};let resolve;
- const context=vm.createContext({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters:{q:'old',tags:[]},state:{revision:1,songs:[]},route:'admin',tab:'songs',demo:false,draft:null,
+ const context=contextWithCatalog({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters:{q:'old',tags:[]},state:{revision:1,songs:[]},route:'admin',tab:'songs',demo:false,draft:null,
   isAdmin:()=>true,api:()=>new Promise(done=>{resolve=done;}),song:()=>null,renderSongResults:()=>{throw Error('stale render');},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:()=>null});
  vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
  const first=vm.runInContext("loadRoomSongSearch('songs','old',[],0)",context);context.filters.q='new';resolve({songIds:['stale']});await first;
@@ -161,7 +179,7 @@ test('outdated manager search response cannot replace a later query or a differe
 
 test('catalog templates drive both single and bulk choices while preserving an existing inactive value',async()=>{
  const calls=[],catalogView={templates:null};
- const context=vm.createContext({Set,catalogView,demo:false,draft:null,api:async body=>{calls.push(body);return {languages:[{name:'日語',active:true},{name:'歷史語言',active:false}],performerTypes:[{name:'樂團',active:true}]};}});
+ const context=contextWithCatalog({Set,catalogView,demo:false,draft:null,api:async body=>{calls.push(body);return {languages:[{name:'日語',active:true},{name:'歷史語言',active:false}],performerTypes:[{name:'樂團',active:true}]};}});
  vm.runInContext(segment('async function catalogTemplateChoices(','async function editSong('),context);
  assert.deepEqual([...await vm.runInContext("catalogTemplateChoices('languages','歷史語言',['fallback'])",context)],['日語','歷史語言']);
  assert.deepEqual([...await vm.runInContext("catalogTemplateChoices('performerTypes','',['fallback'])",context)],['樂團']);
@@ -173,7 +191,7 @@ test('catalog templates drive both single and bulk choices while preserving an e
 
 test('a background revision change refreshes active search results once without duplicate requests',async()=>{
  const timers=[],calls=[],roomSearch={book:null,generation:0,cache:new Map()},state={revision:1,songs:[]};let finish;
- const context=vm.createContext({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters:{q:'song',tags:[]},state,route:'book',demo:false,draft:null,setTimeout:fn=>timers.push(fn),
+ const context=contextWithCatalog({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters:{q:'song',tags:[]},state,route:'book',demo:false,draft:null,setTimeout:fn=>timers.push(fn),
   isAdmin:()=>false,api:body=>{calls.push(body);return new Promise(resolve=>{finish=resolve;});},song:()=>null,renderSongResults:()=>{},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:()=>null});
  vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
  vm.runInContext('bookSearchResult();bookSearchResult()',context);assert.equal(timers.length,1);
@@ -187,7 +205,7 @@ test('a background revision change refreshes active search results once without 
 
 function governanceHarness({president=true}={}){
  const calls=[],view={section:'approved',selected:new Set(),selectedSources:new Map(),selectedVariants:new Map(),templates:{languages:[{id:'zh',name:'華語',active:true}],performerTypes:[]}},browse={items:[],selected:new Set(),selectedRows:new Map()};let captured;
- const context=vm.createContext({Object,Map,Set,Number,String,demo:false,draft:null,catalogView:view,sharedBrowse:browse,sharedLyricHistory:{variantId:null,rows:[]},
+ const context=contextWithCatalog({Object,Map,Set,Number,String,demo:false,draft:null,catalogView:view,sharedBrowse:browse,sharedLyricHistory:{variantId:null,rows:[]},
   isSuperAdmin:()=>president,api:async body=>{calls.push(body);return {};},refresh:async()=>{},loadCatalogReview:async()=>{},toast:()=>{},h:escape,
   field:(name,_label,value='')=>'<input name="'+name+'" value="'+escape(value)+'">',nativeSelect:(name,_label,options)=>'<select name="'+name+'">'+options.map(([id,label])=>'<option value="'+id+'">'+label+'</option>').join('')+'</select>',check:()=>'',modal:(title,html,submit)=>{captured={title,html,submit};}});
  vm.runInContext(segment('function catalogVersions(','function editCatalogTemplate('),context);
@@ -232,7 +250,7 @@ test('restoring lyrics creates a new revision with escaped preview and preserves
 
 test('language filters use existing room categories in auto mode and chosen templates in custom mode',()=>{
  const roomLanguages={data:{mode:'auto',languages:[{name:'華語',sortOrder:1},{name:'日語',sortOrder:2}]}};
- const context=vm.createContext({Set,String,roomLanguages,state:{songs:[{cat:'華語'},{cat:'華語'},{cat:'客語'}]},filters:{language:'客語'},h:escape});
+ const context=contextWithCatalog({Set,String,roomLanguages,state:{songs:[{cat:'華語'},{cat:'華語'},{cat:'客語'}]},filters:{language:'客語'},h:escape});
  vm.runInContext(segment('function visibleLanguages()','function scheduleRoomLanguages()'),context);
  assert.deepEqual(JSON.parse(JSON.stringify(vm.runInContext('visibleLanguages().map(row=>row.name)',context))),['華語','客語']);
  roomLanguages.data={mode:'custom',languages:[{name:'日語',sortOrder:2}]};assert.deepEqual(JSON.parse(JSON.stringify(vm.runInContext('visibleLanguages().map(row=>row.name)',context))),['日語']);
@@ -241,7 +259,7 @@ test('language filters use existing room categories in auto mode and chosen temp
 
 test('language is sent to server before pagination and participates in search cache identity',async()=>{
  const calls=[],roomSearch={book:null,generation:0,cache:new Map()},filters={q:'愛',tags:[],language:'日語'};
- const context=vm.createContext({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters,state:{revision:2,songs:[]},route:'book',demo:false,draft:null,
+ const context=contextWithCatalog({JSON,Date,Set,Map,streamerSlug:'papa',roomSearch,filters,state:{revision:2,songs:[]},route:'book',demo:false,draft:null,
   isAdmin:()=>false,api:async body=>{calls.push(body);return {songIds:[],total:0};},song:()=>null,renderSongResults:()=>{},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:()=>null});
  vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
  await vm.runInContext("loadRoomSongSearch('book','愛',[],1)",context);filters.language='華語';await vm.runInContext("loadRoomSongSearch('book','愛',[],1)",context);
@@ -250,7 +268,7 @@ test('language is sent to server before pagination and participates in search ca
 
 test('saving room language choices uses the dedicated scoped endpoint without modifying songs',async()=>{
  const calls=[],roomLanguages={};let submit;
- const context=vm.createContext({Set,Promise,Date,roomLanguages,filters:{language:'華語'},roomSearch:{generation:0},demo:false,draft:null,isAdmin:()=>true,
+ const context=contextWithCatalog({Set,Promise,Date,roomLanguages,filters:{language:'華語'},roomSearch:{generation:0},demo:false,draft:null,isAdmin:()=>true,
   api:async body=>{calls.push(body);return body.op==='catalogTemplates'?{languages:[{id:'zh',name:'華語',active:true}]}:{mode:'custom',languageIds:['zh'],languages:[{id:'zh',name:'華語'}]};},nativeSelect:()=>'',h:escape,check:()=>'<input name="languageIds">',modal:(_title,_html,fn)=>{submit=fn;},render:()=>{},toast:()=>{}});
  vm.runInContext(segment('async function editLanguageFilters()','function songToolbar('),context);
  await vm.runInContext('editLanguageFilters()',context);await submit({get:name=>name==='mode'?'custom':null,getAll:()=>['zh']});

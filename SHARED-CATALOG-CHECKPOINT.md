@@ -1,3 +1,28 @@
+# Shared catalog — 10.05-CATALOG.2 checkpoint
+
+Updated: 2026-10-05 (Asia/Taipei). Previous stable source: 8b76042793eca1641ac9f7596734b613c10cb2be.
+
+## Current release: catalog usability A–H
+
+- Manual same-song confirmation reuses one active common version across rooms. Existing versions merge only by an explicit president decision; differing versions can be reviewed separately under one work. Local tags, Key, credit costs, private notes, custom lyrics and performance records stay local.
+- President navigation has five sections; pending groups expose three decisions and conflicting common fields require a choice. Different-version groups select one source at a time instead of combining differing singers into one version.
+- Review and common search use complete pagers and 10/20/50 page sizes. Page selection and explicit all-filter selection retain metadata across pages. Review/add writes use batches of at most 50; common-song removal is recoverable deactivation, never deletion of a local song.
+- Mandarin displays as 華語. Old 國語 search input remains an alias; language template/filter references are merged without deleting historical template evidence.
+- Non-obvious actions have hover, keyboard and tap explanations. Tags default closed with a selected summary and label search. The compact queue draw uses the current room's eligible songs and adds a self queue item without player credit, hourly quota, popularity or player notifications.
+- Both history views read the same redacted event stream and show readable summaries; technical data stays collapsed and original catalog audit records remain.
+
+## Deployment and preservation evidence
+
+- Applied atomic `202610050001_catalog_usability.sql` on Supabase. Private database recovery point: `10.05-CATALOG.2-before`; frontend recovery source is the stable commit above.
+- Before/after: 1709 songs, 2237 entities, 11 approved candidates, 11 links and 9 active shared versions. No automatic approval or merge occurred.
+- Compared all 2237 backup entities with live rows: 0 missing, 0 changed non-language song fields, 0 changed other records. Only the requested song language value changed. Anonymous review and authenticated direct event RPC execution remain denied.
+- Updated existing `party-api` Edge function successfully. Live read-only API QA: 29/29 passed; current room raw JSON read 111863 bytes, unchanged read 58 bytes. This is raw response size, not a claim about Supabase billing compression or monthly savings.
+- Final automated suite: 238/238 passed, zero skips/failures. Frontend Build, Edge/schema bundles and diff checks passed.
+- Isolated browser fixture QA passed 43-row cross-page selection, first/last paging, conflicting common-field choices, separate version-source selection, tag selection/search, tap explanation and self queue insertion. Fixture self item has null player, zero credit cost and no ledger entries. At 390px viewport the admin song page had no horizontal overflow.
+- Pages verification and final release SHA are recorded in the external release handoff after publication. Notification/chat/push code and existing fallbacks remain; no private message was sent to a real user just to test delivery.
+
+## Earlier deployed V1 evidence
+
 # Shared catalog V1 — 10.04-CATALOG checkpoint
 
 Updated: 2026-10-04 (Asia/Taipei).

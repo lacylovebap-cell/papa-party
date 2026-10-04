@@ -1,6 +1,6 @@
 // Catalog endpoints use targeted service-role queries. Never call load() or add
 // catalog/lyrics rows to the generic platform snapshot or ordinary read view.
-const CATALOG_OPS=new Set(['catalogSearch','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom']);
+const CATALOG_OPS=new Set(['catalogSearch','catalogMergeSame','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom']);
 const catalogUuid=(v:any)=>typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);
 const catalogPage=(b:any)=>({limit:Math.max(1,Math.min(50,Math.floor(Number(b.limit)||20))),offset:Math.max(0,Math.min(10000,Math.floor(Number(b.offset)||0)))});
 const catalogActor=(who:any)=>isSuper(who)?'president':who?.role==='streamer_admin'?'streamer:'+who.streamer_id:'player:'+String(who?.playerId||'anonymous');
@@ -40,9 +40,9 @@ async function catalogOperation(b:any,who:any){
  }
  if(op==='songSearchRoom'){
   const room=await catalogRoom(who,b.streamer||'papa');
-  const q=String(b.q||'').trim();if(q.length>100)throw Error('搜尋文字過長');
+  const q=String(b.q||'').trim().replaceAll('國語','華語');if(q.length>100)throw Error('搜尋文字過長');
   const tags=Array.isArray(b.tags)?b.tags.filter((x:any)=>typeof x==='string'&&x.length<=50).slice(0,20):[];
-  const language=b.language==null?null:String(b.language);if(language&&language.length>100)throw Error('語言名稱過長');
+  const language=b.language==null?null:String(b.language).replaceAll('國語','華語');if(language&&language.length>100)throw Error('語言名稱過長');
   return await api('/rest/v1/rpc/papa_song_search_room',{room_id:room.id,query_text:q,tags,page_limit:page.limit,page_offset:page.offset,language_name:language||null});
  }
  if(op==='catalogLanguageFilter'||op==='catalogLanguageFilterSave'){
@@ -52,7 +52,13 @@ async function catalogOperation(b:any,who:any){
   if(!['auto','custom'].includes(b.mode)||!Array.isArray(b.languageIds)||b.languageIds.length>100||b.languageIds.some((id:any)=>typeof id!=='string'||!/^[a-z0-9_-]{1,100}$/.test(id))||new Set(b.languageIds).size!==b.languageIds.length)throw Error('請選擇有效語言');
   return await api('/rest/v1/rpc/papa_catalog_language_filter_save',{room_id:room.id,mode:b.mode,language_ids:b.languageIds,actor_id:catalogActor(who)});
  }
+ if(op==='catalogMergeSame'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');const ids=b.variantIds,versions=b.expectedVersions;
+  if(!Array.isArray(ids)||ids.length<2||ids.length>50||ids.some((id:any)=>!catalogUuid(id))||new Set(ids).size!==ids.length||!ids.includes(b.targetVariant)||!versions||ids.some((id:any)=>typeof versions[id]!=='string'||!Number.isFinite(Date.parse(versions[id]))))throw Error('請選擇有效共同版本');
+  return await api('/rest/v1/rpc/papa_catalog_merge_same_versions',{variant_ids:ids,target_variant:b.targetVariant,expected_versions:Object.fromEntries(ids.map((id:any)=>[id,versions[id]])),actor_id:catalogActor(who)});
+ }
  if(op==='catalogGovernance'){
+
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
   if(!['update_variant','merge_family','split_variant'].includes(b.action))throw Error('共同曲庫管理操作不正確');
   const ids=b.variantIds,candidates=b.candidateIds||[],versions=b.expectedVersions,sources=b.expectedSources||{};
@@ -74,18 +80,20 @@ async function catalogOperation(b:any,who:any){
   if(!isManager(who))throw Error('請先登入管理');
   const room=who?.role==='streamer_admin'||b.streamer?await catalogRoom(who,b.streamer||who.streamer_id,true):null;
   const q=String(b.q||'').trim();if(q.length>100)throw Error('搜尋文字過長');
-  const r=await api('/rest/v1/rpc/papa_catalog_search',{query_text:q,page_limit:page.limit,page_offset:page.offset,room_id:room?.id||null});
+  if(b.inactive&&!isSuper(who))throw Error('僅限 PA Party總裁');
+  const r=await api('/rest/v1/rpc/'+(b.inactive?'papa_catalog_inactive_search':'papa_catalog_search'),{query_text:q,page_limit:page.limit,page_offset:page.offset,room_id:room?.id||null});
   return {items:(r.rows||[]).map((x:any)=>({...x,variantId:x.id})),total:r.total||0,hasMore:!!r.hasMore};
  }
  if(op==='catalogReviewList'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
   const status=['pending','approved','rejected','removed','history'].includes(b.status)?b.status:'pending';
-  const r=await api('/rest/v1/rpc/papa_catalog_review_list',{status,page_limit:page.limit,page_offset:page.offset});
+  if(status==='history'){const r=await api('/rest/v1/rpc/papa_event_page_v2',{room_id:'__global__',page_number:Math.floor(page.offset/50),include_global:true,module_filter:'shared_catalog',page_limit:page.limit,page_offset:page.offset});return {items:r.rows.map((x:any)=>({...x,actorId:x.actor_role,createdAt:x.created_at,title:x.after_data?.titles?.join('、')||x.after_data?.details?.title,details:x.after_data})),total:r.total||0,hasMore:r.hasMore};}
+  const r=await api('/rest/v1/rpc/papa_catalog_review_feed',{status,query_text:String(b.q||'').trim().slice(0,100),page_limit:page.limit,page_offset:page.offset});
   return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore};
  }
  if(op==='catalogReview'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
-  const decisions=['approve_new','link_variant','create_variant','reject','remove','unlink'];
+  const decisions=['confirm_same','approve_new','link_variant','create_variant','reject','remove','unlink'];
   if(!decisions.includes(b.decision))throw Error('此審核操作尚未開放');
   const ids=Array.isArray(b.candidateIds)?[...new Set(b.candidateIds)].filter(catalogUuid).slice(0,50):[];
   if(!ids.length||ids.length!==b.candidateIds?.length)throw Error('請選擇有效候選歌曲（最多 50 首）');
@@ -94,7 +102,7 @@ async function catalogOperation(b:any,who:any){
   const targetVariant=b.variantId==null?null:catalogUuid(b.variantId)?b.variantId:null;
   const targetFamily=b.familyId==null?null:catalogUuid(b.familyId)?b.familyId:null;
   if(b.variantId!=null&&!targetVariant||b.familyId!=null&&!targetFamily)throw Error('共同歌曲識別碼錯誤');
-  return await api('/rest/v1/rpc/papa_catalog_review',{decision:b.decision,candidate_ids:ids,target_variant:targetVariant,target_family:targetFamily,version_label:String(b.variantLabel||'').slice(0,100),actor_id:catalogActor(who),expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]]))});
+  return await api('/rest/v1/rpc/papa_catalog_review_v2',{decision:b.decision,candidate_ids:ids,target_variant:targetVariant,target_family:targetFamily,version_label:String(b.variantLabel||'').slice(0,100),actor_id:catalogActor(who),expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),common_metadata:b.commonMetadata||{}});
  }
  if(op==='catalogTemplates'){
   if(!isManager(who))throw Error('請先登入管理');
@@ -102,7 +110,7 @@ async function catalogOperation(b:any,who:any){
    api('/rest/v1/papa_catalog_languages?select=id,name,sort_order,active&order=sort_order.asc,id.asc&limit=100'),
    api('/rest/v1/papa_catalog_performer_types?select=id,name,sort_order,active&order=sort_order.asc,id.asc&limit=100')
   ]);
-  return {languages,performerTypes};
+  return {languages:languages.filter((x:any)=>!x.name.startsWith('已合併至華語')),performerTypes};
  }
  if(op==='catalogTemplateChange'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
@@ -110,7 +118,7 @@ async function catalogOperation(b:any,who:any){
   if(!['language','performerType'].includes(b.kind)||!actions[b.action])throw Error('模板操作不正確');
   const id=b.action==='create'?'custom_'+crypto.randomUUID().replaceAll('-',''):String(b.id||'');
   if(!/^[a-z0-9_-]{1,100}$/.test(id)||b.name!=null&&(typeof b.name!=='string'||b.name.length>100)||b.sortOrder!=null&&!Number.isInteger(b.sortOrder))throw Error('模板內容不正確');
-  return await api('/rest/v1/rpc/papa_catalog_template_change',{kind:b.kind==='performerType'?'performer_type':'language',action:actions[b.action],template_id:id,template_name:b.name||null,sort_order:b.sortOrder??null,active:b.active??null,actor_id:catalogActor(who)});
+  return await api('/rest/v1/rpc/papa_catalog_template_change',{kind:b.kind==='performerType'?'performer_type':'language',action:actions[b.action],template_id:id,template_name:b.name==='國語'?'華語':b.name||null,sort_order:b.sortOrder??null,active:b.active??null,actor_id:catalogActor(who)});
  }
  if(op==='catalogLyrics'){
   if(!isManager(who))throw Error('歌詞僅供主播與總裁查看');
