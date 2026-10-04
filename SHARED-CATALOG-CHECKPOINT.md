@@ -1,58 +1,94 @@
-# Issue #1 local checkpoint — not ready to deploy
+# Shared catalog V1 — 10.04-CATALOG checkpoint
 
-Base: main `28811065e178dd8069ce0a9e11129f65e5a07792` (9.28-P2).
-Branch: `feature/shared-catalog-v1`. No P3 code included.
+Updated: 2026-10-04 (Asia/Taipei).
+Branch: feature/shared-catalog-v1. Integrated source commit: 8a8f618.
+Production frontend baseline: 28811065e178dd8069ce0a9e11129f65e5a07792 (9.28-P2).
 
-## Implemented locally
+## Verified deployment status
 
-- `src/catalog-candidates.js`: pure, non-mutating candidate index and comparisons. Width/case/punctuation normalization, conservative orthographic mappings, explicit caller-provided Chinese folds and aliases, language/version differences, title similarity. Suggestions remain pending; no automatic family/variant/link creation.
-- Candidate scan bounds comparisons (500 by default, maximum 5000 per page), with a cursor bound to a caller-owned immutable snapshot ID. Integration must include dictionary/configuration version in snapshot identity. Full pairwise scan is O(n²) overall; replace with indexed candidate retrieval before running large production books. No comprehensive Chinese conversion dictionary included yet.
-- `publicViewRoom` now projects public song fields through an allowlist, excluding full lyrics and future unknown private fields. Existing full server-side `songSearch` still searches lyrics and returns only ordinary song metadata.
-- Tests cover non-mutating scanning, pending-only results, aliases, versions, paginated resumption, malformed cursors, actual bundled API read/search responses for anonymous and player sessions, manager visibility and cross-room rejection.
+- The conflict-retry hotfix (5a51595; 202610040001_version_conflict_no_retry.sql) is deployed. PostgREST was indefinitely retrying intentional VERSION_CONFLICT errors marked with SQLSTATE 40001. The hotfix uses non-retryable PT409 and preserves service-only grants and the original function backup.
+- Live verification after the hotfix showed CPU 2%, Postgres errors 0 in the last 60 minutes, and no active commit queries. These are observations at verification time.
+- Catalog migrations 001–011 and the existing party-api Edge function are now deployed successfully.
+- Postmigration verification: revision 2319, existing entities 2214, original rows unchanged, candidates 0 and links 0 before the initial scan. Anonymous review execution and authenticated direct lyric execution were both denied.
+- The new frontend is built and ready. Its main push / Pages deployment is still pending. A build or release.json alone is not evidence of frontend deployment.
+
+## Recovery points
+
+Private backup papa_release_backups, release 10.04-CATALOG-before:
+
+| Evidence | Value |
+|---|---|
+| Business revision | 2319 |
+| Original entity rows | 2214 |
+| All-room songs | 1704 |
+| Ordered entity content hash | 6491bcf060a8effe726dfb8491a0bd2b |
+| Catalog tables before migration | absent |
+
+The backup includes the original snapshot, entity hash and replaced directory, audit and read helper definitions. The hotfix's original function was saved separately as 10.04-version-conflict-before. Preserve both recovery points. Concurrent legitimate business writes can change the live revision/hash; distinguish them from migration effects.
+
+## Completed functionality
+
+- Additive families, variants, streamer-song links, pending candidates, catalog audit, language / performer templates, lyric revisions, room lyric choices, private notes and language settings. Existing song JSON, songId, balances, queues and histories are not rewritten or automatically merged.
+- Links use (streamer_id, song_id), allowing duplicate existing local songs to link to one shared version. Unlink preserves the local song and materializes shared lyrics as a room-owned copy when necessary.
+- Service-only tables / RPCs use RLS and revoked public execution. Edge authorization enforces president, streamer and player scopes independently of supplied identifiers.
+- Candidate reconciliation uses bounded keyset pages (maximum 100 source songs per call). New-song candidate-hook failures do not break the normal song save. The initial scan only creates pending suggestions; it never approves or merges.
+- Review / governance transactions check exact version timestamps and source hashes. Stale decisions fail without partial link or audit changes. Shared read projections are never written back by ordinary local-song updates.
+- President UI supports bounded review pages, batch decisions, shared metadata, family grouping, version splitting and history. Indexed normalized-title suggestions return at most three current peers per candidate; uncertain relationships remain manual.
+- Language / performer templates have stable IDs. Used values can be deactivated without rewriting history. Streamers can search shared variants and add bounded, idempotent batches; already-added versions are disabled.
+- Room language settings support automatic actual-song categories or custom template values. Language filtering is applied before pagination and participates in cache identity.
+- Shared lyrics use protected revisions. Restoring content creates a new revision, preserving previous history. Room choices support shared, independent copy and own content; private notes remain separate.
+- Authorized on-demand lyric reads validate the current room/source link. Stale links fall back to the original local song. Lists, ordinary search and generic event responses omit full lyric bodies and private notes.
+- Player lyric search runs in the backend and returns safe song IDs/results, never snippets or a lyric-hit flag. Private notes are excluded.
+- Shared and room searches are bounded / paginated. pg_trgm GIN indexes narrow metadata and eligible lyric sources, then exact effective room, tags, language and lyric-choice rules are rechecked. Literal wildcard characters retain literal meaning.
+- Frontend debounce, IME composition, stale-response guards, recoverable errors and filter/page resets are implemented. Search caches include room, view, revision, query, filters and page size.
+
+## Egress changes and measurements
+
+- Targeted catalog, room-search, lyric, event-page and directory operations run before full-state loading. Ordinary database reads remove lyric bodies before DB-to-Edge transfer.
+- Tiny revision preflight handles unchanged reads; changed and periodic forced reads retain synchronization.
+- Private chat uses a bounded recent initial page and incremental sequence catch-up rather than repeatedly downloading the full conversation. Receipts and catch-up remain, and obsolete timers/subscriptions are stopped on identity/page changes.
+- Notification audio uses a small stored content version; unchanged audio is not repeatedly downloaded. Existing unread notices do not repeatedly refresh the app.
+- Board / streamer directories use selected fields and limits. New event capture and legacy event responses redact lyric bodies / private notes; old history is not bulk rewritten or deleted.
+
+Comparable public read measurements before and after Edge deployment:
+
+| Read | Before | After |
+|---|---:|---:|
+| Room read, 504 songs | 204,246 bytes | 111,090 bytes |
+| Songs including lyric bodies | 504 | 0 |
+| Unchanged read | 1,563 bytes | 58 bytes |
+
+These are raw JSON response sizes, not compressed Supabase billing amounts. The entire original entity JSON measured 1,071,853 bytes. pg_stat_statements showed 75,024 cumulative papa_v2_snapshot calls; this is not an hourly rate. Daily Egress savings still require postdeployment observation, and historic quota usage is not erased.
 
 ## Validation
 
-155 tests pass (141 existing + 14 new). `node build.mjs`, `node build-edge.mjs`, and `git diff --check` pass. Edge bundle compilation is included in tests. No migration exists yet; no SQL validation or production write performed.
+- Full final suite: 234/234 passed, zero failures or skips.
+- Exact generated 001–011 deployment SQL was tested as a single transaction with real PostgreSQL behavior through PGlite + pg_trgm. Original song, ledger, queue and revision remain unchanged; no automatic candidates; direct anonymous execution denied.
+- Tests cover stale reviews, source preservation, permissions, independent lyric modes, languages, pagination, candidate peers and actual indexed plans with large fixtures.
+- Frontend Build, Edge bundle, schema bundle and diff-format checks passed; actual bundled Edge behavior is covered.
+- Chrome local-fixture QA passed metadata edits, grouping/splitting, lyric restore, language modes and ordinary streamer permissions. The 390 × 844 mobile book had no horizontal overflow; no console warnings/errors were observed. This browser QA used deterministic local API fixtures, not production integration; its small fixture did not exercise multiple pages.
+- Live schema permissions, original-data preservation and anonymous read / unchanged read have now also been verified.
 
-## Deployment blocked / pending work
+## Deliberate limits
 
-Supabase still displays CPU 99%, high CPU affecting performance, Egress 6.17 GB / 5 GB, and approximately 354,562 Postgres errors in its last-hour dashboard. These are dashboard counts, not confirmed failed user actions; root cause is not diagnosed. Respect the resource-stop condition: keep P2 deployed, no live scan or migration.
+- Realtime remains enabled. Notification fallback remains approximately every 30 seconds; bounded board fallback remains approximately every 8 seconds. Reliability was not sacrificed to remove every request.
+- One- or two-character queries without useful trigrams retain a scoped exact fallback. Broad searches and total counts still have a cost.
+- Chinese normalization uses conservative format / selected orthographic mappings, not a comprehensive simplified/traditional conversion dictionary. Uncertain links require manual review.
+- The complete production candidate backfill and frontend Pages verification remain pending. Do not infer a pending-candidate count of zero after the scan from the pre-scan zero.
+- Live private-message / push delivery cannot be claimed solely from mock browser QA. Do not send messages to other people merely to test.
 
-**Do not deploy this checkpoint by itself.** Player room/home search still uses local `matchesSong`; after redaction it needs a debounced backend query integration to preserve lyric search. Global `songSearch` already matches lyrics on the server. Existing clients/caches and cache-version invalidation must be covered before rollout. No new version label was set.
+## Next steps
 
-Next: implement service-only additive schema, transactional audit/review operations, immutable scan snapshots and efficient candidate retrieval, reviewed Chinese conversion/alias dictionaries, president-only UI and bulk reviews, template management, streamer multi-add and language settings, versioned shared/custom/private lyrics, backend room search plus frontend integration. Test data preservation and actual database permissions in isolated QA after resource recovery. Back up the database before production migration (current backup is Git only). Then deploy/verify backend and Pages together; retain historical song IDs and all original business data. Candidate count remains unknown because production scan has not run.
+1. Push the tested frontend and root 10.04-CATALOG manifest to main; confirm Pages deployment and the served release.
+2. Run bounded resumable candidate reconciliation, record processed / pending counts and verify it preserves original songs and business revision. Never auto-approve.
+3. Check live scoped searches and room switching, notification / chat / board / queue regressions, and update the Egress report with observed production results and limitations.
+4. Record final deployment commit, scan counts and verification evidence here and in the external handoff. Do not restart completed work or mix unrelated P3 changes.
 
-Do not restart completed candidate/privacy helper work; build on these files and tests.
+## Artifact locations
 
-## Schema audit constraints for the next implementation
-
-These are implementation requirements, not a claim that a migration exists.
-
-- Keep `papa_v2_entities` song JSON and existing `songId` authoritative for local songbooks and history. Add separate family, variant and streamer-song link tables. The link primary key is `(streamer_id, song_id)`; do **not** add `UNIQUE(streamer_id, variant_id)` because multiple existing local songs may legitimately link to one shared variant.
-- Unlink deletes or deactivates only the link. Never delete or rewrite the original song, tags, private fields, queue, requests, credits or performance history. Project approved common title/artist/language/performer fields at a dedicated read boundary; never pass this enriched projection into generic `entries()` / `commit()`.
-- Index each original song with its source hash and revision. Review must transactionally compare current source identity/hash and candidate version and reject stale decisions. First scan creates candidates only. New songs remain immediately usable if candidate creation fails; recover missed candidates through an idempotent reconciliation path rather than rolling back or duplicating the user's song.
-- Language and performer masters have stable IDs, editable names/order and active flags. Used values are deactivated, never hard-deleted; renames must not rewrite local business records.
-- Store shared lyric revisions separately from streamer lyric selection (`shared`, `copy`, `own`) and private notes. Copy captures an independent body and never changes on shared revision updates. Use dedicated authorized lyric endpoints. Exclude lyric bodies/private notes from generic read, ordinary search results and generic audit payloads. Lyric audit records reference immutable protected revisions for president history/restore, rather than copying bodies into broadly accessible event records. Preserve the explicit manager lyric workflow through those dedicated endpoints.
-- All new tables/functions are service-only: enable RLS, revoke anon/authenticated access and revoke function execution from PUBLIC as appropriate. Check authenticated president role server-side before decisions; do not trust a supplied role or streamer identifier. Apply mutation plus audit atomically and test direct database access denial as well as API permission checks.
-- Do not append catalog, candidates or lyrics to `TABLES`, `papa_v2_snapshot`, or ordinary read payloads. Use targeted indexed lookups and keyset backfill. The current pure pairwise scanner is a local test helper, **not** the production scan implementation: a per-page bound alone does not remove its O(N²) total work. Implement indexed candidate retrieval before a live backfill.
-
-Required regression cases: duplicate local songs linking to one variant; unlink preserves local JSON/history; approved projection never writes back; stale review fails without partial audit/link changes; candidate-hook failure leaves new song usable; used-template deactivation; copy/own lyric independence; anonymous/player/generic audit payload privacy; cross-streamer denial; idempotent resumable keyset scan without full snapshot reads.
-
-## Player search audit — deployment prerequisite
-
-- Player home/book currently filter `state.songs` through local `matchesSong` (`src/app.js`, around lines 107–109, 242, 297). Redacting lyrics from read therefore removes lyric-only matches from those views until server integration is complete.
-- Existing Edge `songSearch` (`supabase/functions/party-api/index.ts`, around line 139) searches across streamers, truncates to the first 100, and is not wired to these views. Requests currently pass through `load()` / the full platform snapshot. Do not simply invoke this endpoint on every keystroke.
-- Implement room-scoped server search that checks room visibility/access and returns only safe song IDs/ordinary metadata. Search title, artist, tags and authorized searchable lyric content on the server. Never return snippets, lyric text or `lyricHit`. Keep private lyric notes out of the search index.
-- Preserve the selected tags, deterministic ordering and pagination; avoid a first-100 ceiling that silently loses later matches. Bind pagination to room/query/filter state and reset it when those change.
-- Debounce player queries; honor IME composition (do not query incomplete composition text), and invalidate out-of-order responses when the query, filters, room or view changes. A failed search should show a clear recoverable state rather than claim there are no matches. Clear-query behavior must restore the ordinary book.
-- Move targeted search before full-snapshot loading or provide a separate indexed RPC/data path; validate the intended query plan and resource cost in isolated QA. CPU saturation remains a deployment stop condition. No production per-key search or load testing while the warning persists.
-- Add room-specific Edge tests covering anonymous/player lyric-only matches without disclosure, no cross-room results, inactive rooms, tags combined with lyrics, more than 100 matches and stable pages. Add frontend behavior tests for debounce, IME, stale-response races, filter/page reset and clear/error states. Current privacy tests do not prove these missing integrations.
-
-## Generic event history lyric exposure — unresolved audit finding
-
-The schema audit reports that `papa_release_a_commit` / `papa_capture_event` save `before_data` and `after_data`, while `papa_audit_redact` does not remove `lyrics` / `lyricNotes`. Existing generic song lyric edits can therefore duplicate lyric bodies in `papa_events`. The public song allowlist in this checkpoint does not fix event storage or event responses.
-
-- Verify the active SQL definitions before implementing changes. Keep new lyric revisions and private notes outside generic entities/commit/events; generic audit entries should contain protected revision references and safe metadata only.
-- Add explicit event-response redaction and tests for all permitted roles and legacy event shapes, including before/after payloads containing lyric bodies and notes. Test both write-time audit minimization and read-time protection; protecting future writes alone leaves old entries exposed.
-- Inventory historic event exposure with a bounded, read-only approach after resource recovery. Do not bulk rewrite/delete old audit history under the current CPU warning. Decide on an additive safe response projection and, if needed, a separately backed-up, reviewed history treatment that preserves audit integrity and does not erase original song data.
-- For player home/book search, the unconditional `load()` reaches `papa_v2_snapshot` of **all entities** before existing `songSearch`. The new indexed room endpoint/RPC must bypass that path, with frontend debounce plus cancellation/stale-response guards; never wire full snapshots per key.
+Repo: C:/Users/Administrator/Documents/Codex/2026-10-01/referenced-chatgpt-conversation-this-is-an/work/papa-party
+QA/report/images: C:/Users/Administrator/Documents/Codex/2026-09-17/referenced-chatgpt-conversation-this-is-an-4/outputs/
+Browser report: catalog-browser-qa.md
+Database recovery proof: database-recovered-2026-10-04.png
+Egress report: PA-Party-Supabase-Egress-Audit-2026-10-01.md
+External handoff: C:/Users/Administrator/Documents/Codex/2026-10-01/referenced-chatgpt-conversation-this-is-an/outputs/PA-Party-Issue-1-handoff.md
