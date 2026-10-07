@@ -1,13 +1,13 @@
 // Catalog endpoints use targeted service-role queries. Never call load() or add
 // catalog/lyrics rows to the generic platform snapshot or ordinary read view.
-const CATALOG_OPS=new Set(['catalogRooms','catalogSearch','catalogMergeSame','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom']);
+const CATALOG_OPS=new Set(['catalogCandidateEdit','catalogLyricSources','catalogLyricAdopt','catalogRooms','catalogSearch','catalogMergeSame','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom']);
 const catalogUuid=(v:any)=>typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);
 const catalogPage=(b:any)=>({limit:Math.max(1,Math.min(50,Math.floor(Number(b.limit)||20))),offset:Math.max(0,Math.min(10000,Math.floor(Number(b.offset)||0)))});
 const catalogActor=(who:any)=>isSuper(who)?'president':who?.role==='streamer_admin'?'streamer:'+who.streamer_id:'player:'+String(who?.playerId||'anonymous');
 const CATALOG_COMMON_FIELDS=['title','artist','cat','artistType','version','catalogVariantId'];
 function catalogMetadataView(view:any,rows:any[]){
  const byId=new Map(rows.map((r:any)=>[r.songId,r]));
- return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries(CATALOG_COMMON_FIELDS.filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;})};
+ return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries([...CATALOG_COMMON_FIELDS,'hasLyrics','lyricsMode'].filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;})};
 }
 // A local tag/note edit must not persist the displayed shared metadata into the
 // original song. Explicitly changed common fields still become new candidates.
@@ -33,6 +33,17 @@ async function catalogRoom(who:any,requested:any,allowInactive=false){
 
 async function catalogOperation(b:any,who:any){
  const page=catalogPage(b),op=b.op;
+ if(op==='catalogCandidateEdit'||op==='catalogLyricSources'||op==='catalogLyricAdopt'){
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');
+  if(op==='catalogCandidateEdit'){
+   if(!catalogUuid(b.candidateId)||!/^[a-f0-9]{32}$/.test(b.expectedSource||''))throw Error('候選資料已更新');
+   return await api('/rest/v1/rpc/papa_catalog_candidate_edit',{candidate_id:b.candidateId,expected_source:b.expectedSource,metadata:b.metadata||{},actor_id:catalogActor(who)});
+  }
+  if(!catalogUuid(b.variantId))throw Error('共同版本不正確');
+  if(op==='catalogLyricSources')return await api('/rest/v1/rpc/papa_catalog_lyric_sources',{chosen_variant:b.variantId,page_limit:Math.min(page.limit,3),page_offset:page.offset});
+  if(typeof b.streamerSongId!=='string'||typeof b.sourceStreamer!=='string'||!Number.isFinite(Date.parse(b.expectedUpdated)))throw Error('歌詞來源已更新');
+  return await api('/rest/v1/rpc/papa_catalog_adopt_lyric',{chosen_variant:b.variantId,room_id:b.sourceStreamer,song_id:b.streamerSongId,actor_id:catalogActor(who),skip:b.skip===true,expected_updated:b.expectedUpdated});
+ }
  if(op==='catalogRooms'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');if(!catalogUuid(b.variantId))throw Error('共同版本不正確');
   return await api('/rest/v1/rpc/papa_catalog_variant_rooms',{chosen_variant:b.variantId,page_limit:page.limit,page_offset:page.offset});
@@ -90,6 +101,10 @@ async function catalogOperation(b:any,who:any){
  }
  if(op==='catalogReviewList'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
+  if(['singles','duplicates','families'].includes(b.status)){
+   const r=b.status==='families'?await api('/rest/v1/rpc/papa_catalog_families_page',{query_text:String(b.q||'').slice(0,100),page_limit:page.limit,page_offset:page.offset,lyrics_only:b.lyricsOnly===true}):await api('/rest/v1/rpc/papa_catalog_review_page',{section:b.status,query_text:String(b.q||'').slice(0,100),language_name:String(b.language||'').slice(0,100),page_limit:page.limit,page_offset:page.offset,chosen_group:b.groupId||null});
+   return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore,counts:r.counts};
+  }
   const status=['pending','approved','rejected','removed','history'].includes(b.status)?b.status:'pending';
   if(status==='history'){const r=await api('/rest/v1/rpc/papa_event_page_v2',{room_id:'__global__',page_number:Math.floor(page.offset/50),include_global:true,module_filter:'shared_catalog',page_limit:page.limit,page_offset:page.offset});return {items:r.rows.map((x:any)=>({...x,actorId:x.actor_role,createdAt:x.created_at,title:x.after_data?.titles?.join('、')||x.after_data?.details?.title,details:x.after_data})),total:r.total||0,hasMore:r.hasMore};}
   const r=await api('/rest/v1/rpc/papa_catalog_review_feed',{status,query_text:String(b.q||'').trim().slice(0,100),page_limit:page.limit,page_offset:page.offset});
@@ -97,7 +112,7 @@ async function catalogOperation(b:any,who:any){
  }
  if(op==='catalogReview'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
-  const decisions=['confirm_same','approve_new','link_variant','create_variant','reject','remove','unlink'];
+  const decisions=['confirm_same','different_versions','independent','approve_new','link_variant','create_variant','reject','remove','unlink'];
   if(!decisions.includes(b.decision))throw Error('此審核操作尚未開放');
   const ids=Array.isArray(b.candidateIds)?[...new Set(b.candidateIds)].filter(catalogUuid).slice(0,50):[];
   if(!ids.length||ids.length!==b.candidateIds?.length)throw Error('請選擇有效候選歌曲（最多 50 首）');
@@ -106,6 +121,8 @@ async function catalogOperation(b:any,who:any){
   const targetVariant=b.variantId==null?null:catalogUuid(b.variantId)?b.variantId:null;
   const targetFamily=b.familyId==null?null:catalogUuid(b.familyId)?b.familyId:null;
   if(b.variantId!=null&&!targetVariant||b.familyId!=null&&!targetFamily)throw Error('共同歌曲識別碼錯誤');
+  if(b.lyricsSource!=null&&(!catalogUuid(b.lyricsSource)||!ids.includes(b.lyricsSource))||b.sharedBody!=null&&(typeof b.sharedBody!=='string'||b.sharedBody.length>100000))throw Error('歌詞來源不正確');
+  if(!['reject','remove','unlink'].includes(b.decision))return await api('/rest/v1/rpc/papa_catalog_review_selected',{decision:b.decision,candidate_ids:ids,expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),actor_id:catalogActor(who),target_family:targetFamily,target_variant:targetVariant,common_metadata:{...(b.commonMetadata||{}),...(b.variantLabel?{versionLabel:String(b.variantLabel).slice(0,100)}:{})},lyrics_source:b.lyricsSource||null,shared_body:b.sharedBody??null,version_labels:b.versionLabels||{}});
   return await api('/rest/v1/rpc/papa_catalog_review_v2',{decision:b.decision,candidate_ids:ids,target_variant:targetVariant,target_family:targetFamily,version_label:String(b.variantLabel||'').slice(0,100),actor_id:catalogActor(who),expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),common_metadata:b.commonMetadata||{}});
  }
  if(op==='catalogTemplates'){
@@ -136,6 +153,7 @@ async function catalogOperation(b:any,who:any){
   if(variantId&&!catalogUuid(variantId)||!variantId&&!roomSong)throw Error('共同版本識別碼錯誤');
   const r=await api('/rest/v1/rpc/papa_catalog_get_lyrics',{variant_id:variantId||null,room_id:room?.id||null,song_id:b.streamerSongId||null});
   const resolvedVariant=r.variantId||null;
+  if(b.sharedOnly){if(!roomSong||!resolvedVariant)throw Error('這首尚未連結共同歌詞');return {...await api('/rest/v1/rpc/papa_catalog_get_lyrics',{variant_id:resolvedVariant,room_id:null,song_id:null}),linked:true,variantId:resolvedVariant};}
   if(b.includeHistory){if(!resolvedVariant)throw Error('這首尚未連結共同歌詞');const history=await api('/rest/v1/rpc/papa_catalog_lyric_history',{variant_id:resolvedVariant,page_limit:page.limit,page_offset:page.offset});return {...r,linked:true,variantId:resolvedVariant,history:history.rows||[],historyTotal:history.total||0,historyHasMore:!!history.hasMore};}
   return {...r,linked:!!resolvedVariant,variantId:resolvedVariant};
  }

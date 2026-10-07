@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {deriveNotices,cleanNoticePrefs,noticeChannels,validPushSubscription} from '../src/notification-rules.js';
+import {deriveNotices,cleanNoticePrefs,noticeChannels,validPushSubscription,canonicalNoticeLink,webNoticePath} from '../src/notification-rules.js';
 const state=()=>({streamers:[{id:'a',slug:'a',display_name:'怕怕'},{id:'b',slug:'b',display_name:'主播 B'}],players:[{playerId:'p',name:'玩家甲'},{playerId:'q',name:'玩家乙'}],queue:[],ledger:[]});
 const context={streamer_id:'a',role:'player'},request={id:'1',streamer_id:'a',playerId:'p',kind:'saved',title:'歌曲甲',status:'waiting'};
 test('saved request has separate host and player notices, with source',()=>{const before=state(),after=state();after.queue=[request];const rows=deriveNotices(before,after,context);assert.equal(rows.length,2);assert.deepEqual(rows.map(n=>n.recipient),['__admin__','p']);assert.ok(rows.every(n=>n.streamer_id==='a'&&n.body.startsWith('怕怕｜')));});
@@ -12,3 +12,12 @@ test('credit mutations notify delta only, without ledger note disclosure',()=>{c
 test('quiet credit and important request defaults differ',()=>{assert.equal(noticeChannels({},'credit').sound,false);assert.equal(noticeChannels({},'live').sound,true);assert.equal(noticeChannels({},'live').push,false);assert.equal(noticeChannels({pushEnabled:true},'live').push,true);});
 test('mute preserves center and red dot; restoration preserves per-type choices',()=>{const p=cleanNoticePrefs({pushEnabled:true,types:{live:{sound:false,popup:false}}});assert.equal(noticeChannels({...p,muteAll:true},'saved').sound,false);assert.equal(noticeChannels({...p,muteAll:true},'saved').center,true);assert.equal(noticeChannels({...p,muteAll:true},'saved').badge,true);assert.equal(noticeChannels({...p,muteAll:false},'live').sound,false);assert.equal(noticeChannels({...p,muteAll:false},'saved').sound,true);});
 test('malicious endpoint subscriptions rejected before network access',()=>{const keys={p256dh:'a'.repeat(87),auth:'a'.repeat(22)};for(const endpoint of ['http://fcm.googleapis.com/a','https://localhost/a','https://fcm.googleapis.com.evil.test/a','https://127.0.0.1/a','https://fcm.googleapis.com:8443/a','https://user@fcm.googleapis.com/a'])assert.equal(validPushSubscription({endpoint,keys}),false);assert.equal(validPushSubscription({endpoint:'https://fcm.googleapis.com/fcm/send/abc',keys}),true);assert.equal(validPushSubscription({endpoint:'https://web.push.apple.com/abc',keys}),true);});
+test('canonical notification link carries one Space/entity identity for every platform',()=>{
+ const notice={id:'notice-1',space_id:'space-001',streamer_id:'michelle',recipient:'__admin__',type:'message',entity_id:'thread-1'};
+ const link=canonicalNoticeLink(notice,'michelle');
+ assert.deepEqual(link,{version:1,spaceId:'space-001',streamerId:'michelle',streamerSlug:'michelle',section:'admin',entityType:'message',entityId:'thread-1',notificationId:'notice-1'});
+ assert.equal(webNoticePath(link),'./?streamer=michelle#admin');
+ assert.equal(canonicalNoticeLink({...notice,recipient:'P1'},'mi chelle').section,'center');
+ assert.equal(webNoticePath(canonicalNoticeLink({...notice,recipient:'P1'},'mi chelle')),'./?streamer=mi%20chelle#center');
+ assert.equal(JSON.stringify(link).includes('https://'),false,'native adapters receive a URL-independent target');
+});

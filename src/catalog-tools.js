@@ -3,10 +3,19 @@ export const catalogGroupKey=row=>String(row?.title||'').normalize('NFKC').toLoc
 export function eventDescription(event,{playerName=()=>'',songName=()=>'',roomName=id=>id}={}){
  const row=event.after_data||event.before_data||{},details=row.details||{};
  event={...event,actor_role:event.actor_role||event.actorId};
- const actor=event.actor_role==='president'||['admin','super_admin'].includes(event.actor_role)?'PA Party總裁':event.actor_role?.startsWith('streamer:')?roomName(event.actor_role.slice(9)):event.actor_player_id?playerName(event.actor_player_id):roomName(event.streamer_id)||'管理端';
- const player=row.name||playerName(row.playerId||row.player_id||event.actor_player_id)||'玩家';
+ const role=event.actor_role;
+ const actor=event.actor_display_name_snapshot||
+  (role==='president'||['admin','super_admin'].includes(role)?'PA Party總裁':
+  role==='system'?'系統':
+  role==='streamer_admin'?roomName(event.actor_streamer_id||event.streamer_id)||'主播管理員':
+  role?.startsWith('streamer:')?roomName(role.slice(9))||'主播管理員':
+  role==='player'?playerName(event.actor_player_id)||'玩家':
+  '舊紀錄／操作者未知');
+ const targetId=row.playerId||row.player_id||event.target_player_id||
+  (role==='player'?event.actor_player_id:null);
+ const player=event.target_player_name_snapshot||row.name||playerName(targetId)||'玩家';
  const title=row.songSnapshot?.title||row.title||row.titles?.join('、')||details.title||songName(row.songId||row.song_id)||'歌曲',artist=row.songSnapshot?.artist||row.artist;
- const labels={approve_new:'建立共同歌曲',confirm_same:'確認是同一首共同歌曲',link_variant:'確認是同一首並連到共同歌曲',create_variant:'建立同一首的不同版本',reject:'判定不是同一首',remove:'移除待審候選',unlink:'從共同曲庫分開',merge_family:'整理為同一首的不同版本',split_variant:'分開共同版本',update_variant:'更新共同主資料',lyric_save:'更新共同歌詞',lyric_choice:'修改歌詞來源',batch_add:'從共同曲庫加入歌本',template_change:'修改共用設定',language_filter:'修改語言篩選'};
+ const labels={candidate_edit:'編輯待審共同資料',independent:'獨立建立另一首歌曲',different_versions:'建立同一作品的不同版本',approve_new:'建立共同歌曲',confirm_same:'確認是同一首共同歌曲',link_variant:'確認是同一首並連到共同歌曲',create_variant:'建立同一首的不同版本',reject:'判定不是同一首',remove:'移除待審候選',unlink:'從共同曲庫分開',merge_family:'整理為同一首的不同版本',split_variant:'分開共同版本',update_variant:'更新共同主資料',lyric_save:'更新共同歌詞',lyric_choice:'修改歌詞來源',batch_add:'從共同曲庫加入歌本',template_change:'修改共用設定',language_filter:'修改語言篩選'};
  if(event.entity_kind==='shared_catalog'||event.actorId)return `${actor}將《${title}》${labels[event.action]||'更新共同曲庫'}${row.rooms?.length?'（'+row.rooms.map(roomName).join('、')+'）':''}`;
  if(['request_failed','failed_request'].includes(event.action))return `${player}提歌《${title}》失敗：本小時提歌額度已滿`;
  if(event.entity_kind==='players')return `${actor}${event.before_data?'編輯':'新增'}玩家${player}的基本資料`;
@@ -56,7 +65,7 @@ export function installActionHints(){
  popup.setAttribute('popover','manual');let owner=null;
  const hide=()=>{if(popup.matches?.(':popover-open'))popup.hidePopover();popup.hidden=true;owner=null;};
  const show=el=>{hide();owner=el;popup.textContent=el.dataset.hint;const overlay=el.closest('dialog[open]');(overlay||document.body).append(popup);popup.hidden=false;if(popup.showPopover)popup.showPopover();const r=el.getBoundingClientRect();popup.style.left=Math.max(8,Math.min(r.left,innerWidth-popup.offsetWidth-8))+'px';popup.style.top=Math.max(8,r.bottom+6+popup.offsetHeight>innerHeight-8?r.top-popup.offsetHeight-6:r.bottom+6)+'px';};
- function decorate(root){for(const b of root.querySelectorAll('button[data-act]')){const hint=actionHints[b.dataset.act];if(!hint||b.dataset.hintReady)continue;b.dataset.hintReady='1';b.title=hint;const info=document.createElement('button');info.type='button';info.className='action-help';info.textContent='ⓘ';info.dataset.hint=hint;info.setAttribute('aria-label','說明：'+b.textContent);info.setAttribute('aria-describedby',popup.id);b.after(info);info.addEventListener('mouseenter',()=>show(info));info.addEventListener('focus',()=>{if(info.matches(':focus-visible'))show(info);});info.addEventListener('mouseleave',hide);info.addEventListener('blur',hide);info.addEventListener('click',e=>{e.stopPropagation();show(info);});}}
+ function decorate(root){for(const b of root.querySelectorAll('button[data-act]')){const hint=actionHints[b.dataset.act];if(!hint||b.dataset.hintReady)continue;b.dataset.hintReady='1';b.title=hint;const info=document.createElement('button');info.type='button';info.className='action-help';info.textContent='ⓘ';info.dataset.hint=hint;info.setAttribute('aria-label','說明：'+b.textContent);info.setAttribute('aria-describedby',popup.id);{const wrap=document.createElement('span');wrap.className='queue-action-hint action-target-hint';b.before(wrap);wrap.append(b,info);}info.addEventListener('mouseenter',()=>show(info));info.addEventListener('focus',()=>{if(info.matches(':focus-visible'))show(info);});info.addEventListener('mouseleave',hide);info.addEventListener('blur',hide);info.addEventListener('click',e=>{e.stopPropagation();show(info);});}}
  decorate(document);new MutationObserver(()=>{if(owner&&!owner.isConnected)hide();decorate(document);}).observe(document.body,{childList:true,subtree:true});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});document.addEventListener('click',e=>{if(!e.target.closest('.action-help'))hide();});
  document.addEventListener('close',hide,true);document.addEventListener('cancel',hide,true);window.addEventListener('resize',hide);document.addEventListener('scroll',hide,true);

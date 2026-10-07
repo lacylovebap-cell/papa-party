@@ -46,7 +46,7 @@ test('initial and older chat pages retain newest-first database pagination and c
  assert.equal(edge.paths.length,previous,'cross-player access is denied before even resolving names');
 });
 
-function frontend(api){
+function frontend(api,realtimeAvailable=()=>false){
  const original={document:globalThis.document,setInterval:globalThis.setInterval};
  const events={},listeners={},timers=[],nodes={title:{textContent:''},error:{textContent:''},older:{hidden:true}};
  const box={innerHTML:'',scrollTop:0,clientHeight:100,get scrollHeight(){return (this.innerHTML.match(/data-chat-seq=/g)||[]).length*20;}};
@@ -55,7 +55,7 @@ function frontend(api){
  globalThis.document={hidden:false,body:{append(){}},createElement(){return dialog;},addEventListener(type,callback){listeners[type]=callback;}};
  globalThis.setInterval=(callback,ms)=>{timers.push({callback,ms});return timers.length;};
  const calls=[],read=[];
- const chat=createChat({api:async b=>{calls.push({...b,room:state.streamer});return api(b);},context:()=>state,toast(){},onRead(){read.push(true);}});
+ const chat=createChat({api:async b=>{calls.push({...b,room:state.streamer});return api(b);},context:()=>state,toast(){},onRead(){read.push(true);},realtimeAvailable});
  return {chat,state,dialog,box,nodes,calls,read,timers,listeners,seqs:()=>[...box.innerHTML.matchAll(/data-chat-seq="(\d+)"/g)].map(m=>Number(m[1])),async older(){await events.click({target:{closest:()=>({dataset:{chat:'older'}})}});},restore(){for(const [key,value]of Object.entries(original)){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}}};
 }
 
@@ -114,5 +114,22 @@ test('overlapping refreshes are coalesced and a stale old-room response cannot r
   resolveOld({rows:[row(100)],hasMore:false,recipientRead:100,streamerName:'怕怕',playerName:'Alice'});await opening;
   assert.deepEqual(ui.seqs(),[999]);assert.match(ui.nodes.title.textContent,/米雪/);
   await ui.chat.refresh();assert.equal(ui.calls.at(-1).after,999,'new thread owns its cursor');
+ }finally{ui.restore();}
+});
+
+test('chat relies on new-message notices while Realtime is healthy and keeps the disconnected fallback',async()=>{
+ const service=server(),connection={healthy:true},ui=frontend(service.api,()=>connection.healthy);
+ try{
+  await ui.chat.open();
+  const baseline=ui.calls.length;
+  ui.timers[0].callback();await new Promise(setImmediate);
+  assert.equal(ui.calls.length,baseline,'healthy Realtime suppresses the four-second read');
+  service.state.rows.push(row(1));
+  await ui.chat.refresh();
+  assert.deepEqual(ui.seqs(),[1],'notification-driven refresh still shows a message immediately');
+  connection.healthy=false;
+  const beforeFallback=ui.calls.length;
+  ui.timers[0].callback();await new Promise(setImmediate);
+  assert.equal(ui.calls.length,beforeFallback+1,'disconnected client resumes the original fallback');
  }finally{ui.restore();}
 });

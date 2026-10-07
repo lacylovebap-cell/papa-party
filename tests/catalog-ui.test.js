@@ -37,12 +37,12 @@ test('an older review response cannot replace a newer search or page-size filter
  assert.equal(catalogView.loaded,true);assert.equal(catalogView.items[0].title,'野心家');assert.equal(catalogView.total,1);
 });
 
-test('pending peer hints use safe room labels and history uses readable operation metadata',()=>{
- const catalogView={section:'pending',selected:new Set(),items:[{id:'c1',title:'歌名',artist:'歌手',streamerId:'papa',suggestedCandidates:[{title:'<另一首>',artist:'歌手',streamerId:'michelle',matchType:'possible_version',lyrics:'PRIVATE_BODY'}]}]};
+test('review groups use safe room labels without lyrics and history uses readable operation metadata',()=>{
+ const catalogView={section:'duplicates',page:0,selected:new Set(),items:[],groups:[{id:'group',total:1,rows:[{id:'c1',title:'<另一首>',artist:'歌手',streamerId:'michelle',lyrics:'PRIVATE_BODY'}]}]};
  const context=contextWithCatalog({catalogView,state:{streamers:[{id:'papa',display_name:'怕怕'},{id:'michelle',display_name:'米雪'}]},h:escape,button:()=>'',blank:()=>'',time:x=>'DATE:'+x});
  vm.runInContext(segment('function catalogReviewHtml()','async function scanCatalogCandidates()'),context);
  const html=vm.runInContext('catalogReviewHtml()',context);
- assert.match(html,/可能不同版本/);assert.match(html,/米雪/);assert.match(html,/&lt;另一首&gt;/);assert.doesNotMatch(html,/PRIVATE_BODY/);
+ assert.match(html,/catalog-candidate-group/);assert.match(html,/米雪/);assert.match(html,/&lt;另一首&gt;/);assert.doesNotMatch(html,/PRIVATE_BODY/);
  catalogView.section='history';catalogView.items=[{id:1,action:'update_variant',actorId:'president',createdAt:'2026-10-04'}];
  const history=vm.runInContext('catalogReviewHtml()',context);
  assert.match(history,/更新共同主資料/);assert.match(history,/PA Party總裁/);assert.match(history,/DATE:2026-10-04/);
@@ -144,7 +144,7 @@ test('batch-add feedback uses the confirmed count when existing songs are skippe
 
 test('review sends the hashes seen at selection time even after paging or a newer list response',async()=>{
  const calls=[],catalogView={selected:new Set(['a','b']),selectedSources:new Map([['a','selected-a'],['b','selected-b']]),items:[{id:'b',sourceHash:'new-b'}],loaded:true};
- const context=contextWithCatalog({Object,catalogView,demo:false,draft:null,isSuperAdmin:()=>true,toast:()=>{},confirm:()=>true,api:async body=>{calls.push(body);},loadCatalogReview:async()=>{}});
+ const context=contextWithCatalog({Object,catalogView,demo:false,draft:null,isSuperAdmin:()=>true,toast:()=>{},confirm:()=>true,api:async body=>{calls.push(body);},invalidateCatalogTabs:()=>{catalogView.loaded=false;},loadCatalogReview:async()=>{}});
  vm.runInContext(segment('async function catalogReviewAction(','async function openSharedBrowse('),context);
  await vm.runInContext("catalogReviewAction('approve_new')",context);
  assert.deepEqual(JSON.parse(JSON.stringify(calls[0].expectedSources)),{a:'selected-a',b:'selected-b'});

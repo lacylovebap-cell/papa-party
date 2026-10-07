@@ -25,10 +25,10 @@ test('gift acknowledgment and timed preparation preserve cancellation and legacy
  assert.equal(balance(c,f.p.playerId),4);assert.equal(reservedHour(c,now),0);const cancelled=mutate(c,{type:'cancelOwn',data:{id:q.id}},f.p,now);assert.equal(cancelled.queue[0].status,'cancelled');assert.equal(balance(cancelled,f.p.playerId),4);
  assert.ok(queuePrepared({status:'waiting'}));const old=structuredClone(c);delete old.queue[0].awaitingAcknowledgment;delete old.queue[0].awaitingPreparation;assert.ok(queuePrepared(old.queue[0]));
 });
-test('candidate render gives only duplicates three decisions; single and cross-page peers are distinct',()=>{
+test('single review and grouped duplicate review render as independent tabs',()=>{
  const src=fs.readFileSync('src/app.js','utf8'),render=src.slice(src.indexOf('function catalogReviewHtml()'),src.indexOf('\nasync function scanCatalogCandidates()'));
- const values={items:[{id:'one',title:'單筆',artist:'甲'},{id:'two',title:'多筆',artist:'乙',suggestedCandidates:[{title:'多筆',artist:'丙'}]}],section:'pending',selected:new Set(),total:2};
- const ctx=vm.createContext({catalogView:values,state:{streamers:[]},catalogGroupKey,eventDescription,h:String,playerName:()=>'',song:()=>null,time:String,blank:()=>'',button:(label,act)=>`<button data-act="${act}">${label}</button>`,catalogPager:()=>''});vm.runInContext(render,ctx);const html=vm.runInContext('catalogReviewHtml()',ctx);assert.equal((html.match(/catalogReviewSame/g)||[]).length,1);assert.match(html,/catalog-single-candidate/);assert.doesNotMatch(html,/catalogScan|catalogBrowse/);
+ const values={items:[{id:'one',title:'單筆',artist:'甲'}],section:'singles',selected:new Set(),total:1};
+ const ctx=vm.createContext({catalogView:values,state:{streamers:[]},catalogGroupKey,eventDescription,h:String,playerName:()=>'',song:()=>null,time:String,blank:()=>'',button:(label,act)=>`<button data-act="${act}">${label}</button>`,catalogPager:()=>''});vm.runInContext(render,ctx);const html=vm.runInContext('catalogReviewHtml()',ctx);assert.match(html,/人工指定同一首/);assert.match(html,/catalog-single-candidate/);assert.doesNotMatch(html,/catalogGroupDecision/);values.section='duplicates';values.groups=[{id:'g',total:2,rows:[{id:'a',title:'Honey'},{id:'b',title:'Honey'}]}];const grouped=vm.runInContext('catalogReviewHtml()',ctx);assert.equal((grouped.match(/catalogGroupDecision/g)||[]).length,3);assert.doesNotMatch(grouped,/catalog-single-candidate/);
 });
 test('indexed event reads, snapshots and due notices are bounded, isolated and idempotent in PostgreSQL',async t=>{
  const db=new PGlite({extensions:{pg_trgm}});t.after(()=>db.close());const q=async(sql,args=[])=>(await db.query(sql,args)).rows;
