@@ -37,6 +37,14 @@ function edge(){
  return {context,calls,request};
 }
 
+test('public common-book classification uses one bounded RPC and no business snapshot',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi;
+ context.mockApi=async(path,body)=>{if(path.endsWith('papa_catalog_public_page_filtered')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['英語'],performerTypes:['團體'],versionKinds:['cover']}};}return old(path,body);};
+ const response=await request({op:'catalogSongbook',q:'Honey',language:'英語',performerType:'團體',versionKind:'cover',limit:1000,offset:12});
+ assert.equal(response.status,200);assert.equal(calls.length,1);assert.deepEqual(JSON.parse(JSON.stringify(calls[0].body)),{query_text:'Honey',language_filter:'英語',performer_filter:'團體',version_filter:'cover',page_limit:20,page_offset:12});
+ assert.equal((await request({op:'catalogSongbook',language:'x'.repeat(101)})).status,200);assert.equal(calls.length,1);
+});
+
 test('issue inbox maps paginated rows and binds scope to the authenticated streamer',async()=>{
  const {request,calls,context}=edge(),original=context.mockApi;
  context.mockApi=async(path,body)=>{

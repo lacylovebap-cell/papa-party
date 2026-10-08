@@ -36,7 +36,9 @@ async function catalogOperation(b:any,who:any){
  if(op==='catalogSongbook'){
   const q=String(b.q||'').trim();
   if(q.length>100)return {rows:[],total:0,hasMore:false};
-  return await api('/rest/v1/rpc/papa_catalog_public_page',{query_text:q,page_limit:Math.min(page.limit,20),page_offset:page.offset});
+  const language=String(b.language||''),performer=String(b.performerType||''),version=String(b.versionKind||'');
+  if([language,performer,version].some(v=>v.length>100))return {rows:[],total:0,hasMore:false};
+  return await api('/rest/v1/rpc/papa_catalog_public_page_filtered',{query_text:q,language_filter:language,performer_filter:performer,version_filter:version,page_limit:Math.min(page.limit,20),page_offset:page.offset});
  }
  if(op==='catalogLinkInfo'){
   if(!isManager(who))throw Error('請先登入主播管理');
