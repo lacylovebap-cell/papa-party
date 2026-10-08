@@ -42,3 +42,11 @@ Latest production main `97b1f24` has now been merged into this branch. Overlappi
 3. Continue shared core business gaps, then Android FCM/secure storage/signing/download and Windows adapters/installer; iOS remains reserved interfaces only. No native deliverable is complete yet.
 4. Measure Egress/request behavior; tests and code inspection do not prove a billing reduction.
 5. Follow the existing final release requirement: complete authorized phases, one full regression/build, production backup/preservation checks, migrations/Edge/Web deployment, necessary smoke tests. Do not deploy a partially routed architecture.
+
+## Production UI priority patch (2026-10-08)
+
+Main is now 07403f388c03406e5495df1b28688df0f0c1af9b / 10.08-UI.1. All nine browser UI comments were fixed and deployed independently of the unfinished Space foundation. Full regression: 258/258; build and exact-SHA Pages deployment passed. Additive production migration 202610080009 adds service-only bounded public classification reads; original entities/links remained unchanged. Merge this main commit before resuming the architecture branch, preserving its explicit Space 002 release barrier. Evidence: ../ui-catalog-deployment-result-1008.json.
+
+
+## Priority UI.2 release — 2026-10-08
+Production main is d2ef1d8c4c907f34e7984d810a450e2bd145547d / 10.08-UI.2. Additive migration 202610080010_admin_catalog_controls.sql and party-api deployed. 266 regression tests and build passed. Business data hash guard: 2348 entities / 1255 links unchanged. Version manager filters, canonical room names, report and batch add, compact song actions and atomic guarded bulk deletion, Enter shortcuts, nested ledger allocation, tagged proxy draw and queue title/hint fixed. Merge latest main before resuming Space work; do not redeploy old UI.1 bundle. No Space foundation migrations shipped.
