@@ -338,3 +338,35 @@ test('song editing and learned wishes use one guarded room snapshot and never hy
   if(action.type==='wishAdmin')assert.equal(result.data.state.songs.some(song=>song.title==='Learned'),true);
  }
 });
+
+test('extra quota writes use one scoped metadata read and one atomic quota RPC with no business or lyric write',async()=>{
+ const {context,calls,request}=edge(true),now=new Date().toISOString();
+ const s=mutate(empty(),{type:'player',data:{name:'Quota Player',ids:['Q'],balance:10}},{role:'admin'},now),id=s.players[0].playerId;
+ const rows=stateEntries(s),old=context.mockApi;context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001',accountId:'verified-manager'};
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_v2_room_write_snapshot_with_quota')){calls.push({path,body});return {revision:7,rows,extraQuotas:[],extraQuotaRights:{[id]:[{streamer_id:'michelle',streamer_name:'米雪',extra_quota:1}]}};}
+  if(path.endsWith('papa_manage_player_extra_quota')){calls.push({path,body});return 8;}
+  return old(path,body);
+ };
+ const result=await request({op:'mutate',revision:7,streamer:'papa',action:{type:'extraQuota',data:{player_id:id,extra_quota:3,enabled:true}}});
+ assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.state.revision,8);assert.deepEqual(result.data.state.players[0].quotaRights.map(x=>x.extra_quota),[1,3]);
+ const read=calls.find(c=>c.path.endsWith('papa_v2_room_write_snapshot_with_quota'));assert.deepEqual(JSON.parse(JSON.stringify(read.body)),{requested_room:'papa',selected_song_ids:[],allowed_space:'space-001',quota_player:id});
+ const write=calls.find(c=>c.path.endsWith('papa_manage_player_extra_quota'));assert.equal(write.body.actor_context.account_id,'verified-manager');assert.equal(write.body.requested_room,'papa');assert.equal(write.body.requested_extra,3);assert.equal(write.body.expected,7);
+ assert.equal(calls.filter(c=>c.path.endsWith('papa_manage_player_extra_quota')).length,1);assert.equal(calls.some(c=>/papa_v2_snapshot|papa_room_admin_commit|papa_catalog_get_lyrics|papa_release_b_commit/.test(c.path)),false);
+ const count=calls.filter(c=>c.path.endsWith('papa_manage_player_extra_quota')).length;
+ assert.equal((await request({op:'mutate',revision:6,streamer:'papa',action:{type:'extraQuota',data:{player_id:id,extra_quota:9,enabled:true}}})).status,400);assert.equal(calls.filter(c=>c.path.endsWith('papa_manage_player_extra_quota')).length,count);
+});
+test('player profile rights lookup ignores a forged player and failed-request logging uses personal capacity',async()=>{
+ const {context,calls,request}=edge(true),now=new Date().toISOString();let s=empty();
+ for(const name of ['A','B'])s=mutate(s,{type:'player',data:{name,ids:[name],balance:10}},{role:'admin'},now);
+ s=mutate(s,{type:'song',data:{title:'Quota song',artist:'Singer'}},{role:'admin'},now);const a=s.players[0].playerId,b=s.players[1].playerId,songId=s.songs[0].songId;
+ s=mutate(s,{type:'onBehalf',data:{playerId:b,songId,kind:'saved'}},{role:'admin'},now);s=mutate(s,{type:'onBehalf',data:{playerId:b,songId,kind:'saved'}},{role:'admin'},now);
+ const rows=stateEntries(s),old=context.mockApi;context.testActor={role:'player',playerId:a,accountId:'verified-player',spaceId:'space-001'};
+ context.mockApi=async(path,body)=>{
+  if(path.includes('papa_v2_scoped_read_snapshot')){calls.push({path,body});return {revision:7,rows,extraQuotas:[{streamer_id:'papa',player_id:a,extra_quota:2,enabled:true}],extraQuotaRights:{[a]:[{streamer_id:'papa',streamer_name:'怕怕',extra_quota:2}]}};}
+  return old(path,body);
+ };
+ const profile=await request({op:'read',streamer:'papa',profilePlayerId:b});assert.equal(profile.status,200,JSON.stringify(profile.data));assert.equal(calls.find(c=>c.path.endsWith('papa_v2_scoped_read_snapshot_with_quota')).body.quota_player,a);
+ assert.equal(profile.data.state.hourlyPersonal.totalRemaining,2);assert.equal(profile.data.state.players.length,1);
+ const failure=await request({op:'failedRequest',streamer:'papa',songId});assert.equal(failure.status,200);assert.equal(failure.data.counted,false);assert.equal(calls.some(c=>c.path.endsWith('papa_record_failed_request')),false);
+});

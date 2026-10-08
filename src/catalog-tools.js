@@ -32,8 +32,10 @@ export function eventDescription(event,{playerName=()=>'',songName=()=>'',roomNa
  const labels={candidate_edit:'編輯待審共同資料',independent:'獨立建立另一首歌曲',different_versions:'建立同一作品的不同版本',approve_new:'建立共同歌曲',confirm_same:'確認是同一首共同歌曲',link_variant:'確認是同一首並連到共同歌曲',create_variant:'建立同一首的不同版本',reject:'判定不是同一首',remove:'移除待審候選',unlink:'從共同曲庫分開',merge_family:'整理為同一首的不同版本',split_variant:'分開共同版本',update_variant:'更新共同主資料',lyric_save:'更新共同歌詞',lyric_choice:'修改歌詞來源',batch_add:'從共同曲庫加入歌本',template_change:'修改共用設定',language_filter:'修改語言篩選'};
  if(event.entity_kind==='shared_catalog'||event.actorId)return `${actor}將《${title}》${labels[event.action]||'更新共同曲庫'}${row.rooms?.length?'（'+row.rooms.map(roomName).join('、')+'）':''}`;
  if(['request_failed','failed_request'].includes(event.action))return `${player}提歌《${title}》失敗：本小時提歌額度已滿`;
+ if(event.entity_kind==='extra_quota')return `${actor}${row.enabled?'設定':'停用'}${player}在${roomName(event.streamer_id)}的專屬提歌權${row.enabled?' +'+row.extra_quota:''}`;
  if(event.entity_kind==='players')return `${actor}${event.before_data?'編輯':'新增'}玩家${player}的基本資料`;
  if(event.entity_kind==='queue'){
+  if(event.action==='recordTime')return `${actor}修改${player}的《${title}》實際時間${row.kind==='saved'?'，並重新計算提歌額度':''}`;
   const states={waiting:'加入待播',pending:'送出現點，等待確認禮物',completed:'完成演唱',cancelled:'取消待播',stored:'轉為存歌'};
   const description=row.status!=='waiting'?states[row.status]:row.awaitingAcknowledgment?'收到提歌，等待主播確認':row.awaitingPreparation?'已確認，等待準備時間':row.preparationEndsAt?(row.readyAt?'已準備好':`設定準備 ${row.preparationMinutes} 分鐘`):states[row.status];
   return `${actor}為${row.kind==='self'?'主播自帶':player}的《${title}》${description||'修改待播資料'}`;
