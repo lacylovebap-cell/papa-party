@@ -17,6 +17,7 @@ Branch: `feature/space-foundation-1008`. Existing dirty development checkout rem
 - Learned wishes that add a song explicitly use the administrative path, never the operational-only transaction. Unauthorized mutation requests fail before loading business state.
 
 - Remembered player metadata now comes from the verified server profile; a refresh that unexpectedly changes that business player is rejected and revoked instead of silently replacing the local identity.
+- Streamer password login, president streamer-credential configuration, and image-upload authorization now reuse the existing lightweight streamer directory instead of reading the complete business snapshot. Communications/revision checks pass the verified actor's Space into that existing directory RPC; caller Space fields do not authorize it. No extra queries, timers, subscriptions or migration were added. The Space 002 barrier remains unchanged until downstream communication/business isolation is complete.
 
 ## Validation
 
@@ -24,6 +25,7 @@ Branch: `feature/space-foundation-1008`. Existing dirty development checkout rem
 - Subsequent `space-room-1008-targeted.txt`: **81/81 targeted tests passed** after introducing scoped operational writes. This overlaps the earlier run; do not add the counts or call it a full regression.
 - `space-scope-1008-targeted.txt`: **48/48 targeted tests passed** for the latest fifteen-migration scope/identity/admin-write checkpoint. This overlaps previous checks; it is not full regression. Includes real current catalog triggers and the original A/B business/audit/notification commit. SQL patch merging retains private lyrics and approved relations, selected hydration excludes other rooms, and malformed notification writes roll back all updates.
 - `space-device-metadata-1008-targeted.txt`: **29/29 targeted tests passed** for canonical player metadata, device refresh failures, separate manager/player slots, and legacy compatibility. Counts overlap earlier runs.
+- `space-metadata-1008-targeted.txt`: **39/39 targeted tests passed** for the lightweight login/account/image paths, communication metadata scope, catalog/queue compatibility, manager authentication/session revocation, and cross-room upload rejection. Tests assert no business snapshot load and no storage write on cross-room denial. Counts overlap earlier checks; no full regression was run. This removes three identifiable full-snapshot call sites, not a measured production billing reduction.
 - Migration integration runs the current deployed catalog stack first, then all fifteen foundation migrations; original business JSON, old event identity fields, and approved catalog links remain unchanged.
 - An end-to-end Edge fixture verifies one room snapshot plus one existing notification transaction for completion, without a full snapshot or lyric body. A real PostgreSQL fixture runs the original A/B business/audit/notification transaction and verifies cross-room denial, private source preservation, revision conflicts and rollback after a notification insert failure.
 - `node --check` passes for changed Web modules. Edge test harness compiles/exercises the updated TypeScript bundle.

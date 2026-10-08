@@ -225,6 +225,34 @@ test('catalog singer relationships use server-resolved Space and cannot accept c
  assert.equal(calls.some(c=>c.path.endsWith('papa_v2_snapshot')),false);
 });
 
+test('communication directory binds server Space and lightweight manager paths never load business snapshots',async()=>{
+ const {context,calls,request}=edge(),original=context.mockApi;
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_manager_login')){calls.push({path,body});return true;}
+  if(path.endsWith('papa_bind_verified_legacy_session')){calls.push({path,body});return {role:'streamer_admin',streamerId:'papa'};}
+  if(path.endsWith('papa_manage_streamer_login')){calls.push({path,body});return {ok:true};}
+  return original(path,body);
+ };
+ context.allowedFixtureSpace='space-002';
+ await vm.runInContext('loadCommunicationState(allowedFixtureSpace)',context);
+ assert.equal(calls.at(-1).body.chosen_space,'space-002');calls.length=0;
+ const login=await request({op:'streamerLogin',streamer:'papa',password:'fixture-only',spaceId:'space-002'});
+ assert.equal(login.status,200,JSON.stringify(login.data));
+ assert.equal(calls.find(c=>c.path.endsWith('papa_streamer_directory_in_space')).body.chosen_space,'space-001');
+ context.testActor={role:'super_admin'};
+ assert.equal((await request({op:'setStreamerAccount',streamer:'papa',password:'fixture-only',enabled:true})).status,200);
+ let uploads=0;context.atob=atob;context.fetch=async()=>{uploads++;return new Response('',{status:200});};
+ context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
+ assert.equal((await request({op:'upload',streamer:'michelle',mime:'image/webp',image:'YQ=='})).status,400);
+ assert.equal(uploads,0,'cross-room upload never writes storage');
+ assert.equal((await request({op:'upload',streamer:'papa',mime:'image/webp',image:'YQ=='})).status,200);assert.equal(uploads,1);
+ context.testActor={role:'player',playerId:'P1',spaceId:'space-002'};
+ const count=calls.length;
+ assert.equal((await request({op:'notifications',streamer:'other'})).status,400);
+ assert.equal(calls.length,count,'Space 002 barrier remains before communication access');
+ assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
+});
+
 test('song editing and learned wishes use one guarded room snapshot and never hydrate unrelated lyric bodies',async()=>{
  const {context,calls,request}=edge(true),now=new Date().toISOString();
  let state=mutate(empty(),{type:'song',data:{title:'Song',artist:'Artist',lyrics:'original-private-body',tags:['甜歌']}},{role:'admin'},now);

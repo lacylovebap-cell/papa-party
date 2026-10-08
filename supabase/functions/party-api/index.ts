@@ -113,7 +113,7 @@ async function api(path:string,body?:unknown,method?:string){
 }
 async function load(lean=false,requestedRoom='papa',allowedSpace='space-001',writeSongs:string[]|null=null){const snap=await api('/rest/v1/rpc/'+(writeSongs?'papa_v2_room_write_snapshot':lean?'papa_v2_scoped_read_snapshot_in_space':'papa_v2_snapshot'),writeSongs?{requested_room:requestedRoom,selected_song_ids:writeSongs}:lean?{requested_room:requestedRoom,allowed_space:allowedSpace}:{}),s=empty();s.revision=snap.revision;for(const r of snap.rows){if(r.kind==='settings')s.settings=r.data;else if(r.kind==='meta')Object.assign(s,r.data);else if(TABLES.includes(r.kind))s[r.kind].push(r.data);}for(const k of TABLES)s[k].sort((a:any,b:any)=>(a._order||0)-(b._order||0));return upgradePlatform(s);}
 // Chat, board and notices need room metadata, not the full song/history snapshot.
-async function loadCommunicationState(){const streamers=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:'space-001'});if(!Array.isArray(streamers))throw Error('找不到主播設定');return {...empty(),schemaVersion:3,streamers,streamerSettings:{}};}
+async function loadCommunicationState(allowedSpace='space-001'){const streamers=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:allowedSpace});if(!Array.isArray(streamers))throw Error('找不到主播設定');return {...empty(),schemaVersion:3,streamers,streamerSettings:{}};}
 // Backup/draft is an explicit full export. Ordinary views always load lyrics separately.
 function leanSongView(view:any){return {...view,songs:view.songs.map(({lyrics,lyricNotes,privateNote,privateNotes,lyricHistory,lyricsHistory,...song}:any)=>song)};}
 async function commit(before:any,after:any,context:any={}){const {changes,removed}=stateChanges(before,after,{preserveOrder:!!(context.roomScoped||context.roomWriteScoped)}),notices=deriveNotices(before,after,context);after.revision=await api('/rest/v1/rpc/'+(context.roomScoped?'papa_room_operational_commit':context.roomWriteScoped?'papa_room_admin_commit':'papa_release_b_commit'),{expected:before.revision,changes,removed,actor_context:context,notices,...(context.roomScoped||context.roomWriteScoped?{requested_room:context.streamer_id}:{})});schedulePush(context.streamer_id,[...new Set(notices.map((n:any)=>n.recipient))]);return after;}
@@ -188,7 +188,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  if(who?.spaceId&&who.spaceId!=='space-001')
   throw Error('此 Space 的資料頁尚未開放');
  if(b.op==='streamerLogin'){
-  const snapshot=await load(),r=scopeState(snapshot,b.streamer).currentStreamer,token='streamer:'+crypto.randomUUID()+crypto.randomUUID();
+  const snapshot=await loadCommunicationState(),r=scopeState(snapshot,b.streamer).currentStreamer,token='streamer:'+crypto.randomUUID()+crypto.randomUUID();
   const sessionHash=await hash(token);
   if(typeof b.password!=='string'||!await api('/rest/v1/rpc/papa_manager_login',{kind:'streamer',room:r.id,password:b.password,auth_user:ADMIN||null,session_hash:sessionHash}))throw Error('主播密碼不正確、尚未啟用或嘗試過多，請稍後再試');
   const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});
@@ -197,7 +197,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  }
  if(b.op==='streamerAccounts'){if(!isSuper(who))throw Error('僅限 PA Party總裁');return respond({accounts:await api('/rest/v1/papa_streamer_accounts?select=streamer_id,enabled,updated_at')});}
  if(b.op==='setStreamerAccount'){
-  if(!isSuper(who))throw Error('僅限 PA Party總裁');const snapshot=await load(),room=scopeState(snapshot,b.streamer).currentStreamer.id;
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');const snapshot=await loadCommunicationState(who.spaceId||'space-001'),room=scopeState(snapshot,b.streamer).currentStreamer.id;
   if(b.password!=null&&typeof b.password!=='string')throw Error('密碼格式不正確');
   const result=await api('/rest/v1/rpc/papa_manage_streamer_login',{room,password:b.password||null,active:b.enabled===true,auth_user:ADMIN||null});managerPasswordError(result,'streamer');return respond({ok:true});
  }
@@ -217,13 +217,13 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   const result=await api('/rest/v1/rpc/papa_change_manager_password',{kind,room,current_password:b.currentPassword,new_password:b.newPassword,auth_user:ADMIN||null,session_hash:await hash(b.token)});
   managerPasswordError(result,kind);return respond({ok:true,signOut:true});
  }
- if(b.op==='upload'){if(!isManager(who))throw new Error('只有管理員能上傳');const uploadRoom=scopeState(await load(),b.streamer||'papa').currentStreamer.id;requireRoom(who,uploadRoom);const binary=Uint8Array.from(atob(b.image),c=>c.charCodeAt(0));if(binary.length>3145728||b.mime!=='image/webp')throw new Error('請使用壓縮後圖片');const path=crypto.randomUUID()+'.webp',r=await fetch(SB_URL+'/storage/v1/object/papa-photos/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'image/webp'},body:binary});if(!r.ok)throw new Error('圖片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-photos/'+path});}
+ if(b.op==='upload'){if(!isManager(who))throw new Error('只有管理員能上傳');const uploadRoom=scopeState(await loadCommunicationState(who.spaceId||'space-001'),b.streamer||'papa').currentStreamer.id;requireRoom(who,uploadRoom);const binary=Uint8Array.from(atob(b.image),c=>c.charCodeAt(0));if(binary.length>3145728||b.mime!=='image/webp')throw new Error('請使用壓縮後圖片');const path=crypto.randomUUID()+'.webp',r=await fetch(SB_URL+'/storage/v1/object/papa-photos/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'image/webp'},body:binary});if(!r.ok)throw new Error('圖片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-photos/'+path});}
  if(b.op==='events'){if(!isManager(who))throw new Error('請先登入管理');const room=await catalogRoom(who,b.streamer||'papa',true),page=Math.max(0,Math.min(200,Math.floor(Number(b.page)||0)));return respond(await api('/rest/v1/rpc/papa_event_page_v2',{room_id:room.id,page_number:page,include_global:isSuper(who),module_filter:null,page_limit:50,page_offset:page*50}));}
  if(b.op==='pushWorker'){const [config]=await api('/rest/v1/papa_notice_config?id=eq.worker');if(!b.secret||await hash(b.secret)!==await hash(config?.value?.secret||''))throw Error('驗證失敗');await deliverPush();return respond({ok:true});}
  if(CATALOG_OPS.has(b.op))return respond(await catalogOperation(b,who));
- if(['boardRooms','boardDirectory','boardBlocks','boardUnblock','boardBlock','boardList','boardCreate','boardChange'].includes(b.op))return respond(await boardOperation(b,who,await loadCommunicationState()));
+ if(['boardRooms','boardDirectory','boardBlocks','boardUnblock','boardBlock','boardList','boardCreate','boardChange'].includes(b.op))return respond(await boardOperation(b,who,await loadCommunicationState(who?.spaceId||'space-001')));
  if(['noticeSound','notifications','noticeTest','noticeRead','noticePreferences','pushKey','pushSubscribe','pushUnsubscribe','chatInbox','chatMessages','chatSend','chatRead'].includes(b.op)){
-  const comm=await loadCommunicationState();
+  const comm=await loadCommunicationState(who?.spaceId||'space-001');
   if(who?.role==='streamer_admin')requireRoom(who,scopeState(comm,b.streamer||'papa').currentStreamer.id);
   if(['chatInbox','chatMessages','chatSend','chatRead'].includes(b.op))return respond(await chatOperation(b,who,comm));
   return respond(await notificationOperation(b,who,comm));
@@ -234,7 +234,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  if(b.op==='read'&&Number.isInteger(b.revision)&&b.revision>=0&&b.signatures&&typeof b.signatures==='object'&&!Array.isArray(b.signatures)&&Object.keys(b.signatures).length){
   const [row]=await api('/rest/v1/papa_v2_revision?id=eq.1&select=revision&limit=1');
   if(row&&Number(row.revision)===b.revision){
-   const comm=await loadCommunicationState().catch(()=>null);
+   const comm=await loadCommunicationState(who?.spaceId||'space-001').catch(()=>null);
    if(comm){const room=scopeState(comm,b.streamer||'papa').currentStreamer;requireRoom(who,room.id);if(!room.active&&!isManager(who))throw Error('主播頁暫未開放');return respond({state:{},now:t,ready:true});}
   }
  }
