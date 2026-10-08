@@ -19,6 +19,7 @@ function server(authUser=''){
    if(path.includes('papa_v2_sessions?'))return sessionRows;
    if(path.includes('papa_streamer_accounts?')&&path.includes('enabled=eq.true'))return [{streamer_id:'papa',enabled:true}];
    if(path.endsWith('papa_manager_login'))return allowed;
+   if(path.endsWith('papa_streamer_directory'))return upgradePlatform(empty()).streamers;
    if(path.endsWith('papa_change_manager_password')||path.endsWith('papa_manage_streamer_login'))return responses.change||{ok:true};
    throw Error('Unexpected database access '+path);
   };

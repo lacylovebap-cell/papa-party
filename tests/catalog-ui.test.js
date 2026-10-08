@@ -317,3 +317,12 @@ test('saving room language choices uses the dedicated scoped endpoint without mo
  assert.deepEqual(JSON.parse(JSON.stringify(calls[2])),{op:'catalogLanguageFilterSave',mode:'custom',languageIds:['zh'],management:true});
  assert.equal(context.filters.language,'');assert.equal(calls.some(row=>row.op==='mutate'),false);
 });
+
+test('select all duplicate search results keeps groups and source tokens across pages',async()=>{
+ const calls=[],groups=Array.from({length:51},(_,i)=>({id:'g'+i,total:i===0?3:1,rows:[{id:'c'+i,groupId:'g'+i,sourceHash:'h'+i}]}));
+ const catalogView={section:'duplicates',search:'Honey',language:'英語',page:2,total:51,selected:new Set(['old']),selectedRows:new Map([['old',{id:'old',groupId:'old'}]]),selectedSources:new Map(),selectedVariants:new Map()};
+ const context=contextWithCatalog({catalogView,toast:()=>{},render:()=>{},api:async body=>{calls.push(body);return body.groupId?{items:[{id:'extra1',sourceHash:'x1'},{id:'extra2',sourceHash:'x2'}],hasMore:false}:{items:groups.slice(body.offset,body.offset+50),hasMore:body.offset+50<groups.length};}});
+ vm.runInContext(segment('function selectCatalogRows(','async function confirmSameCatalog('),context);
+ await vm.runInContext('selectAllCatalog()',context);
+ assert.deepEqual(calls.filter(c=>!c.groupId).map(c=>c.offset),[0,50]);assert.equal(catalogView.selected.size,54);assert.equal(catalogView.selectedRows.get('extra2').groupId,'g0');assert.equal(catalogView.selectedSources.get('c50'),'h50');assert.equal(catalogView.page,2);assert.equal(catalogView.loading,false);assert.ok(calls.filter(c=>!c.groupId).every(c=>c.q==='Honey'&&c.language==='英語'));
+});

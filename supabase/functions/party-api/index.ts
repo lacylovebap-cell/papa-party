@@ -126,13 +126,13 @@ function managerPasswordError(result:any,kind:string){
 
 Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json(),who=await actor(b.token||''),t=new Date().toISOString();
  if(b.op==='streamerLogin'){
-  const snapshot=await load(),r=scopeState(snapshot,b.streamer).currentStreamer,token='streamer:'+crypto.randomUUID()+crypto.randomUUID();
+  const snapshot=await loadCommunicationState(),r=scopeState(snapshot,b.streamer).currentStreamer,token='streamer:'+crypto.randomUUID()+crypto.randomUUID();
   if(typeof b.password!=='string'||!await api('/rest/v1/rpc/papa_manager_login',{kind:'streamer',room:r.id,password:b.password,auth_user:ADMIN||null,session_hash:await hash(token)}))throw Error('主播密碼不正確、尚未啟用或嘗試過多，請稍後再試');
   return respond({token,role:'streamer_admin',streamerId:r.id,streamerSlug:r.slug,expiresIn:43200,legacy:true});
  }
  if(b.op==='streamerAccounts'){if(!isSuper(who))throw Error('僅限 PA Party總裁');return respond({accounts:await api('/rest/v1/papa_streamer_accounts?select=streamer_id,enabled,updated_at')});}
  if(b.op==='setStreamerAccount'){
-  if(!isSuper(who))throw Error('僅限 PA Party總裁');const snapshot=await load(),room=scopeState(snapshot,b.streamer).currentStreamer.id;
+  if(!isSuper(who))throw Error('僅限 PA Party總裁');const snapshot=await loadCommunicationState(),room=scopeState(snapshot,b.streamer).currentStreamer.id;
   if(b.password!=null&&typeof b.password!=='string')throw Error('密碼格式不正確');
   const result=await api('/rest/v1/rpc/papa_manage_streamer_login',{room,password:b.password||null,active:b.enabled===true,auth_user:ADMIN||null});managerPasswordError(result,'streamer');return respond({ok:true});
  }
@@ -149,7 +149,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   const result=await api('/rest/v1/rpc/papa_change_manager_password',{kind,room,current_password:b.currentPassword,new_password:b.newPassword,auth_user:ADMIN||null,session_hash:await hash(b.token)});
   managerPasswordError(result,kind);return respond({ok:true,signOut:true});
  }
- if(b.op==='upload'){if(!isManager(who))throw new Error('只有管理員能上傳');const uploadRoom=scopeState(await load(),b.streamer||'papa').currentStreamer.id;requireRoom(who,uploadRoom);const binary=Uint8Array.from(atob(b.image),c=>c.charCodeAt(0));if(binary.length>3145728||b.mime!=='image/webp')throw new Error('請使用壓縮後圖片');const path=crypto.randomUUID()+'.webp',r=await fetch(SB_URL+'/storage/v1/object/papa-photos/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'image/webp'},body:binary});if(!r.ok)throw new Error('圖片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-photos/'+path});}
+ if(b.op==='upload'){if(!isManager(who))throw new Error('只有管理員能上傳');const uploadRoom=scopeState(await loadCommunicationState(),b.streamer||'papa').currentStreamer.id;requireRoom(who,uploadRoom);const binary=Uint8Array.from(atob(b.image),c=>c.charCodeAt(0));if(binary.length>3145728||b.mime!=='image/webp')throw new Error('請使用壓縮後圖片');const path=crypto.randomUUID()+'.webp',r=await fetch(SB_URL+'/storage/v1/object/papa-photos/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'image/webp'},body:binary});if(!r.ok)throw new Error('圖片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-photos/'+path});}
  if(b.op==='events'){if(!isManager(who))throw new Error('請先登入管理');const room=await catalogRoom(who,b.streamer||'papa',true),page=Math.max(0,Math.min(200,Math.floor(Number(b.page)||0)));return respond(await api('/rest/v1/rpc/papa_event_page_v2',{room_id:room.id,page_number:page,include_global:isSuper(who),module_filter:null,page_limit:50,page_offset:page*50}));}
  if(b.op==='pushWorker'){const [config]=await api('/rest/v1/papa_notice_config?id=eq.worker');if(!b.secret||await hash(b.secret)!==await hash(config?.value?.secret||''))throw Error('驗證失敗');await deliverPush();return respond({ok:true});}
  if(CATALOG_OPS.has(b.op))return respond(await catalogOperation(b,who));

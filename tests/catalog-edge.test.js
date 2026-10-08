@@ -166,3 +166,17 @@ test('unchanged read uses small revision and room metadata, while forced read ke
  context.testActor={role:'streamer_admin',streamer_id:'michelle'};
  assert.equal((await request({op:'read',streamer:'papa',revision:7,signatures:{songs:'known'}})).status,400,'cached reads still enforce streamer scope');
 });
+
+test('manager metadata and upload paths never download a business snapshot',async()=>{
+ const {context,calls,request}=edge(),original=context.mockApi;
+ context.mockApi=async(path,body)=>{if(path.endsWith('papa_manager_login')){calls.push({path,body});return true;}if(path.endsWith('papa_manage_streamer_login')){calls.push({path,body});return {ok:true};}return original(path,body);};
+ assert.equal((await request({op:'streamerLogin',streamer:'papa',password:'fixture-only'})).status,200);
+ context.testActor={role:'super_admin'};
+ assert.equal((await request({op:'setStreamerAccount',streamer:'papa',password:'fixture-only',enabled:true})).status,200);
+ let uploads=0;context.atob=atob;context.fetch=async()=>{uploads++;return new Response('',{status:200});};
+ context.testActor={role:'streamer_admin',streamer_id:'papa'};
+ assert.equal((await request({op:'upload',streamer:'michelle',mime:'image/webp',image:'YQ=='})).status,400);assert.equal(uploads,0);
+ assert.equal((await request({op:'upload',streamer:'papa',mime:'image/webp',image:'YQ=='})).status,200);assert.equal(uploads,1);
+ assert.equal(calls.filter(c=>c.path.endsWith('papa_streamer_directory')).length,4);
+ assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
+});
