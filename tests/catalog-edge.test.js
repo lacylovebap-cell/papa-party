@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
 import {execFileSync} from 'node:child_process';
+import {empty,mutate} from '../src/core.js';
+import {stateEntries} from '../src/state-patch.js';
 
 function edge(allowRead=false){
  execFileSync(process.execPath,['build-edge.mjs'],{cwd:new URL('../',import.meta.url)});
@@ -38,6 +40,26 @@ function edge(allowRead=false){
  };
  return {context,calls,request};
 }
+
+test('queue completion uses one room snapshot and the existing notification transaction without reading lyrics/full history',async()=>{
+ const {context,calls,request}=edge(true);const now=new Date().toISOString();
+ let state=mutate(empty(),{type:'song',data:{title:'Song',artist:'Artist',lyrics:'private source lyric'}},{role:'admin'},now);
+ state=mutate(state,{type:'streamerDraw',data:{songId:state.songs[0].songId}},{role:'admin'},now);
+ state=mutate(state,{type:'queue',data:{id:state.queue[0].id,operation:'stage',preparationMinutes:0}},{role:'admin'},now);
+ const rows=stateEntries(state).map(row=>row.kind==='songs'?{...row,data:{...row.data,lyrics:undefined}}:row);
+ const old=context.mockApi;context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_v2_scoped_read_snapshot')){calls.push({path,body});return {revision:7,rows};}
+  if(path.endsWith('papa_room_operational_commit')){calls.push({path,body});assert.equal(body.requested_room,'papa');assert.ok(body.changes.every(r=>['queue','ledger','wishes'].includes(r.kind)));return 8;}
+  return old(path,body);
+ };
+ const result=await request({op:'mutate',revision:7,streamer:'papa',action:{type:'queue',data:{id:state.queue[0].id,operation:'complete'}}});
+ assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.state.queue[0].status,'completed');
+ assert.equal(calls.filter(c=>c.path.endsWith('papa_v2_scoped_read_snapshot')).length,1);
+ assert.equal(calls.filter(c=>c.path.endsWith('papa_room_operational_commit')).length,1);
+ assert.equal(calls.some(c=>c.path.endsWith('papa_v2_snapshot')),false);
+ assert.equal(JSON.stringify(result.data).includes('private source lyric'),false);
+});
 
 test('issue inbox maps paginated rows and binds scope to the authenticated streamer',async()=>{
  const {request,calls,context}=edge(),original=context.mockApi;

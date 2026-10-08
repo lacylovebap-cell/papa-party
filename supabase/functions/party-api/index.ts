@@ -1,4 +1,5 @@
 import {isSuper,isManager,coreActor,requireRoom,authorizeManagerOperation,managementView,noticeIdentity,validNoticeAudio,prepareManagerAction} from '../../../src/access-policy.js';
+import {stateChanges,scopedOperationalAction} from '../../../src/state-patch.js';
 // No browser access to tables or VAPID secrets. All recipient keys come from actor().
 import webpush from 'npm:web-push@3.6.7';
 import {cleanNoticePrefs,noticeChannels,validPushSubscription,canonicalNoticeLink,webNoticePath} from '../../../src/notification-rules.js';
@@ -115,8 +116,7 @@ async function load(lean=false,requestedRoom='papa'){const snap=await api('/rest
 async function loadCommunicationState(){const streamers=await api('/rest/v1/rpc/papa_streamer_directory',{});if(!Array.isArray(streamers))throw Error('找不到主播設定');return {...empty(),schemaVersion:3,streamers,streamerSettings:{}};}
 // Backup/draft is an explicit full export. Ordinary views always load lyrics separately.
 function leanSongView(view:any){return {...view,songs:view.songs.map(({lyrics,lyricNotes,privateNote,privateNotes,lyricHistory,lyricsHistory,...song}:any)=>song)};}
-function entries(s:any){return [...TABLES.flatMap(k=>s[k].map((data:any,index:number)=>({kind:k,id:String(data.playerId&&k==='players'?data.playerId:data.songId&&k==='songs'?data.songId:data.id),data:{...data,_order:index}}))),{kind:'settings',id:'1',data:s.settings},{kind:'meta',id:'1',data:{schemaVersion:3,streamers:s.streamers,streamerSettings:s.streamerSettings,migrationIssues:s.migrationIssues||[]}}];}
-async function commit(before:any,after:any,context:any={}){const old=new Map(entries(before).map(r=>[r.kind+':'+r.id,r])),next=entries(after),keys=new Set(next.map(r=>r.kind+':'+r.id));const changes=next.filter(r=>JSON.stringify(old.get(r.kind+':'+r.id)?.data)!==JSON.stringify(r.data)),removed=[...old.values()].filter(r=>!keys.has(r.kind+':'+r.id)).map(r=>({kind:r.kind,id:r.id}));const notices=deriveNotices(before,after,context);after.revision=await api('/rest/v1/rpc/papa_release_b_commit',{expected:before.revision,changes,removed,actor_context:context,notices});schedulePush(context.streamer_id,[...new Set(notices.map((n:any)=>n.recipient))]);return after;}
+async function commit(before:any,after:any,context:any={}){const {changes,removed}=stateChanges(before,after,{preserveOrder:!!context.roomScoped}),notices=deriveNotices(before,after,context);after.revision=await api('/rest/v1/rpc/'+(context.roomScoped?'papa_room_operational_commit':'papa_release_b_commit'),{expected:before.revision,changes,removed,actor_context:context,notices,...(context.roomScoped?{requested_room:context.streamer_id}:{})});schedulePush(context.streamer_id,[...new Set(notices.map((n:any)=>n.recipient))]);return after;}
 async function actor(token:string,requestedRoom:string|null=null){
  if(!/^(player|admin|streamer|device):/.test(token||''))return null;
  const r=await api('/rest/v1/rpc/papa_verified_session_actor',{session_hash:await hash(token),requested_room:requestedRoom});
@@ -230,7 +230,8 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
    if(comm){const room=scopeState(comm,b.streamer||'papa').currentStreamer;requireRoom(who,room.id);if(!room.active&&!isManager(who))throw Error('主播頁暫未開放');return respond({state:{},now:t,ready:true});}
   }
  }
- const s=await load(b.op==='read',b.streamer||'papa');
+ const roomScoped=b.op==='mutate'&&scopedOperationalAction(b.action);
+ const s=await load(b.op==='read'||roomScoped,b.streamer||'papa');
  if(b.op==='failedRequest'){if(who?.role!=='player')throw new Error('請先登入玩家');const room=scopeState(s,b.streamer||'papa'),p=room.players.find((p:any)=>p.playerId===who.playerId);if(!room.currentStreamer.active||!p)throw new Error('找不到玩家');const quote=quoteSong(room,b.songId,b,who.playerId,t),available=balance(room,who.playerId)-reservedCredits(room,who.playerId),full=!canRequestSaved(room,t,quote.creditCost);if(available<quote.creditCost||!full)return respond({counted:false});const counted=await api('/rest/v1/rpc/papa_record_failed_request',{room_id:room.currentStreamer.id,player_id:who.playerId,song_id:b.songId,bucket:hourKey(t)});schedulePush(room.currentStreamer.id,['__admin__',who.playerId]);return respond({counted});}if(b.op==='login'){if(who?.playerId)throw new Error('請先登出再登入');const p=s.players.find((p:any)=>p.playerId===b.playerId);if(!p||String(p.password||'')!==String(b.password||''))throw new Error('玩家密碼不正確');const token='player:'+crypto.randomUUID()+crypto.randomUUID(),sessionHash=await hash(token);await api('/rest/v1/papa_v2_sessions',{token_hash:sessionHash,player_id:p.playerId,login_id:p.ids.includes(b.loginId)?b.loginId:'',expires_at:new Date(Date.now()+30*86400000).toISOString()});const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});if(identity?.role!=='player'||identity?.spaceId!=='space-001')throw new Error('玩家登入身分尚未完成設定');return respond({token});}
  if(b.op==='songSearch'){return respond({songs:searchAcrossStreamers(s,b.query||'').slice(0,100)});}if(b.op==='search'){return respond({players:b.query?.trim()?playerSearch(s,b.query).slice(0,20).map((p:any)=>({playerId:p.playerId,name:p.name,ids:p.ids,hasPassword:!!p.password})):[]});}
  if(b.op==='backup'){if(!isSuper(who))throw new Error('僅限PA Party總裁備份');return respond({backup:s,now:t});}const project=async(value:any)=>{const base=leanSongView(managementView(publicView(value,coreActor(who),t,b.streamer||'papa'),who)),rows=await api('/rest/v1/rpc/papa_catalog_song_metadata',{room_id:base.currentStreamer.id}),view=catalogMetadataView(base,rows,isManager(who)),signatures:any={},delta:any={};for(const [key,v] of Object.entries(view)){signatures[key]=await hash(JSON.stringify(v));if(b.signatures?.[key]!==signatures[key])delta[key]=v;}return {state:delta,signatures,now:t,ready:value.schemaVersion>=3};};
@@ -244,5 +245,5 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   account_id:who?.accountId||null,space_id:who?.spaceId||null,
   actor_streamer_id:who?.role==='streamer_admin'?who.streamer_id:null,
   streamer_id:scopeState(s,b.streamer||'papa').currentStreamer.id,
-  action:b.op==='mutate'?b.action?.type+(b.action?.data?.operation?':'+b.action.data.operation:''):b.op})));
+  roomScoped,action:b.op==='mutate'?b.action?.type+(b.action?.data?.operation?':'+b.action.data.operation:''):b.op})));
  }catch(e){return respond({error:e.message||'操作失敗'},400);}});

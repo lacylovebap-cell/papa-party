@@ -44,12 +44,12 @@ test('Phase 1 migrations apply in order without rewriting existing business reco
  const beforeLinks=await q('select * from papa_catalog_song_links order by song_id');
  const beforeEntities=await q('select kind,id,data from papa_v2_entities order by kind,id');
  const beforeEvents=await q('select id,streamer_id,entity_kind,entity_id,action,actor_role from papa_events');
- for(let number=1;number<=10;number++){
+ for(let number=1;number<=11;number++){
   const file=`supabase/migrations/20261007${String(number).padStart(4,'0')}_${[
    'space_foundation','device_sessions','verified_identity_binding',
    'audit_actor_snapshots','device_push_contract','device_access_lifecycle',
    'notification_space_scope','policy_feature_entitlement',
-   'scoped_read_snapshot','web_device_push_bridge'][number-1]}.sql`;
+   'scoped_read_snapshot','web_device_push_bridge','room_operational_commit'][number-1]}.sql`;
   await db.exec(fs.readFileSync(file,'utf8'));
  }
  assert.deepEqual(await q('select kind,id,data from papa_v2_entities order by kind,id'),beforeEntities);

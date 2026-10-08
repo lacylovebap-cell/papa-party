@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {PGlite} from '@electric-sql/pglite';
+
+test('room-only operations reuse the real queue/credit/audit/notification transaction, deny cross-room/private writes and roll back atomically',async t=>{
+ const db=new PGlite();t.after(()=>db.close());
+ const q=async(sql,args=[])=>(await db.query(sql,args)).rows;
+ await db.exec('create role anon;create role authenticated;create role service_role;');
+ const base=fs.readFileSync('supabase/migrations/202609170001_party_v2.sql','utf8');
+ await db.exec(base.slice(0,base.indexOf('insert into storage.buckets')));
+ await db.exec(fs.readFileSync('supabase/migrations/202609240001_release_a.sql','utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/202609240003_notifications.sql','utf8'));
+ await q('insert into papa_v2_entities values($1,$2,$3)',['meta','1',{streamers:[{id:'papa',slug:'papa'},{id:'michelle',slug:'michelle'}]}]);
+ for(const [kind,id,data] of [['songs','s1',{songId:'s1',streamer_id:'papa',lyrics:'private lyric',privateNote:'private note'}],['queue','q1',{id:'q1',streamer_id:'papa',status:'waiting',_order:73}],['queue','q2',{id:'q2',streamer_id:'michelle',status:'waiting',_order:120}]])
+  await q('insert into papa_v2_entities values($1,$2,$3)',[kind,id,data]);
+ await db.exec(fs.readFileSync('supabase/migrations/202610070001_space_foundation.sql','utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/202610070009_scoped_read_snapshot.sql','utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/202610070011_room_operational_commit.sql','utf8'));
+ const scoped=(await q("select papa_v2_scoped_read_snapshot('papa') value"))[0].value;
+ assert.equal(scoped.rows.some(r=>r.id==='q2'),false);assert.equal(JSON.stringify(scoped).includes('private lyric'),false);
+ const context={role:'streamer_admin',actor_streamer_id:'papa',streamer_id:'papa',space_id:'space-001',action:'queue:complete'};
+ const item={kind:'queue',id:'q1',data:{id:'q1',streamer_id:'papa',status:'completed',_order:73}};
+ const commit=async(expected,changes,removed=[],notices=[],ctx=context)=>q('select papa_room_operational_commit($1,$2,$3,$4,$5,$6) value',[expected,changes,removed,ctx,notices,'papa']);
+ assert.equal((await commit(0,[item]))[0].value,1);
+ assert.equal((await q("select data->>'status' status from papa_v2_entities where id='q1'"))[0].status,'completed');
+ assert.equal((await q("select data->>'status' status from papa_v2_entities where id='q2'"))[0].status,'waiting');
+ assert.deepEqual((await q("select data from papa_v2_entities where id='s1'"))[0].data,{songId:'s1',streamer_id:'papa',lyrics:'private lyric',privateNote:'private note'});
+ assert.ok((await q("select count(*)::int n from papa_events where action='queue:complete'"))[0].n>0);
+ await assert.rejects(commit(0,[item]),/VERSION_CONFLICT/);
+ await assert.rejects(commit(1,[{...item,id:'q2',data:{...item.data,id:'q2'}}]),/SCOPE_INVALID/);
+ await assert.rejects(commit(1,[],[{kind:'queue',id:'q2'}]),/SCOPE_INVALID/);
+ await assert.rejects(commit(1,[{kind:'songs',id:'s1',data:{id:'s1',streamer_id:'papa',lyrics:''}}]),/SCOPE_INVALID/);
+ await assert.rejects(commit(1,[item],[],[],{...context,actor_streamer_id:'michelle'}),/ACTOR_INVALID/);
+ const before=await q('select kind,id,data from papa_v2_entities order by kind,id');
+ await assert.rejects(commit(1,[{...item,data:{...item.data,status:'cancelled'}}],[],[{id:'bad-uuid',streamer_id:'papa'}]),/uuid/);
+ assert.deepEqual(await q('select kind,id,data from papa_v2_entities order by kind,id'),before);
+ assert.equal((await q('select revision from papa_v2_revision'))[0].revision,1);
+ await db.exec('set role anon');await assert.rejects(commit(1,[item]),/permission denied/);await db.exec('reset role');
+});

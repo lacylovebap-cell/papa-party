@@ -6,7 +6,7 @@ import {stripTypeScriptTypes} from 'node:module';
 
 // Use the real handler and role resolver while replacing only the database/network boundary.
 const root=new URL('../',import.meta.url),read=f=>fs.readFileSync(new URL(f,root),'utf8');
-const source=[read('src/home-settings.js'),read('src/core.js'),read('src/access-policy.js'),read('src/notification-rules.js'),read('supabase/functions/party-api/index.ts')]
+const source=[read('src/home-settings.js'),read('src/core.js'),read('src/state-patch.js'),read('src/access-policy.js'),read('src/notification-rules.js'),read('supabase/functions/party-api/index.ts')]
  .map(s=>s.replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'')).join('\n');
 function server(authUser=''){
  let handler;
