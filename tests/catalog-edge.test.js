@@ -37,6 +37,21 @@ function edge(){
  return {context,calls,request};
 }
 
+test('version relation filters are bounded and ordinary streamers cannot query adoptable lyrics or another room',async()=>{
+ const {context,calls,request}=edge(),original=context.mockApi;
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_catalog_families_page_v3')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['華語'],versionKinds:['cover']}};}
+  if(path.endsWith('papa_catalog_variant_rooms_v3')){calls.push({path,body});return {items:[{streamerName:'怕怕'}],total:1};}
+  return original(path,body);
+ };
+ context.testActor={role:'streamer_admin',streamer_id:'michelle'};
+ const r=await request({op:'catalogReviewList',status:'families',streamer:'michelle',q:'Honey',language:'華語',versionKind:'cover',lyricsFilter:'proposals',limit:1000,offset:2});
+ assert.equal(r.status,200);assert.equal(calls.at(-1).body.viewer_room,'michelle');assert.equal(calls.at(-1).body.page_limit,50);assert.equal(calls.at(-1).body.language_filter,'華語');assert.equal(calls.at(-1).body.version_filter,'cover');assert.equal(calls.at(-1).body.lyrics_filter,'all');assert.deepEqual(r.data.filters.languages,['華語']);
+ assert.equal((await request({op:'catalogReviewList',status:'families',streamer:'papa'})).status,400);
+ assert.equal((await request({op:'catalogRooms',variantId:'11111111-1111-4111-8111-111111111111'})).data.items[0].streamerName,'怕怕');
+ assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
+});
+
 test('public common-book classification uses one bounded RPC and no business snapshot',async()=>{
  const {context,calls,request}=edge(),old=context.mockApi;
  context.mockApi=async(path,body)=>{if(path.endsWith('papa_catalog_public_page_filtered')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['英語'],performerTypes:['團體'],versionKinds:['cover']}};}return old(path,body);};

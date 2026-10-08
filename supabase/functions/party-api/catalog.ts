@@ -7,7 +7,7 @@ const catalogActor=(who:any)=>isSuper(who)?'president':who?.role==='streamer_adm
 const CATALOG_COMMON_FIELDS=['title','artist','cat','artistType','version','catalogVariantId'];
 function catalogMetadataView(view:any,rows:any[],management=false){
  const byId=new Map(rows.map((r:any)=>[r.songId,r]));
- return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries([...CATALOG_COMMON_FIELDS,'hasLyrics','lyricsMode',...(management?['catalogStatus','catalogFamilyId']:[])].filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;})};
+ return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries([...CATALOG_COMMON_FIELDS,'hasLyrics','lyricsMode',...(management?['catalogStatus','catalogFamilyId','otherStreamerCount']:[])].filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;})};
 }
 // A local tag/note edit must not persist the displayed shared metadata into the
 // original song. Explicitly changed common fields still become new candidates.
@@ -105,7 +105,7 @@ async function catalogOperation(b:any,who:any){
  }
  if(op==='catalogRooms'){
   if(!isManager(who))throw Error('請先登入主播管理');if(!catalogUuid(b.variantId))throw Error('共同版本不正確');
-  return await api('/rest/v1/rpc/papa_catalog_variant_rooms_v2',{chosen_variant:b.variantId,page_limit:page.limit,page_offset:page.offset});
+  return await api('/rest/v1/rpc/papa_catalog_variant_rooms_v3',{chosen_variant:b.variantId,page_limit:page.limit,page_offset:page.offset});
  }
  if(op==='catalogScan'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
@@ -177,10 +177,13 @@ async function catalogOperation(b:any,who:any){
  if(op==='catalogReviewList'){
   if(b.status==='families'){
    if(!isManager(who))throw Error('請先登入主播管理');
-   const r=await api('/rest/v1/rpc/papa_catalog_families_page_v2',{query_text:String(b.q||'').slice(0,100),
-    lyrics_filter:['all','with','without','proposals'].includes(b.lyricsFilter)?b.lyricsFilter:'all',
+   const room=await catalogRoom(who,b.streamer||who.streamer_id||'papa',true);
+   if([b.q,b.language,b.versionKind].some(v=>String(v||'').length>100))throw Error('共同曲庫篩選不正確');
+   const r=await api('/rest/v1/rpc/papa_catalog_families_page_v3',{query_text:String(b.q||''),
+    lyrics_filter:(isSuper(who)?['all','with','without','proposals']:['all','with','without']).includes(b.lyricsFilter)?b.lyricsFilter:'all',
+    language_filter:String(b.language||''),version_filter:String(b.versionKind||''),viewer_room:room.id,
     page_limit:page.limit,page_offset:page.offset});
-   return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore};
+   return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore,filters:r.filters};
   }
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
   if(['singles','duplicates','families'].includes(b.status)){

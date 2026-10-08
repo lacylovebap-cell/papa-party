@@ -94,6 +94,14 @@ function mutateRoom(source,action,actor,t=stamp()){
  case 'songsBulk':{
   const ids=[...new Set(payload.songIds||[])],rows=ids.map(id=>s.songs.find(x=>x.songId===id)),mode=payload.tagMode||'keep',tags=list(payload.tags||[]);
   requireThat(ids.length&&rows.every(Boolean),'所選歌曲有異動，請重新選取');
+  if(payload.remove===true){
+   requireThat(ids.length<=2000,'一次最多刪除 2000 首');
+   const chosen=new Set(ids);
+   requireThat(!s.crowns.some(c=>chosen.has(c.songId)&&isActive(c,t)),'所選歌曲有有效冠歌，請先處理冠歌');
+   requireThat(!s.queue.some(q=>['pending','waiting'].includes(q.status)&&(chosen.has(q.songId)||chosen.has(q.pairSongId)||(q.items||[]).some(x=>chosen.has(x.songId)))),'所選歌曲仍在待播，請先完成或取消');
+   requireThat(!s.songs.some(x=>!chosen.has(x.songId)&&(x.pairSongIds||[]).some(id=>chosen.has(id))),'請先解除其他半首歌曲的搭配');
+   s.songs=s.songs.filter(x=>!chosen.has(x.songId));break;
+  }
   requireThat(['keep','add','remove','replace','clear'].includes(mode),'標籤處理方式不正確');
   requireThat(!['add','remove','replace'].includes(mode)||tags.length,'請勾選或填寫標籤；要全部移除請選清空');
   requireThat(payload.cat===undefined||['華語','韓語','台語','其他'].includes(payload.cat),'語言不正確');

@@ -8,6 +8,20 @@ test('each queued song retains its own preparation time',()=>{let s=request(fixt
 test('public now-playing follows first confirmed queue item without exposing player history',()=>{let s=fixture();s=request(s,'live');assert.equal(publicView(s,null,t).nowPlaying,null);s=queue(s,'approve');const v=publicView(s,null,t);assert.equal(v.nowPlaying.title,'舞孃');assert.equal(v.queue.length,0);assert.equal(v.nowPlaying.playerId,undefined);s=queue(s,'complete');assert.equal(publicView(s,null,t).nowPlaying,null);});
 function fixture(){let s=empty();s=mutate(s,{type:'player',data:{name:'樂樂',ids:'123,456',balance:5,password:'abcd'}},admin,t);s=mutate(s,{type:'song',data:{title:'舞孃',artist:'蔡依林',tags:['嗨歌']}},admin,t);return s;}
 const player=s=>({role:'player',playerId:s.players[0].playerId,loginId:'456'});
+test('bulk deletion is atomic, guards active dependants and retains historical records',()=>{
+ let s=fixture();s=mutate(s,{type:'song',data:{title:'第二首',artist:'歌手'}},admin,t);
+ const ids=s.songs.map(x=>x.songId),remove=data=>mutate(s,{type:'songsBulk',data},admin,t);
+ for(const data of [{songIds:[ids[0],'missing'],remove:true},{songIds:[],remove:true}])assert.throws(()=>remove(data));
+ assert.throws(()=>mutate(s,{type:'songsBulk',data:{songIds:ids,remove:true}},player(s),t),/管理/);
+ s=request(s);const before=structuredClone(s);assert.throws(()=>remove({songIds:ids,remove:true}),/待播/);assert.deepEqual(s,before);
+ s=queue(s,'complete');const historical=structuredClone({queue:s.queue,ledger:s.ledger,players:s.players});
+ const out=remove({songIds:ids,remove:true});assert.equal(out.songs.length,0);assert.deepEqual({queue:out.queue,ledger:out.ledger,players:out.players},historical);
+ s.songs[1].pairSongIds=[ids[0]];assert.throws(()=>remove({songIds:[ids[0]],remove:true}),/搭配/);
+ s.songs[1].pairSongIds=[];s.crowns.push({id:'crown-fixture',streamer_id:'papa',songId:ids[0],activatedAt:'2026-09-01T00:00:00Z',expiresAt:'2026-10-01T00:00:00Z'});
+ assert.throws(()=>remove({songIds:ids,remove:true}),/冠歌/);
+ const cross=structuredClone(s);cross.songs.push({...s.songs[0],songId:'other-room-song',streamer_id:'other'});const snapshot=structuredClone(cross);
+ assert.throws(()=>mutate(cross,{streamer:'papa',type:'songsBulk',data:{songIds:[ids[0],'other-room-song'],remove:true}},admin,t));assert.deepEqual(cross,snapshot);
+});
 function request(s,kind='saved',at=t,p=player(s)){return mutate(s,{type:'request',data:{songId:s.songs[0].songId,kind,giftConfirmed:true}},p,at);}
 function queue(s,operation,at=t){if(operation==='complete'&&s.queue[0].status==='waiting'&&s.queue[0].awaitingAcknowledgment)s=mutate(s,{type:'queue',data:{id:s.queue[0].id,operation:'acknowledge',preparationMinutes:0}},admin,at);return mutate(s,{type:'queue',data:{id:s.queue[0].id,operation,...(operation==='approve'?{preparationMinutes:0}:{})}},admin,at);}
 test('hidden songs preserve manager history while blocking public visibility and requests',()=>{

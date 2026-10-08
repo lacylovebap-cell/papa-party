@@ -127,5 +127,20 @@ test('selected review keeps Honey 2+1 / 2+2 isolated, private data intact and ly
  assert.equal((await rpc('papa_catalog_get_lyrics',[null,'b','link-custom'])).body,'source custom');
  await rpc('papa_catalog_link_room_song',['b','link-custom',b.variantId,unlinkedSource,a.variantId,'streamer:b',false]);
  assert.equal((await rpc('papa_catalog_get_lyrics',[null,'b','link-custom'])).body,'source custom');
- for(const role of ['anon','authenticated']){await db.exec('set role '+role);await assert.rejects(rpc('papa_catalog_review_page',['singles']),/permission denied/);await assert.rejects(q('select body from papa_catalog_custom_archives'),/permission denied/);await db.exec('reset role');}
+ {const businessBefore=await q('select kind,id,data from papa_v2_entities order by kind,id'),linksBefore=await q('select streamer_id,song_id,variant_id,source_hash from papa_catalog_song_links order by song_id');
+ await db.exec(fs.readFileSync('supabase/migrations/202610080010_admin_catalog_controls.sql','utf8'));
+ assert.deepEqual(await q('select kind,id,data from papa_v2_entities order by kind,id'),businessBefore);
+ assert.deepEqual(await q('select streamer_id,song_id,variant_id,source_hash from papa_catalog_song_links order by song_id'),linksBefore);
+ const cover=await rpc('papa_catalog_families_page_v3',['Full merge','all',1,0,'','cover','papa']);
+ assert.equal(cover.total,1);assert.equal(cover.rows.length,1);assert.equal(cover.rows[0].variants[0].alreadyAdded,true);assert.equal(cover.rows[0].variants[0].versionKind,'cover');
+ assert.ok(!JSON.stringify(cover).includes('custom sf1'));assert.ok(!JSON.stringify(cover).includes('privateNote'));assert.ok(cover.filters.versionKinds.includes('cover'));
+ assert.equal((await rpc('papa_catalog_families_page_v3',['Full merge','all',1,0,'英語','cover','papa'])).total,0);
+ assert.equal((await rpc('papa_catalog_families_page_v3',['Full merge','all',1,0,'','live','papa'])).total,0);
+ const familyPage=await rpc('papa_catalog_families_page_v3',['','all',1,0,'','','b']);assert.equal(familyPage.rows.length,1);assert.ok(familyPage.hasMore);
+ const second=await rpc('papa_catalog_families_page_v3',['','all',1,1,'','','b']);assert.notEqual(familyPage.rows[0].id,second.rows[0].id);
+ await q("update papa_v2_entities set data=jsonb_set(data,'{streamers}',$1) where kind='meta' and id='1'",[[{id:'papa',display_name:'怕怕',active:true},{id:'b',display_name:'米雪',active:true},{id:'c',display_name:'咪醬',active:true},{id:'d',display_name:'停用',active:false}]]);
+ const rooms=await rpc('papa_catalog_variant_rooms_v3',[a.variantId,1,0]);assert.equal(rooms.items.length,1);assert.ok(['怕怕','米雪','咪醬'].includes(rooms.items[0].streamerName));assert.ok(!JSON.stringify(rooms).includes('source custom'));
+ const meta=await rpc('papa_catalog_song_metadata',['papa']);assert.ok(meta.some(row=>row.otherStreamerCount>0));assert.ok(meta.every(row=>Number.isInteger(row.otherStreamerCount)));assert.ok(!JSON.stringify(meta).includes('custom sf1'));
+ for(const role of ['anon','authenticated']){await db.exec('set role '+role);await assert.rejects(rpc('papa_catalog_families_page_v3'),/permission denied/);await assert.rejects(rpc('papa_catalog_variant_rooms_v3',[a.variantId]),/permission denied/);await assert.rejects(rpc('papa_catalog_review_page',['singles']),/permission denied/);await assert.rejects(q('select body from papa_catalog_custom_archives'),/permission denied/);await db.exec('reset role');}
+ }
 });
