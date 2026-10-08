@@ -89,7 +89,7 @@ test('crown imports use own-room songs, existing players and core tier validatio
 
 test('room import validates kind, input, exact choices and the 2000-row boundary',()=>{
  const before=fixture(),snapshot=structuredClone(before),text='Song｜Artist';
- for(const kind of ['players','unknown',undefined])assert.throws(()=>applyRoomImport(before,kind,text,['skip'],admin,at,roomId),/歌曲或冠歌/);
+ for(const kind of ['unknown',undefined])assert.throws(()=>applyRoomImport(before,kind,text,['skip'],admin,at,roomId),/類型不正確/);
  for(const value of ['', '  ',null,42,'歌名｜歌手'])assert.throws(()=>applyRoomImport(before,'songs',value,[],admin,at,roomId),/匯入資料/);
  for(const choices of [{0:'skip'},['new'],['unknown'],new Array(1),['skip',undefined]])assert.throws(()=>applyRoomImport(before,'songs',text,choices,admin,at,roomId),/選項不正確/);
  for(const choices of [[],['skip','skip']])assert.throws(()=>applyRoomImport(before,'songs',text,choices,admin,at,roomId),/行數不符/);

@@ -2,7 +2,13 @@ import {validateHome} from './home-settings.js';
 export const TABLES=['players','songs','ledger','queue','crowns','cards','wishes'];
 export const TIERS=[{name:'金卡',fee:55599,price:4200,months:1},{name:'鉑金卡',fee:125000,price:9999,months:1},{name:'鑽石卡',fee:375000,price:18188,months:1},{name:'黑卡',fee:500000,price:27999,months:3},{name:'至尊卡',fee:925000,price:55599,months:0}];
 export const DEFAULTS={status:'空閒中',hourlyLimit:2,opening:'19:00～01:00（可能加班）',audition:387,livePrice:2990,liveDouble:500,crownDouble:18188,tiers:TIERS,plans:[{name:'一般 2 首',amount:2,fee:5555,double:990},{name:'一般 3 首',amount:3,fee:7299,double:1399},{name:'一般 6 首',amount:6,fee:13999,double:2799},{name:'🏅 金牌歌單',amount:10,fee:22887,double:4200}],tags:['嗨歌','傷感','甜歌','怪歌','慢歌'],manual:'1. 先登入玩家，再挑首喜歡的歌 ♡\n2. 提歌扣存歌，每小時有上限。\n3. 現點送出後，等{streamer}確認禮物。\n4. 冠歌主人照一般規則；其他玩家依卡別現點。'};
-export const uid=()=>crypto.randomUUID();
+let mutationIds=null;
+export const uid=()=>{if(!mutationIds)return crypto.randomUUID();if(mutationIds.replay){if(mutationIds.index>=mutationIds.ids.length)throw Error('草稿操作識別碼不足');return mutationIds.ids[mutationIds.index++];}const id=crypto.randomUUID();mutationIds.ids.push(id);return id;};
+// Core mutations are synchronous. Record their generated identities so later
+// draft operations can refer to the same rows when the server replays them.
+function withMutationIds(context,run){const previous=mutationIds;mutationIds=context;try{const value=run();if(value&&typeof value.then==='function')throw Error('草稿操作必須同步完成');return value;}finally{mutationIds=previous;}}
+export function captureMutationIds(run){const context={ids:[],replay:false};const value=withMutationIds(context,run);return {value,ids:context.ids};}
+export function replayMutationIds(ids,run){if(!Array.isArray(ids)||ids.length>2000||new Set(ids).size!==ids.length||ids.some(id=>typeof id!=='string'||!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(id)))throw Error('草稿操作識別碼不正確');const context={ids:[...ids],index:0,replay:true},value=withMutationIds(context,run);if(context.index!==ids.length)throw Error('草稿操作識別碼與操作不符');return value;}
 export const list=x=>[...new Set((Array.isArray(x)?x:String(x||'').split(/[,，、；;]/)).map(x=>String(x).trim()).filter(Boolean))];
 export const norm=x=>String(x??'').trim().toLocaleLowerCase();
 export function empty(){return {schemaVersion:2,revision:0,settings:structuredClone(DEFAULTS),...Object.fromEntries(TABLES.map(k=>[k,[]]))};}

@@ -4,7 +4,7 @@ const MAX_ROWS=2000;
 const CHOICES=new Set(['add','update','skip']);
 
 export function applyRoomImport(state,kind,text,choices,actor,time,streamer='papa'){
- if(!['songs','crowns'].includes(kind))throw Error('目前主播只能匯入歌曲或冠歌');
+ if(!['players','songs','crowns'].includes(kind))throw Error('匯入類型不正確');
  if(typeof text!=='string'||!text.trim())throw Error('請填匯入資料');
  // Preview may include one header row; bound the work before matching source rows.
  if(text.trim().split(/\r?\n/).filter(Boolean).length>MAX_ROWS+1)throw Error('一次最多匯入 2000 行');

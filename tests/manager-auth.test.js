@@ -32,7 +32,7 @@ function server(authUser=''){
    if(path==='/rest/v1/papa_v2_sessions')return null;
    if(path.includes('papa_streamer_accounts?')&&path.includes('enabled=eq.true'))return [{streamer_id:'papa',enabled:true}];
    if(path.endsWith('papa_manager_login'))return allowed;
-   if(path.endsWith('papa_streamer_directory_in_space'))return upgradePlatform(empty()).streamers;
+   if(path.endsWith('papa_streamer_directory_in_space')||path.endsWith('papa_streamer_directory'))return upgradePlatform(empty()).streamers;
    if(path.endsWith('papa_start_device_session'))return {sessionId:'12345678-1234-1234-1234-123456789abc',role:body.chosen_role};
    if(path.endsWith('papa_refresh_device_access'))return responses.deviceRefresh===undefined?
     {sessionId:body.chosen_session,role:'player',spaceId:'space-001'}:responses.deviceRefresh;

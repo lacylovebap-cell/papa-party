@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f1f5fb"><title>找不到頁面｜PA Party</title></head>
+<body>
+<main><h1>找不到這個頁面</h1><p>請從 PA Party 入口重新選擇空間。</p><a href="/papa-party/">回到 PA Party</a></main>
+<script type="module">
+import {spacePathFallback} from '/papa-party/src/space-path-fallback.js';
+const destination=spacePathFallback(location.href,new URL('/papa-party/',location.href));
+if(destination)location.replace(destination);
+</script>
+</body>
+</html>
