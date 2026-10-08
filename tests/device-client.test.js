@@ -9,7 +9,7 @@ function fixture(){
  const transport=async body=>{
   calls.push(body);if(fail)throw fail;
   if(body.op==='deviceStart'){
-   const role=body.token,sessionId='session-'+(++serial),record={sessionId,role:role==='president'?'super_admin':role,refreshToken:'refresh:'+serial,spaceId:role==='president'?null:'space-001',streamerId:role==='streamer_admin'?'papa':null};
+   const role=body.token,sessionId='session-'+(++serial),record={sessionId,role:role==='president'?'super_admin':role,refreshToken:'refresh:'+serial,spaceId:role==='president'?null:'space-001',streamerId:role==='streamer_admin'?'papa':null,...(role==='player'?{playerId:'P1',loginId:'ID1'}:{})};
    sessions.set(sessionId,record);return {...record,role};
   }
   const session=sessions.get(body.sessionId);
@@ -72,4 +72,13 @@ test('failed logout remains retryable and president role maps to separate manage
  assert.equal(f.records.get('manager').role,'super_admin');f.fail=Error('offline');
  await assert.rejects(a.logout('super_admin'),/offline/);assert.equal(f.records.size,1);
  f.fail=null;await a.logout('super_admin');assert.equal(f.records.size,0);assert.equal(f.sessions.size,0);
+});
+
+test('remembered player metadata is server-verified and a different business player cannot silently replace it',async()=>{
+ const f=fixture(),client=f.client();await client.remember('player','player');
+ assert.equal((await client.identity('player')).playerId,'P1');
+ assert.equal((await client.identity('player')).loginId,'ID1');
+ const remote=[...f.sessions.values()][0];remote.playerId='P-OTHER';client.forgetAccess();
+ await assert.rejects(client.token('player'),/不一致/);
+ assert.equal(f.records.size,0);assert.equal(f.sessions.size,0);
 });

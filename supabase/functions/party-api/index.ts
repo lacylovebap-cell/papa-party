@@ -151,7 +151,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
    chosen_space:who.spaceId||null,chosen_streamer:who.streamer_id||null,
    new_refresh_hash:await hash(refreshToken),chosen_login_id:who.loginId||''});
   if(!registration?.sessionId)throw Error('裝置登入尚未完成');
-  return respond({...registration,refreshToken});
+  return respond({...registration,refreshToken,...(who.role==='player'?{playerId:who.playerId,loginId:who.loginId||''}:{})});
  }
  if(b.op==='deviceRefresh'){
   if(typeof b.sessionId!=='string'||!/^[a-f0-9-]{36}$/i.test(b.sessionId)
@@ -164,7 +164,8 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   if(!refreshed)throw Error('裝置登入已到期，請重新登入');
   return respond({token,refreshToken,sessionId:refreshed.sessionId,
    role:refreshed.role==='president'?'super_admin':refreshed.role,
-   streamerId:refreshed.streamerId,spaceId:refreshed.spaceId,expiresIn:43200});
+   streamerId:refreshed.streamerId,spaceId:refreshed.spaceId,
+   ...(refreshed.role==='player'?{playerId:refreshed.playerId,loginId:refreshed.loginId||''}:{}),expiresIn:43200});
  }
  if(b.op==='deviceLogout'){
   if(typeof b.sessionId!=='string'||!/^[a-f0-9-]{36}$/i.test(b.sessionId)

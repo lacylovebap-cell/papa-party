@@ -10,9 +10,9 @@ export function createDeviceSessions({transport,store,lock,installationId,platfo
  const expires=result=>now()+Math.min(43200,Math.max(0,Number(result.expiresIn)||0))*1000;
  function verified(result,expected){
   if(typeof result?.token!=='string'||!result.token.startsWith('device:')||typeof result.refreshToken!=='string'||!result.refreshToken.startsWith('refresh:')||result.sessionId!==expected.sessionId||result.role!==expected.role||
-   (expected.spaceId&&result.spaceId!==expected.spaceId)||(expected.streamerId&&result.streamerId!==expected.streamerId)||!Number.isFinite(Number(result.expiresIn))||Number(result.expiresIn)<=0)
+   (expected.spaceId&&result.spaceId!==expected.spaceId)||(expected.streamerId&&result.streamerId!==expected.streamerId)||(expected.playerId&&result.playerId!==expected.playerId)||!Number.isFinite(Number(result.expiresIn))||Number(result.expiresIn)<=0)
    throw Error('裝置登入身分不一致，請重新登入');
-  return {sessionId:result.sessionId,refreshToken:result.refreshToken,role:result.role,spaceId:result.spaceId||null,streamerId:result.streamerId||null};
+  return {sessionId:result.sessionId,refreshToken:result.refreshToken,role:result.role,spaceId:result.spaceId||null,streamerId:result.streamerId||null,...(result.role==='player'&&result.playerId?{playerId:result.playerId,loginId:result.loginId||''}:{})};
  }
  async function refresh(key,record){
   let result;
@@ -35,7 +35,7 @@ export function createDeviceSessions({transport,store,lock,installationId,platfo
     const start=await transport({op:'deviceStart',token,installationId,platform,appVersion,streamer:scope.streamer});
     const serverRole=start.role==='president'?'super_admin':start.role;
     if(serverRole!==role||typeof start.sessionId!=='string'||!start.sessionId||typeof start.refreshToken!=='string'||!start.refreshToken.startsWith('refresh:')){await revoke({...start,role:serverRole});throw Error('裝置登入身分不一致，請重新登入');}
-    const record={sessionId:start.sessionId,refreshToken:start.refreshToken,role,spaceId:start.spaceId||null,streamerId:start.streamerId||null};
+    const record={sessionId:start.sessionId,refreshToken:start.refreshToken,role,spaceId:start.spaceId||null,streamerId:start.streamerId||null,...(role==='player'&&start.playerId?{playerId:start.playerId,loginId:start.loginId||''}:{})};
     try{await store.set(key,record);}catch(error){await revoke(record);throw error;}
     try{return await refresh(key,record);}catch(error){error.deviceRegistered=true;throw error;}
    });
@@ -60,7 +60,7 @@ export function createDeviceSessions({transport,store,lock,installationId,platfo
     await store.remove(key);access.delete(key);
    });
   },
-  async identity(role){const key=validRole(role);return lock(key,async()=>{const record=await store.get(key);if(!usable(record)||record.role!==role)return null;const {sessionId,role:kind,spaceId,streamerId}=record;return {sessionId,role:kind,spaceId,streamerId};});},
+  async identity(role){const key=validRole(role);return lock(key,async()=>{const record=await store.get(key);if(!usable(record)||record.role!==role)return null;const {sessionId,role:kind,spaceId,streamerId,playerId,loginId}=record;return {sessionId,role:kind,spaceId,streamerId,...(playerId?{playerId,loginId}: {})};});},
   forgetAccess(){access.clear();}
  };
 }
