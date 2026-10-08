@@ -49,13 +49,13 @@ test('queue completion uses one room snapshot and the existing notification tran
  const rows=stateEntries(state).map(row=>row.kind==='songs'?{...row,data:{...row.data,lyrics:undefined}}:row);
  const old=context.mockApi;context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
  context.mockApi=async(path,body)=>{
-  if(path.endsWith('papa_v2_scoped_read_snapshot')){calls.push({path,body});return {revision:7,rows};}
+  if(path.endsWith('papa_v2_scoped_read_snapshot_in_space')){calls.push({path,body});return {revision:7,rows};}
   if(path.endsWith('papa_room_operational_commit')){calls.push({path,body});assert.equal(body.requested_room,'papa');assert.ok(body.changes.every(r=>['queue','ledger','wishes'].includes(r.kind)));return 8;}
   return old(path,body);
  };
  const result=await request({op:'mutate',revision:7,streamer:'papa',action:{type:'queue',data:{id:state.queue[0].id,operation:'complete'}}});
  assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.state.queue[0].status,'completed');
- assert.equal(calls.filter(c=>c.path.endsWith('papa_v2_scoped_read_snapshot')).length,1);
+ assert.equal(calls.filter(c=>c.path.endsWith('papa_v2_scoped_read_snapshot_in_space')).length,1);
  assert.equal(calls.filter(c=>c.path.endsWith('papa_room_operational_commit')).length,1);
  assert.equal(calls.some(c=>c.path.endsWith('papa_v2_snapshot')),false);
  assert.equal(JSON.stringify(result.data).includes('private source lyric'),false);
@@ -198,4 +198,53 @@ test('forced ordinary read requests only its room from the scoped snapshot RPC',
  const read=calls.find(c=>c.path.includes('papa_v2_scoped_read_snapshot'));
  assert.equal(read.body.requested_room,'michelle');
  assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
+});
+
+test('catalog singer relationships use server-resolved Space and cannot accept caller-selected scope',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi;
+ context.mockApi=async(path,body)=>{
+  if(path.includes('papa_streamer_directory')){calls.push({path,body});return [{id:'papa',slug:'papa',active:true,spaceId:'space-001'},{id:'other',slug:'other',active:true,spaceId:'space-002'}];}
+  if(path.includes('papa_catalog_public_page_in_space')||path.includes('papa_catalog_family_singers_in_space')||path.includes('papa_catalog_variant_rooms_v2_in_space')||path.includes('papa_catalog_families_page_v2_in_space')){calls.push({path,body});return {rows:[],items:[],total:0,hasMore:false};}
+  return old(path,body);
+ };
+ const family='11111111-1111-4111-8111-111111111111';
+ context.testActor={role:'player',playerId:'P1',spaceId:'space-001'};
+ let result=await request({op:'catalogSongbook',streamer:'papa',spaceId:'space-002',requested_space:'space-002'});
+ assert.equal(result.status,200);assert.equal(calls.at(-1).body.requested_space,'space-001');
+ const before=calls.filter(c=>c.path.includes('papa_catalog_public_page_in_space')).length;
+ assert.equal((await request({op:'catalogSongbook',streamer:'other'})).status,400);
+ assert.equal(calls.filter(c=>c.path.includes('papa_catalog_public_page_in_space')).length,before);
+ context.testActor=null;assert.equal((await request({op:'catalogSongbook',streamer:'other'})).status,400);
+ context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
+ for(const body of [{op:'catalogFamilySingers',familyId:family},{op:'catalogRooms',variantId:family},{op:'catalogReviewList',status:'families'}]){
+  result=await request({...body,spaceId:'space-002'});assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(calls.at(-1).body.requested_space,'space-001');
+ }
+ context.testActor={role:'super_admin',accountId:'president'};
+ assert.equal((await request({op:'catalogRooms',variantId:family})).status,200);assert.equal(calls.at(-1).body.requested_space,null,'only global president review may request all Spaces');
+ assert.equal((await request({op:'catalogSongbook',streamer:'other'})).status,200);assert.equal(calls.at(-1).body.requested_space,'space-002');
+ assert.equal(calls.some(c=>c.path.endsWith('papa_v2_snapshot')),false);
+});
+
+test('song editing and learned wishes use one guarded room snapshot and never hydrate unrelated lyric bodies',async()=>{
+ const {context,calls,request}=edge(true),now=new Date().toISOString();
+ let state=mutate(empty(),{type:'song',data:{title:'Song',artist:'Artist',lyrics:'original-private-body',tags:['甜歌']}},{role:'admin'},now);
+ const id=state.songs[0].songId;state.wishes=[{id:'W1',streamer_id:'papa',title:'Learned',artist:'Artist',status:'收到',playerId:'P1'}];
+ const original=context.mockApi;context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_v2_room_write_snapshot')){calls.push({path,body});return {revision:7,rows:stateEntries(state).map(row=>row.kind==='songs'&&!body.selected_song_ids.includes(row.id)?{...row,data:{...row.data,lyrics:undefined}}:row)};}
+  if(path.endsWith('papa_room_admin_commit')){calls.push({path,body});assert.equal(body.requested_room,'papa');assert.equal(body.actor_context.roomWriteScoped,true);return 8;}
+  return original(path,body);
+ };
+ for(const action of [{type:'song',data:{songId:id,title:'Edited',artist:'Artist',tags:['甜歌']}},{type:'songsBulk',data:{songIds:[id],new:true}},{type:'wishAdmin',data:{id:'W1',status:'已學會',addSong:true}}]){
+  const from=calls.length,result=await request({op:'mutate',revision:7,streamer:'papa',action});
+  assert.equal(result.status,200,JSON.stringify(result.data));
+  const current=calls.slice(from),snapshot=current.find(c=>c.path.endsWith('papa_v2_room_write_snapshot'));
+  assert.deepEqual(Array.from(snapshot.body.selected_song_ids),action.type==='song'?[id]:[]);
+  assert.equal(current.filter(c=>c.path.endsWith('papa_v2_room_write_snapshot')).length,1);
+  assert.equal(current.filter(c=>c.path.endsWith('papa_room_admin_commit')).length,1);
+  assert.equal(current.some(c=>c.path.endsWith('papa_v2_snapshot')),false);
+  assert.equal(JSON.stringify(result.data).includes('original-private-body'),false);
+  if(action.type==='song')assert.equal(current.find(c=>c.path.endsWith('papa_room_admin_commit')).body.changes.find(c=>c.kind==='songs').data.lyrics,'original-private-body');
+  if(action.type==='wishAdmin')assert.equal(result.data.state.songs.some(song=>song.title==='Learned'),true);
+ }
 });

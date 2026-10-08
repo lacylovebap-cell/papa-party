@@ -42,4 +42,6 @@ test('the lean operational path never handles song/private/profile/settings writ
  assert.equal(scopedOperationalAction({type:'recordTime',data:{table:'queue'}}),true);
  assert.equal(scopedOperationalAction({type:'recordTime',data:{table:'players'}}),false);
  assert.equal(scopedOperationalAction({type:'queue'}),true);
+ assert.equal(scopedOperationalAction({type:'wishAdmin',data:{status:'已學會',addSong:true}}),false);
+ assert.equal(scopedOperationalAction({type:'wishAdmin',data:{status:'已學會',addSong:false}}),true);
 });

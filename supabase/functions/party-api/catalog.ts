@@ -27,6 +27,9 @@ async function catalogRoom(who:any,requested:any,allowInactive=false){
  const room=rooms.find((r:any)=>r.id===requested||r.slug===requested);
  if(!room)throw Error('找不到主播');
  requireRoom(who,room.id);
+ const spaceId=room.spaceId||'space-001';
+ if(!isSuper(who)&&spaceId!==(who?.spaceId||'space-001'))throw Error('找不到主播');
+ if(spaceId!=='space-001'&&!who)throw Error('請先登入');
  if(!room.active&&!allowInactive&&!isManager(who))throw Error('主播頁暫未開放');
  return room;
 }
@@ -36,7 +39,8 @@ async function catalogOperation(b:any,who:any){
  if(op==='catalogSongbook'){
   const q=String(b.q||'').trim();
   if(q.length>100)return {rows:[],total:0,hasMore:false};
-  return await api('/rest/v1/rpc/papa_catalog_public_page',{query_text:q,page_limit:Math.min(page.limit,20),page_offset:page.offset});
+  const room=await catalogRoom(who,b.streamer||who?.streamer_id||'papa');
+  return await api('/rest/v1/rpc/papa_catalog_public_page_in_space',{query_text:q,page_limit:Math.min(page.limit,20),page_offset:page.offset,requested_space:room.spaceId||'space-001'});
  }
  if(op==='catalogLinkInfo'){
   if(!isManager(who))throw Error('請先登入主播管理');
@@ -46,7 +50,8 @@ async function catalogOperation(b:any,who:any){
  }
  if(op==='catalogFamilySingers'){
   if(!isManager(who)||!catalogUuid(b.familyId))throw Error('請先登入主播管理');
-  return await api('/rest/v1/rpc/papa_catalog_family_singers',{chosen_family:b.familyId});
+  const room=await catalogRoom(who,b.streamer||who.streamer_id||'papa',true);
+  return await api('/rest/v1/rpc/papa_catalog_family_singers_in_space',{chosen_family:b.familyId,requested_space:room.spaceId||'space-001'});
  }
  if(op==='catalogImportMatches'){
   if(!isManager(who)||!Array.isArray(b.rows)||b.rows.length>100)throw Error('匯入資料過多');
@@ -103,7 +108,8 @@ async function catalogOperation(b:any,who:any){
  }
  if(op==='catalogRooms'){
   if(!isManager(who))throw Error('請先登入主播管理');if(!catalogUuid(b.variantId))throw Error('共同版本不正確');
-  return await api('/rest/v1/rpc/papa_catalog_variant_rooms_v2',{chosen_variant:b.variantId,page_limit:page.limit,page_offset:page.offset});
+  const room=isSuper(who)&&!b.streamer?null:await catalogRoom(who,b.streamer||who.streamer_id||'papa',true);
+  return await api('/rest/v1/rpc/papa_catalog_variant_rooms_v2_in_space',{chosen_variant:b.variantId,page_limit:page.limit,page_offset:page.offset,requested_space:room?room.spaceId||'space-001':null});
  }
  if(op==='catalogScan'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
@@ -175,7 +181,8 @@ async function catalogOperation(b:any,who:any){
  if(op==='catalogReviewList'){
   if(b.status==='families'){
    if(!isManager(who))throw Error('請先登入主播管理');
-   const r=await api('/rest/v1/rpc/papa_catalog_families_page_v2',{query_text:String(b.q||'').slice(0,100),
+   const room=isSuper(who)&&!b.streamer?null:await catalogRoom(who,b.streamer||who.streamer_id||'papa',true);
+   const r=await api('/rest/v1/rpc/papa_catalog_families_page_v2_in_space',{requested_space:room?room.spaceId||'space-001':null,query_text:String(b.q||'').slice(0,100),
     lyrics_filter:['all','with','without','proposals'].includes(b.lyricsFilter)?b.lyricsFilter:'all',
     page_limit:page.limit,page_offset:page.offset});
    return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore};

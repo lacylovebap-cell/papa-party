@@ -23,7 +23,7 @@ function server(authUser=''){
      return body.requested_room===row.streamer_id?
       {role:'streamer_admin',streamerId:row.streamer_id,spaceId:'space-001',accountId:row.account_id}:null;
     if(row.player_id!=='__admin__'&&row.role!=='streamer_admin')
-     return (row.space_id||'space-001')===(body.requested_room==='other'?'space-002':'space-001')?
+     return (body.requested_room===null||(row.space_id||'space-001')===(body.requested_room==='other'?'space-002':'space-001'))?
       {role:'player',playerId:row.player_id,loginId:row.login_id,spaceId:row.space_id||'space-001',accountId:row.account_id}:null;
     return null;
    }
@@ -43,6 +43,8 @@ function server(authUser=''){
      {role:'player',spaceId:'space-001'};
    }
    if(path.endsWith('papa_change_manager_password')||path.endsWith('papa_manage_streamer_login'))return responses.change||{ok:true};
+   if(path.endsWith('papa_account_space_list'))return responses.spaces||[];
+   if(path.endsWith('papa_account_space_by_slug'))return responses.space||null;
    throw Error('Unexpected database access '+path);
   };
   load=async()=>upgradePlatform(empty());
@@ -57,6 +59,22 @@ test('president login never forwards a chosen streamer or accepts a client role'
   assert.equal(s.calls()[1].body.session_hash,call.body.session_hash);
   assert.equal(JSON.stringify(r.data).includes('example-password'),false);
  }
+});
+
+test('Space discovery is account-bound, never enumerates customers anonymously, and does not fall through to a room snapshot',async()=>{
+ const s=server();const anonymous=await s.request({op:'spaces',accountId:'forged'});
+ assert.equal(anonymous.status,400);assert.equal(s.calls().some(c=>c.path.endsWith('papa_account_space_list')),false);
+ s.set("calls=[];sessionRows=[{player_id:'P1',role:'player',account_id:'verified-account',space_id:'space-002'}];responses.spaces=[{id:'space-002',slug:'other',name:'Other'}]");
+ const list=await s.request({op:'spaces',token:'device:verified',accountId:'forged',streamer:'papa'});
+ assert.equal(list.status,200);assert.deepEqual(list.data.spaces,[{id:'space-002',slug:'other',name:'Other'}]);
+ assert.equal(s.calls().find(c=>c.path.endsWith('papa_account_space_list')).body.subject,'verified-account');
+ assert.equal(s.calls().find(c=>c.path.endsWith('papa_verified_session_actor')).body.requested_room,null);
+ const denied=await s.request({op:'spaceResolve',token:'device:verified',slug:'not-a-membership'});
+ assert.equal(denied.status,400);assert.match(denied.data.error,/找不到可使用/);
+ s.set("responses.space={id:'space-002',slug:'other',name:'Other'}");
+ const allowed=await s.request({op:'spaceResolve',token:'device:verified',slug:'other'});
+ assert.equal(allowed.status,200);assert.equal(allowed.data.space.id,'space-002');
+ assert.equal(s.calls().some(c=>c.path.endsWith('papa_v2_snapshot')),false);
 });
 test('streamer login resolves its room server-side and cannot elevate itself',async()=>{
  const s=server(),r=await s.request({op:'streamerLogin',password:'own-password',streamer:'papa',role:'super_admin',streamerId:'other'});
