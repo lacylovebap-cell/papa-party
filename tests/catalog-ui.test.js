@@ -9,11 +9,31 @@ const segment=(start,end)=>source.slice(source.indexOf(start),source.indexOf(end
 function contextWithCatalog(values){
  if(values.catalogView){values.catalogView.selectedRows??=new Map();values.catalogView.selectedVariants??=new Map();}
  if(values.sharedBrowse)values.sharedBrowse.selectedRows??=new Map();
- const context=vm.createContext({playerName:()=>'玩家',song:()=>null,...values,catalogGroupKey,canonicalLanguage,eventDescription});
+ const context=vm.createContext({playerName:()=>'玩家',song:()=>null,admin:true,isSuperAdmin:()=>true,invalidateCatalogTabs:()=>{},...values,catalogGroupKey,canonicalLanguage,eventDescription});
  vm.runInContext(segment('function catalogPager(','function selectCatalogRows('),context);
  return context;
 }
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+test('group selection follows actual returned row count and preserves one selection state',async()=>{
+ const calls=[],rows=Array.from({length:230},(_,i)=>({id:'c'+i,groupId:'g',sourceHash:'h'+i}));
+ const catalogView={selected:new Set(),selectedRows:new Map(),selectedSources:new Map(),selectedVariants:new Map()};
+ const context=contextWithCatalog({catalogView,api:async b=>{calls.push(b);return {items:rows.slice(b.offset,b.offset+100),hasMore:b.offset+100<rows.length};}});
+ vm.runInContext(segment('function selectCatalogRows(','async function confirmSameCatalog('),context);
+ context.group={id:'g',total:230,rows:rows.slice(0,100)};
+ await vm.runInContext('fetchCatalogGroupRows(group).then(selectCatalogRows)',context);
+ assert.deepEqual(calls.map(r=>r.offset),[100,200]);assert.equal(catalogView.selected.size,230);
+ assert.equal(catalogView.selectedSources.get('c229'),'h229');assert.equal(catalogView.selectedRows.get('c229').groupId,'g');
+});
+
+test('ordinary streamer can inspect version relations without master-write controls',()=>{
+ const catalogView={section:'approved',page:0,selected:new Set(),items:[{title:'共同歌',variants:[{id:'v',variantId:'v',artist:'歌手',versionLabel:'Live',streamerCount:3,hasSharedLyrics:true}]}]};
+ const context=contextWithCatalog({catalogView,state:{streamers:[]},isSuperAdmin:()=>false,h:escape,button:(label,act)=>'<button data-act="'+act+'">'+label+'</button>',blank:()=>'',time:x=>x});
+ vm.runInContext(segment('function catalogReviewHtml()','async function scanCatalogCandidates()'),context);
+ const html=vm.runInContext('catalogReviewHtml()',context);assert.match(html,/查看主播（3）/);
+ for(const act of ['relationEdit','relationSplit','relationUnlink','relationDelete','catalogSharedLyrics'])assert.ok(!html.includes('data-act="'+act+'"'));
+ assert.ok(!html.includes('單筆待審'));assert.match(html,/我的問題回報/);
+});
 
 test('different-version group asks for one source instead of combining different singers into one version',()=>{
  const items=[{id:'a',title:'作品',artist:'歌手甲',streamerId:'papa'},{id:'b',title:'作品',artist:'歌手乙',streamerId:'michelle'},{id:'c',title:'別首',artist:'第三人'}];let shown;
@@ -226,12 +246,22 @@ function governanceHarness({president=true}={}){
 
 test('shared metadata edit keeps exact concurrency token and leaves unchanged legacy classifications intact',async()=>{
  const u=governanceHarness(),updatedAt='2026-10-04T01:02:03.123456+00:00';
- u.browse.items=[{id:'v1',title:'Song',artist:'Singer',language:'舊分類',updatedAt}];
+ u.browse.items=[{id:'v1',title:'Song',artist:'Singer',language:'舊分類',versionKind:'original',updatedAt}];
  await u.run("editCatalogMetadata('v1')");
  await u.modal.submit(new Map([['title','New'],['artist','Singer'],['versionLabel','Live'],['languageId','__keep__'],['performerTypeId','__keep__']]));
  const call=u.calls[0];assert.equal(call.op,'catalogGovernance');assert.equal(call.action,'update_variant');assert.equal(call.expectedVersions.v1,updatedAt);
  assert.equal('languageId' in call.metadata,false);assert.equal('performerTypeId' in call.metadata,false);assert.equal(call.metadata.title,'New');
  const denied=governanceHarness({president:false});await denied.run("editCatalogMetadata('v1')");assert.equal(denied.modal,undefined);assert.equal(denied.calls.length,0);
+});
+
+test('editing an older search projection loads variant details once before displaying the form',async()=>{
+ const u=governanceHarness();u.browse.items=[{id:'v1',title:'Song',updatedAt:'old'}];
+ u.context.api=async body=>{u.calls.push(body);return {variantId:'v1',title:'Song',artist:'Singer',versionKind:'cover',performerDetail:'duet',versionNote:'preserve',updatedAt:'precise'};};
+ await u.run("editCatalogMetadata('v1')");
+ assert.equal(u.calls.length,1);assert.equal(u.calls[0].op,'catalogVariantInfo');
+ assert.match(u.modal.html,/value="preserve"/);
+ await u.modal.submit(new Map([['title','Song'],['artist','Singer'],['versionLabel',''],['versionKind','cover'],['performerDetail','duet'],['versionNote','preserve'],['languageId','__keep__'],['performerTypeId','__keep__']]));
+ assert.equal(u.calls[1].expectedVersions.v1,'precise');assert.equal(u.calls[1].details.versionNote,'preserve');
 });
 
 test('version grouping uses selected metadata across pages and an existing family selector',async()=>{

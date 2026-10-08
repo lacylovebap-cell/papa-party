@@ -10,6 +10,15 @@ function fixture(){let s=empty();s=mutate(s,{type:'player',data:{name:'樂樂',i
 const player=s=>({role:'player',playerId:s.players[0].playerId,loginId:'456'});
 function request(s,kind='saved',at=t,p=player(s)){return mutate(s,{type:'request',data:{songId:s.songs[0].songId,kind,giftConfirmed:true}},p,at);}
 function queue(s,operation,at=t){if(operation==='complete'&&s.queue[0].status==='waiting'&&s.queue[0].awaitingAcknowledgment)s=mutate(s,{type:'queue',data:{id:s.queue[0].id,operation:'acknowledge',preparationMinutes:0}},admin,at);return mutate(s,{type:'queue',data:{id:s.queue[0].id,operation,...(operation==='approve'?{preparationMinutes:0}:{})}},admin,at);}
+test('hidden songs preserve manager history while blocking public visibility and requests',()=>{
+ let s=queue(request(fixture()),'complete');const id=s.songs[0].songId,history=structuredClone(s.queue),ledger=structuredClone(s.ledger);
+ s=mutate(s,{type:'song',data:{...s.songs[0],hidden:true}},admin,t);
+ assert.equal(publicView(s,null,t).songs.length,0);assert.equal(publicView(s,player(s),t).songs.length,0);
+ assert.equal(publicView(s,admin,t).songs[0].hidden,true);assert.deepEqual(s.queue,history);assert.deepEqual(s.ledger,ledger);
+ for(const kind of ['saved','live'])assert.throws(()=>request(s,kind),/找不到歌曲/);
+ s=mutate(s,{type:'song',data:{...s.songs[0],hidden:false}},admin,t);
+ assert.equal(publicView(s,null,t).songs[0].songId,id);assert.equal(songPlays(s,id),1);
+});
 test('all aliases spend the same ledger; completed only increments once',()=>{let s=fixture();s=request(s);assert.equal(balance(s,s.players[0].playerId),5);assert.equal(songPlays(s,s.songs[0].songId),0);s=queue(s,'complete');assert.equal(songPlays(s,s.songs[0].songId),1);assert.throws(()=>queue(s,'complete'));assert.equal(balance(s,s.players[0].playerId),4);});
 test('cancel releases reservation without adding deposits; permanent delete updates ledger',()=>{let s=request(fixture());s=queue(s,'cancel');assert.equal(balance(s,s.players[0].playerId),5);assert.equal(stats(s,t).saved,0);assert.throws(()=>queue(s,'cancel'));s=queue(s,'delete');assert.equal(s.queue.length,0);assert.equal(balance(s,s.players[0].playerId),5);});
 test('live pending is not received or playable, approval then conversion',()=>{let s=request(fixture(),'live');assert.equal(stats(s,t).received,0);assert.throws(()=>queue(s,'complete'));s=queue(s,'approve');assert.equal(stats(s,t).received,1);assert.equal(songPlays(s,s.songs[0].songId),0);s=queue(s,'store');assert.equal(balance(s,s.players[0].playerId),6);assert.throws(()=>queue(s,'store'));});

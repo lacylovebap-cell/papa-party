@@ -37,6 +37,22 @@ function edge(){
  return {context,calls,request};
 }
 
+test('issue inbox maps paginated rows and binds scope to the authenticated streamer',async()=>{
+ const {request,calls,context}=edge(),original=context.mockApi;
+ context.mockApi=async(path,body)=>{
+  if(path.includes('papa_catalog_issue_page')){calls.push({path,body});return {rows:[{id:'report',description:'check'}],total:1,hasMore:false};}
+  return original(path,body);
+ };
+ context.testActor={role:'streamer_admin',streamer_id:'papa'};
+ const r=await request({op:'catalogIssues',streamer:'michelle',limit:10});
+ assert.equal(r.status,200);assert.equal(r.data.items[0].id,'report');assert.equal(calls.at(-1).body.room_id,'papa');
+ assert.equal((await request({op:'catalogVariantInfo',variantId:'11111111-1111-4111-8111-111111111111'})).status,400);
+ context.testActor={role:'super_admin'};
+ assert.equal((await request({op:'catalogIssues'})).status,200);assert.equal(calls.at(-1).body.room_id,null);
+ context.testActor={role:'player',playerId:'P1'};
+ const before=calls.length;assert.equal((await request({op:'catalogIssues'})).status,400);assert.equal(calls.length,before);
+});
+
 test('room lyric search returns only IDs without a full snapshot or cross-room results',async()=>{
  const {request,calls}=edge();
  const r=await request({op:'songSearchRoom',streamer:'papa',q:'某句歌詞',tags:['情歌'],limit:20,offset:0});
