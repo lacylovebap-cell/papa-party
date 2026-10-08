@@ -133,3 +133,16 @@ test('chat relies on new-message notices while Realtime is healthy and keeps the
   assert.equal(ui.calls.length,beforeFallback+1,'disconnected client resumes the original fallback');
  }finally{ui.restore();}
 });
+
+test('equal player and room identifiers cannot reuse an old Space conversation response or cursor',async()=>{
+ let resolveOld,requests=0;const old=new Promise(resolve=>resolveOld=resolve);
+ const ui=frontend(async b=>{if(b.op==='chatRead')return {ok:true};return ++requests===1?old:{rows:[row(800)],hasMore:false,recipientRead:0,streamerName:'Other room',playerName:'Native player'};});
+ try{
+  ui.state.spaceId='space-001';const opening=ui.chat.open();
+  ui.state.spaceId='space-002';await ui.chat.open();
+  assert.deepEqual(ui.seqs(),[800]);
+  resolveOld({rows:[row(10)],hasMore:false,recipientRead:10,streamerName:'Legacy room',playerName:'Legacy player'});await opening;
+  assert.deepEqual(ui.seqs(),[800]);assert.match(ui.nodes.title.textContent,/Other room/);
+  await ui.chat.refresh();assert.equal(ui.calls.at(-1).after,800);
+ }finally{ui.restore();}
+});

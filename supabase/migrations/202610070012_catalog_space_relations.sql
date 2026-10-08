@@ -165,24 +165,6 @@ create function papa_catalog_family_singers_in_space(chosen_family uuid,requeste
  from papa_catalog_variants v where v.family_id=chosen_family and v.active
 $$;
 
--- Legacy signatures now delegate to Space 001, never the whole platform.
-create or replace function papa_catalog_public_page(query_text text default '',page_limit int default 12,page_offset int default 0)
-returns jsonb language sql stable security definer set search_path=public as $$
- select papa_catalog_public_page_in_space(query_text,page_limit,page_offset,'space-001');
-$$;
-create or replace function papa_catalog_variant_rooms_v2(chosen_variant uuid,page_limit int default 30,page_offset int default 0)
-returns jsonb language sql stable security definer set search_path=public as $$
- select papa_catalog_variant_rooms_v2_in_space(chosen_variant,page_limit,page_offset,'space-001');
-$$;
-create or replace function papa_catalog_families_page_v2(query_text text default '',lyrics_filter text default 'all',page_limit int default 20,page_offset int default 0)
-returns jsonb language sql stable security definer set search_path=public as $$
- select papa_catalog_families_page_v2_in_space(query_text,lyrics_filter,page_limit,page_offset,'space-001');
-$$;
-create or replace function papa_catalog_family_singers(chosen_family uuid)
-returns jsonb language sql stable security definer set search_path=public as $$
- select papa_catalog_family_singers_in_space(chosen_family,'space-001');
-$$;
-
 revoke all on function papa_catalog_public_page_in_space(text,int,int,text),papa_catalog_variant_rooms_v2_in_space(uuid,int,int,text),papa_catalog_families_page_v2_in_space(text,text,int,int,text),papa_catalog_family_singers_in_space(uuid,text) from public,anon,authenticated;
 grant execute on function papa_catalog_public_page_in_space(text,int,int,text),papa_catalog_variant_rooms_v2_in_space(uuid,int,int,text),papa_catalog_families_page_v2_in_space(text,text,int,int,text),papa_catalog_family_singers_in_space(uuid,text) to service_role;
 notify pgrst,'reload schema';

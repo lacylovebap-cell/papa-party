@@ -3,11 +3,11 @@
 const CATALOG_OPS=new Set(['catalogCandidateEdit','catalogLyricSources','catalogLyricAdopt','catalogRooms','catalogSearch','catalogSuggestions','catalogVariantInfo','catalogMergeSame','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom','catalogLinkSong','catalogLinkInfo','catalogFamilySingers','catalogImportMatches','catalogImportLink','catalogIssueReport','catalogIssues','catalogIssueStatus','catalogSongbook']);
 const catalogUuid=(v:any)=>typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);
 const catalogPage=(b:any)=>({limit:Math.max(1,Math.min(50,Math.floor(Number(b.limit)||20))),offset:Math.max(0,Math.min(10000,Math.floor(Number(b.offset)||0)))});
-const catalogActor=(who:any)=>isSuper(who)?'president':who?.role==='streamer_admin'?'streamer:'+who.streamer_id:'player:'+String(who?.playerId||'anonymous');
+const catalogActor=(who:any)=>who?.accountId?'verified:'+JSON.stringify({account_id:who.accountId,role:who.role,space_id:who.spaceId||null,actor_streamer_id:who.streamer_id||null,player_id:who.playerId||null}):isSuper(who)?'president':who?.role==='streamer_admin'?'streamer:'+who.streamer_id:'player:'+String(who?.playerId||'anonymous');
 const CATALOG_COMMON_FIELDS=['title','artist','cat','artistType','version','catalogVariantId'];
 function catalogMetadataView(view:any,rows:any[],management=false){
  const byId=new Map(rows.map((r:any)=>[r.songId,r]));
- return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries([...CATALOG_COMMON_FIELDS,'hasLyrics','lyricsMode',...(management?['catalogStatus','catalogFamilyId']:[])].filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;})};
+ return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries([...CATALOG_COMMON_FIELDS,'hasLyrics','lyricsMode',...(management?['catalogStatus','catalogFamilyId','otherStreamerCount']:[])].filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;})};
 }
 // A local tag/note edit must not persist the displayed shared metadata into the
 // original song. Explicitly changed common fields still become new candidates.
@@ -39,8 +39,10 @@ async function catalogOperation(b:any,who:any){
  if(op==='catalogSongbook'){
   const q=String(b.q||'').trim();
   if(q.length>100)return {rows:[],total:0,hasMore:false};
+  const language=String(b.language||''),performer=String(b.performerType||''),version=String(b.versionKind||'');
+  if([language,performer,version].some(v=>v.length>100))return {rows:[],total:0,hasMore:false};
   const room=await catalogRoom(who,b.streamer||who?.streamer_id||'papa');
-  return await api('/rest/v1/rpc/papa_catalog_public_page_in_space',{query_text:q,page_limit:Math.min(page.limit,20),page_offset:page.offset,requested_space:room.spaceId||'space-001'});
+  return await api('/rest/v1/rpc/papa_catalog_public_page_filtered_in_space',{query_text:q,language_filter:language,performer_filter:performer,version_filter:version,page_limit:Math.min(page.limit,20),page_offset:page.offset,requested_space:room.spaceId||'space-001'});
  }
  if(op==='catalogLinkInfo'){
   if(!isManager(who))throw Error('請先登入主播管理');
@@ -109,7 +111,7 @@ async function catalogOperation(b:any,who:any){
  if(op==='catalogRooms'){
   if(!isManager(who))throw Error('請先登入主播管理');if(!catalogUuid(b.variantId))throw Error('共同版本不正確');
   const room=isSuper(who)&&!b.streamer?null:await catalogRoom(who,b.streamer||who.streamer_id||'papa',true);
-  return await api('/rest/v1/rpc/papa_catalog_variant_rooms_v2_in_space',{chosen_variant:b.variantId,page_limit:page.limit,page_offset:page.offset,requested_space:room?room.spaceId||'space-001':null});
+  return await api('/rest/v1/rpc/papa_catalog_variant_rooms_v3_in_space',{chosen_variant:b.variantId,page_limit:page.limit,page_offset:page.offset,requested_space:room?room.spaceId||'space-001':null});
  }
  if(op==='catalogScan'){
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
@@ -182,10 +184,12 @@ async function catalogOperation(b:any,who:any){
   if(b.status==='families'){
    if(!isManager(who))throw Error('請先登入主播管理');
    const room=isSuper(who)&&!b.streamer?null:await catalogRoom(who,b.streamer||who.streamer_id||'papa',true);
-   const r=await api('/rest/v1/rpc/papa_catalog_families_page_v2_in_space',{requested_space:room?room.spaceId||'space-001':null,query_text:String(b.q||'').slice(0,100),
-    lyrics_filter:['all','with','without','proposals'].includes(b.lyricsFilter)?b.lyricsFilter:'all',
+   if([b.q,b.language,b.versionKind].some(v=>String(v||'').length>100))throw Error('共同曲庫篩選不正確');
+   const r=await api('/rest/v1/rpc/papa_catalog_families_page_v3_in_space',{query_text:String(b.q||''),
+    lyrics_filter:(isSuper(who)?['all','with','without','proposals']:['all','with','without']).includes(b.lyricsFilter)?b.lyricsFilter:'all',
+    language_filter:String(b.language||''),version_filter:String(b.versionKind||''),viewer_room:room?.id||null,requested_space:room?room.spaceId||'space-001':null,
     page_limit:page.limit,page_offset:page.offset});
-   return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore};
+   return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore,filters:r.filters};
   }
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
   if(['singles','duplicates','families'].includes(b.status)){

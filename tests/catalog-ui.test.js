@@ -3,13 +3,20 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {catalogGroupKey,canonicalLanguage,eventDescription} from '../src/catalog-tools.js';
+import {drawSong} from '../src/fate.js';
 
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const segment=(start,end)=>source.slice(source.indexOf(start),source.indexOf(end));
+test('new queue draws by the same homepage tag rules and preserves the chosen player',()=>{
+ const picker={value:'',closest:()=>null,dispatchEvent:()=>{}},player={value:'player-unchanged'};
+ const context=vm.createContext({Event,drawSong,drawnStreamerSong:null,toast:()=>{},state:{currentStreamer:{id:'papa'},songs:[{songId:'sweet',title:'甜歌',tags:['甜歌'],streamer_id:'papa'},{songId:'sad',title:'傷感',tags:['傷感'],streamer_id:'papa'},{songId:'other',title:'其他主播',tags:['甜歌'],streamer_id:'b'}]},$:sel=>sel.includes('songId')?picker:sel==='#proxy-fate-category'?{value:'tag:甜歌'}:player});
+ vm.runInContext(source.split(/\r?\n/).find(x=>x.startsWith('function drawForStreamer()')),context);
+ vm.runInContext('drawForStreamer()',context);assert.equal(picker.value,'sweet');assert.equal(player.value,'player-unchanged');
+});
 function contextWithCatalog(values){
  if(values.catalogView){values.catalogView.selectedRows??=new Map();values.catalogView.selectedVariants??=new Map();}
  if(values.sharedBrowse)values.sharedBrowse.selectedRows??=new Map();
- const context=vm.createContext({playerName:()=>'玩家',song:()=>null,admin:true,isSuperAdmin:()=>true,invalidateCatalogTabs:()=>{},...values,catalogGroupKey,canonicalLanguage,eventDescription});
+ const context=vm.createContext({state:{currentStreamer:{id:'papa'},streamers:[]},playerName:()=>'玩家',song:()=>null,admin:true,isSuperAdmin:()=>true,invalidateCatalogTabs:()=>{},...values,catalogGroupKey,canonicalLanguage,eventDescription});
  vm.runInContext(segment('function catalogPager(','function selectCatalogRows('),context);
  return context;
 }
@@ -33,6 +40,22 @@ test('ordinary streamer can inspect version relations without master-write contr
  const html=vm.runInContext('catalogReviewHtml()',context);assert.match(html,/查看主播（3）/);
  for(const act of ['relationEdit','relationSplit','relationUnlink','relationDelete','catalogSharedLyrics'])assert.ok(!html.includes('data-act="'+act+'"'));
  assert.ok(!html.includes('單筆待審'));assert.match(html,/我的問題回報/);
+ assert.doesNotMatch(html,/有可採用歌詞/);assert.match(html,/語言篩選/);assert.match(html,/版本篩選/);assert.match(html,/data-act="catalogReport"/);assert.match(html,/data-relation-select/);assert.match(html,/批量加入我的歌本/);
+});
+
+test('relation selection survives paging, skips existing songs and reuses the existing batch-add flow',async()=>{
+ const catalogView={versionSelected:new Set(),versionRows:new Map()},sharedBrowse={};let invoked=0;
+ const context=vm.createContext({catalogView,sharedBrowse,addSharedSongs:async()=>invoked++});
+ vm.runInContext(segment('function selectRelationRows(','async function addSharedSongs()'),context);
+ vm.runInContext("selectRelationRows([{id:'v1'},{id:'existing',alreadyAdded:true}]);selectRelationRows([{id:'v2'}]);addRelationSongs()",context);
+ assert.deepEqual([...catalogView.versionSelected],['v1','v2']);assert.deepEqual([...sharedBrowse.selected],['v1','v2']);assert.equal(invoked,1);
+});
+
+test('relation member modal renders canonical streamer names instead of raw identifiers',()=>{
+ const context=vm.createContext({state:{streamers:[]},h:escape,isSuperAdmin:()=>false,button:()=>'',blank:()=>''});
+ vm.runInContext(segment('function relationRoomRows(','async function relationRoomsPage('),context);
+ const html=vm.runInContext("relationRoomRows({items:[{streamerId:'uuid-secret',streamerName:'咪醬',songs:[{title:'Honey',artist:'歌手'}]},{streamerId:'papa',streamerName:'怕怕',songs:[]}]},'v')",context);
+ assert.match(html,/咪醬/);assert.match(html,/怕怕/);assert.doesNotMatch(html,/uuid-secret|>papa</);
 });
 
 test('different-version group asks for one source instead of combining different singers into one version',()=>{

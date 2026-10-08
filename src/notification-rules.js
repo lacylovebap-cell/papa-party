@@ -34,4 +34,4 @@ export function canonicalNoticeLink(notice,streamerSlug){return {
  streamerSlug:streamerSlug||'papa',section:['__admin__','__super__'].includes(notice.recipient)?'admin':'center',
  entityType:notice.type||null,entityId:notice.entity_id||null,notificationId:notice.id
 };}
-export function webNoticePath(link){return './?streamer='+encodeURIComponent(link.streamerSlug)+'#'+link.section;}
+export function webNoticePath(link){return './?streamer='+encodeURIComponent(link.streamerSlug)+(link.spaceId&&link.spaceId!=='space-001'?'&spaceId='+encodeURIComponent(link.spaceId):'')+'#'+link.section;}

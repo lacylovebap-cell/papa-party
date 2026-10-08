@@ -61,6 +61,29 @@ test('queue completion uses one room snapshot and the existing notification tran
  assert.equal(JSON.stringify(result.data).includes('private source lyric'),false);
 });
 
+test('version relation filters are bounded and ordinary streamers cannot query adoptable lyrics or another room',async()=>{
+ const {context,calls,request}=edge(),original=context.mockApi;
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_catalog_families_page_v3_in_space')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['華語'],versionKinds:['cover']}};}
+  if(path.endsWith('papa_catalog_variant_rooms_v3_in_space')){calls.push({path,body});return {items:[{streamerName:'怕怕'}],total:1};}
+  return original(path,body);
+ };
+ context.testActor={role:'streamer_admin',streamer_id:'michelle'};
+ const r=await request({op:'catalogReviewList',status:'families',streamer:'michelle',q:'Honey',language:'華語',versionKind:'cover',lyricsFilter:'proposals',limit:1000,offset:2});
+ assert.equal(r.status,200);assert.equal(calls.at(-1).body.viewer_room,'michelle');assert.equal(calls.at(-1).body.page_limit,50);assert.equal(calls.at(-1).body.language_filter,'華語');assert.equal(calls.at(-1).body.version_filter,'cover');assert.equal(calls.at(-1).body.lyrics_filter,'all');assert.deepEqual(r.data.filters.languages,['華語']);
+ assert.equal((await request({op:'catalogReviewList',status:'families',streamer:'papa'})).status,400);
+ assert.equal((await request({op:'catalogRooms',variantId:'11111111-1111-4111-8111-111111111111'})).data.items[0].streamerName,'怕怕');
+ assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
+});
+
+test('public common-book classification uses one bounded RPC and no business snapshot',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi;
+ context.mockApi=async(path,body)=>{if(path.endsWith('papa_catalog_public_page_filtered_in_space')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['英語'],performerTypes:['團體'],versionKinds:['cover']}};}return old(path,body);};
+ const response=await request({op:'catalogSongbook',q:'Honey',language:'英語',performerType:'團體',versionKind:'cover',limit:1000,offset:12});
+ assert.equal(response.status,200);assert.equal(calls.filter(c=>c.path.includes('public_page_filtered')).length,1);assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1).body)),{query_text:'Honey',language_filter:'英語',performer_filter:'團體',version_filter:'cover',page_limit:20,page_offset:12,requested_space:'space-001'});
+ assert.equal((await request({op:'catalogSongbook',language:'x'.repeat(101)})).status,200);assert.equal(calls.filter(c=>c.path.includes('public_page_filtered')).length,1);
+});
+
 test('issue inbox maps paginated rows and binds scope to the authenticated streamer',async()=>{
  const {request,calls,context}=edge(),original=context.mockApi;
  context.mockApi=async(path,body)=>{
@@ -204,16 +227,16 @@ test('catalog singer relationships use server-resolved Space and cannot accept c
  const {context,calls,request}=edge(),old=context.mockApi;
  context.mockApi=async(path,body)=>{
   if(path.includes('papa_streamer_directory')){calls.push({path,body});return [{id:'papa',slug:'papa',active:true,spaceId:'space-001'},{id:'other',slug:'other',active:true,spaceId:'space-002'}];}
-  if(path.includes('papa_catalog_public_page_in_space')||path.includes('papa_catalog_family_singers_in_space')||path.includes('papa_catalog_variant_rooms_v2_in_space')||path.includes('papa_catalog_families_page_v2_in_space')){calls.push({path,body});return {rows:[],items:[],total:0,hasMore:false};}
+  if(path.includes('papa_catalog_public_page_filtered_in_space')||path.includes('papa_catalog_family_singers_in_space')||path.includes('papa_catalog_variant_rooms_v3_in_space')||path.includes('papa_catalog_families_page_v3_in_space')){calls.push({path,body});return {rows:[],items:[],total:0,hasMore:false};}
   return old(path,body);
  };
  const family='11111111-1111-4111-8111-111111111111';
  context.testActor={role:'player',playerId:'P1',spaceId:'space-001'};
  let result=await request({op:'catalogSongbook',streamer:'papa',spaceId:'space-002',requested_space:'space-002'});
  assert.equal(result.status,200);assert.equal(calls.at(-1).body.requested_space,'space-001');
- const before=calls.filter(c=>c.path.includes('papa_catalog_public_page_in_space')).length;
+ const before=calls.filter(c=>c.path.includes('papa_catalog_public_page_filtered_in_space')).length;
  assert.equal((await request({op:'catalogSongbook',streamer:'other'})).status,400);
- assert.equal(calls.filter(c=>c.path.includes('papa_catalog_public_page_in_space')).length,before);
+ assert.equal(calls.filter(c=>c.path.includes('papa_catalog_public_page_filtered_in_space')).length,before);
  context.testActor=null;assert.equal((await request({op:'catalogSongbook',streamer:'other'})).status,400);
  context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
  for(const body of [{op:'catalogFamilySingers',familyId:family},{op:'catalogRooms',variantId:family},{op:'catalogReviewList',status:'families'}]){
@@ -253,22 +276,44 @@ test('communication directory binds server Space and lightweight manager paths n
  assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
 });
 
+test('catalog audit actor is the verified Account and Space, never caller-provided identity',async()=>{
+ const {context,calls,request}=edge();
+ context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001',accountId:'22222222-2222-4222-8222-222222222222'};
+ const result=await request({op:'catalogLanguageFilterSave',streamer:'papa',mode:'auto',languageIds:[],actor_id:'president',accountId:'forged',spaceId:'space-002'});
+ assert.equal(result.status,200,JSON.stringify(result.data));
+ const key=calls.at(-1).body.actor_id;assert.ok(key.startsWith('verified:'));
+ assert.deepEqual(JSON.parse(key.slice(9)),{account_id:context.testActor.accountId,role:'streamer_admin',space_id:'space-001',actor_streamer_id:'papa',player_id:null});
+});
+
+test('legacy cross-room song search uses a bounded authorized-Space RPC instead of a platform snapshot',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi;
+ context.mockApi=async(path,body)=>{if(path.endsWith('papa_song_search_in_space')){calls.push({path,body});return [{songId:'S1',title:'Honey',artist:'Artist',streamer:'怕怕',slug:'papa'}];}return old(path,body);};
+ context.testActor={role:'player',playerId:'P1',spaceId:'space-001'};
+ const result=await request({op:'songSearch',streamer:'papa',query:'Honey',spaceId:'space-002'});
+ assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.songs[0].songId,'S1');
+ assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1).body)),{query_text:'Honey',requested_space:'space-001',page_limit:100});
+ assert.equal(calls.some(c=>c.path.includes('snapshot')),false);
+ const count=calls.filter(c=>c.path.endsWith('papa_song_search_in_space')).length;
+ await request({op:'songSearch',query:''});assert.equal(calls.filter(c=>c.path.endsWith('papa_song_search_in_space')).length,count);
+ assert.equal((await request({op:'songSearch',query:'x'.repeat(101)})).status,400);
+});
+
 test('song editing and learned wishes use one guarded room snapshot and never hydrate unrelated lyric bodies',async()=>{
  const {context,calls,request}=edge(true),now=new Date().toISOString();
  let state=mutate(empty(),{type:'song',data:{title:'Song',artist:'Artist',lyrics:'original-private-body',tags:['甜歌']}},{role:'admin'},now);
  const id=state.songs[0].songId;state.wishes=[{id:'W1',streamer_id:'papa',title:'Learned',artist:'Artist',status:'收到',playerId:'P1'}];
  const original=context.mockApi;context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
  context.mockApi=async(path,body)=>{
-  if(path.endsWith('papa_v2_room_write_snapshot')){calls.push({path,body});return {revision:7,rows:stateEntries(state).map(row=>row.kind==='songs'&&!body.selected_song_ids.includes(row.id)?{...row,data:{...row.data,lyrics:undefined}}:row)};}
+  if(path.endsWith('papa_v2_room_write_snapshot_in_space')){calls.push({path,body});return {revision:7,rows:stateEntries(state).map(row=>row.kind==='songs'&&!body.selected_song_ids.includes(row.id)?{...row,data:{...row.data,lyrics:undefined}}:row)};}
   if(path.endsWith('papa_room_admin_commit')){calls.push({path,body});assert.equal(body.requested_room,'papa');assert.equal(body.actor_context.roomWriteScoped,true);return 8;}
   return original(path,body);
  };
  for(const action of [{type:'song',data:{songId:id,title:'Edited',artist:'Artist',tags:['甜歌']}},{type:'songsBulk',data:{songIds:[id],new:true}},{type:'wishAdmin',data:{id:'W1',status:'已學會',addSong:true}}]){
   const from=calls.length,result=await request({op:'mutate',revision:7,streamer:'papa',action});
   assert.equal(result.status,200,JSON.stringify(result.data));
-  const current=calls.slice(from),snapshot=current.find(c=>c.path.endsWith('papa_v2_room_write_snapshot'));
+  const current=calls.slice(from),snapshot=current.find(c=>c.path.endsWith('papa_v2_room_write_snapshot_in_space'));
   assert.deepEqual(Array.from(snapshot.body.selected_song_ids),action.type==='song'?[id]:[]);
-  assert.equal(current.filter(c=>c.path.endsWith('papa_v2_room_write_snapshot')).length,1);
+  assert.equal(current.filter(c=>c.path.endsWith('papa_v2_room_write_snapshot_in_space')).length,1);
   assert.equal(current.filter(c=>c.path.endsWith('papa_room_admin_commit')).length,1);
   assert.equal(current.some(c=>c.path.endsWith('papa_v2_snapshot')),false);
   assert.equal(JSON.stringify(result.data).includes('original-private-body'),false);

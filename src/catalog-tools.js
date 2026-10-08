@@ -1,4 +1,18 @@
 export const canonicalLanguage=value=>value==='國語'?'華語':value;
+// Search uses the existing local button handler. IME, multiline input and
+// unrelated forms retain their normal keyboard behavior.
+export function installSearchShortcuts(root=document,instantSearch={}){
+ root.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'||e.defaultPrevented||e.isComposing||e.keyCode===229||e.repeat||e.ctrlKey||e.altKey||e.metaKey||e.shiftKey)return;
+  const input=e.target;if(input?.tagName!=='INPUT'||!['text','search','email',''].includes(input.type||''))return;
+  if(input.closest('.entity-picker'))return;
+  if(instantSearch[input.id]){e.preventDefault();instantSearch[input.id](input);return;}
+  const scope=input.closest('.toolbar,.catalog-browse-filters,[data-board-audience],form');if(!scope)return;
+  const buttons=[...scope.querySelectorAll('button')].filter(b=>/^搜尋(?:玩家|對象|歌曲)?$/.test(b.textContent.trim())&&!b.hidden);
+  if(buttons.length!==1)return;
+  e.preventDefault();if(!buttons[0].disabled)buttons[0].click();
+ });
+}
 export const catalogGroupKey=row=>String(row?.title||'').normalize('NFKC').toLocaleLowerCase().replace(/[\s\p{P}\p{S}]/gu,'');
 export function eventDescription(event,{playerName=()=>'',songName=()=>'',roomName=id=>id}={}){
  const row=event.after_data||event.before_data||{},details=row.details||{};
@@ -27,7 +41,7 @@ export function eventDescription(event,{playerName=()=>'',songName=()=>'',roomNa
  if(event.entity_kind==='ledger')return `${actor}調整${player}的存歌紀錄${row.amount!=null?'（'+row.amount+' 首）':''}`;
  if(event.entity_kind==='chat')return `${player}與${roomName(event.streamer_id)}的私訊新增訊息`;
  const kinds={songs:'歌曲',crowns:'冠歌',cards:'卡片',wishes:'許願',settings:'直播設定',meta:'主播設定',board:'留言'};
- return `${actor}${event.action?.includes('delete')?'刪除':event.before_data?'更新':'新增'}${kinds[event.entity_kind]||'操作紀錄'}${row.title||row.songSnapshot?.title?'《'+title+'》'+(artist?'－'+artist:''):''}`;
+ return `${actor}${event.action?.includes('delete')||event.before_data&&event.after_data===null?'刪除':event.before_data?'更新':'新增'}${kinds[event.entity_kind]||'操作紀錄'}${row.title||row.songSnapshot?.title?'《'+title+'》'+(artist?'－'+artist:''):''}`;
 }
 export const actionHints={
  catalogReviewSame:'將你確認相同的來源連到同一筆共同歌曲；主播標籤、Key、歌詞及扣歌設定保留。',

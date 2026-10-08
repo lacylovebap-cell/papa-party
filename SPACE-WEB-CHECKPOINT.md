@@ -1,4 +1,13 @@
-# Architecture continuation — 2026-10-08
+# Architecture continuation — 2026-10-09
+
+## Current continuation checkpoint
+
+- Production remains `d2ef1d8c4c907f34e7984d810a450e2bd145547d` / `10.08-UI.2`. Latest main is integrated locally, including bounded catalog filters, search shortcuts, tagged draw and compact song actions. Older release paragraphs below are historical evidence.
+- Nineteen local architecture migrations are complete: the fifteen foundations plus `202610080011`–`202610080014`. None has been deployed. Filtered catalog relations, private lyric-proposal visibility, native player/room transactions, chat/board/audit contexts and legacy song search now enforce canonical Space boundaries. Native settings audit stores only the changed room's public settings; operational cancellation guards reject missing/null status, completed entries and malformed references. Existing Space 001 contracts and private song sources remain intact.
+- Targeted integration: **80/80 passed** (`../space-integration-verified-1009.txt`). Subsequent bounded legacy catalog compatibility/chronology checks passed **3/3**; client cache/catalog/notification checks passed **35/35**. Counts overlap and are not full regression. Cache/draft/admin-tab and asynchronous communication identities include Space; no new timer, polling or subscription.
+- Two anonymous production read-only measurements: homepage payload **169,649 bytes**, common catalog 12-family page **5,594 bytes** (`../space-egress-readonly-benchmark-1009.json`). These measure response size only, not request frequency, database-to-Edge transfer or billing savings. No live business writes were made.
+- Next work is atomic durable-device Space switching and revalidated Home/Last Space preferences. Keep the explicit native-page activation barrier until canonical routing, provisioning, import/publish/registry and all remaining original phases are complete. Android/Windows deliverables and final integrated regression/build/deployment remain pending.
+- The existing real-browser encrypted-storage verification below is still valid for the foundation. Repeat only affected lifecycle checks once explicit Space switching is integrated.
 
 Architecture base: `f5925ba73fa6c0a63e7c17ea43d1a01b661632a7`, `10.08-CATALOG.2`.
 Latest formal release: `97b1f24d94ce2782198215aa64ae35d6cb3a6f26`, `10.08-EGRESS.1`. The three lightweight metadata paths were independently backported to the existing production architecture and deployed without any foundation migrations. Edge deployed and GitHub Pages built at this exact SHA. Production catalog and unauthorized-upload smoke passed; browser console was clean. Grouped all-result/group-checkbox selection already existed in CATALOG.2 and remains preserved, with additional cross-page validation. Evidence: `../metadata-egress-deployment-result.json`. Merge latest main before final architecture release; do not overwrite this production optimization or cache version.

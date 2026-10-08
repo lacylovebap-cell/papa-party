@@ -36,7 +36,7 @@ test('shared song master stays global while singer pages, counts and directory r
   values('papa','queue','Q1','complete','legacy-server');
  insert into papa_notifications(streamer_id,recipient) values('papa','P1');`);
 
- for(const file of fs.readdirSync('supabase/migrations').filter(f=>/^2026100100\d\d_/.test(f)||/^20261005000[123]_/.test(f)||/^20261008000[1-8]_/.test(f)).sort())await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
+ for(const file of fs.readdirSync('supabase/migrations').filter(f=>/^2026100100\d\d_/.test(f)||/^20261005000[123]_/.test(f)||/^2026100800(?:0[1-9]|10)_/.test(f)).sort())await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
  await db.exec(fs.readFileSync('supabase/migrations/202610070001_space_foundation.sql','utf8'));
  await q("insert into papa_spaces(id,slug,display_name) values('space-002','other-space','Other')");
  await q("insert into papa_space_streamers(streamer_id,space_id) values('other-room','space-002')");
@@ -49,6 +49,7 @@ test('shared song master stays global while singer pages, counts and directory r
  const before=await q('select kind,id,data from papa_v2_entities order by kind,id');
  const links=await q('select * from papa_catalog_song_links order by song_id');
  await db.exec(fs.readFileSync('supabase/migrations/202610070012_catalog_space_relations.sql','utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/202610080011_catalog_filtered_space.sql','utf8'));
  const directory=await rpc('papa_streamer_directory');assert.equal(directory.find(r=>r.id==='other-room').spaceId,'space-002');
  for(const [space,expected] of [['space-001',['michelle','papa']],['space-002',['other-room']]]){
   const publicPage=await rpc('papa_catalog_public_page_in_space',['',12,0,space]);

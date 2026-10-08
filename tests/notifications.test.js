@@ -20,4 +20,5 @@ test('canonical notification link carries one Space/entity identity for every pl
  assert.equal(canonicalNoticeLink({...notice,recipient:'P1'},'mi chelle').section,'center');
  assert.equal(webNoticePath(canonicalNoticeLink({...notice,recipient:'P1'},'mi chelle')),'./?streamer=mi%20chelle#center');
  assert.equal(JSON.stringify(link).includes('https://'),false,'native adapters receive a URL-independent target');
+ assert.equal(webNoticePath(canonicalNoticeLink({...notice,space_id:'space-002'},'other-room')),'./?streamer=other-room&spaceId=space-002#admin','native Space notification retains its canonical Space when opened on Web');
 });
