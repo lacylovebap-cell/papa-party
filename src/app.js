@@ -9,12 +9,17 @@ import {createNotifications} from './notifications.js?v=10.08-UI.2';
 import {API,PUBLISHABLE_KEY} from './config.js';
 import {createWebDeviceLogin} from './web-device-login.js';
 import {roomStorageKey} from './communication-context.js';
+import {createWebSpaceEntry} from './web-space-entry.js';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js';
 import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour} from './core.js?v=10.08-UI.2';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let deviceLogin=null;
 const demo=new URLSearchParams(location.search).has('demo')||location.pathname.endsWith('/preview.html'),roomCacheKey=k=>roomStorageKey(k,{spaceId:new URLSearchParams(location.search).get('spaceId'),streamerSlug:new URLSearchParams(location.search).get('streamer')}),get=k=>{try{return JSON.parse(localStorage.getItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k)));}catch{return null;}},put=(k,v)=>localStorage.setItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k),JSON.stringify(['player','admin'].includes(k)&&deviceLogin?deviceLogin.persisted(v):v));
 let state=empty(),full=null,session=get('player'),admin=get('admin'),draft=get('draft'),offset=0,busy=false,route=location.hash.slice(1)||'home',tab=new URLSearchParams(location.search).get('adminTab')||get('adminTab')||'queue',subtab=new URLSearchParams(location.search).get('tab')||'overview',selectedPlayer=new URLSearchParams(location.search).get('player')||null,photoIndex=0,fateId=null,fateSeen=[],fateCategory='all',importRows=[],importKind='players',importText='',migrationPreview=null;
 const streamerSlug=new URLSearchParams(location.search).get('streamer')||'papa';
+const spaceMount=new URL('../',import.meta.url).href;
+let entryPending=!demo&&requiresSpaceEntry(location.href,spaceMount),
+ entryController=null,entryChoices=[],entryOffset=0,entryMembershipCount=0,entryIdentity=null,legacyEntryRoomsLoaded=false;
 let tagsExpanded=false,drawnStreamerSong=null,eventPage=0,proxyDraft=null;let signatures={};let queueHistory=false;const selectedQueue=new Set();
 let lastFullRefreshAt=0,refreshInFlight=null;
 const selectedSongs=new Set();
@@ -71,6 +76,44 @@ async function deviceTransport(body){
  return data;
 }
 if(!demo)deviceLogin=createWebDeviceLogin({transport:deviceTransport,appVersion:'space-foundation-1008'});
+function saveEntryIdentity(identity){
+ if(identity?.role==='player'){session=identity;put('player',session);}
+ else {admin=identity;put('admin',admin);}
+}
+function showSpaceEntry(result=null){
+ if(!state.currentStreamer)state=publicView(upgradePlatform(empty()),null,clock(),'papa');
+ header();entryChoices=result?.spaces||[];
+ const choices=entryChoices.map(space=>button(h(space.name),'enterSpace',space.id,'tiny')).join('');
+ $('#app').innerHTML=card('PA Party',!entryIdentity
+  ?'<p>登入後進入你已加入的空間。</p><div class="actions">'+button('登入','login','','primary')+button('管理登入','admin')+'</div>'
+  :choices?'<p>選擇你的空間。</p><div class="actions">'+choices+'</div>'+((entryOffset||result.hasMore)?'<div class="pagination">'+button('上一頁','entryPage','-1','tiny',entryOffset?'':'disabled')+button('下一頁','entryPage','1','tiny',result.hasMore?'':'disabled')+'</div>':'')
+  :'<p>目前沒有可進入的空間。請聯絡管理者確認使用權限。</p><div class="actions">'+button('登出',entryIdentity.role==='player'?'logout':'adminLogout')+'</div>',true);
+}
+async function enterSpace(space){
+ if(!entryIdentity)throw Error('請先登入');
+ let next;
+ if(entryIdentity.device)next=await entryController.enter(space);
+ else {if(space.id!=='space-001')throw Error('此瀏覽器尚不支援跨空間登入，請使用支援安全裝置登入的瀏覽器');next={identity:entryIdentity,url:spaceDestination(location.href,spaceMount,space,{page:route==='admin'?'admin':'home'})};}
+ saveEntryIdentity(next.identity);draft=null;signatures={};roomSearch.generation++;clearTimeout(roomSearch.timer);
+ if(new URL(next.url).href!==location.href){location.replace(next.url);return false;}
+ entryPending=false;return true;
+}
+async function openSpaceEntry({list=false,offset=0}={}){
+ entryPending=true;entryOffset=offset;entryIdentity=route==='admin'?admin:session||admin;
+ if(!entryIdentity){showSpaceEntry();return false;}
+ let result;
+ if(entryIdentity.device){
+  if(!deviceLogin)throw Error('請使用原本登入裝置');
+  entryController=createWebSpaceEntry({deviceLogin,transport:deviceTransport,identity:entryIdentity,url:location.href,mountUrl:spaceMount});
+  result=await entryController.resolve({list,offset});entryIdentity={...entryIdentity,...result.identity};saveEntryIdentity(entryIdentity);
+ }else {
+  const slug=list?null:requestedSpace(location.href,spaceMount),response=await deviceTransport({op:'spaceEntry',token:entryIdentity.token,slug,streamer:entryIdentity.streamerSlug||streamerSlug,limit:50,offset});
+  result={...response,...chooseSpaceEntry(response,list?{}:entryIdentity,slug)};
+ }
+ entryMembershipCount=result.membershipCount||0;
+ if(result.kind==='destination')return enterSpace(result.space);
+ showSpaceEntry(result);return false;
+}
 async function api(body){
  const identity=(isAdmin()||body.management)?admin:session;
  if(identity?.device){
@@ -92,12 +135,13 @@ async function api(body){
  if(data.signatures)signatures=data.signatures;if(data.now)offset=timeValue(data.now)-Date.now();return data;
 }
 async function refresh(force=false){
- if(busy)return;
+ if(busy||entryPending)return;
  if(refreshInFlight){await refreshInFlight;if(force)return refresh(true);return;}
  const run=(async()=>{
   if(demo||draft&&isAdmin()){full=(draft&&isAdmin()?draft.state:null)||get('demo')||full;state=publicView(full,actor(),clock(),streamerSlug);render();return;}
   const fullRead=force||Date.now()-lastFullRefreshAt>=300000;
   const r=await api({op:'read',revision:fullRead?-1:state.revision});
+  if(entryPending)return;
   if(r.state){state={...state,...r.state};if(fullRead)lastFullRefreshAt=Date.now();render();}
   if(!r.ready&&!isAdmin())$('#app').innerHTML=`<section class="card"><h2>歌本整理中 ♡</h2><p>管理員完成資料移轉後就能開始點歌。</p>${button('管理入口','admin')}</section>`;
  })();
@@ -106,13 +150,13 @@ async function refresh(force=false){
 async function dispatch(type,data){if(busy)throw new Error('上一筆還在處理');busy=true;try{if(demo||draft&&isAdmin()){const before=structuredClone(full);full=mutate(full,{type,data,streamer:streamerSlug},actor(),clock());notifications.localChange(before,full,{type,data,streamer:streamerSlug},actor());if(draft&&isAdmin()){draft.state=full;put('draft',draft);}else put('demo',full);state=publicView(full,actor(),clock(),streamerSlug);}else{const r=await api({op:'mutate',revision:state.revision,action:{type,data}});state={...state,...r.state};}if(['song','songsBulk'].includes(type))invalidateCatalogTabs();render();notifications.refresh().catch(()=>{});}finally{busy=false;}}
 function switchStreamer(slug){if(slug===streamerSlug)return;location.href=streamerDestination(location.href,slug,{role:admin?.role,managedSlug:admin?.streamerSlug,subtab,adminTab:tab});}
 document.addEventListener('change',e=>{if(e.target.id==='header-streamer')switchStreamer(e.target.value);if(e.target.id==='fate-category'){fateCategory=e.target.value;fateSeen=[];fateId=null;$('#fate-result').innerHTML=fateResultHtml();}});
-async function go(next){if(next==='admin'&&admin?.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(location.href);u.hash='admin';location.href=streamerDestination(u.href,admin.streamerSlug,{role:admin.role,managedSlug:admin.streamerSlug});return;}signatures={};route=next;location.hash=next;filters={q:'',tags:[],language:''};pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);if(next==='admin'&&!admin){route='home';await adminLogin();return;}if(next==='center'&&!session){route='home';await loginDialog();return;}await refresh(true);if(next==='common-book')await loadCommonBook(0);if(pendingCommonRequest&&session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}}
-const notifications=createNotifications({api:b=>api({...b,management:!!admin,streamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug}),apiUrl:API,apiKey:PUBLISHABLE_KEY,context:()=>({spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',deviceSessionId:(admin||session)?.sessionId,demo:demo||!!(draft&&isAdmin()),role:admin?(admin.role||'super_admin'):'player',recipient:admin?(isSuperAdmin()?'__super__':'__admin__'):session?.playerId,streamer:admin?(isSuperAdmin()?'__global__':admin.streamerSlug):streamerSlug,streamerName:admin&&isSuperAdmin()?'全部主播':state.currentStreamer?.display_name}),toast,onUpdate:()=>{chat.refresh().catch(()=>{});if(!busy&&!$('#dialog').open&&!document.activeElement?.matches('input,textarea,select'))refresh().catch(()=>{});}});
-const chat=createChat({api,context:()=>({spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',manager:isAdmin(),role:isAdmin()?admin?.role:'player',playerId:session?.playerId,streamer:streamerSlug,streamerName:hostName(),demo:demo||!!draft}),toast,onRead:()=>notifications.refresh().catch(()=>{}),realtimeAvailable:()=>notifications.realtimeAvailable()});
+async function go(next){if(entryPending){if(next==='admin'&&!admin){await adminLogin();return;}await openSpaceEntry();return;}if(next==='admin'&&admin?.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(location.href);u.hash='admin';location.href=streamerDestination(u.href,admin.streamerSlug,{role:admin.role,managedSlug:admin.streamerSlug});return;}signatures={};route=next;location.hash=next;filters={q:'',tags:[],language:''};pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);if(next==='admin'&&!admin){route='home';await adminLogin();return;}if(next==='center'&&!session){route='home';await loginDialog();return;}await refresh(true);if(next==='common-book')await loadCommonBook(0);if(pendingCommonRequest&&session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}}
+const notifications=createNotifications({api:b=>api({...b,management:!!admin,streamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug}),apiUrl:API,apiKey:PUBLISHABLE_KEY,context:()=>({spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',deviceSessionId:(admin||session)?.sessionId,demo:demo||entryPending||!!(draft&&isAdmin()),role:admin?(admin.role||'super_admin'):'player',recipient:admin?(isSuperAdmin()?'__super__':'__admin__'):session?.playerId,streamer:admin?(isSuperAdmin()?'__global__':admin.streamerSlug):streamerSlug,streamerName:admin&&isSuperAdmin()?'全部主播':state.currentStreamer?.display_name}),toast,onUpdate:()=>{chat.refresh().catch(()=>{});if(!busy&&!$('#dialog').open&&!document.activeElement?.matches('input,textarea,select'))refresh().catch(()=>{});}});
+const chat=createChat({api,context:()=>({spaceId:(isAdmin()?admin?.spaceId:session?.spaceId)||state.currentStreamer?.spaceId||'space-001',manager:isAdmin(),role:isAdmin()?admin?.role:'player',playerId:session?.playerId,streamer:streamerSlug,streamerName:hostName(),demo:demo||entryPending||!!draft}),toast,onRead:()=>notifications.refresh().catch(()=>{}),realtimeAvailable:()=>notifications.realtimeAvailable()});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-chat]'))chat.open().catch(e=>toast(e.message));});
-const board=createBoard({api,context:()=>({spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',manager:isAdmin(),role:admin?.role,playerId:session?.playerId,streamer:streamerSlug,streamerName:hostName(),demo:demo||!!draft}),toast});
+const board=createBoard({api,context:()=>({spaceId:(isAdmin()?admin?.spaceId:session?.spaceId)||state.currentStreamer?.spaceId||'space-001',manager:isAdmin(),role:isAdmin()?admin?.role:'player',playerId:session?.playerId,streamer:streamerSlug,streamerName:hostName(),demo:demo||entryPending||!!draft}),toast});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-board]'))board.open().catch(e=>toast(e.message));});
-function header(){const p=me();$('#header').innerHTML=`${demo?'<div class="offline">預覽測試模式 · 資料只在這台裝置，未連正式資料庫</div>':''}<div class="header-inner">${button('<span class="brand-logo" role="img" aria-label="PA • PARTY"></span>','home','','brand')}<div class="login-status">${p?`<b title="${h(p.name)}">👤 ${h(p.name)}${session.loginId?'｜ID '+h(session.loginId):''}</b><small>可以開始點歌嚕 ♡</small>`:''}</div><div class="header-actions"><label class="header-streamer"><span>主播</span><select id="header-streamer" aria-label="切換主播">${state.streamers?.filter(r=>r.active||isAdmin()&&isSuperAdmin()).map(r=>`<option value="${h(r.slug)}" ${r.slug===streamerSlug?'selected':''}>${h(r.display_name)}</option>`).join('')||''}</select></label>${button(h('回'+hostName()+'首頁'),'home')}${button('歌本','book')}${button('共同歌本','common-book')}${p?button('玩家中心','center')+button('登出','logout'):button('登入','login')}${button('管理','admin')}${chat.button()}${board.button()}${notifications.button()}</div></div>`;}
+function header(){const p=me();$('#header').innerHTML=`${demo?'<div class="offline">預覽測試模式 · 資料只在這台裝置，未連正式資料庫</div>':''}<div class="header-inner">${button('<span class="brand-logo" role="img" aria-label="PA • PARTY"></span>','home','','brand')}<div class="login-status">${p?`<b title="${h(p.name)}">👤 ${h(p.name)}${session.loginId?'｜ID '+h(session.loginId):''}</b><small>可以開始點歌嚕 ♡</small>`:''}</div><div class="header-actions"><label class="header-streamer"><span>主播</span><select id="header-streamer" aria-label="切換主播">${state.streamers?.filter(r=>r.active||isAdmin()&&isSuperAdmin()).map(r=>`<option value="${h(r.slug)}" ${r.slug===streamerSlug?'selected':''}>${h(r.display_name)}</option>`).join('')||''}</select></label>${button(h('回'+hostName()+'首頁'),'home')}${button('歌本','book')}${button('共同歌本','common-book')}${p?button('玩家中心','center')+button('登出','logout'):button('登入','login')}${entryMembershipCount>1?button('切換空間','switchSpace'):''}${button('管理','admin')}${chat.button()}${board.button()}${notifications.button()}</div></div>`;}
 function card(title,body,wide=false,action=''){return `<section class="card ${wide?'wide':''}">${title||action?`<div class="section-head"><h2>${title}</h2>${action}</div>`:''}${body}</section>`;}
 function songRows(rows){return rows.map((s,i)=>{const c=crownFor(state,s.songId,clock());return `<div class="song"><span class="number">${i+1}</span><div class="info"><b>${h(s.title)}${c?' 👑':''}</b><small>${h(s.artist)} · ${plays(s)} 次</small>${s.murmur?`<div class="subtle">💬 ${h(hostName())}碎碎念：${h(s.murmur)}</div>`:''}<div>${(s.tags||[]).map(t=>`<span class="tag">${h(t)}</span>`).join('')}</div></div><div class="actions">${button('提歌','request',s.songId,'tiny','data-kind="saved"')}${button('現點','request',s.songId,'tiny','data-kind="live"')}</div></div>`;}).join('')||blank(say('empty'));}
 function hour(){const current=state.hourBucket===hourKey(clock()),used=isAdmin()?usedHour(state,clock()):(current?state.hourlyUsed||0:0),reserved=isAdmin()?reservedHour(state,clock()):(current?state.hourlyReserved||0:0),remaining=Math.ceil((3600000-(Date.now()+offset)%3600000)/60000);return `<small>🕒 本小時提歌額度</small><strong>${used+reserved} / ${state.settings.hourlyLimit}${used+reserved>=state.settings.hourlyLimit?' <span class="quota-full">提滿了</span>':''}</strong><small>還可使用 ${Math.max(0,state.settings.hourlyLimit-used-reserved)} 首額度；待唱保留 ${reserved} 首</small><small>距離下一次提歌重置還有 ${remaining} 分鐘</small>`;}
@@ -232,12 +276,14 @@ function settingsHtml(){return `<div class="notice ${draft?'warning':''}">${demo
 function render(){applyHomeTheme();header();if(route==='admin'&&admin)renderAdmin();else if(route==='common-book')renderCommonBook();else if(route==='book')renderBook();else if(route==='center'&&session)renderCenter();else if(route==='gallery')renderGallery();else renderHome();}
 
 async function loginDialog(){modal('👤 玩家登入','<label>名稱、ID 或曾用名<input id="login-query" placeholder="找找自己"></label><div id="login-results"></div>');}
-async function chooseLogin(id){const result=demo?full.players.find(p=>p.playerId===id):(await api({op:'search',query:id})).players.find(p=>p.playerId===id);if(!result)return;modal('登入 '+result.name,`${select('loginId','本次使用的 ID',result.ids.length?result.ids.map(x=>[x,x]):[['','沒有平台 ID']],result.ids[0])}${result.hasPassword||result.password?field('password','玩家密碼','','password','autocomplete="current-password"'):''}`,async f=>{let token='demo';if(!demo)token=(await api({op:'login',playerId:id,loginId:f.get('loginId'),password:f.get('password')||''})).token;else if(String(result.password||'')!==String(f.get('password')||''))throw new Error('玩家密碼不正確');const identity={playerId:id,loginId:f.get('loginId')||'',role:'player',token};session=deviceLogin?await deviceLogin.remember(identity,{streamer:streamerSlug}):identity;put('player',session);await go('home');});}
+async function chooseLogin(id){const result=demo?full.players.find(p=>p.playerId===id):(await api({op:'search',query:id})).players.find(p=>p.playerId===id);if(!result)return;modal('登入 '+result.name,`${select('loginId','本次使用的 ID',result.ids.length?result.ids.map(x=>[x,x]):[['','沒有平台 ID']],result.ids[0])}${result.hasPassword||result.password?field('password','玩家密碼','','password','autocomplete="current-password"'):''}`,async f=>{let token='demo';if(!demo)token=(await api({op:'login',playerId:id,loginId:f.get('loginId'),password:f.get('password')||''})).token;else if(String(result.password||'')!==String(f.get('password')||''))throw new Error('玩家密碼不正確');const identity={playerId:id,loginId:f.get('loginId')||'',role:'player',token};session=deviceLogin?await deviceLogin.remember(identity,{streamer:streamerSlug}):identity;put('player',session);if(entryPending){route='home';await openSpaceEntry();return;}await go('home');});}
 async function adminLogin(){
+ if(entryPending&&!demo&&!legacyEntryRoomsLoaded){const response=await deviceTransport({op:'entryLegacyRooms'});state.streamers=response.rooms;legacyEntryRoomsLoaded=true;}
  modal('🔐 管理入口',nativeSelect('mode','登入身分',[['streamer','主播管理'],['super','PA Party總裁']],'streamer')+'<div data-login-room>'+nativeSelect('streamer','選擇主播',state.streamers.map(r=>[r.slug,r.display_name]),streamerSlug)+'</div>'+(demo?'<p>本機測試模式</p>':field('password','密碼','','password','required autocomplete="current-password"')),async f=>{
  const mode=f.get('mode'),slug=mode==='streamer'?f.get('streamer'):undefined;
  const auth=demo?{token:'demo',role:mode==='super'?'super_admin':'streamer_admin',streamerSlug:slug,expiresIn:43200,legacy:true}:await api({op:mode==='super'?'adminLogin':'streamerLogin',streamer:slug,password:f.get('password')});
  const identity={...auth,until:Date.now()+43200000,accessUntil:Date.now()+(auth.expiresIn-60)*1000};admin=deviceLogin?await deviceLogin.remember(identity,{streamer:slug||streamerSlug}):identity;draft=null;put('admin',admin);
+ if(entryPending){route='admin';await openSpaceEntry();return;}
  if(admin.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(location.href);u.searchParams.set('streamer',admin.streamerSlug);u.hash='admin';location.href=u.href;return;}
  await go('admin');toast('已登入，點「啟用通知音效」開始提醒');
  });
@@ -292,6 +338,8 @@ async function migrate(){if(demo)return toast('預覽不讀正式資料');migrat
 
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;try{switch(a){
 case 'pickEntity':{const box=b.closest('.entity-picker'),kind=box.dataset.entityKind,record=kind==='playerId'?state.players.find(p=>p.playerId===id):song(id);box.querySelector('[type=hidden]').value=id;box.querySelector('[data-entity-query]').value=kind==='playerId'?record.name+' · '+(record.ids.join('、')||'無平台 ID'):record.title+'－'+record.artist;box.querySelector('.entity-results').innerHTML='';break;}
+case 'enterSpace':{const chosen=entryChoices.find(space=>space.id===id);if(!chosen)throw Error('請重新選擇空間');await enterSpace(chosen);break;}
+case 'switchSpace':await openSpaceEntry({list:true});break;case 'entryPage':await openSpaceEntry({list:true,offset:Math.max(0,entryOffset+Number(id)*50)});break;
 case 'editHome':editHome();break;
 case 'close':$('#dialog').close();break;
 case 'home':case 'book':case 'common-book':case 'center':case 'gallery':await go(a);break;
@@ -376,9 +424,9 @@ async function updateSearch(input){const id=input.id;try{
  if(id==='ledger-query'){ledgerQuery=input.value;pages.ledger=1;const holder=document.createElement('div');holder.innerHTML=ledgerRows(null,true);$('#ledger-results').replaceWith(holder.querySelector('#ledger-results'));}
  if(id==='stats-day')$('#stats-result').innerHTML=statsHtml(stats(state,input.value+'T19:00:00+08:00'));
 }catch(err){toast(err.message);}}
-async function start(){if(demo){const catalog=await (await fetch('src/catalog.json')).json();full=get('demo')||migrateLegacy({songs:catalog,users:[],queue:[],crowns:[]});if(full.schemaVersion<3){put('before-v3',full);seedPreviewCrowns(full);full=upgradePlatform(full);}put('demo',full);}if(route==='admin'&&!admin)route='home';const incoming=new URL(location.href),songId=incoming.searchParams.get('commonRequest'),kind=incoming.searchParams.get('commonKind');if(songId&&songId.length<=200&&['saved','live'].includes(kind)){pendingCommonRequest={songId,kind};incoming.searchParams.delete('commonRequest');incoming.searchParams.delete('commonKind');history.replaceState(null,'',incoming.href);}try{await refresh(true);if(route==='common-book')await loadCommonBook(0);if(pendingCommonRequest){if(session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}else await loginDialog();}}catch(e){header();$('#app').innerHTML=card('連線還沒準備好',`<p>${h(e.message)}</p><p class="muted">管理員完成 V2 部署設定後即可使用。現有正式資料沒有被改動。</p>${button('管理入口','admin')}`,true);}}
-let lastHour=hourKey(clock());setInterval(()=>{const nextHour=hourKey(clock());if(!document.hidden&&nextHour!==lastHour&&!busy&&!$('#dialog').open&&!document.activeElement?.matches('input,textarea,select')){lastHour=nextHour;refresh(true).catch(()=>{});}if($('#hour'))$('#hour').innerHTML=hour();},1000);
-setInterval(()=>{if(document.hidden||$('#dialog').open||document.activeElement?.matches('input,textarea,select')||demo||draft)return;refresh().catch(()=>{});},30000);
+async function start(){if(demo){const catalog=await (await fetch('src/catalog.json')).json();full=get('demo')||migrateLegacy({songs:catalog,users:[],queue:[],crowns:[]});if(full.schemaVersion<3){put('before-v3',full);seedPreviewCrowns(full);full=upgradePlatform(full);}put('demo',full);}if(route==='admin'&&!admin)route='home';const incoming=new URL(location.href),songId=incoming.searchParams.get('commonRequest'),kind=incoming.searchParams.get('commonKind');if(songId&&songId.length<=200&&['saved','live'].includes(kind)){pendingCommonRequest={songId,kind};incoming.searchParams.delete('commonRequest');incoming.searchParams.delete('commonKind');history.replaceState(null,'',incoming.href);}try{if(entryPending&&!await openSpaceEntry())return;await refresh(true);if(route==='common-book')await loadCommonBook(0);if(pendingCommonRequest){if(session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}else await loginDialog();}}catch(e){header();$('#app').innerHTML=card('連線還沒準備好',`<p>${h(e.message)}</p><p class="muted">管理員完成 V2 部署設定後即可使用。現有正式資料沒有被改動。</p>${button('管理入口','admin')}`,true);}}
+let lastHour=hourKey(clock());setInterval(()=>{const nextHour=hourKey(clock());if(!entryPending&&!document.hidden&&nextHour!==lastHour&&!busy&&!$('#dialog').open&&!document.activeElement?.matches('input,textarea,select')){lastHour=nextHour;refresh(true).catch(()=>{});}if($('#hour'))$('#hour').innerHTML=hour();},1000);
+setInterval(()=>{if(entryPending||document.hidden||$('#dialog').open||document.activeElement?.matches('input,textarea,select')||demo||draft)return;refresh().catch(()=>{});},30000);
 setInterval(()=>{if(route==='home'&&$('#photo-carousel')&&!document.hidden){photoIndex++;$('#photo-carousel').innerHTML=photoCarousel();}},8000);
 window.addEventListener('hashchange',()=>{const next=location.hash.slice(1)||'home';if(next!==route)go(next).catch(e=>toast(e.message));});
 

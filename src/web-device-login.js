@@ -25,7 +25,18 @@ export function createWebDeviceLogin({environment=globalThis,transport,appVersio
     const verified=await client.identity(role);
     return {...identity,...verified,device:true,token,refreshToken:undefined};
    },
-   async access(identity){return identity?.device?client.token(identity.role||'player',{spaceId:identity.spaceId,streamerId:identity.streamerId}):identity?.token||null;},
+   async switchSpace(identity,scope={}){
+    if(!identity?.device)throw Error('請先登入裝置');
+    const role=identity.role||'player';let token,verified;
+    try{token=await client.switchSpace(role,scope,identity);}catch(error){
+     if(!error.deviceRegistered||error.authExpired||!error.deviceIdentity?.sessionId)throw error;
+     verified=await client.identity(role,{sessionId:error.deviceIdentity.sessionId});if(!verified)throw error;
+    }
+    verified ||= await client.identity(role,{token});if(!verified)throw Error('此登入不適用目前頁面');
+    const {token:oldToken,refreshToken,sessionId,spaceId,streamerId,playerId,loginId,selectedSpace,homeSpace,lastSpace,spaceSlug,selectedStreamerId,...metadata}=identity;
+    return {...metadata,...verified,device:true,token};
+   },
+   async access(identity){return identity?.device?client.token(identity.role||'player',{sessionId:identity.sessionId,spaceId:identity.spaceId,streamerId:identity.streamerId,playerId:identity.playerId}):identity?.token||null;},
    async logout(identity){if(identity?.device)await client.logout(identity.role||'player');},
    persisted(identity){if(!identity?.device)return identity;const {token,refreshToken,accessUntil,until,...metadata}=identity;return metadata;}
   };

@@ -20,7 +20,7 @@ function server(authUser=''){
     const row=sessionRows[0];if(!row)return null;
     if(row.player_id==='__admin__'&&(!row.role||row.role==='super_admin'))return {role:'super_admin',accountId:row.account_id};
     if(row.role==='streamer_admin'&&row.player_id==='__streamer__:'+row.streamer_id)
-     return body.requested_room===row.streamer_id?
+     return body.requested_room===null||body.requested_room===row.streamer_id?
       {role:'streamer_admin',streamerId:row.streamer_id,spaceId:'space-001',accountId:row.account_id}:null;
     if(row.player_id!=='__admin__'&&row.role!=='streamer_admin')
      return (body.requested_room===null||(row.space_id||'space-001')===(body.requested_room==='other'?'space-002':'space-001'))?
@@ -37,6 +37,8 @@ function server(authUser=''){
    if(path.endsWith('papa_refresh_device_access'))return responses.deviceRefresh===undefined?
     {sessionId:body.chosen_session,role:'player',spaceId:'space-001'}:responses.deviceRefresh;
    if(path.endsWith('papa_revoke_device_with_refresh'))return true;
+   if(path.endsWith('papa_switch_device_space'))return responses.deviceSwitch||null;
+   if(path.endsWith('papa_read_device_space_preferences'))return responses.devicePreferences||null;
    if(path.endsWith('papa_bind_verified_legacy_session')){
     const manager=calls.findLast(x=>x.path.endsWith('papa_manager_login'));
     return manager?.body.kind==='president'?{role:'president'}:
@@ -46,6 +48,7 @@ function server(authUser=''){
    if(path.endsWith('papa_change_manager_password')||path.endsWith('papa_manage_streamer_login'))return responses.change||{ok:true};
    if(path.endsWith('papa_account_space_list'))return responses.spaces||[];
    if(path.endsWith('papa_account_space_by_slug'))return responses.space||null;
+   if(path.endsWith('papa_account_space_entry'))return responses.entry||{spaces:[],total:0,hasMore:false};
    throw Error('Unexpected database access '+path);
   };
   load=async()=>upgradePlatform(empty());
@@ -76,6 +79,53 @@ test('Space discovery is account-bound, never enumerates customers anonymously, 
  const allowed=await s.request({op:'spaceResolve',token:'device:verified',slug:'other'});
  assert.equal(allowed.status,200);assert.equal(allowed.data.space.id,'space-002');
  assert.equal(s.calls().some(c=>c.path.endsWith('papa_v2_snapshot')),false);
+});
+
+test('explicit device Space switch is one atomic credential RPC, ignores forged identity, and issues no access token',async()=>{
+ const s=server(),oldSession='11111111-1111-4111-8111-111111111111',newSession='22222222-2222-4222-8222-222222222222';
+ s.set(`load=async()=>{throw Error('business state must not load')};responses.deviceSwitch=${JSON.stringify({sessionId:newSession,role:'player',spaceId:'space-002',streamerId:null,playerId:'P-NATIVE',spaceSlug:'other',selectedSpace:{id:'space-002',slug:'other',name:'Other'},homeSpace:{id:'space-001',slug:'papa',name:'PA Party'},lastSpace:{id:'space-002',slug:'other',name:'Other'}})}`);
+ const r=await s.request({op:'deviceSwitchSpace',sessionId:oldSession,refreshToken:'refresh:old',slug:'other',streamer:'room-002',token:'admin:forged',role:'super_admin',accountId:'forged',playerId:'P-WRONG',installationId:'borrowed',spaceId:'wrong'});
+ assert.equal(r.status,200,JSON.stringify(r.data));assert.equal(r.data.sessionId,newSession);assert.equal(r.data.playerId,'P-NATIVE');assert.equal(r.data.spaceId,'space-002');assert.equal(r.data.role,'player');assert.equal(r.data.token,undefined);assert.match(r.data.refreshToken,/^refresh:/);assert.equal(r.data.homeSpace.id,'space-001');
+ const calls=s.calls();assert.equal(calls.length,1);assert.equal(calls[0].path,'/rest/v1/rpc/papa_switch_device_space');
+ assert.deepEqual({...calls[0].body,current_refresh_hash:'hash',new_refresh_hash:'new'},{chosen_session:oldSession,current_refresh_hash:'hash',requested_slug:'other',requested_streamer:'room-002',new_refresh_hash:'new'});
+ assert.match(calls[0].body.current_refresh_hash,/^[a-f0-9]{64}$/);assert.notEqual(calls[0].body.new_refresh_hash,calls[0].body.current_refresh_hash);assert.equal(JSON.stringify(calls).includes('refresh:old'),false);assert.equal(JSON.stringify(calls).includes('forged'),false);
+ s.set(`calls=[];responses.deviceSwitch=${JSON.stringify({sessionId:newSession,role:'president',spaceId:null,streamerId:null,spaceSlug:'other',selectedSpace:{id:'space-002',slug:'other',name:'Other'},selectedStreamerId:'room-002'})}`);
+ const president=await s.request({op:'deviceSwitchSpace',sessionId:oldSession,refreshToken:'refresh:old',slug:'other'});
+ assert.equal(president.status,200);assert.equal(president.data.role,'super_admin');assert.equal(president.data.spaceId,null);assert.equal(president.data.streamerId,null);assert.equal(president.data.selectedSpace.id,'space-002');assert.equal(president.data.selectedStreamerId,'room-002');
+});
+
+test('entry resolves only the verified role and Account with bounded public destinations',async()=>{
+ const s=server();assert.equal((await s.request({op:'spaceEntry',slug:'star',accountId:'forged'})).status,400);assert.equal(s.calls().length,0);
+ s.set("sessionRows=[{player_id:'P-NATIVE',role:'player',account_id:'verified-account',space_id:'space-002'}];responses.entry={spaces:[{id:'space-002',slug:'star',streamerId:'r2',streamerSlug:'lina',streamerCount:1}],total:1,hasMore:false}");
+ const r=await s.request({op:'spaceEntry',token:'device:verified',slug:'star',streamer:'papa',role:'president',chosen_streamer:'papa',accountId:'forged',limit:10000,offset:-1});
+ assert.equal(r.status,200);assert.equal(r.data.spaces[0].id,'space-002');
+ const call=s.calls().at(-1);assert.equal(call.path,'/rest/v1/rpc/papa_account_space_entry');assert.deepEqual(call.body,{subject:'verified-account',actor_role:'player',chosen_streamer:'papa',requested_slug:'star',requested_hostname:null,page_limit:100,page_offset:0});assert.equal(s.calls()[0].body.requested_room,null);
+ assert.equal(s.calls().some(c=>c.path.includes('papa_v2_snapshot')),false);
+ const count=s.calls().length;const bad=await s.request({op:'spaceEntry',token:'device:verified',hostname:'../invalid'});assert.equal(bad.status,400);assert.equal(s.calls().length,count+1,'only identity verification happens for invalid URL');
+ s.set("calls=[];sessionRows=[{player_id:'__streamer__:michelle',role:'streamer_admin',streamer_id:'michelle',account_id:'verified-manager'}]");
+ const manager=await s.request({op:'spaceEntry',token:'device:manager',streamer:'forged-room',role:'president'});
+ assert.equal(manager.status,200);assert.equal(s.calls().at(-1).body.chosen_streamer,'michelle');assert.equal(s.calls().at(-1).body.actor_role,'streamer_admin');
+});
+
+test('root login directory stays in Space 001 and exposes only public room identity fields',async()=>{
+ const s=server();s.set("const entryApi=api;api=async(path,body)=>{if(path.endsWith('papa_streamer_directory_in_space')){calls.push({path,body});return [{id:'papa',slug:'papa',display_name:'怕怕',settings:{private:'hidden'},spaceId:'space-001',password:'hidden'}];}return entryApi(path,body)}");
+ const r=await s.request({op:'entryLegacyRooms',streamer:'foreign-room',spaceId:'space-002',accountId:'forged'});
+ assert.equal(r.status,200);assert.deepEqual(r.data,{rooms:[{id:'papa',slug:'papa',display_name:'怕怕'}]});assert.equal(s.calls().length,1);assert.deepEqual(s.calls()[0].body,{chosen_space:'space-001'});
+});
+
+test('device Space preference reads require refresh credential and invalid switch input never reaches the DB',async()=>{
+ const s=server(),sessionId='11111111-1111-4111-8111-111111111111';
+ for(const body of [{sessionId,slug:'other'},{sessionId,refreshToken:'refresh:ok',slug:'../../other'},{sessionId,refreshToken:'refresh:ok',slug:'other',streamer:[]},{sessionId,refreshToken:'refresh:'+ 'x'.repeat(201),slug:'other'}]){
+  assert.equal((await s.request({op:'deviceSwitchSpace',...body})).status,400);assert.equal(s.calls().length,0);
+ }
+ s.set("responses.devicePreferences={homeSpace:null,lastSpace:{id:'space-002',slug:'other',name:'Other'}}");
+ const prefs=await s.request({op:'deviceSpacePreferences',sessionId,refreshToken:'refresh:ok',token:'device:irrelevant',accountId:'forged'});
+ assert.equal(prefs.status,200);assert.equal(prefs.data.homeSpace,null);assert.equal(prefs.data.lastSpace.id,'space-002');assert.equal(s.calls().length,1);assert.equal(s.calls()[0].path,'/rest/v1/rpc/papa_read_device_space_preferences');
+ s.set('responses.deviceSwitch=null');const expired=await s.request({op:'deviceSwitchSpace',sessionId,refreshToken:'refresh:old',slug:'other'});
+ assert.equal(expired.status,400);assert.equal(expired.data.refreshToken,undefined);assert.match(expired.data.error,/到期/);
+ s.set(`responses.deviceRefresh=${JSON.stringify({sessionId,role:'player',spaceId:'space-002',playerId:'P-NATIVE',homeSpace:null,lastSpace:{id:'space-002',slug:'other',name:'Other'}})}`);
+ const restored=await s.request({op:'deviceRefresh',sessionId,refreshToken:'refresh:ok'});
+ assert.equal(restored.status,200);assert.equal(restored.data.homeSpace,null);assert.equal(restored.data.lastSpace.id,'space-002');assert.equal(s.calls().at(-1).path,'/rest/v1/rpc/papa_refresh_device_access');
 });
 test('streamer login resolves its room server-side and cannot elevate itself',async()=>{
  const s=server(),r=await s.request({op:'streamerLogin',password:'own-password',streamer:'papa',role:'super_admin',streamerId:'other'});

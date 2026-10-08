@@ -61,6 +61,23 @@ test('queue completion uses one room snapshot and the existing notification tran
  assert.equal(JSON.stringify(result.data).includes('private source lyric'),false);
 });
 
+test('song import reuses a single scoped source and atomic commit without hydrating or erasing custom lyrics',async()=>{
+ const {context,calls,request}=edge(true),now=new Date().toISOString();
+ let state=mutate(empty(),{type:'song',data:{title:'Existing',artist:'Artist',lyrics:'private custom source'}},{role:'admin'},now);
+ const own=state.songs[0].songId;state=mutate(state,{type:'streamer',data:{slug:'michelle',display_name:'米雪'}},{role:'admin'},now);
+ const rows=stateEntries(state).map(row=>row.kind==='songs'?{...row,data:{...row.data,lyrics:undefined}}:row);
+ const old=context.mockApi;context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_v2_room_write_snapshot_in_space')){calls.push({path,body});assert.deepEqual(JSON.parse(JSON.stringify(body)),{requested_room:'papa',selected_song_ids:[],allowed_space:'space-001'});return {revision:7,rows:JSON.parse(JSON.stringify(rows))};}
+  if(path.endsWith('papa_room_admin_commit')){calls.push({path,body});assert.equal(body.actor_context.action,'import');assert.equal(body.requested_room,'papa');const changed=body.changes.find(r=>r.kind==='songs'&&r.id===own);assert.ok(changed);assert.equal(Object.hasOwn(changed.data,'lyrics'),false);assert.equal(body.removed.length,0);return 8;}
+  return old(path,body);
+ };
+ const result=await request({op:'import',revision:7,streamer:'papa',kind:'songs',text:'Existing|Artist|日語|男歌手|抒情|是|new note',choices:['update']});
+ assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.state.songs[0].cat,'日語');
+ assert.equal(calls.filter(c=>c.path.endsWith('papa_v2_room_write_snapshot_in_space')).length,1);assert.equal(calls.filter(c=>c.path.endsWith('papa_room_admin_commit')).length,1);
+ assert.equal(calls.some(c=>c.path.endsWith('papa_v2_snapshot')||c.path.includes('papa_catalog_get_lyrics')),false);assert.equal(JSON.stringify(result.data).includes('private custom source'),false);
+});
+
 test('version relation filters are bounded and ordinary streamers cannot query adoptable lyrics or another room',async()=>{
  const {context,calls,request}=edge(),original=context.mockApi;
  context.mockApi=async(path,body)=>{
