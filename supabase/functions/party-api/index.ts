@@ -1,7 +1,7 @@
 import {isSuper,isManager,coreActor,requireRoom,authorizeManagerOperation,managementView,noticeIdentity,validNoticeAudio,prepareManagerAction} from '../../../src/access-policy.js';
 // No browser access to tables or VAPID secrets. All recipient keys come from actor().
 import webpush from 'npm:web-push@3.6.7';
-import {cleanNoticePrefs,noticeChannels,validPushSubscription} from '../../../src/notification-rules.js';
+import {cleanNoticePrefs,noticeChannels,validPushSubscription,canonicalNoticeLink,webNoticePath} from '../../../src/notification-rules.js';
 
 async function noticeKeys(){
  let rows=await api('/rest/v1/papa_notice_config?id=eq.vapid');
@@ -42,15 +42,16 @@ async function notificationOperation(b:any,who:any,s:any){
  }
  if(b.op==='pushKey')return {publicKey:(await noticeKeys()).publicKey};
  if(b.op==='pushSubscribe'){
+  if(b.expectedDeviceSessionId&&b.expectedDeviceSessionId!==who.deviceSessionId)throw Error('登入身分已變更，請重新啟用推播');
   if(!validPushSubscription(b.subscription))throw Error('推播訂閱格式不正確或此瀏覽器尚不支援');
   const endpoint=b.subscription.endpoint;
-  if(!/^(player|admin|streamer):/.test(b.token)){
+  if(!/^(player|admin|streamer|device):/.test(b.token)){
    const claims=JSON.parse(atob(b.token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
    const expires=new Date(Math.min(Number(claims.exp)*1000,Date.now()+43200000));
    if(!Number.isFinite(expires.getTime()))throw Error('請重新登入管理');
    await fetch(SB_URL+'/rest/v1/papa_v2_sessions?on_conflict=token_hash',{method:'POST',headers:{...headers,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({token_hash:await hash(b.token),player_id:'__admin__',login_id:'',expires_at:expires.toISOString()})});
   }
-  const r=await fetch(SB_URL+'/rest/v1/papa_push_subscriptions?on_conflict=streamer_id,endpoint',{method:'POST',headers:{...headers,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({streamer_id:room,recipient,endpoint,subscription:{endpoint,keys:b.subscription.keys},session_hash:await hash(b.token)})});
+  const r=await fetch(SB_URL+'/rest/v1/papa_push_subscriptions?on_conflict=streamer_id,endpoint',{method:'POST',headers:{...headers,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({streamer_id:room,recipient,endpoint,subscription:{endpoint,keys:b.subscription.keys},session_hash:await hash(b.token),device_session_id:who.deviceSessionId||null})});
   if(!r.ok)throw Error('推播訂閱儲存失敗');return {ok:true};
  }
  if(b.op==='pushUnsubscribe'){
@@ -61,16 +62,20 @@ async function notificationOperation(b:any,who:any,s:any){
 async function deliverPush(){
  const jobs=await api('/rest/v1/rpc/papa_claim_push',{});if(!jobs.length)return;
  const keys=await noticeKeys();
+ const streamers=await api('/rest/v1/rpc/papa_streamer_directory',{});
+ const slugByRoom=new Map((Array.isArray(streamers)?streamers:[]).map((room:any)=>[room.id,room.slug]));
  await Promise.allSettled(jobs.map(async(job:any)=>{
   const jobFilter='id=eq.'+job.id+'&lease=eq.'+job.lease;
   try{
    const [n]=await api('/rest/v1/papa_notifications?id=eq.'+job.notice_id),[sub]=await api('/rest/v1/papa_push_subscriptions?id=eq.'+job.subscription_id);
    if(!n||!sub){await api('/rest/v1/papa_push_jobs?'+jobFilter,{status:'skipped'},'PATCH');return;}
    const preferenceRoom=n.recipient==='__super__'?'__global__':n.streamer_id;const [prefs]=await api('/rest/v1/papa_notice_preferences?streamer_id=eq.'+encodeURIComponent(preferenceRoom)+'&recipient=eq.'+encodeURIComponent(n.recipient));
-   const sessions=await api('/rest/v1/papa_v2_sessions?token_hash=eq.'+sub.session_hash+'&expires_at=gt.'+encodeURIComponent(new Date().toISOString()));
-   const sess=sessions[0];const sessionAllowed=sess&&(sub.recipient==='__super__'?sess.player_id==='__admin__'&&(!sess.role||sess.role==='super_admin'):sub.recipient==='__admin__'?sess.role==='streamer_admin'&&sess.streamer_id===n.streamer_id:sess.player_id===sub.recipient&&(!sess.role||sess.role==='player'));if(!sessionAllowed||n.recipient!==sub.recipient||sub.streamer_id!==preferenceRoom||n.read_at||!noticeChannels(prefs?.preferences,n.type).push){await api('/rest/v1/papa_push_jobs?'+jobFilter,{status:'skipped'},'PATCH');return;}
-   const meta=await api('/rest/v1/papa_v2_entities?kind=eq.meta&id=eq.1&select=data'),slug=meta[0]?.data?.streamers?.find((r:any)=>r.id===n.streamer_id)?.slug||'papa';
-   const payload=JSON.stringify({id:n.id,title:'PA • PARTY · '+n.streamer_name,body:n.body,url:'./?streamer='+encodeURIComponent(slug)+'#'+(['__admin__','__super__'].includes(n.recipient)?'admin':'center'),recipient:n.recipient});
+   const sess=sub.device_session_id?null:await api('/rest/v1/rpc/papa_verified_session_actor',{session_hash:sub.session_hash,requested_room:null});
+   const sessionAllowed=sub.device_session_id?await api('/rest/v1/rpc/papa_device_push_recipient',{chosen_device:sub.device_session_id,chosen_room:n.streamer_id,chosen_recipient:sub.recipient}):sess&&(sub.recipient==='__super__'?sess.role==='super_admin':sub.recipient==='__admin__'?sess.role==='streamer_admin'&&sess.streamerId===n.streamer_id:sess.role==='player'&&sess.playerId===sub.recipient);if(!sessionAllowed||n.recipient!==sub.recipient||sub.streamer_id!==preferenceRoom||n.read_at||!noticeChannels(prefs?.preferences,n.type).push){await api('/rest/v1/papa_push_jobs?'+jobFilter,{status:'skipped'},'PATCH');return;}
+   const slug=slugByRoom.get(n.streamer_id)||'papa';
+   const link=canonicalNoticeLink(n,slug);
+   const payload=JSON.stringify({id:n.id,title:'PA • PARTY · '+n.streamer_name,
+    body:n.body,url:webNoticePath(link),link,recipient:n.recipient});
    const details=webpush.generateRequestDetails(sub.subscription,payload,{vapidDetails:{subject:'https://lacylovebap-cell.github.io/papa-party/',publicKey:keys.publicKey,privateKey:keys.privateKey},TTL:3600});
    const response=await fetch(details.endpoint,{method:'POST',headers:details.headers,body:details.body,redirect:'error',signal:AbortSignal.timeout(12000)});
    if(response.status===404||response.status===410){await api('/rest/v1/papa_push_subscriptions?id=eq.'+sub.id,undefined,'DELETE');return;}
@@ -100,34 +105,86 @@ const hash=async(s:string)=>Array.from(new Uint8Array(await crypto.subtle.digest
 async function api(path:string,body?:unknown,method?:string){
  const r=await fetch(SB_URL+path,{method:method||(body?'POST':'GET'),headers,body:body?JSON.stringify(body):undefined}),text=await r.text();
  if(!r.ok){
-  const messages:any={BOARD_MODERATED:'此留言由管理者隱藏，請聯絡管理者恢復',BOARD_RATE_LIMIT:'留言送得太快，請稍候三秒再試',BOARD_RETRY_CHANGED:'重試內容不同，請重新開啟留言板',CHAT_RATE_LIMIT:'訊息送得太快，請稍候再送',CHAT_REQUEST_REUSED:'訊息重試內容不同，請重新開啟私訊',VERSION_CONFLICT:'資料剛更新了，請重新整理後再試一次',CATALOG_SELECTION_STALE:'共同資料剛更新，請重新選取後再操作',CATALOG_SOURCE_STALE:'原歌曲剛更新，請重新選取後再審核',CATALOG_CANDIDATE_STALE:'候選歌曲剛更新，請重新選取後再審核',CATALOG_TEMPLATE_MISSING:'這個模板已停用或不存在，請重新選擇',CATALOG_ALREADY_LINKED:'歌曲已建立共同關聯，請重新整理',CATALOG_AMBIGUOUS_TARGET:'存在多筆同版本共同歌曲，請選擇既有目標後再連結',CATALOG_BATCH_DIFFERENT_VERSIONS:'所選歌曲屬於不同版本，請分批處理'};
+  const messages:any={ACCOUNT_DISABLED:'登入已到期，請重新登入',MEMBERSHIP_REQUIRED:'登入已到期，請重新登入',MEMBERSHIP_SUSPENDED:'登入已到期，請重新登入',SESSION_ACCOUNT_MISMATCH:'登入已到期，請重新登入',DEVICE_IDENTITY_MISMATCH:'登入已到期，請重新登入',BOARD_MODERATED:'此留言由管理者隱藏，請聯絡管理者恢復',BOARD_RATE_LIMIT:'留言送得太快，請稍候三秒再試',BOARD_RETRY_CHANGED:'重試內容不同，請重新開啟留言板',CHAT_RATE_LIMIT:'訊息送得太快，請稍候再送',CHAT_REQUEST_REUSED:'訊息重試內容不同，請重新開啟私訊',VERSION_CONFLICT:'資料剛更新了，請重新整理後再試一次',CATALOG_SELECTION_STALE:'共同資料剛更新，請重新選取後再操作',CATALOG_SOURCE_STALE:'原歌曲剛更新，請重新選取後再審核',CATALOG_CANDIDATE_STALE:'候選歌曲剛更新，請重新選取後再審核',CATALOG_TEMPLATE_MISSING:'這個模板已停用或不存在，請重新選擇',CATALOG_ALREADY_LINKED:'歌曲已建立共同關聯，請重新整理',CATALOG_AMBIGUOUS_TARGET:'存在多筆同版本共同歌曲，請選擇既有目標後再連結',CATALOG_BATCH_DIFFERENT_VERSIONS:'所選歌曲屬於不同版本，請分批處理'};
   throw Error(Object.entries(messages).find(([code])=>text.includes(code))?.[1]||'資料庫操作失敗');
  }
  return text?JSON.parse(text):null;
 }
-async function load(lean=false){const snap=await api('/rest/v1/rpc/'+(lean?'papa_v2_read_snapshot':'papa_v2_snapshot'),{}),s=empty();s.revision=snap.revision;for(const r of snap.rows){if(r.kind==='settings')s.settings=r.data;else if(r.kind==='meta')Object.assign(s,r.data);else if(TABLES.includes(r.kind))s[r.kind].push(r.data);}for(const k of TABLES)s[k].sort((a:any,b:any)=>(a._order||0)-(b._order||0));return upgradePlatform(s);}
+async function load(lean=false,requestedRoom='papa'){const snap=await api('/rest/v1/rpc/'+(lean?'papa_v2_scoped_read_snapshot':'papa_v2_snapshot'),lean?{requested_room:requestedRoom}:{}),s=empty();s.revision=snap.revision;for(const r of snap.rows){if(r.kind==='settings')s.settings=r.data;else if(r.kind==='meta')Object.assign(s,r.data);else if(TABLES.includes(r.kind))s[r.kind].push(r.data);}for(const k of TABLES)s[k].sort((a:any,b:any)=>(a._order||0)-(b._order||0));return upgradePlatform(s);}
 // Chat, board and notices need room metadata, not the full song/history snapshot.
 async function loadCommunicationState(){const streamers=await api('/rest/v1/rpc/papa_streamer_directory',{});if(!Array.isArray(streamers))throw Error('找不到主播設定');return {...empty(),schemaVersion:3,streamers,streamerSettings:{}};}
 // Backup/draft is an explicit full export. Ordinary views always load lyrics separately.
 function leanSongView(view:any){return {...view,songs:view.songs.map(({lyrics,lyricNotes,privateNote,privateNotes,lyricHistory,lyricsHistory,...song}:any)=>song)};}
 function entries(s:any){return [...TABLES.flatMap(k=>s[k].map((data:any,index:number)=>({kind:k,id:String(data.playerId&&k==='players'?data.playerId:data.songId&&k==='songs'?data.songId:data.id),data:{...data,_order:index}}))),{kind:'settings',id:'1',data:s.settings},{kind:'meta',id:'1',data:{schemaVersion:3,streamers:s.streamers,streamerSettings:s.streamerSettings,migrationIssues:s.migrationIssues||[]}}];}
 async function commit(before:any,after:any,context:any={}){const old=new Map(entries(before).map(r=>[r.kind+':'+r.id,r])),next=entries(after),keys=new Set(next.map(r=>r.kind+':'+r.id));const changes=next.filter(r=>JSON.stringify(old.get(r.kind+':'+r.id)?.data)!==JSON.stringify(r.data)),removed=[...old.values()].filter(r=>!keys.has(r.kind+':'+r.id)).map(r=>({kind:r.kind,id:r.id}));const notices=deriveNotices(before,after,context);after.revision=await api('/rest/v1/rpc/papa_release_b_commit',{expected:before.revision,changes,removed,actor_context:context,notices});schedulePush(context.streamer_id,[...new Set(notices.map((n:any)=>n.recipient))]);return after;}
-async function actor(token:string){
- if(!/^(player|admin|streamer):/.test(token||''))return null;
- const rows=await api('/rest/v1/papa_v2_sessions?token_hash=eq.'+await hash(token)+'&expires_at=gt.'+encodeURIComponent(new Date().toISOString())+'&select=player_id,login_id,role,streamer_id&limit=1'),r=rows[0];if(!r)return null;
- if(token.startsWith('admin:')&&r.player_id==='__admin__'&&(!r.role||r.role==='super_admin'))return {role:'super_admin'};
- if(token.startsWith('streamer:')&&r.role==='streamer_admin'){const a=await api('/rest/v1/papa_streamer_accounts?streamer_id=eq.'+encodeURIComponent(r.streamer_id)+'&enabled=eq.true&select=streamer_id&limit=1');return a.length?{role:'streamer_admin',streamer_id:r.streamer_id}:null;}
- return token.startsWith('player:')&&(!r.role||r.role==='player')?{role:'player',playerId:r.player_id,loginId:r.login_id}:null;
+async function actor(token:string,requestedRoom:string|null=null){
+ if(!/^(player|admin|streamer|device):/.test(token||''))return null;
+ const r=await api('/rest/v1/rpc/papa_verified_session_actor',{session_hash:await hash(token),requested_room:requestedRoom});
+ if(!r)return null;
+ const device=token.startsWith('device:');
+ if((device||token.startsWith('admin:'))&&r.role==='super_admin')return {role:'super_admin',accountId:r.accountId,deviceSessionId:r.deviceSessionId};
+ if((device||token.startsWith('streamer:'))&&r.role==='streamer_admin')return {role:'streamer_admin',streamer_id:r.streamerId,spaceId:r.spaceId,accountId:r.accountId,deviceSessionId:r.deviceSessionId};
+ return (device||token.startsWith('player:'))&&r.role==='player'?{role:'player',playerId:r.playerId,loginId:r.loginId,spaceId:r.spaceId,accountId:r.accountId,deviceSessionId:r.deviceSessionId}:null;
 }
 function managerPasswordError(result:any,kind:string){
  const messages:any={expired:'登入已到期，請重新登入',rate_limit:'嘗試過多，請 15 分鐘後再試',invalid_current:'目前密碼不正確',weak_password:kind==='president'?'總裁新密碼請使用至少 8 字、72 位元組以內':'主播新密碼請使用至少 4 字、72 位元組以內',same_password:'新密碼不能與目前密碼相同',same_as_president:'主播密碼不能與 PA Party總裁密碼相同',same_as_streamer:'總裁密碼不能與任一主播密碼相同',password_required:'請先設定主播密碼'};
  if(!result?.ok)throw Error(messages[result?.reason]||'密碼設定未完成，請重新登入後再試');
 }
 
-Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json(),who=await actor(b.token||''),t=new Date().toISOString();
+Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json(),who=await actor(b.token||'',b.streamer||'papa'),t=new Date().toISOString();
+ if(b.op==='deviceStart'){
+  if(!who?.accountId)throw Error('請先重新登入，才能記住此裝置');
+  if(typeof b.installationId!=='string'||!/^[a-f0-9-]{36}$/i.test(b.installationId)
+   ||!['web','android','desktop','ios'].includes(b.platform))throw Error('裝置資訊不正確');
+  const refreshToken='refresh:'+crypto.randomUUID()+crypto.randomUUID();
+  const role=who.role==='super_admin'?'president':who.role;
+  const registration=await api('/rest/v1/rpc/papa_start_device_session',{
+   subject:who.accountId,chosen_installation:b.installationId,chosen_platform:b.platform,
+   chosen_version:String(b.appVersion||'').slice(0,64),chosen_role:role,
+   chosen_space:who.spaceId||null,chosen_streamer:who.streamer_id||null,
+   new_refresh_hash:await hash(refreshToken),chosen_login_id:who.loginId||''});
+  if(!registration?.sessionId)throw Error('裝置登入尚未完成');
+  return respond({...registration,refreshToken});
+ }
+ if(b.op==='deviceRefresh'){
+  if(typeof b.sessionId!=='string'||!/^[a-f0-9-]{36}$/i.test(b.sessionId)
+   ||typeof b.refreshToken!=='string'||!b.refreshToken.startsWith('refresh:'))
+   throw Error('裝置登入已到期，請重新登入');
+  const token='device:'+crypto.randomUUID()+crypto.randomUUID(),refreshToken='refresh:'+crypto.randomUUID()+crypto.randomUUID();
+  const refreshed=await api('/rest/v1/rpc/papa_refresh_device_access',{
+   chosen_session:b.sessionId,old_refresh_hash:await hash(b.refreshToken),
+   new_refresh_hash:await hash(refreshToken),new_access_hash:await hash(token)});
+  if(!refreshed)throw Error('裝置登入已到期，請重新登入');
+  return respond({token,refreshToken,sessionId:refreshed.sessionId,
+   role:refreshed.role==='president'?'super_admin':refreshed.role,
+   streamerId:refreshed.streamerId,spaceId:refreshed.spaceId,expiresIn:43200});
+ }
+ if(b.op==='deviceLogout'){
+  if(typeof b.sessionId!=='string'||!/^[a-f0-9-]{36}$/i.test(b.sessionId)
+   ||typeof b.refreshToken!=='string'||!b.refreshToken.startsWith('refresh:'))
+   throw Error('裝置資訊不正確');
+  const revoked=await api('/rest/v1/rpc/papa_revoke_device_with_refresh',{
+   chosen_session:b.sessionId,current_refresh_hash:await hash(b.refreshToken)});
+  if(!revoked)throw Error('裝置登入已到期，請重新登入');
+  return respond({ok:true});
+ }
+ if(b.op==='logout'){
+  if(String(b.token||'').startsWith('device:'))throw Error('請使用裝置登出');
+  if(who)await api('/rest/v1/papa_push_subscriptions?session_hash=eq.'+await hash(b.token),undefined,'DELETE');
+  if(/^(player|admin|streamer):/.test(b.token||''))
+   await api('/rest/v1/papa_v2_sessions?token_hash=eq.'+await hash(b.token),undefined,'DELETE');
+  return respond({ok:true});
+ }
+ // The legacy business snapshot is still a Space 001 compatibility path.
+ // Do not expose a second Space through it before scoped reads/writes ship.
+ if(who?.spaceId&&who.spaceId!=='space-001')
+  throw Error('此 Space 的資料頁尚未開放');
  if(b.op==='streamerLogin'){
   const snapshot=await load(),r=scopeState(snapshot,b.streamer).currentStreamer,token='streamer:'+crypto.randomUUID()+crypto.randomUUID();
-  if(typeof b.password!=='string'||!await api('/rest/v1/rpc/papa_manager_login',{kind:'streamer',room:r.id,password:b.password,auth_user:ADMIN||null,session_hash:await hash(token)}))throw Error('主播密碼不正確、尚未啟用或嘗試過多，請稍後再試');
+  const sessionHash=await hash(token);
+  if(typeof b.password!=='string'||!await api('/rest/v1/rpc/papa_manager_login',{kind:'streamer',room:r.id,password:b.password,auth_user:ADMIN||null,session_hash:sessionHash}))throw Error('主播密碼不正確、尚未啟用或嘗試過多，請稍後再試');
+  const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});
+  if(identity?.role!=='streamer_admin'||identity?.streamerId!==r.id)throw Error('主播登入身分尚未完成設定');
   return respond({token,role:'streamer_admin',streamerId:r.id,streamerSlug:r.slug,expiresIn:43200,legacy:true});
  }
  if(b.op==='streamerAccounts'){if(!isSuper(who))throw Error('僅限 PA Party總裁');return respond({accounts:await api('/rest/v1/papa_streamer_accounts?select=streamer_id,enabled,updated_at')});}
@@ -138,7 +195,10 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  }
  if(b.op==='adminLogin'){
   const token='admin:'+crypto.randomUUID()+crypto.randomUUID();
-  if(typeof b.password!=='string'||!await api('/rest/v1/rpc/papa_manager_login',{kind:'president',room:null,password:b.password,auth_user:ADMIN||null,session_hash:await hash(token)}))throw Error('總裁密碼不正確或嘗試過多，請稍後再試');
+  const sessionHash=await hash(token);
+  if(typeof b.password!=='string'||!await api('/rest/v1/rpc/papa_manager_login',{kind:'president',room:null,password:b.password,auth_user:ADMIN||null,session_hash:sessionHash}))throw Error('總裁密碼不正確或嘗試過多，請稍後再試');
+  const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});
+  if(identity?.role!=='president')throw Error('總裁登入身分尚未完成設定');
   return respond({token,role:'super_admin',expiresIn:43200,legacy:true});
  }
  if(b.op==='refreshAdmin')throw Error('請使用總裁密碼重新登入');
@@ -170,9 +230,8 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
    if(comm){const room=scopeState(comm,b.streamer||'papa').currentStreamer;requireRoom(who,room.id);if(!room.active&&!isManager(who))throw Error('主播頁暫未開放');return respond({state:{},now:t,ready:true});}
   }
  }
- const s=await load(b.op==='read');
-if(b.op==='failedRequest'){if(who?.role!=='player')throw new Error('請先登入玩家');const room=scopeState(s,b.streamer||'papa'),p=room.players.find((p:any)=>p.playerId===who.playerId);if(!room.currentStreamer.active||!p)throw new Error('找不到玩家');const quote=quoteSong(room,b.songId,b,who.playerId,t),available=balance(room,who.playerId)-reservedCredits(room,who.playerId),full=!canRequestSaved(room,t,quote.creditCost);if(available<quote.creditCost||!full)return respond({counted:false});const counted=await api('/rest/v1/rpc/papa_record_failed_request',{room_id:room.currentStreamer.id,player_id:who.playerId,song_id:b.songId,bucket:hourKey(t)});schedulePush(room.currentStreamer.id,['__admin__',who.playerId]);return respond({counted});}if(b.op==='login'){if(who?.playerId)throw new Error('請先登出再登入');const p=s.players.find((p:any)=>p.playerId===b.playerId);if(!p||String(p.password||'')!==String(b.password||''))throw new Error('玩家密碼不正確');const token='player:'+crypto.randomUUID()+crypto.randomUUID();await api('/rest/v1/papa_v2_sessions',{token_hash:await hash(token),player_id:p.playerId,login_id:p.ids.includes(b.loginId)?b.loginId:'',expires_at:new Date(Date.now()+30*86400000).toISOString()});return respond({token});}
- if(b.op==='logout'){if(who)await api('/rest/v1/papa_push_subscriptions?session_hash=eq.'+await hash(b.token),undefined,'DELETE');if(/^(player|admin|streamer):/.test(b.token||''))await api('/rest/v1/papa_v2_sessions?token_hash=eq.'+await hash(b.token),undefined,'DELETE');return respond({ok:true});}
+ const s=await load(b.op==='read',b.streamer||'papa');
+ if(b.op==='failedRequest'){if(who?.role!=='player')throw new Error('請先登入玩家');const room=scopeState(s,b.streamer||'papa'),p=room.players.find((p:any)=>p.playerId===who.playerId);if(!room.currentStreamer.active||!p)throw new Error('找不到玩家');const quote=quoteSong(room,b.songId,b,who.playerId,t),available=balance(room,who.playerId)-reservedCredits(room,who.playerId),full=!canRequestSaved(room,t,quote.creditCost);if(available<quote.creditCost||!full)return respond({counted:false});const counted=await api('/rest/v1/rpc/papa_record_failed_request',{room_id:room.currentStreamer.id,player_id:who.playerId,song_id:b.songId,bucket:hourKey(t)});schedulePush(room.currentStreamer.id,['__admin__',who.playerId]);return respond({counted});}if(b.op==='login'){if(who?.playerId)throw new Error('請先登出再登入');const p=s.players.find((p:any)=>p.playerId===b.playerId);if(!p||String(p.password||'')!==String(b.password||''))throw new Error('玩家密碼不正確');const token='player:'+crypto.randomUUID()+crypto.randomUUID(),sessionHash=await hash(token);await api('/rest/v1/papa_v2_sessions',{token_hash:sessionHash,player_id:p.playerId,login_id:p.ids.includes(b.loginId)?b.loginId:'',expires_at:new Date(Date.now()+30*86400000).toISOString()});const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});if(identity?.role!=='player'||identity?.spaceId!=='space-001')throw new Error('玩家登入身分尚未完成設定');return respond({token});}
  if(b.op==='songSearch'){return respond({songs:searchAcrossStreamers(s,b.query||'').slice(0,100)});}if(b.op==='search'){return respond({players:b.query?.trim()?playerSearch(s,b.query).slice(0,20).map((p:any)=>({playerId:p.playerId,name:p.name,ids:p.ids,hasPassword:!!p.password})):[]});}
  if(b.op==='backup'){if(!isSuper(who))throw new Error('僅限PA Party總裁備份');return respond({backup:s,now:t});}const project=async(value:any)=>{const base=leanSongView(managementView(publicView(value,coreActor(who),t,b.streamer||'papa'),who)),rows=await api('/rest/v1/rpc/papa_catalog_song_metadata',{room_id:base.currentStreamer.id}),view=catalogMetadataView(base,rows,isManager(who)),signatures:any={},delta:any={};for(const [key,v] of Object.entries(view)){signatures[key]=await hash(JSON.stringify(v));if(b.signatures?.[key]!==signatures[key])delta[key]=v;}return {state:delta,signatures,now:t,ready:value.schemaVersion>=3};};
  if(b.op==='read'){if(b.token&&!who)throw new Error('登入已到期，請重新登入');return respond(await project(s));}
@@ -181,5 +240,9 @@ if(b.op==='failedRequest'){if(who?.role!=='player')throw new Error('請先登入
  if(b.op==='migrate'){if(s.songs.length)throw new Error('已有 V2 資料，不能重複移轉');const rows=await api('/rest/v1/party_state?id=eq.1&select=data'),old=rows[0]?.data;if(!old)throw new Error('找不到 V1 資料');const migrated=migrateLegacy(old);if(!b.confirm)return respond({issues:migrated.migrationIssues,counts:Object.fromEntries(TABLES.map(k=>[k,migrated[k].length])),backup:old});return respond({state:publicView(await commit(s,upgradePlatform(migrated)),who,t,b.streamer||'papa'),now:t});}
  if(b.revision!==s.revision)throw new Error('資料剛更新了，請重新整理後再試一次');
  let next;if(b.op==='import'){const rows=previewImport(scopeState(s,b.streamer||'papa'),b.kind,b.text);next=applyImport(s,b.kind,rows,b.choices,coreActor(who),t,b.streamer||'papa');}else if(b.op==='publish'){if(b.baseRevision!==s.revision)throw new Error('正式資料已有更新，請重新建立草稿');if(b.state?.schemaVersion!==3)throw new Error('草稿格式錯誤');if(!b.state.streamerSettings)throw new Error('請先取得完整平台草稿');next=b.state;}else {let action=prepareManagerAction(who,b.action,s);if(isManager(who)&&action?.type==='song'&&action.data?.songId&&!action.data.remove){const room=scopeState(s,b.streamer||'papa').currentStreamer.id;action=catalogPreserveSource(action,s,room,await api('/rest/v1/rpc/papa_catalog_song_metadata',{room_id:room}));}next=mutate(s,{...action,streamer:b.streamer||'papa'},coreActor(who),t);}
- return respond(await project(await commit(s,next,{role:who?.role||'unknown',player_id:who?.playerId||null,streamer_id:scopeState(s,b.streamer||'papa').currentStreamer.id,action:b.op==='mutate'?b.action?.type+(b.action?.data?.operation?':'+b.action.data.operation:''):b.op})));
+ return respond(await project(await commit(s,next,{role:who?.role||'unknown',player_id:who?.playerId||null,
+  account_id:who?.accountId||null,space_id:who?.spaceId||null,
+  actor_streamer_id:who?.role==='streamer_admin'?who.streamer_id:null,
+  streamer_id:scopeState(s,b.streamer||'papa').currentStreamer.id,
+  action:b.op==='mutate'?b.action?.type+(b.action?.data?.operation?':'+b.action.data.operation:''):b.op})));
  }catch(e){return respond({error:e.message||'操作失敗'},400);}});

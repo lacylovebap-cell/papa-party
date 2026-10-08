@@ -7,9 +7,11 @@ import {openHomeEditor} from './home-editor.js?v=9.24-H';
 import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=9.24-B.2';
 import {createNotifications} from './notifications.js?v=10.08-CATALOG.2';
 import {API,PUBLISHABLE_KEY} from './config.js';
+import {createWebDeviceLogin} from './web-device-login.js';
 import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour} from './core.js?v=10.08-CATALOG.2';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const demo=new URLSearchParams(location.search).has('demo')||location.pathname.endsWith('/preview.html'),roomCacheKey=k=>['draft','adminTab'].includes(k)?k+'-'+(new URLSearchParams(location.search).get('streamer')||'papa'):k,get=k=>{try{return JSON.parse(localStorage.getItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k)));}catch{return null;}},put=(k,v)=>localStorage.setItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k),JSON.stringify(v));
+let deviceLogin=null;
+const demo=new URLSearchParams(location.search).has('demo')||location.pathname.endsWith('/preview.html'),roomCacheKey=k=>['draft','adminTab'].includes(k)?k+'-'+(new URLSearchParams(location.search).get('streamer')||'papa'):k,get=k=>{try{return JSON.parse(localStorage.getItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k)));}catch{return null;}},put=(k,v)=>localStorage.setItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k),JSON.stringify(['player','admin'].includes(k)&&deviceLogin?deviceLogin.persisted(v):v));
 let state=empty(),full=null,session=get('player'),admin=get('admin'),draft=get('draft'),offset=0,busy=false,route=location.hash.slice(1)||'home',tab=new URLSearchParams(location.search).get('adminTab')||get('adminTab')||'queue',subtab=new URLSearchParams(location.search).get('tab')||'overview',selectedPlayer=new URLSearchParams(location.search).get('player')||null,photoIndex=0,fateId=null,fateSeen=[],fateCategory='all',importRows=[],importKind='players',importText='',migrationPreview=null;
 const streamerSlug=new URLSearchParams(location.search).get('streamer')||'papa';
 let tagsExpanded=false,drawnStreamerSong=null,eventPage=0,proxyDraft=null;let signatures={};let queueHistory=false;const selectedQueue=new Set();
@@ -25,7 +27,7 @@ const commonBook={q:'',page:0,rows:[],total:0,loading:false,error:'',generation:
 let sharedLyricHistory={variantId:null,rows:[]};
 const roomLanguages={data:null,loadedAt:0,loading:false};
 const roomSearch={book:null,home:null,songs:null,unsupported:false,generation:0,timer:null,cache:new Map()};
-if(admin?.until<Date.now()){admin=null;put('admin',null);}if(!admin)draft=null;
+if(!admin?.device&&admin?.until<Date.now()){admin=null;put('admin',null);}if(!admin)draft=null;
 const isSuperAdmin=()=>!!admin&&admin.role!=='streamer_admin';
 const clock=()=>stamp(Date.now()+offset),me=()=>state.players.find(p=>p.playerId===session?.playerId),isAdmin=()=>!!admin&&route==='admin',actor=()=>isAdmin()?{role:'admin'}:session?{role:'player',playerId:session.playerId,loginId:session.loginId}:null;
 const button=(label,act,id='',cls='tiny',extra='')=>`<button type="button" class="${cls}" data-act="${act}" data-id="${h(id)}" ${extra}>${label}</button>`;
@@ -52,7 +54,7 @@ const formData=f=>Object.fromEntries(f.entries());
 function paginate(items,key,size=10){const max=Math.max(1,Math.ceil(items.length/size));pages[key]=Math.min(Math.max(1,pages[key]||1),max);return {rows:items.slice((pages[key]-1)*size,pages[key]*size),nav:`<div class="pagination">${button('上一頁','page',key,'tiny',`data-step="-1" ${pages[key]===1?'disabled':''}`)}<label class="page-jump">第 <input type="number" min="1" max="${max}" value="${pages[key]}" data-page-key="${h(key)}" aria-label="輸入頁碼"> / ${max} 頁</label>${button('跳頁','jumpPage',key)}${button('下一頁','page',key,'tiny',`data-step="1" ${pages[key]===max?'disabled':''}`)}</div>`};}
 function managerSessionExpired(response,data){return response.status===401||data?.code==='AUTH_EXPIRED'||['登入已到期，請重新登入','請重新登入管理','請使用總裁密碼重新登入','請先登入管理','請先登入'].includes(data?.error);}
 function discardManagerSession(token){
- if(!token||admin?.token!==token)return false;
+ if(typeof token==='object'?(!token||admin!==token):(!token||admin?.token!==token))return false;
  const rooms=state.streamers,currentRoom=state.currentStreamer;
  admin=null;draft=null;full=null;signatures={};selectedPlayer=null;state=empty();state.streamers=rooms;state.currentStreamer=currentRoom;
  put('admin',null);put('draft',null);
@@ -62,7 +64,20 @@ function discardManagerSession(token){
  document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());header();$('#app').innerHTML=card('請重新登入管理','<p>管理登入已失效，請重新輸入密碼。</p>'+button('管理入口','admin'),true);
  return true;
 }
+async function deviceTransport(body){
+ const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify({streamer:streamerSlug,...body})}),data=await r.json();
+ if(!r.ok||data.error)throw Object.assign(new Error(data.error||'連線失敗'),{authExpired:r.status===401||data.code==='AUTH_EXPIRED'||/(?:裝置)?登入已到期|MEMBERSHIP_|ACCOUNT_DISABLED|SESSION_ACCOUNT_MISMATCH/.test(data.error||'')});
+ return data;
+}
+if(!demo)deviceLogin=createWebDeviceLogin({transport:deviceTransport,appVersion:'space-foundation-1008'});
 async function api(body){
+ const identity=(isAdmin()||body.management)?admin:session;
+ if(identity?.device){
+  if(!deviceLogin)throw Error('此瀏覽器無法恢復裝置登入，請使用原本登入裝置');
+  try{const token=await deviceLogin.access(identity);if(!token)throw Object.assign(Error('登入已到期，請重新登入'),{authExpired:true});
+   if(((isAdmin()||body.management)?admin:session)!==identity)throw Error('登入身分已變更，請重新操作');identity.token=token;
+  }catch(error){if(error.authExpired){if(identity===admin)discardManagerSession(identity);else if(identity===session){session=null;put('player',null);}}throw error;}
+ }
  if(admin&&(isAdmin()||body.management)&&!admin.legacy&&admin.accessUntil<Date.now()&&body.op!=='refreshAdmin'){
   const previousToken=admin.token,r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify({op:'refreshAdmin',refreshToken:admin.refreshToken})}),v=await r.json();
   if(!r.ok||v.error){if(managerSessionExpired(r,v))discardManagerSession(previousToken);throw new Error(v.error||'請重新登入管理');}
@@ -71,7 +86,7 @@ async function api(body){
  }
  const managerToken=(isAdmin()||body.management)?admin?.token:null,payload={streamer:streamerSlug,token:(isAdmin()||body.management)?admin?.token:session?.token,signatures,...body};
  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify(payload)}),data=await r.json();
- if(!r.ok||data.error){if(managerToken&&payload.token===managerToken&&managerSessionExpired(r,data))discardManagerSession(managerToken);throw new Error(data.error||'連線失敗');}
+ if(!r.ok||data.error){if(managerSessionExpired(r,data)&&identity?.device){await deviceLogin.logout(identity).catch(()=>{});if(identity===session){session=null;put('player',null);}}if(managerToken&&payload.token===managerToken&&managerSessionExpired(r,data))discardManagerSession(managerToken);throw new Error(data.error||'連線失敗');}
  if(managerToken&&admin?.token!==managerToken)throw new Error('登入身分已變更，請重新操作');
  if(data.signatures)signatures=data.signatures;if(data.now)offset=timeValue(data.now)-Date.now();return data;
 }
@@ -91,7 +106,7 @@ async function dispatch(type,data){if(busy)throw new Error('上一筆還在處�
 function switchStreamer(slug){if(slug===streamerSlug)return;location.href=streamerDestination(location.href,slug,{role:admin?.role,managedSlug:admin?.streamerSlug,subtab,adminTab:tab});}
 document.addEventListener('change',e=>{if(e.target.id==='header-streamer')switchStreamer(e.target.value);if(e.target.id==='fate-category'){fateCategory=e.target.value;fateSeen=[];fateId=null;$('#fate-result').innerHTML=fateResultHtml();}});
 async function go(next){if(next==='admin'&&admin?.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(location.href);u.hash='admin';location.href=streamerDestination(u.href,admin.streamerSlug,{role:admin.role,managedSlug:admin.streamerSlug});return;}signatures={};route=next;location.hash=next;filters={q:'',tags:[],language:''};pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);if(next==='admin'&&!admin){route='home';await adminLogin();return;}if(next==='center'&&!session){route='home';await loginDialog();return;}await refresh(true);if(next==='common-book')await loadCommonBook(0);if(pendingCommonRequest&&session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}}
-const notifications=createNotifications({api:b=>api({...b,management:!!admin,streamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug}),apiUrl:API,apiKey:PUBLISHABLE_KEY,context:()=>({demo:demo||!!(draft&&isAdmin()),role:admin?(admin.role||'super_admin'):'player',recipient:admin?(isSuperAdmin()?'__super__':'__admin__'):session?.playerId,streamer:admin?(isSuperAdmin()?'__global__':admin.streamerSlug):streamerSlug,streamerName:admin&&isSuperAdmin()?'全部主播':state.currentStreamer?.display_name}),toast,onUpdate:()=>{chat.refresh().catch(()=>{});if(!busy&&!$('#dialog').open&&!document.activeElement?.matches('input,textarea,select'))refresh().catch(()=>{});}});
+const notifications=createNotifications({api:b=>api({...b,management:!!admin,streamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug}),apiUrl:API,apiKey:PUBLISHABLE_KEY,context:()=>({deviceSessionId:(admin||session)?.sessionId,demo:demo||!!(draft&&isAdmin()),role:admin?(admin.role||'super_admin'):'player',recipient:admin?(isSuperAdmin()?'__super__':'__admin__'):session?.playerId,streamer:admin?(isSuperAdmin()?'__global__':admin.streamerSlug):streamerSlug,streamerName:admin&&isSuperAdmin()?'全部主播':state.currentStreamer?.display_name}),toast,onUpdate:()=>{chat.refresh().catch(()=>{});if(!busy&&!$('#dialog').open&&!document.activeElement?.matches('input,textarea,select'))refresh().catch(()=>{});}});
 const chat=createChat({api,context:()=>({manager:isAdmin(),role:isAdmin()?admin?.role:'player',playerId:session?.playerId,streamer:streamerSlug,streamerName:hostName(),demo:demo||!!draft}),toast,onRead:()=>notifications.refresh().catch(()=>{}),realtimeAvailable:()=>notifications.realtimeAvailable()});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-chat]'))chat.open().catch(e=>toast(e.message));});
 const board=createBoard({api,context:()=>({manager:isAdmin(),role:admin?.role,playerId:session?.playerId,streamer:streamerSlug,streamerName:hostName(),demo:demo||!!draft}),toast});
@@ -216,12 +231,12 @@ function settingsHtml(){return `<div class="notice ${draft?'warning':''}">${demo
 function render(){applyHomeTheme();header();if(route==='admin'&&admin)renderAdmin();else if(route==='common-book')renderCommonBook();else if(route==='book')renderBook();else if(route==='center'&&session)renderCenter();else if(route==='gallery')renderGallery();else renderHome();}
 
 async function loginDialog(){modal('👤 玩家登入','<label>名稱、ID 或曾用名<input id="login-query" placeholder="找找自己"></label><div id="login-results"></div>');}
-async function chooseLogin(id){const result=demo?full.players.find(p=>p.playerId===id):(await api({op:'search',query:id})).players.find(p=>p.playerId===id);if(!result)return;modal('登入 '+result.name,`${select('loginId','本次使用的 ID',result.ids.length?result.ids.map(x=>[x,x]):[['','沒有平台 ID']],result.ids[0])}${result.hasPassword||result.password?field('password','玩家密碼','','password','autocomplete="current-password"'):''}`,async f=>{let token='demo';if(!demo)token=(await api({op:'login',playerId:id,loginId:f.get('loginId'),password:f.get('password')||''})).token;else if(String(result.password||'')!==String(f.get('password')||''))throw new Error('玩家密碼不正確');session={playerId:id,loginId:f.get('loginId')||'',token};put('player',session);await go('home');});}
+async function chooseLogin(id){const result=demo?full.players.find(p=>p.playerId===id):(await api({op:'search',query:id})).players.find(p=>p.playerId===id);if(!result)return;modal('登入 '+result.name,`${select('loginId','本次使用的 ID',result.ids.length?result.ids.map(x=>[x,x]):[['','沒有平台 ID']],result.ids[0])}${result.hasPassword||result.password?field('password','玩家密碼','','password','autocomplete="current-password"'):''}`,async f=>{let token='demo';if(!demo)token=(await api({op:'login',playerId:id,loginId:f.get('loginId'),password:f.get('password')||''})).token;else if(String(result.password||'')!==String(f.get('password')||''))throw new Error('玩家密碼不正確');const identity={playerId:id,loginId:f.get('loginId')||'',role:'player',token};session=deviceLogin?await deviceLogin.remember(identity,{streamer:streamerSlug}):identity;put('player',session);await go('home');});}
 async function adminLogin(){
  modal('🔐 管理入口',nativeSelect('mode','登入身分',[['streamer','主播管理'],['super','PA Party總裁']],'streamer')+'<div data-login-room>'+nativeSelect('streamer','選擇主播',state.streamers.map(r=>[r.slug,r.display_name]),streamerSlug)+'</div>'+(demo?'<p>本機測試模式</p>':field('password','密碼','','password','required autocomplete="current-password"')),async f=>{
  const mode=f.get('mode'),slug=mode==='streamer'?f.get('streamer'):undefined;
  const auth=demo?{token:'demo',role:mode==='super'?'super_admin':'streamer_admin',streamerSlug:slug,expiresIn:43200,legacy:true}:await api({op:mode==='super'?'adminLogin':'streamerLogin',streamer:slug,password:f.get('password')});
- admin={...auth,until:Date.now()+43200000,accessUntil:Date.now()+(auth.expiresIn-60)*1000};draft=null;put('admin',admin);
+ const identity={...auth,until:Date.now()+43200000,accessUntil:Date.now()+(auth.expiresIn-60)*1000};admin=deviceLogin?await deviceLogin.remember(identity,{streamer:slug||streamerSlug}):identity;draft=null;put('admin',admin);
  if(admin.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(location.href);u.searchParams.set('streamer',admin.streamerSlug);u.hash='admin';location.href=u.href;return;}
  await go('admin');toast('已登入，點「啟用通知音效」開始提醒');
  });
@@ -281,10 +296,10 @@ case 'close':$('#dialog').close();break;
 case 'home':case 'book':case 'common-book':case 'center':case 'gallery':await go(a);break;
 case 'commonBookPage':await loadCommonBook(commonBook.page+Number(id));break;case 'commonStreamer':commonBookDestination(id);break;case 'commonRequest':await commonBookRequest(b.dataset.slug,id,b.dataset.kind);break;
 case 'login':await loginDialog();break;case 'chooseLogin':await chooseLogin(id);break;
-case 'logout':if(!demo)await api({op:'logout'});session=null;put('player',null);await go('home');break;
+case 'logout':if(session?.device){if(!deviceLogin)throw Error('請使用原本登入裝置登出');await deviceLogin.logout(session);}else if(!demo)await api({op:'logout'});session=null;put('player',null);await go('home');break;
 case 'admin':admin?await go('admin'):await adminLogin();break;
 case 'changeManagerPassword':changeManagerPassword();break;
-case 'adminLogout':if(!demo)await api({op:'logout'});admin=null;draft=null;put('admin',null);await go('home');break;
+case 'adminLogout':if(admin?.device){if(!deviceLogin)throw Error('請使用原本登入裝置登出');await deviceLogin.logout(admin);}else if(!demo)await api({op:'logout'});admin=null;draft=null;put('admin',null);await go('home');break;
  case 'adminTab':tab=id;put('adminTab',tab);selectedPlayer=null;pages={};adminQuery='';render();break;
 case 'subtab':subtab=id;pages={};render();break;
 case 'jumpPage':jumpPage(document.querySelector('[data-page-key="'+id+'"]'));break;

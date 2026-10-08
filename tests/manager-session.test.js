@@ -8,9 +8,9 @@ const source=app.slice(app.indexOf('function managerSessionExpired('),app.indexO
 function client({legacy=true,response={error:'登入已到期，請重新登入'},status=400,networkError=false}={}){
  const saved={'papa-v2-draft-papa':'private','papa-v2-draft-other':'private','papa-v2-player':'keep'};
  const storage={...saved};Object.defineProperty(storage,'removeItem',{enumerable:false,value:key=>delete storage[key]});
- const appNode={innerHTML:''},ctx=vm.createContext({Date,JSON,Error,localStorage:storage,location:{hash:'admin'},document:{querySelectorAll:()=>[{close(){}}]},fetch:async()=>{if(networkError)throw Error('network offline');return {ok:status===200,status,json:async()=>response};}});
+ const appNode={innerHTML:''},ctx=vm.createContext({Date,JSON,Error,createWebDeviceLogin:()=>null,localStorage:storage,location:{hash:'admin'},document:{querySelectorAll:()=>[{close(){}}]},fetch:async()=>{if(networkError)throw Error('network offline');return {ok:status===200,status,json:async()=>response};}});
  vm.runInContext(`
-  var admin={token:'admin:old',legacy:${legacy},accessUntil:0,refreshToken:'old-refresh'},session={token:'player:keep'},draft={state:{private:true}},full={private:true},signatures={private:'old'},selectedPlayer='P1',state={streamers:[{id:'papa',slug:'papa'}],currentStreamer:{id:'papa'},players:[{password:'private'}]},route='admin',demo=false,offset=0,streamerSlug='papa',API='test',PUBLISHABLE_KEY='public',writes={};
+  var deviceLogin=null,admin={token:'admin:old',legacy:${legacy},accessUntil:0,refreshToken:'old-refresh'},session={token:'player:keep'},draft={state:{private:true}},full={private:true},signatures={private:'old'},selectedPlayer='P1',state={streamers:[{id:'papa',slug:'papa'}],currentStreamer:{id:'papa'},players:[{password:'private'}]},route='admin',demo=false,offset=0,streamerSlug='papa',API='test',PUBLISHABLE_KEY='public',writes={};
   var node={innerHTML:''};
   function isAdmin(){return !!admin&&route==='admin';}function put(key,value){writes[key]=value;}function empty(){return {players:[],songs:[]};}function header(){}function card(title,body){return title+body;}function button(label,act){return '<button data-act="'+act+'">'+label+'</button>';}function $(selector){return node;}function timeValue(value){return Date.parse(value);}
  `+source,ctx);
@@ -38,4 +38,21 @@ test('a successful late manager response is rejected after its manager session c
  const c=client({status:200,response:{state:{private:true},signatures:{secret:'x'}}});
  c.ctx.fetch=async()=>{c.value("admin={token:'admin:new',legacy:true}");return {ok:true,status:200,json:async()=>({state:{private:true},signatures:{secret:'x'}})};};
  await assert.rejects(c.request(),/登入身分已變更/);assert.equal(c.value('admin.token'),'admin:new');assert.equal(c.value('signatures.secret'),undefined);
+});
+
+test('remembered manager restores access before its request without persisting the bearer token',async()=>{
+ const c=client({status:200,response:{state:{}}});let payload;
+ c.value("admin={device:true,role:'streamer_admin',spaceId:'space-001',streamerId:'papa'};deviceLogin={access:async()=> 'device:renewed'}");
+ c.ctx.fetch=async(_,options)=>{payload=JSON.parse(options.body);return {ok:true,status:200,json:async()=>({state:{}})};};
+ await c.request();assert.equal(payload.token,'device:renewed');assert.equal(c.value('writes.admin'),undefined);
+});
+
+test('expired remembered identity without an in-memory token clears private manager state',async()=>{
+ const c=client();c.value("admin={device:true,role:'streamer_admin'};deviceLogin={access:async()=>{throw Object.assign(Error('expired'),{authExpired:true});}};");
+ await assert.rejects(c.request(),/expired/);assert.equal(c.value('admin'),null);assert.equal(c.value('draft'),null);assert.equal(c.value('session.token'),'player:keep');
+});
+
+test('late device refresh cannot replace a newly selected manager identity',async()=>{
+ const c=client();c.value("admin={device:true,role:'streamer_admin'};deviceLogin={access:async()=>{admin={token:'admin:new',legacy:true};return 'device:old';}};");
+ await assert.rejects(c.request(),/登入身分已變更/);assert.equal(c.value('admin.token'),'admin:new');
 });

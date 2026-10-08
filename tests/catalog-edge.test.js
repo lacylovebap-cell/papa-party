@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
 import {execFileSync} from 'node:child_process';
 
-function edge(){
+function edge(allowRead=false){
  execFileSync(process.execPath,['build-edge.mjs'],{cwd:new URL('../',import.meta.url)});
  const code=fs.readFileSync(new URL('../deploy-function.txt',import.meta.url),'utf8').replace(/^import webpush .*;\r?\n/m,'const webpush={};');
  let handler;
@@ -18,6 +18,8 @@ function edge(){
   calls.push({path,body});
   if(path.includes('papa_streamer_directory'))return meta.data.streamers;
   if(path.includes('papa_v2_revision?'))return [{revision:7}];
+  if(path.includes('papa_v2_scoped_read_snapshot'))return {revision:7,rows:[{kind:'meta',id:'1',data:{schemaVersion:3,...meta.data}},{kind:'settings',id:'1',data:{}}]};
+  if(path.includes('papa_catalog_song_metadata'))return [];
   if(path.includes('papa_song_search_room'))return {songIds:['local-song'],total:1,hasMore:false};
   if(path.includes('papa_catalog_search'))return {rows:[{id:'variant-id',title:'公開歌名',artist:'歌手'}],total:1,hasMore:false};
   if(path.includes('papa_catalog_song_links?'))return [{variant_id:'11111111-1111-4111-8111-111111111111'}];
@@ -29,7 +31,7 @@ function edge(){
   if(path.includes('papa_notice_config?id=eq.player_sound'))return [{value:{data:'data:audio/mp4;base64,YQ=='}}];
   throw Error('unexpected database path: '+path);
  };
- vm.runInContext('actor=async()=>testActor;api=async(path,body)=>mockApi(path,body);load=async()=>{throw Error("full snapshot was loaded")};',context);
+ vm.runInContext('actor=async()=>testActor;api=async(path,body)=>mockApi(path,body);'+(allowRead?'':'load=async()=>{throw Error("full snapshot was loaded")};'),context);
  const request=async body=>{
   const response=await handler({method:'POST',json:async()=>body});
   return {status:response.status,data:JSON.parse(await response.text())};
@@ -165,4 +167,13 @@ test('unchanged read uses small revision and room metadata, while forced read ke
  assert.equal((await request({op:'read',streamer:'papa',revision:-1,signatures:{songs:'known'}})).status,400,'forced refresh must continue to the full read path');
  context.testActor={role:'streamer_admin',streamer_id:'michelle'};
  assert.equal((await request({op:'read',streamer:'papa',revision:7,signatures:{songs:'known'}})).status,400,'cached reads still enforce streamer scope');
+});
+
+test('forced ordinary read requests only its room from the scoped snapshot RPC',async()=>{
+ const {request,calls}=edge(true);
+ const result=await request({op:'read',streamer:'michelle',revision:-1});
+ assert.equal(result.status,200,JSON.stringify(result.data));
+ const read=calls.find(c=>c.path.includes('papa_v2_scoped_read_snapshot'));
+ assert.equal(read.body.requested_room,'michelle');
+ assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
 });
