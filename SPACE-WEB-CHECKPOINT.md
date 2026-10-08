@@ -1,6 +1,7 @@
 # Architecture continuation — 2026-10-08
 
-Base / formal release: `f5925ba73fa6c0a63e7c17ea43d1a01b661632a7`, `10.08-CATALOG.2`.
+Architecture base: `f5925ba73fa6c0a63e7c17ea43d1a01b661632a7`, `10.08-CATALOG.2`.
+Latest formal release: `97b1f24d94ce2782198215aa64ae35d6cb3a6f26`, `10.08-EGRESS.1`. The three lightweight metadata paths were independently backported to the existing production architecture and deployed without any foundation migrations. Edge deployed and GitHub Pages built at this exact SHA. Production catalog and unauthorized-upload smoke passed; browser console was clean. Grouped all-result/group-checkbox selection already existed in CATALOG.2 and remains preserved, with additional cross-page validation. Evidence: `../metadata-egress-deployment-result.json`. Merge latest main before final architecture release; do not overwrite this production optimization or cache version.
 Branch: `feature/space-foundation-1008`. Existing dirty development checkout remains untouched.
 
 ## Completed locally
@@ -31,7 +32,7 @@ Branch: `feature/space-foundation-1008`. Existing dirty development checkout rem
 - `node --check` passes for changed Web modules. Edge test harness compiles/exercises the updated TypeScript bundle.
 - Real in-app Chromium browser verification passed on isolated `127.0.0.1:4175`, using the actual Web device-login/storage modules with a local backend fixture. Player and manager credentials use AES-GCM with a nonextractable key; both IndexedDB records are encrypted and localStorage contains neither refresh nor access tokens. Closing and reopening the tab retained both identities. Restoring two identities made exactly two refresh requests; twenty subsequent concurrent player requests reused one access token with **zero additional refresh requests**. A second tab rotated both credentials successfully; the first tab's twenty requests still caused zero extra refreshes. Player logout in the second tab revoked that slot; restoring the first tab returned player=false, manager=true. Total fixture counts: start=2, refresh=6, logout=1, rejected=0. Browser warning/error logs were empty. This proves local browser lifecycle behavior, **not** live Supabase or background Push delivery.
 - Browser proof is saved outside the repository as `../space-device-browser-1008.png`; the ignored `qa-device-server.mjs` is archived as `../space-device-browser-fixture-1008.mjs`. The local fixture never contacted Supabase or production, and was stopped after verification.
-- These are local targeted checks. No Phase 7 full regression/build, live foundation migration, or architecture production deployment has happened. Formal main remains the verified catalog release.
+- These are local architecture targeted checks. No Phase 7 full regression/build, live foundation migration, or architecture production deployment has happened. Formal main is the separately verified EGRESS.1 release above; the foundation and multi-Space changes remain on this development branch.
 
 ## Next work / release barrier
 
