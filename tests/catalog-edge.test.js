@@ -7,14 +7,18 @@ import {execFileSync} from 'node:child_process';
 import {empty,mutate} from '../src/core.js';
 import {stateEntries} from '../src/state-patch.js';
 
+let edgeSource;
 function edge(allowRead=false){
- execFileSync(process.execPath,['build-edge.mjs'],{cwd:new URL('../',import.meta.url)});
- const code=fs.readFileSync(new URL('../deploy-function.txt',import.meta.url),'utf8').replace(/^import webpush .*;\r?\n/m,'const webpush={};');
+ if(!edgeSource){
+  execFileSync(process.execPath,['build-edge.mjs'],{cwd:new URL('../',import.meta.url)});
+  const code=fs.readFileSync(new URL('../deploy-function.txt',import.meta.url),'utf8').replace(/^import webpush .*;\r?\n/m,'const webpush={};');
+  edgeSource=stripTypeScriptTypes(code);
+ }
  let handler;
  const calls=[];
  const meta={data:{streamers:[{id:'papa',slug:'papa',active:true,display_name:'怕怕'},{id:'michelle',slug:'michelle',active:true,display_name:'米雪'}],streamerSettings:{}}};
  const context=vm.createContext({URL,crypto,structuredClone,TextEncoder,console,Date,Response,Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://example.test':'test'},serve:h=>handler=h},EdgeRuntime:{waitUntil:()=>{}},fetch:()=>{throw Error('unexpected network');}});
- vm.runInContext(stripTypeScriptTypes(code),context);
+ vm.runInContext(edgeSource,context);
  context.testActor=null;
  context.mockApi=async(path,body)=>{
   calls.push({path,body});
@@ -40,6 +44,93 @@ function edge(allowRead=false){
  };
  return {context,calls,request};
 }
+
+test('president streamer creation uses one metadata snapshot and one atomic registry commit in the canonical Space',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi,scope='native-space',room='native-room';
+ context.testActor={role:'super_admin',accountId:'11111111-1111-4111-8111-111111111111',spaceId:null};
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_streamer_registry_snapshot')){
+   calls.push({path,body});assert.equal(body.requested_room,room);assert.equal(body.subject,context.testActor.accountId);
+   return {revision:7,canonicalSpace:{id:scope},canonicalRoom:room,rows:[{kind:'meta',id:'1',data:{schemaVersion:3,
+    streamers:[{id:room,slug:room,display_name:'Native Room',active:true,spaceId:scope,privateDescriptor:'private-native'},
+     {id:'papa',slug:'papa',display_name:'Legacy',active:true,spaceId:'space-001'}],
+    streamerSettings:{[room]:{manual:'private native settings'}}}},{kind:'settings',id:'1',data:{manual:'private native settings'}}]};
+  }
+  if(path.endsWith('papa_streamer_registry_commit')){
+   calls.push({path,body});assert.equal(body.requested_space,scope);assert.equal(body.replacement_room.spaceId,scope);
+   assert.equal(body.actor_context.account_id,context.testActor.accountId);assert.equal(body.actor_context.space_id,scope);
+   assert.deepEqual(Array.from(body.room_settings.tags),[]);assert.notEqual(body.room_settings.manual,'private native settings');return 8;
+  }return old(path,body);
+ };
+ const result=await request({op:'mutate',revision:7,streamer:room,action:{type:'streamer',data:{slug:'new-room',display_name:'New Room',active:true}}});
+ assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.state.revision,8);
+ assert.equal(result.data.state.streamers.length,2);assert.ok(result.data.state.streamers.every(r=>r.spaceId===scope));
+ assert.equal(result.data.state.currentStreamer.id,room);
+ for(const secret of ['private-native','private native settings','Legacy'])assert.equal(JSON.stringify(result.data).includes(secret),false);
+ assert.equal(calls.length,2);assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')||c.path.includes('papa_catalog_song_metadata')||c.path.includes('papa_release_b_commit')),false);
+});
+
+test('registry requests reject non-presidents and malformed or cross-Space edits before any write',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi;
+ const body={op:'mutate',revision:7,streamer:'papa',action:{type:'streamer',data:{slug:'new-room',display_name:'New'}}};
+ for(const who of [null,{role:'player',playerId:'P1'},{role:'streamer_admin',streamer_id:'papa'}]){
+  context.testActor=who;assert.equal((await request(body)).status,400);
+ }
+ assert.equal(calls.length,0);
+ context.testActor={role:'super_admin',accountId:'11111111-1111-4111-8111-111111111111',spaceId:null};
+ for(const data of [{...body.action.data,spaceId:'forged'},{...body.action.data,active:'false'}])
+  assert.equal((await request({...body,action:{type:'streamer',data}})).status,400);
+ assert.equal(calls.length,0);
+ context.mockApi=async(path,params)=>{
+  if(path.endsWith('papa_streamer_registry_snapshot')){calls.push({path,body:params});return {revision:7,canonicalSpace:{id:'space-001'},canonicalRoom:'papa',
+   rows:[{kind:'meta',id:'1',data:{schemaVersion:3,streamers:[{id:'papa',slug:'papa',display_name:'Papa',spaceId:'space-001'},
+    {id:'foreign',slug:'foreign',display_name:'Foreign',spaceId:'native-space'}],streamerSettings:{papa:{}}}},{kind:'settings',id:'1',data:{}}]};}
+  return old(path,params);
+ };
+ for(const data of [{...body.action.data,id:'foreign'},{...body.action.data,id:'missing'}])
+  assert.equal((await request({...body,action:{type:'streamer',data}})).status,400);
+ assert.equal((await request({...body,revision:6})).status,400);
+ assert.equal(calls.length,3);assert.ok(calls.every(c=>c.path.endsWith('papa_streamer_registry_snapshot')));
+});
+
+test('explicit president backup uses one complete export and retains business data plus native recovery metadata',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi;
+ const state=mutate(empty(),{type:'song',data:{title:'Private source',artist:'Artist',lyrics:'source lyric'}},{role:'admin'});
+ state.players=[{playerId:'P1',name:'Legacy Player',password:'existing legacy secret',ids:[]}];
+ const architecture={formatVersion:1,tables:{papa_space_player_profiles:[{space_id:'native-space',player_id:'P1',data:{name:'Independent native'}}],
+  papa_player_extra_quotas:[{streamer_id:'native-room',player_id:'P1',extra_quota:3}]},manifest:{excluded:['device sessions']}};
+ context.testActor={role:'super_admin',accountId:'11111111-1111-4111-8111-111111111111',spaceId:null};
+ context.mockApi=async(path,body)=>{if(path.endsWith('papa_president_full_backup')){calls.push({path,body});assert.equal(body.subject,context.testActor.accountId);return {revision:7,rows:stateEntries(state),architecture};}return old(path,body);};
+ const result=await request({op:'backup',streamer:'native-room'});
+ assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.backup.players[0].password,'existing legacy secret');
+ assert.equal(result.data.backup.songs[0].lyrics,'source lyric');assert.deepEqual(result.data.backup.architecture,architecture);
+ assert.equal(calls.length,1);assert.equal(calls[0].path,'/rest/v1/rpc/papa_president_full_backup');
+ for(const who of [null,{role:'player',playerId:'P1'},{role:'streamer_admin',streamer_id:'papa'},{role:'super_admin'}]){
+  context.testActor=who;assert.equal((await request({op:'backup'})).status,400);
+ }
+ assert.equal(calls.length,1);
+});
+
+test('legacy player search and password login use a room-only source and never a platform snapshot',async()=>{
+ const {context,calls,request}=edge(true),old=context.mockApi;
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_v2_scoped_read_snapshot_in_space')){
+   calls.push({path,body});assert.equal(body.allowed_space,'space-001');
+   return {revision:7,rows:[{kind:'meta',id:'1',data:{schemaVersion:3,streamers:[{id:'papa',slug:'papa',display_name:'怕怕',active:true}],streamerSettings:{papa:{}}}},
+    {kind:'settings',id:'1',data:{}},{kind:'players',id:'P1',data:{playerId:'P1',name:'Player One',ids:['001'],names:[],password:'private password'}}]};
+  }
+  if(path==='/rest/v1/papa_v2_sessions'){calls.push({path,body});return null;}
+  if(path.endsWith('papa_bind_verified_legacy_session')){calls.push({path,body});return {role:'player',accountId:'bound-account',spaceId:'space-001'};}
+  return old(path,body);
+ };
+ const found=await request({op:'search',streamer:'papa',query:'Player'});
+ assert.equal(found.status,200,JSON.stringify(found.data));assert.equal(found.data.players[0].hasPassword,true);
+ assert.equal(JSON.stringify(found.data).includes('private password'),false);
+ const login=await request({op:'login',streamer:'papa',playerId:'P1',password:'private password'});
+ assert.equal(login.status,200,JSON.stringify(login.data));assert.ok(login.data.token.startsWith('player:'));
+ assert.equal(calls.filter(c=>c.path.endsWith('papa_v2_scoped_read_snapshot_in_space')).length,2);
+ assert.equal(calls.some(c=>c.path.endsWith('papa_v2_snapshot')||c.path.includes('papa_catalog_get_lyrics')),false);
+});
 
 test('queue completion uses one room snapshot and the existing notification transaction without reading lyrics/full history',async()=>{
  const {context,calls,request}=edge(true);const now=new Date().toISOString();
