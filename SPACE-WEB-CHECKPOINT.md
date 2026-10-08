@@ -3,6 +3,7 @@
 Architecture base: `f5925ba73fa6c0a63e7c17ea43d1a01b661632a7`, `10.08-CATALOG.2`.
 Latest formal release: `97b1f24d94ce2782198215aa64ae35d6cb3a6f26`, `10.08-EGRESS.1`. The three lightweight metadata paths were independently backported to the existing production architecture and deployed without any foundation migrations. Edge deployed and GitHub Pages built at this exact SHA. Production catalog and unauthorized-upload smoke passed; browser console was clean. Grouped all-result/group-checkbox selection already existed in CATALOG.2 and remains preserved, with additional cross-page validation. Evidence: `../metadata-egress-deployment-result.json`. Merge latest main before final architecture release; do not overwrite this production optimization or cache version.
 Branch: `feature/space-foundation-1008`. Existing dirty development checkout remains untouched.
+Latest production main `97b1f24` has now been merged into this branch. Overlapping changes retain the verified Space-scoped metadata paths, the production EGRESS.1 module cache version, and the cross-page group-selection regression case. `space-main-sync-1008-targeted.txt`: **55/55 passed** for Edge catalog/metadata, manager auth, catalog UI/group selection and module-cache consistency. No production foundation migration or architecture deployment occurred. The next implementation task remains Space 002 operational/admin transactions and communication/audit isolation; do not redo this merge.
 
 ## Completed locally
 

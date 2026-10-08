@@ -1,14 +1,14 @@
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints} from './catalog-tools.js?v=10.08-CATALOG.2';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints} from './catalog-tools.js?v=10.08-EGRESS.1';
 import {fateCategories,drawSong} from './fate.js?v=10.05-P0';
 import {createBoard} from './board.js?v=10.05-P0';
-import {createChat} from './chat.js?v=10.08-CATALOG.2';
+import {createChat} from './chat.js?v=10.08-EGRESS.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=9.24-H';
 import {openHomeEditor} from './home-editor.js?v=9.24-H';
 import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=9.24-B.2';
-import {createNotifications} from './notifications.js?v=10.08-CATALOG.2';
+import {createNotifications} from './notifications.js?v=10.08-EGRESS.1';
 import {API,PUBLISHABLE_KEY} from './config.js';
 import {createWebDeviceLogin} from './web-device-login.js';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour} from './core.js?v=10.08-CATALOG.2';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour} from './core.js?v=10.08-EGRESS.1';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let deviceLogin=null;
 const demo=new URLSearchParams(location.search).has('demo')||location.pathname.endsWith('/preview.html'),roomCacheKey=k=>['draft','adminTab'].includes(k)?k+'-'+(new URLSearchParams(location.search).get('streamer')||'papa'):k,get=k=>{try{return JSON.parse(localStorage.getItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k)));}catch{return null;}},put=(k,v)=>localStorage.setItem('papa-v2-'+(demo?'preview-':'')+roomCacheKey(k),JSON.stringify(['player','admin'].includes(k)&&deviceLogin?deviceLogin.persisted(v):v));
