@@ -110,7 +110,7 @@ async function api(path:string,body?:unknown,method?:string){
  const r=await fetch(SB_URL+path,{method:method||(body?'POST':'GET'),headers,body:body?JSON.stringify(body):undefined}),text=await r.text();
  if(!r.ok){
   const messages:any={DEVICE_SWITCH_SPACE_INVALID:'找不到可使用的空間',DEVICE_SWITCH_ROOM_INVALID:'此登入不適用選擇的主播',DEVICE_SWITCH_MEMBERSHIP_REQUIRED:'你沒有此空間的使用權限',DEVICE_SWITCH_PROFILE_REQUIRED:'此空間的玩家資料尚未建立',DEVICE_SWITCH_IDENTITY_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INSTALLATION_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INVALID:'裝置資訊不正確',ACCOUNT_DISABLED:'登入已到期，請重新登入',MEMBERSHIP_REQUIRED:'登入已到期，請重新登入',MEMBERSHIP_SUSPENDED:'登入已到期，請重新登入',SESSION_ACCOUNT_MISMATCH:'登入已到期，請重新登入',DEVICE_IDENTITY_MISMATCH:'登入已到期，請重新登入',BOARD_MODERATED:'此留言由管理者隱藏，請聯絡管理者恢復',BOARD_RATE_LIMIT:'留言送得太快，請稍候三秒再試',BOARD_RETRY_CHANGED:'重試內容不同，請重新開啟留言板',CHAT_RATE_LIMIT:'訊息送得太快，請稍候再送',CHAT_REQUEST_REUSED:'訊息重試內容不同，請重新開啟私訊',VERSION_CONFLICT:'資料剛更新了，請重新整理後再試一次',CATALOG_SELECTION_STALE:'共同資料剛更新，請重新選取後再操作',CATALOG_SOURCE_STALE:'原歌曲剛更新，請重新選取後再審核',CATALOG_CANDIDATE_STALE:'候選歌曲剛更新，請重新選取後再審核',CATALOG_TEMPLATE_MISSING:'這個模板已停用或不存在，請重新選擇',CATALOG_ALREADY_LINKED:'歌曲已建立共同關聯，請重新整理',CATALOG_AMBIGUOUS_TARGET:'存在多筆同版本共同歌曲，請選擇既有目標後再連結',CATALOG_BATCH_DIFFERENT_VERSIONS:'所選歌曲屬於不同版本，請分批處理'};
-  Object.assign(messages,{SONG_FAVORITES_SCOPE_INVALID:'找不到可收藏的主播空間',SONG_FAVORITES_ACTOR_INVALID:'登入已到期，請重新登入',SONG_FAVORITES_SONG_INVALID:'歌曲已隱藏或更新，請重新選擇',SONG_FAVORITES_INPUT_INVALID:'收藏資料不正確',SONG_FAVORITES_PAGE_INVALID:'收藏分頁資料不正確',NEW_PRACTICE_SCOPE_INVALID:'找不到主播的新練歌曲',NEW_PRACTICE_PAGE_INVALID:'新練歌曲分頁資料不正確',STREAMER_REGISTRY_DUPLICATE:'主播網址已使用',STREAMER_REGISTRY_ACTOR_INVALID:'總裁登入已到期，請重新登入',
+  Object.assign(messages,{LISTENING_HISTORY_SCOPE_INVALID:'找不到主播的常聽歌單',LISTENING_HISTORY_ACTOR_INVALID:'無法查看其他玩家的常聽歌單',LISTENING_HISTORY_PLAYER_INVALID:'找不到此玩家',LISTENING_HISTORY_PAGE_INVALID:'常聽歌單分頁資料不正確',SONG_FAVORITES_SCOPE_INVALID:'找不到可收藏的主播空間',SONG_FAVORITES_ACTOR_INVALID:'登入已到期，請重新登入',SONG_FAVORITES_SONG_INVALID:'歌曲已隱藏或更新，請重新選擇',SONG_FAVORITES_INPUT_INVALID:'收藏資料不正確',SONG_FAVORITES_PAGE_INVALID:'收藏分頁資料不正確',NEW_PRACTICE_SCOPE_INVALID:'找不到主播的新練歌曲',NEW_PRACTICE_PAGE_INVALID:'新練歌曲分頁資料不正確',STREAMER_REGISTRY_DUPLICATE:'主播網址已使用',STREAMER_REGISTRY_ACTOR_INVALID:'總裁登入已到期，請重新登入',
    STREAMER_REGISTRY_SCOPE_INVALID:'請切換到該主播空間再編輯',STREAMER_REGISTRY_ROOM_INVALID:'找不到主播',
    STREAMER_REGISTRY_SPACE_INVALID:'找不到可使用的空間',STREAMER_REGISTRY_DESCRIPTOR_INVALID:'主播資料格式錯誤'});
   throw Error(Object.entries(messages).find(([code])=>text.includes(code))?.[1]||'資料庫操作失敗');
@@ -353,6 +353,16 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   const page=b.page??0,limit=b.limit??20;
   if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('收藏分頁資料不正確');
   return respond(await api('/rest/v1/rpc/papa_song_favorites_page',{...common,page_limit:limit,page_offset:page*limit}));
+ }
+ if(b.op==='listeningHistoryPage'){
+  if(b.token&&!who)throw Error('登入已到期，請重新登入');
+  if(!who?.accountId||who.role!=='player'&&!isManager(who))throw Error('請先登入');
+  const management=isManager(who),room=await catalogRoom(who,b.streamer||'papa',management);
+  if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
+  const playerId=management?b.playerId:who.playerId,page=b.page??0,limit=b.limit??20;
+  if(typeof playerId!=='string'||!playerId||playerId.length>128||!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('常聽歌單分頁資料不正確');
+  const context={role:who.role,account_id:who.accountId,player_id:who.playerId||null,actor_streamer_id:who.streamer_id||null,space_id:room.spaceId||'space-001',streamer_id:room.id};
+  return respond(await api('/rest/v1/rpc/papa_listening_history_page',{requested_space:room.spaceId||'space-001',requested_room:room.id,requested_player:playerId,actor_context:context,page_limit:limit,page_offset:page*limit}));
  }
  if(b.op==='newPracticePage'){
   const management=b.management===true;

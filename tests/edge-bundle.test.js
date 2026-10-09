@@ -74,4 +74,19 @@ test('complete edge bundle compiles, preserves URL validators and isolates chat 
  assert.deepEqual(JSON.parse(JSON.stringify(context.favoriteCalls[1].body)),{requested_space:'space-001',requested_room:'michelle',actor_context:{role:'player',account_id:'actual-account',player_id:'P1',space_id:'space-001',streamer_id:'michelle'},requested_song:'S1',requested_favorite:true});
  for(const body of [{op:'favoriteFlags',songIds:Array(51).fill('S1')},{op:'favoriteFlags',songIds:['S1','S1']},{op:'favoriteSet',songId:'S1',favorite:'true'},{op:'favoritesPage',limit:51},{op:'favoritesPage',page:-1}]){context.favoriteCalls.length=0;const bad=await handler({method:'POST',json:async()=>({streamer:'michelle',...body})});assert.equal(bad.status,400);assert.ok(context.favoriteCalls.every(call=>call.path.endsWith('papa_streamer_directory')));}
  context.favoriteCalls.length=0;const favoritePage=await handler({method:'POST',json:async()=>({op:'favoritesPage',streamer:'michelle',page:2,limit:20})});assert.equal(favoritePage.status,200);assert.equal(context.favoriteCalls[1].body.page_offset,40);
+ vm.runInContext(`
+  var listeningCalls=[],listeningWho=null;actor=async()=>listeningWho;
+  api=async(path,body)=>{listeningCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'}];if(path.endsWith('papa_listening_history_page'))return {rows:[],total:0,pageLimit:body.page_limit,pageOffset:body.page_offset};throw Error('unexpected listening query');};
+ `,context);
+ for(const identity of [null,{role:'player',playerId:'P1'},{role:'streamer_admin',streamer_id:'michelle'}]){
+  context.listeningWho=identity;context.listeningCalls.length=0;const denied=await handler({method:'POST',json:async()=>({op:'listeningHistoryPage',streamer:'michelle',playerId:'P2'})});assert.equal(denied.status,400);assert.equal(context.listeningCalls.length,0);
+ }
+ context.listeningWho={role:'player',playerId:'P1',accountId:'actual-account',spaceId:'space-001'};context.listeningCalls.length=0;
+ const listeningPage=await handler({method:'POST',json:async()=>({op:'listeningHistoryPage',token:'test',streamer:'michelle',playerId:'forged-player',actor_context:{role:'super_admin'},page:2,limit:20})});assert.equal(listeningPage.status,200);
+ assert.equal(context.listeningCalls.length,2);assert.deepEqual(JSON.parse(JSON.stringify(context.listeningCalls[1].body)),{requested_space:'space-001',requested_room:'michelle',requested_player:'P1',actor_context:{role:'player',account_id:'actual-account',player_id:'P1',actor_streamer_id:null,space_id:'space-001',streamer_id:'michelle'},page_limit:20,page_offset:40});
+ for(const extra of [{page:-1},{limit:51},{page:10000001}]){context.listeningCalls.length=0;const bad=await handler({method:'POST',json:async()=>({op:'listeningHistoryPage',streamer:'michelle',...extra})});assert.equal(bad.status,400);assert.ok(context.listeningCalls.every(call=>!call.path.endsWith('papa_listening_history_page')));}
+ context.listeningWho={role:'streamer_admin',streamer_id:'michelle',accountId:'manager-account',spaceId:'space-001'};context.listeningCalls.length=0;
+ const managedListening=await handler({method:'POST',json:async()=>({op:'listeningHistoryPage',streamer:'michelle',playerId:'P2',limit:5})});assert.equal(managedListening.status,200);assert.equal(context.listeningCalls[1].body.requested_player,'P2');assert.equal(context.listeningCalls[1].body.actor_context.actor_streamer_id,'michelle');
+ context.listeningCalls.length=0;const wrongRoom=await handler({method:'POST',json:async()=>({op:'listeningHistoryPage',streamer:'papa',playerId:'P2'})});assert.equal(wrongRoom.status,400);assert.ok(context.listeningCalls.every(call=>!call.path.endsWith('papa_listening_history_page')));
+
 });
