@@ -10,8 +10,8 @@ function ui(){
   songs:[],ledger:[],crowns:[],cards:[],wishes:[],badges:[],queue:[{id:'Q1',kind:'saved',status:'completed',playerId:'P1',title:'Song',at:'2026-10-09T12:50:00Z',effective_at:'2026-10-09T12:55:00Z',completedAt:'2026-10-09T12:55:00Z'}],
   players:[{playerId:'P1',name:'玩家',ids:[],names:[],quotaRights:[{streamer_id:'papa',streamer_name:'怕怕',extra_quota:2},{streamer_id:'second',streamer_name:'主播B',extra_quota:3}]}]};
  let captured,manager=true;
- const context=vm.createContext({state,sent,Date,Object,Number,Map,timeValue,stamp,hourKey,savedQuota,offset:0,subtab:'overview',session:{playerId:'P1'},clock:()=>now,isAdmin:()=>manager,hostName:()=> '怕怕',balance:()=>10,me:()=>state.players[0],say:()=>'',blank:()=>'',time:x=>x,
-  song:()=>null,button:(label,action)=>'<button data-act="'+action+'">'+label+'</button>',modal:(title,html,submit)=>captured={title,html,submit},dispatch:async(type,data)=>sent.push({type,data})});
+ const context=vm.createContext({state,sent,draft:null,demo:false,Date,Object,Number,Map,timeValue,stamp,hourKey,savedQuota,offset:0,subtab:'overview',session:{playerId:'P1'},clock:()=>now,isAdmin:()=>manager,hostName:()=> '怕怕',balance:()=>10,me:()=>state.players[0],say:()=>'',blank:()=>'',time:x=>x,
+  storedBalanceHtml:()=> '10 首',listeningOverviewHtml:()=>'',isSuperAdmin:()=>false,song:()=>null,button:(label,action)=>'<button data-act="'+action+'">'+label+'</button>',modal:(title,html,submit)=>captured={title,html,submit},dispatch:async(type,data)=>sent.push({type,data})});
  const escapeLine=line('const $=');vm.runInContext('const '+escapeLine.slice(escapeLine.indexOf('h=')),context);
  vm.runInContext(['const field=','const area=','const check=','const dateInput=','const isoInput='].map(line).join('\n')+'\n'+app.slice(app.indexOf('function editExtraQuota('))+'\n'+line('function hour(){')+'\n'+line('function playerTabs('),context);
  return {context,state,sent,run:source=>vm.runInContext(source,context),setManager:value=>manager=value,get modal(){return captured;}};
@@ -36,3 +36,5 @@ test('audit summaries describe the real manager and corrected time without claim
  assert.match(eventDescription({entity_kind:'queue',actor_role:'super_admin',action:'recordTime',after_data:{playerId:'P1',title:'Song',kind:'saved'}},names),/重新計算提歌額度/);
  assert.doesNotMatch(eventDescription({entity_kind:'queue',actor_role:'super_admin',action:'recordTime',after_data:{playerId:'P1',title:'Song',kind:'live'}},names),/提歌額度/);
 });
+
+test('real quota rights are never silently changed in a local draft',()=>{const u=ui();u.run('draft={state:{}}');assert.throws(()=>u.run("editExtraQuota('P1')"),/退出草稿/);assert.equal(u.sent.length,0);u.run('demo=true');assert.doesNotThrow(()=>u.run("editExtraQuota('P1')"));});

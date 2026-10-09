@@ -23,6 +23,9 @@ async function fixture(t){
    certification:'verified',test:false,password:'retained legacy password '+id,note:'retained private legacy note',futurePrivate:{keep:['private history']}}]);
  for(const file of fs.readdirSync('supabase/migrations').filter(f=>/^2026100100\d\d_/.test(f)||/^20261005000[123]_/.test(f)||/^2026100800(?:0[1-9]|10)_/.test(f)).sort())await db.exec(migration(file));
  for(const file of fs.readdirSync('supabase/migrations').filter(f=>/^2026100700\d\d_/.test(f)||/^20261008001[1-4]_/.test(f)||/^2026100900(?:0[1-9]|10|11)_/.test(f)).sort())await db.exec(migration(file));
+ // Archive migration remains the operation under test; quota fixtures use
+ // the additive compatibility schema required by the released legacy table.
+ await db.exec(migration('202610090015_quota_native_compatibility.sql'));
  const account=async()=>(await q('insert into papa_accounts default values returning id'))[0].id;
  const president=await account(),ordinary=await account(),subjects={};
  await q("insert into papa_platform_roles(account_id,role) values($1,'president')",[president]);

@@ -1,11 +1,11 @@
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.08-UI.2';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.09-QUOTA.1';
 import {fateCategories,drawSong} from './fate.js?v=10.05-P0';
-import {createBoard} from './board.js?v=10.08-UI.2';
-import {createChat} from './chat.js?v=10.08-UI.2';
+import {createBoard} from './board.js?v=10.09-QUOTA.1';
+import {createChat} from './chat.js?v=10.09-QUOTA.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=9.24-H';
 import {openHomeEditor} from './home-editor.js?v=9.24-H';
 import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=9.24-B.2';
-import {createNotifications} from './notifications.js?v=10.08-UI.2';
+import {createNotifications} from './notifications.js?v=10.09-QUOTA.1';
 import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js';
 import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js';
 import {createPlayerManager} from './player-manager.js';
@@ -17,7 +17,7 @@ import {createWebDeviceLogin} from './web-device-login.js';
 import {roomStorageKey} from './communication-context.js';
 import {createWebSpaceEntry} from './web-space-entry.js';
 import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.08-UI.2';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.09-QUOTA.1';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const venueName=venue=>venue==='radio'?'📻 電台':'聲瑪';
 function venueSelector(name='venue',value=venuePolicySettings(state.settings).current_space){return venuePolicySettings(state.settings).radio_enabled?select(name,name==='storage_pool'?'存歌池':'場域',[['shengma','聲瑪'],['radio','📻 電台']],value):'';}
@@ -941,6 +941,7 @@ document.addEventListener('change',e=>{if(!e.target.matches('[data-relation-sele
 
 function editExtraQuota(id){
  if(!isAdmin())throw Error('請先登入管理');
+ if(draft&&!demo)throw Error('請退出草稿模式，再設定正式專屬提歌權');
  const p=state.players.find(x=>x.playerId===id);if(!p)throw Error('找不到玩家');
  const existing=state.extraQuotas?.find(x=>x.streamer_id===state.currentStreamer.id&&x.player_id===id);
  modal('👑 '+hostName()+'｜'+p.name+'的專屬提歌權',field('extra_quota','每小時額外首數（0 為取消）',existing?.extra_quota||0,'number','min="0" max="100000" step="1"')+check('enabled','啟用專屬提歌權',existing?.enabled??true)+'<p class="muted">只對目前主播與這位玩家生效。先使用個人專屬額度，再使用共用額度；仍需有足夠存歌。</p>',async f=>dispatch('extraQuota',{player_id:id,extra_quota:Number(f.get('extra_quota')),enabled:f.has('enabled')}));

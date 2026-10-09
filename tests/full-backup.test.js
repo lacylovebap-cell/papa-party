@@ -23,7 +23,7 @@ test('complete private export preserves legacy/native/catalog/history data, excl
  // Load the actual deployed catalog and bridge schemas; do not substitute
  // mocks for tables that must survive a real recovery export.
  for(const file of fs.readdirSync('supabase/migrations').filter(f=>/^2026100100\d\d_/.test(f)||/^20261005000[123]_/.test(f)||/^2026100800(?:0[1-9]|10)_/.test(f)).sort())await db.exec(read(file));
- for(const file of fs.readdirSync('supabase/migrations').filter(f=>/^2026100700\d\d_/.test(f)||/^20261008001[1-4]_/.test(f)||/^2026100900(?:0[1-9]|1[0-2])_/.test(f)).sort())await db.exec(read(file));
+ for(const file of fs.readdirSync('supabase/migrations').filter(f=>/^2026100700\d\d_/.test(f)||/^20261008001[1-4]_/.test(f)||/^2026100900(?:0[1-9]|1[0-5])_/.test(f)).sort())await db.exec(read(file));
  const account=async()=>(await one('insert into papa_accounts default values returning id')).id;
  const president=await account(),player=await account(),manager=await account();
  await q("insert into papa_manager_account_links(manager_key,account_id) values('president',$1),('streamer:native-room',$2)",[president,manager]);

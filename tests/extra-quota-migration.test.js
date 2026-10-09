@@ -1,19 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
 import {PGlite} from '@electric-sql/pglite';
 import {empty,mutate,TABLES,DEFAULTS} from '../src/core.js';
 import {stateEntries,stateChanges} from '../src/state-patch.js';
 
 const migration=name=>fs.readFileSync('supabase/migrations/'+name,'utf8');
+const releasedQuotaMigration=execFileSync('git',['show','origin/main:supabase/migrations/202610090004_player_extra_quota.sql'],{encoding:'utf8'});
 const at='2026-10-08T04:00:00Z',space='space-native-test',room='native-room',otherRoom='native-room-two';
 async function fixture(t){
  const db=new PGlite();t.after(()=>db.close());
  const q=async(sql,args=[])=>(await db.query(sql,args)).rows;
- const rpc=async(name,args=[])=>(await q('select '+name+'('+args.map((_,i)=>'$'+(i+1)).join(',')+') result',args))[0].result;
+ const rpc=async(name,args=[])=>(await q('select '+name+'('+args.map((value,i)=>'$'+(i+1)+(name==='papa_manage_player_extra_quota'&&i===5?'::'+(typeof value==='object'?'jsonb':'text'):'')).join(',')+') result',args))[0].result;
  await db.exec('create role anon;create role authenticated;create role service_role;');
  const base=migration('202609170001_party_v2.sql');await db.exec(base.slice(0,base.indexOf('insert into storage.buckets')));
  await db.exec(migration('202609240001_release_a.sql'));await db.exec(migration('202609240003_notifications.sql'));
+ await db.exec(migration('202609250001_roles_and_notification_scope.sql'));
+ await db.exec(migration('202610010006_lean_read_snapshot.sql'));
  const legacy=mutate(empty(),{type:'song',data:{title:'Legacy song',artist:'Legacy artist',lyrics:'legacy-private-lyrics'}},{role:'admin'},at);
  legacy.players=[{playerId:'P1',name:'Legacy Player',ids:['legacy-login'],names:[],password:'legacy-password',note:'legacy-private-profile'}];
  legacy.migrationIssues=['legacy-private-issues'];
@@ -36,7 +40,8 @@ async function fixture(t){
   await db.exec(audit.slice(statement,audit.indexOf('$$;',start)+3));
  }
  await db.exec(migration('202610080013_native_room_transactions.sql'));
- await db.exec(migration('202610090004_player_extra_quota.sql'));
+ await db.exec(releasedQuotaMigration);
+ await db.exec(migration('202610090015_quota_native_compatibility.sql'));
  await q("insert into papa_spaces(id,slug,display_name) values($1,'native-test','Native Test'),('space-foreign-test','foreign-test','Foreign Test')",[space]);
  for(const [id,scope] of [[room,space],[otherRoom,space],['foreign-room','space-foreign-test']])
   await q('insert into papa_space_streamers(streamer_id,space_id) values($1,$2)',[id,scope]);
@@ -95,6 +100,8 @@ test('extra rights are normalized, per room/player, audit once and join the orig
  const rev=()=>q('select revision from papa_v2_revision').then(r=>Number(r[0].revision));
  const grant=(r,p,n,c=ctx)=>rpc('papa_manage_player_extra_quota',[before.revision[0].revision,r,p,n,true,c]);
  await grant(room,'P1',2);
+ const attribution=(await q('select updated_by,updated_by_account from papa_player_extra_quotas where streamer_id=$1 and player_id=$2',[room,'P1']))[0];
+ assert.equal(attribution.updated_by,ctx.account_id);assert.equal(attribution.updated_by_account,ctx.account_id);
  const unchanged=await stable();assert.deepEqual(unchanged.entities,before.entities);assert.deepEqual(unchanged.profiles,before.profiles);assert.deepEqual(unchanged.notices,before.notices);
  assert.equal(unchanged.events.length,before.events.length+1);assert.equal(unchanged.events.at(-1).target_player_name_snapshot,'Native P1');assert.equal(unchanged.events.at(-1).after_data.extra_quota,2);
  const minimal=await rpc('papa_v2_scoped_read_snapshot_in_space',[room,space]);assert.deepEqual(minimal.extraQuotaRights,{});
@@ -109,7 +116,9 @@ test('extra rights are normalized, per room/player, audit once and join the orig
  await rpc('papa_manage_player_extra_quota',[await rev(),'papa','P1',3,true,legacyManager]);
  const legacyRights=await rpc('papa_v2_scoped_read_snapshot_with_quota',['papa','space-001','P1']);assert.deepEqual(legacyRights.extraQuotaRights.P1,[{streamer_id:'papa',streamer_name:'怕怕',extra_quota:3}]);
  const nativeRights=await rpc('papa_v2_scoped_read_snapshot_with_quota',[room,space,'P1']);assert.deepEqual(nativeRights.extraQuotaRights.P1.map(x=>x.extra_quota).sort(),[1,2],'identical player IDs never join rights across Spaces');
- assert.deepEqual((await rpc('papa_v2_scoped_read_snapshot',['papa'])).extraQuotas,legacyRights.extraQuotas,'the original one-argument snapshot remains compatible');
+ const untargetedLegacy=await rpc('papa_v2_scoped_read_snapshot',['papa']);
+ assert.deepEqual(untargetedLegacy.rows,legacyRights.rows,'the original one-argument snapshot keeps the same entity rows');
+ assert.deepEqual(untargetedLegacy.extraQuotas,[],'an untargeted read includes only saved participants, not unrelated room grants');
  assert.equal((await q("select data from papa_v2_entities where kind='meta'"))[0].data.streamerSettings[room].extraQuotas,undefined);
 });
 

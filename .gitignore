@@ -9,3 +9,4 @@ qa-*.html
 qa-*.mjs
 notification-audio-test.html
 deploy-*.html
+/supabase/.temp/
