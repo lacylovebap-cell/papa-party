@@ -18,3 +18,5 @@
 .queue-live-tools{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-width:0}.venue-switch{display:inline-flex;gap:3px;flex:none}.venue-switch button{white-space:nowrap}.queue-more>small{display:block;margin-top:4px}
 .proxy-draw-tags{flex:1;min-width:0;font-size:12px}.proxy-draw-tags summary{cursor:pointer;overflow-wrap:anywhere}.proxy-draw-tags .chips{padding-top:6px}.proxy-draw-tags label{display:inline-flex;align-items:center;gap:3px;margin:0}
 .player-search-toolbar{flex-wrap:wrap}.player-search-toolbar input{flex:1 1 240px;min-width:0}.player-search-toolbar button{flex:none}@media(max-width:640px){.player-search-toolbar input{flex-basis:100%}}
+
+.new-practice-row{gap:10px;min-width:0}.new-practice-row[draggable=true]{cursor:grab}.new-practice-row .info{min-width:0;overflow-wrap:anywhere}.new-practice-row .actions{flex-shrink:0}@media(max-width:600px){.new-practice-row{padding:10px 0;flex-wrap:wrap}.new-practice-row .info{flex-basis:100%}.new-practice-row .actions{justify-content:flex-start}}

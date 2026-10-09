@@ -7,7 +7,7 @@ export function authorizeManagerOperation(who,body,room){
  if(who?.role!=='streamer_admin')throw Error('請先登入管理');
  if(['read','events','upload'].includes(body.op))return;
  if(body.op==='import'&&['songs','crowns'].includes(body.kind))return;
- if(body.op==='mutate'&&['player','song','songsBulk','restoreSongEdits','tag','crown','card','wishAdmin','ledger','allocate','allocateStored','queue','queueBulkDelete','onBehalf','streamerDraw','settings','recordTime','extraQuota'].includes(body.action?.type)){
+ if(body.op==='mutate'&&['player','song','songsBulk','newPracticeOrder','restoreSongEdits','tag','crown','card','wishAdmin','ledger','allocate','allocateStored','queue','queueBulkDelete','onBehalf','streamerDraw','settings','recordTime','extraQuota'].includes(body.action?.type)){
   if(body.action.type==='recordTime'&&body.action.data?.table==='players')throw Error('玩家共用資料由PA Party總裁修改');return;
  }
  throw Error('此操作僅限PA Party總裁');

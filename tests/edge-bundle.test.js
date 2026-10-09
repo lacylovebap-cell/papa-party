@@ -51,4 +51,14 @@ test('complete edge bundle compiles, preserves URL validators and isolates chat 
   context.playerPageCalls.length=0;const bad=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'michelle',mode:'all',...extra})});assert.equal(bad.status,400);assert.ok(context.playerPageCalls.every(call=>!call.path.endsWith('papa_player_management_page')));
  }
  context.playerPageCalls.length=0;const foreign=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'papa',mode:'all'})});assert.equal(foreign.status,400);assert.ok(context.playerPageCalls.every(call=>!call.path.endsWith('papa_player_management_page')));
+ vm.runInContext(`
+  var practiceCalls=[];actor=async()=>null;
+  api=async(path,body)=>{practiceCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'}];if(path.endsWith('papa_new_practice_page'))return {rows:[],total:0,pageLimit:body.page_limit,pageOffset:body.page_offset};throw Error('unexpected practice query');};
+ `,context);
+ const practice=await handler({method:'POST',json:async()=>({op:'newPracticePage',streamer:'michelle',page:1,limit:20})});assert.equal(practice.status,200);assert.equal((await practice.json()).pageOffset,20);
+ assert.equal(context.practiceCalls.length,2);assert.deepEqual(JSON.parse(JSON.stringify(context.practiceCalls[1].body)),{requested_space:'space-001',requested_room:'michelle',management:false,page_limit:20,page_offset:20});
+ context.practiceCalls.length=0;const privatePractice=await handler({method:'POST',json:async()=>({op:'newPracticePage',streamer:'michelle',management:true})});assert.equal(privatePractice.status,400);assert.equal(context.practiceCalls.length,0);
+ vm.runInContext("actor=async()=>({role:'streamer_admin',streamer_id:'michelle',spaceId:'space-001'});",context);
+ for(const extra of [{limit:51},{page:-1},{page:10000001},{management:'true'},{streamer:'papa'}]){context.practiceCalls.length=0;const bad=await handler({method:'POST',json:async()=>({op:'newPracticePage',streamer:'michelle',management:true,...extra})});assert.equal(bad.status,400);assert.ok(context.practiceCalls.every(call=>!call.path.endsWith('papa_new_practice_page')));}
+ context.practiceCalls.length=0;const managedPractice=await handler({method:'POST',json:async()=>({op:'newPracticePage',streamer:'michelle',management:true})});assert.equal(managedPractice.status,200);assert.equal(context.practiceCalls[1].body.management,true);
 });

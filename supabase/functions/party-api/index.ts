@@ -335,6 +335,15 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   managerPasswordError(result,kind);return respond({ok:true,signOut:true});
  }
  if(b.op==='upload'){if(!isManager(who))throw new Error('只有管理員能上傳');await managerRoom(who,b.streamer||'papa');const binary=Uint8Array.from(atob(b.image),c=>c.charCodeAt(0));if(binary.length>3145728||b.mime!=='image/webp')throw new Error('請使用壓縮後圖片');const path=crypto.randomUUID()+'.webp',r=await fetch(SB_URL+'/storage/v1/object/papa-photos/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'image/webp'},body:binary});if(!r.ok)throw new Error('圖片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-photos/'+path});}
+ if(b.op==='newPracticePage'){
+  const management=b.management===true;
+  if(b.management!==undefined&&typeof b.management!=='boolean'||management&&!isManager(who))throw Error('請先登入管理');
+  const room=await catalogRoom(who,b.streamer||'papa',management);
+  if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
+  const page=b.page??0,limit=b.limit??20;
+  if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('新練歌曲分頁資料不正確');
+  return respond(await api('/rest/v1/rpc/papa_new_practice_page',{requested_space:room.spaceId||'space-001',requested_room:room.id,management,page_limit:limit,page_offset:page*limit}));
+ }
  if(b.op==='playerManagementPage'){
   if(!isManager(who))throw Error('請先登入管理');
   const room=await catalogRoom(who,b.streamer||'papa',true);

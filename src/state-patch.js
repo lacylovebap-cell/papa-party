@@ -2,7 +2,7 @@ import {TABLES} from './core.js';
 const stateRecordId=(kind,data)=>String(kind==='players'?data.playerId:kind==='songs'?data.songId:data.id);
 const operational=new Set(['request','queue','queueBulkDelete','cancelOwn','onBehalf','streamerDraw','ledger','allocate','allocateStored','wish','wishAdmin']);
 export function scopedOperationalAction(action){return !!action&&!(action.type==='wishAdmin'&&action.data?.addSong)&&(operational.has(action.type)||action.type==='recordTime'&&['queue','ledger','wishes'].includes(action.data?.table));}
-const roomMutations=new Set(['song','songsBulk','restoreSongEdits','tag','crown','card','settings','wishAdmin','player','self','extraQuota']);
+const roomMutations=new Set(['song','songsBulk','newPracticeOrder','restoreSongEdits','tag','crown','card','settings','wishAdmin','player','self','extraQuota']);
 export function scopedRoomMutationAction(action){return !!action&&(roomMutations.has(action.type)||action.type==='recordTime'&&TABLES.includes(action.data?.table));}
 const stateMetaEntries=state=>[{kind:'settings',id:'1',data:state.settings},{kind:'meta',id:'1',data:{schemaVersion:3,streamers:state.streamers,streamerSettings:state.streamerSettings,migrationIssues:state.migrationIssues||[]}}];
 export function stateEntries(state){return [...TABLES.flatMap(kind=>state[kind].map((data,index)=>({kind,id:stateRecordId(kind,data),data:{...data,_order:index}}))),

@@ -61,6 +61,17 @@ test('room admin patches retain private source fields, other rooms and the real 
  before=await read('papa');after=mutate(before,{type:'wishAdmin',data:{id:'W1',status:'已學會',addSong:true}},{role:'admin'},at);
  await commit(before,after);
  assert.equal((await q("select count(*)::int n from papa_v2_entities where kind='songs' and data->>'title'='Learned song'"))[0].n,1);
+ before=await read('papa');after=mutate(before,{type:'songsBulk',data:{songIds:[first],new:true}},{role:'admin'},at);await commit(before,after);
+ before=await read('papa');const learned=before.songs.find(x=>x.title==='Learned song');
+ const originals=await q("select id,data from papa_v2_entities where kind='songs' order by id");
+ after=mutate(before,{type:'newPracticeOrder',data:{songId:learned.songId,targetId:first,position:'before'}},{role:'admin'},at);
+ const orderPatch=stateChanges(before,after,{preserveOrder:true});assert.equal(orderPatch.changes.filter(x=>x.kind==='songs').length,1);
+ await commit(before,after,'papa',{...context('papa'),action:'newPracticeOrder'});
+ assert.deepEqual((await q("select data from papa_v2_entities where kind='songs' and id=$1",[first]))[0].data,originals.find(x=>x.id===first).data);
+ const moved=(await q("select data from papa_v2_entities where kind='songs' and id=$1",[learned.songId]))[0].data;
+ assert.equal(moved.new,true);assert.ok(moved.sort_order<0);
+ assert.equal((await q('select variant_id from papa_catalog_song_links where song_id=$1',[first]))[0].variant_id,linkedBefore);
+ assert.deepEqual((await q("select data from papa_v2_entities where kind='songs' and id=$1",[otherBefore.songId]))[0].data,otherBefore);
  const originalSettings=(await q("select data from papa_v2_entities where kind='settings'"))[0].data;
  before=await read(other);after=mutate(before,{streamer:other,type:'settings',data:{status:'忙碌中'}},{role:'admin'},at);await commit(before,after,other);
  const meta=(await q("select data from papa_v2_entities where kind='meta'"))[0].data;
@@ -69,7 +80,7 @@ test('room admin patches retain private source fields, other rooms and the real 
  before=await read('papa');after=mutate(before,{type:'self',data:{name:'Updated player'}},{role:'player',playerId:'P1'},at);
  await commit(before,after,'papa',{role:'player',player_id:'P1',streamer_id:'papa',space_id:'space-001',action:'self'});
  assert.equal((await q("select data->>'password' pwd from papa_v2_entities where kind='players'"))[0].pwd,'preserved');
- before=await read('papa');after=mutate(before,{type:'songsBulk',data:{songIds:[first],new:true}},{role:'admin'},at);
+ before=await read('papa');after=mutate(before,{type:'songsBulk',data:{songIds:[first],new:false}},{role:'admin'},at);
  const stable=await q('select kind,id,data from papa_v2_entities order by kind,id');
  await assert.rejects(commit(before,after,'papa',context('papa'),[{id:'invalid-uuid',streamer_id:'papa'}]),/uuid/);
  assert.deepEqual(await q('select kind,id,data from papa_v2_entities order by kind,id'),stable);
