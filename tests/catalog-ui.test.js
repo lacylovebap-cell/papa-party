@@ -120,7 +120,7 @@ test('shared catalog browse loads only one page and never renders lyric text fro
 
 test('unchanged reads coalesce and a full refresh is forced at most five minutes apart',async()=>{
  let now=1000000,resolvePending,reads=0;const requests=[],app={innerHTML:''};
- const context=contextWithCatalog({Date:{now:()=>now},demo:false,draft:null,busy:false,refreshInFlight:null,lastFullRefreshAt:0,state:{revision:7},
+ const context=contextWithCatalog({Date:{now:()=>now},demo:false,draft:null,session:null,selectedPlayer:null,busy:false,refreshInFlight:null,lastFullRefreshAt:0,state:{revision:7},
   api:async body=>{requests.push(body);reads++;if(reads===2)return new Promise(resolve=>{resolvePending=resolve;});return {state:{revision:7},ready:true};},render:()=>{},isAdmin:()=>false,$:()=>app,button:()=>''});
  vm.runInContext(segment('async function refresh(','async function dispatch('),context);
  await vm.runInContext('refresh(true)',context);

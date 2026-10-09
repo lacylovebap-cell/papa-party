@@ -72,12 +72,12 @@ test('completion across an hour boundary keeps two credits in the request hour',
  s=request(s,0,{},now);assert.deepEqual(quota(s,now),[0,2]);assert.deepEqual(quota(s,later),[0,0]);
 });
 
-test('backfill and edits preserve created time; only editing request time moves quota',()=>{
+test('backfill and explicit history corrections preserve created time and move quota',()=>{
  let s=setup();s=run(s,'onBehalf',{playerId:player(s).playerId,songId:s.songs[0].songId,kind:'saved',at:past,completed:true});
  const id=s.queue[0].id,created=s.queue[0].created_at;
  assert.deepEqual(quota(s,past),[2,0]);assert.deepEqual(quota(s,now),[0,0]);
  s=run(s,'recordTime',{table:'queue',id,times:{completedAt:now}});
- assert.deepEqual(quota(s,past),[2,0]);assert.deepEqual(quota(s,now),[0,0]);
+ assert.deepEqual(quota(s,past),[0,0]);assert.deepEqual(quota(s,now),[2,0]);
  s=run(s,'recordTime',{table:'queue',id,times:{at:now}});
  assert.deepEqual(quota(s,past),[0,0]);assert.deepEqual(quota(s,now),[2,0]);assert.equal(s.queue[0].created_at,created);
  assert.equal(balance(s,player(s).playerId),18);assert.equal(s.ledger.filter(l=>l.queueId===id).length,1);
