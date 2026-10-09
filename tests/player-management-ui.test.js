@@ -7,11 +7,11 @@ import {balance,playerSearch} from '../src/core.js';
 const lines=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8').split(/\r?\n/);
 const functions=['function playerManagementPanel(','function playerRowsHtml(','function playerResults(','function loadPlayerManagement('].map(prefix=>lines.find(line=>line.startsWith(prefix))).join('\n');
 function harness(){
- const models={stored:{mode:'stored',q:'',page:0,rows:[],total:0,loading:false,error:null},all:{mode:'all',q:'',page:2,rows:[{playerId:'b',name:'Beta',ids:['B'],storedCredits:0}],total:50,loading:false,error:null}};
+ const models={stored:{mode:'stored',q:'Alpha',page:0,rows:[],total:0,loading:false,error:null},all:{mode:'all',q:'Beta',page:2,rows:[{playerId:'b',name:'Beta',ids:['B'],storedCredits:0}],total:50,loading:false,error:null}};
  let mode='stored',local=false,loads=0;
  const state={settings:{},players:[{playerId:'a',name:'Alpha',ids:['A'],names:[]},{playerId:'b',name:'Beta',ids:['B'],names:[]},{playerId:'c',name:'Gamma',ids:[],names:[]}],ledger:[{playerId:'a',amount:2},{playerId:'b',amount:0},{playerId:'c',amount:-1}],crowns:[],queue:[],cards:[]};
  const ctx=vm.createContext({state,balance,playerSearch,playerInputs:{stored:'Alpha',all:'Beta'},adminQuery:'',h:x=>String(x??''),button:(label,action,id='',classes='',extra='')=>'<button data-act="'+action+'" data-id="'+id+'" class="'+classes+'" '+extra+'>'+label+'</button>',
-  blank:text=>'<p>'+text+'</p>',paginate:rows=>({rows,nav:''}),localPlayerManagement:()=>local,
+  isSuperAdmin:()=>false,playerArchiveView:{open:false},blank:text=>'<p>'+text+'</p>',paginate:rows=>({rows,nav:''}),localPlayerManagement:()=>local,
   playerManagement:{state:()=>models[mode],load:async()=>{loads++;}}});
  vm.runInContext(functions,ctx);
  return {state,models,ctx,setMode:value=>mode=value,setLocal:value=>local=value,loads:()=>loads,run:code=>vm.runInContext(code,ctx)};

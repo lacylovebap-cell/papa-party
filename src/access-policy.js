@@ -30,7 +30,7 @@ export function prepareManagerAction(who,action,state){
 export function managementView(view,who){
  if(who?.role!=='streamer_admin')return view;
  requireRoom(who,view.currentStreamer.id);
- return {...view,players:view.players.map(({playerId,name,ids,names,certification,test,quotaRights})=>({playerId,name,ids,names,certification,test,quotaRights})),streamers:[view.currentStreamer],migrationIssues:[],streamerSettings:undefined};
+ return {...view,players:view.players.map(({playerId,name,ids,names,certification,test,quotaRights,archived})=>({playerId,name,ids,names,certification,test,quotaRights,archived:!!archived})),streamers:[view.currentStreamer],migrationIssues:[],streamerSettings:undefined};
 }
 export function noticeIdentity(who,room){
  requireRoom(who,room);

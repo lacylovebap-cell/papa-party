@@ -16,8 +16,8 @@ test('streamer can operate own songs and queues, cannot switch room or run globa
  assert.throws(()=>authorizeManagerOperation(player,{op:'read'},'a'));
 });
 test('global players remain visible while account secrets, notes and other rooms are removed',()=>{
- const view={currentStreamer:{id:'a'},streamers:[{id:'a'},{id:'b'}],players:[{playerId:'p',name:'玩家',ids:['1'],names:[],test:false,password:'secret',note:'private'}],migrationIssues:['other room'],streamerSettings:{b:{secret:true}},queue:[]};
- const out=managementView(view,streamer);assert.equal(out.players.length,1);assert.equal(out.players[0].name,'玩家');assert.equal(out.players[0].password,undefined);assert.equal(out.players[0].note,undefined);assert.equal(out.streamers.length,1);assert.equal(out.streamerSettings,undefined);assert.deepEqual(out.migrationIssues,[]);
+ const view={currentStreamer:{id:'a'},streamers:[{id:'a'},{id:'b'}],players:[{playerId:'p',name:'玩家',ids:['1'],names:[],test:false,archived:true,password:'secret',note:'private'}],migrationIssues:['other room'],streamerSettings:{b:{secret:true}},queue:[]};
+ const out=managementView(view,streamer);assert.equal(out.players.length,1);assert.equal(out.players[0].name,'玩家');assert.equal(out.players[0].archived,true);assert.equal(out.players[0].password,undefined);assert.equal(out.players[0].note,undefined);assert.equal(out.streamers.length,1);assert.equal(out.streamerSettings,undefined);assert.deepEqual(out.migrationIssues,[]);
  assert.equal(view.players[0].password,'secret');assert.equal(managementView(view,superAdmin),view);
 });
 test('players cannot replace audio; only management roles can',()=>{

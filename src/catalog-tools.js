@@ -35,6 +35,7 @@ export function eventDescription(event,{playerName=()=>'',songName=()=>'',roomNa
  if(event.entity_kind==='extra_quota')return `${actor}${row.enabled?'設定':'停用'}${player}在${roomName(event.streamer_id)}的專屬提歌權${row.enabled?' +'+row.extra_quota:''}`;
  if(event.entity_kind==='song_favorites')return `${actor}${row.favorite?'收藏':'取消收藏'}《${title}》`;
  if(event.action==='newPracticeOrder'&&event.entity_kind==='songs')return `${actor}調整《${title}》的新練歌曲順序`;
+ if(event.entity_kind==='players'&&['playerArchive','playerRestore'].includes(event.action||event.actor_context?.action))return `${actor}${(event.action||event.actor_context?.action)==='playerArchive'?'封存':'恢復'}了玩家${player}`;
  if(event.entity_kind==='players')return `${actor}${event.before_data?'編輯':'新增'}玩家${player}的基本資料`;
  if(event.entity_kind==='queue'){
   if(event.action==='recordTime')return `${actor}修改${player}的《${title}》實際時間${row.kind==='saved'?'，並重新計算提歌額度':''}`;

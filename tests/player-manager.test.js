@@ -118,3 +118,64 @@ test('malformed page rows, counts, identifiers, names, balances and large arrays
  const f=fixture();await finish(f,{rows:[{playerId:'old',name:'舊玩家'}],total:1});
  assert.deepEqual(f.manager.state().rows[0],{playerId:'old',name:'舊玩家',ids:[],names:[],certification:'',test:false,storedCredits:0});
 });
+
+const actorKey=(loggedIn=true,role='streamer',accountId='account-a',streamerId='papa')=>JSON.stringify([loggedIn,role,accountId,streamerId]);
+const actorContext=key=>({spaceId:'space-001',roomId:'papa',revision:1,actorKey:key});
+const changedActors=[
+ ['Account',actorKey(true,'streamer','account-b')],
+ ['role',actorKey(true,'super')],
+ ['logout',actorKey(false,null,null,null)]
+];
+
+test('optional actor keys preserve old contexts, null compatibility and exact API payloads',async()=>{
+ const f=fixture(),m=f.manager;await finish(f);
+ f.setContext(actorContext(null));await m.load();assert.equal(f.calls.length,1);
+ f.setContext(actorContext(undefined));await m.load();assert.equal(f.calls.length,1);
+ for(const key of ['', 'a'.repeat(256)]){
+  f.setContext(actorContext(key));assert.deepEqual(m.state().rows,[]);await finish(f);
+ }
+ assert.equal(f.calls.length,3);
+ assert.deepEqual(f.calls[2],{op:'playerManagementPage',mode:'stored',query:'',page:0,limit:20});
+ assert.deepEqual(Object.keys(m.state()),['mode','q','page','rows','total','loading','error']);
+});
+
+test('same-room Account, role and logout changes before dispatch prevent every old API read',async()=>{
+ for(const [label,key] of changedActors){
+  const f=fixture(),m=f.manager;f.setContext(actorContext(actorKey()));
+  m.search('舊存歌');m.setPage(2);m.setMode('all');m.search('舊全玩家');m.setPage(3);
+  const old=m.load(),notifications=f.changes.length;
+  f.setContext(actorContext(key));await old;
+  assert.equal(f.calls.length,0,label);assert.equal(f.changes.length,notifications,label);
+  for(const mode of ['stored','all'])assert.deepEqual(m.state(mode),{mode,q:'',page:0,rows:[],total:0,loading:false,error:null},label);
+ }
+});
+
+test('same-room actor changes clear both caches and prevent late old results from notifying or applying',async()=>{
+ for(const [label,key] of changedActors){
+  const f=fixture(),m=f.manager;f.setContext(actorContext(actorKey()));
+  m.search('舊存歌');m.setPage(2);await finish(f,{rows:[row('cached-old-actor')],total:60});
+  m.setMode('all');m.search('舊全玩家');m.setPage(3);const old=m.load();await tick();
+  f.setContext(actorContext(key));const notifications=f.changes.length;
+  for(const mode of ['stored','all'])assert.deepEqual(m.state(mode),{mode,q:'',page:0,rows:[],total:0,loading:false,error:null},label);
+  assert.equal(f.changes.length,notifications,'scope reads must reset silently');
+  const current=m.load();await tick();assert.equal(f.calls.length,3,label);
+  f.pending[2].resolve({rows:[row('new-actor')],total:1});await current;
+  const currentNotifications=f.changes.length;
+  f.pending[1].resolve({rows:[row('late-old-actor')],total:80});await old;
+  assert.equal(m.state().rows[0].playerId,'new-actor',label);assert.equal(f.changes.length,currentNotifications,label);
+  m.setMode('stored');const stored=m.load();await tick();assert.equal(f.calls.length,4,'the old actor stored cache must not be reused');
+  assert.deepEqual(f.calls[3],{op:'playerManagementPage',mode:'stored',query:'',page:0,limit:20});
+  f.pending[3].resolve({rows:[row('new-stored')],total:1});await stored;
+  m.search('新存歌');m.setMode('all');assert.equal(m.state().q,'');assert.equal(m.state().rows[0].playerId,'new-actor');
+  assert.equal(m.state('stored').q,'新存歌');
+ }
+});
+
+test('malformed optional actor keys fail before any API request or notification',()=>{
+ for(const key of [false,0,{},[],Symbol('actor'),new String('actor'),'a'.repeat(257)]){
+  const f=fixture();f.setContext(actorContext(key));
+  assert.throws(()=>f.manager.state(),/空間資訊不正確/);
+  assert.throws(()=>f.manager.load(),/空間資訊不正確/);
+  assert.equal(f.calls.length,0);assert.equal(f.changes.length,0);
+ }
+});

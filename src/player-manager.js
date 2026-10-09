@@ -55,16 +55,16 @@ export function createPlayerManager({api,context,onChange=()=>{},pageLimit=20}){
  }
  function syncContext(){
   const next=context();
-  if(!next||typeof next.spaceId!=='string'||!next.spaceId||typeof next.roomId!=='string'||!next.roomId||!Number.isSafeInteger(next.revision)||next.revision<0)
+  if(!next||typeof next.spaceId!=='string'||!next.spaceId||typeof next.roomId!=='string'||!next.roomId||!Number.isSafeInteger(next.revision)||next.revision<0||next.actorKey!=null&&(typeof next.actorKey!=='string'||next.actorKey.length>256))
    throw playerManagerError('玩家清單空間資訊不正確');
-  const identity=JSON.stringify([next.spaceId,next.roomId]),revision=next.revision;
+  const identity=JSON.stringify([next.spaceId,next.roomId,next.actorKey??null]),revision=next.revision;
   if(!scope){scope={identity,revision};return;}
   if(identity!==scope.identity||revision!==scope.revision){
-   const changedSpace=identity!==scope.identity;
+   const changedIdentity=identity!==scope.identity;
    invalidate();
    for(const mode of PLAYER_MANAGER_MODES){
     const {q,page}=modes[mode];
-    modes[mode]={...fresh(mode),q:changedSpace?'':q,page:changedSpace?0:page};
+    modes[mode]={...fresh(mode),q:changedIdentity?'':q,page:changedIdentity?0:page};
    }
    scope={identity,revision};
   }
