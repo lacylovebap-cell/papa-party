@@ -16,7 +16,7 @@ test('new queue draws by the same homepage tag rules and preserves the chosen pl
 function contextWithCatalog(values){
  if(values.catalogView){values.catalogView.selectedRows??=new Map();values.catalogView.selectedVariants??=new Map();}
  if(values.sharedBrowse)values.sharedBrowse.selectedRows??=new Map();
- const context=vm.createContext({state:{currentStreamer:{id:'papa'},streamers:[]},playerName:()=>'玩家',song:()=>null,admin:true,isSuperAdmin:()=>true,invalidateCatalogTabs:()=>{},...values,catalogGroupKey,canonicalLanguage,eventDescription});
+ const context=vm.createContext({session:null,songCatalogStatusFilter:'all',songVisibilityFilter:'visible',state:{currentStreamer:{id:'papa'},streamers:[]},playerName:()=>'玩家',song:()=>null,admin:true,isSuperAdmin:()=>true,invalidateCatalogTabs:()=>{},...values,catalogGroupKey,canonicalLanguage,eventDescription});
  vm.runInContext(segment('function catalogPager(','function selectCatalogRows('),context);
  return context;
 }

@@ -566,3 +566,23 @@ test('player profile rights lookup ignores a forged player and failed-request lo
  assert.equal(profile.data.state.hourlyPersonal.totalRemaining,2);assert.equal(profile.data.state.players.length,1);
  const failure=await request({op:'failedRequest',streamer:'papa',songId});assert.equal(failure.status,200);assert.equal(failure.data.counted,false);assert.equal(calls.some(c=>c.path.endsWith('papa_record_failed_request')),false);
 });
+
+
+test('room search forces public visibility and passes manager filters to one bounded scoped indexed query',async()=>{
+ const {context,calls,request}=edge();
+ for(const who of [null,{role:'player',playerId:'P1',spaceId:'space-001'}]){
+  context.testActor=who;calls.length=0;
+  const result=await request({op:'songSearchRoom',streamer:'michelle',q:'共同歌詞',visibility:'hidden',catalogStatus:'pending',limit:20,offset:40});
+  assert.equal(result.status,200,JSON.stringify(result.data));
+  const query=calls.find(c=>c.path.endsWith('papa_song_search_room_v3'));assert.ok(query);
+  assert.deepEqual(JSON.parse(JSON.stringify(query.body)),{room_id:'michelle',requested_space:'space-001',query_text:'共同歌詞',tags:[],page_limit:20,page_offset:40,language_name:null,visibility:'visible',catalog_status:'all'});
+  assert.equal(calls.length,2);assert.equal(calls.some(c=>/snapshot|get_lyrics/.test(c.path)),false);
+ }
+ context.testActor={role:'streamer_admin',streamer_id:'michelle',spaceId:'space-001'};calls.length=0;
+ const manager=await request({op:'songSearchRoom',streamer:'michelle',q:'',visibility:'hidden',catalogStatus:'linked',language:'台語',tags:['古風'],limit:20});
+ assert.equal(manager.status,200,JSON.stringify(manager.data));
+ const query=calls.find(c=>c.path.endsWith('papa_song_search_room_v3'));assert.equal(query.body.visibility,'hidden');assert.equal(query.body.catalog_status,'linked');assert.equal(query.body.language_name,'台語');assert.equal(query.body.query_text,'');assert.equal(query.body.page_limit,20);
+ for(const extra of [{visibility:'wrong'},{catalogStatus:'wrong'},{streamer:'papa'}]){
+  calls.length=0;assert.equal((await request({op:'songSearchRoom',streamer:'michelle',visibility:'hidden',...extra})).status,400);assert.equal(calls.some(c=>c.path.endsWith('papa_song_search_room_v3')),false);
+ }
+});

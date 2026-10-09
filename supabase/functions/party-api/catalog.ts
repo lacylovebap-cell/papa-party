@@ -123,7 +123,9 @@ async function catalogOperation(b:any,who:any){
   const q=String(b.q||'').trim().replaceAll('國語','華語');if(q.length>100)throw Error('搜尋文字過長');
   const tags=Array.isArray(b.tags)?b.tags.filter((x:any)=>typeof x==='string'&&x.length<=50).slice(0,20):[];
   const language=b.language==null?null:String(b.language).replaceAll('國語','華語');if(language&&language.length>100)throw Error('語言名稱過長');
-  return await api('/rest/v1/rpc/papa_song_search_room_v2',{room_id:room.id,query_text:q,tags,page_limit:page.limit,page_offset:page.offset,language_name:language||null,include_hidden:isManager(who)});
+  const management=isManager(who),visibility=management?(b.visibility||'all'):'visible',status=management?(b.catalogStatus||'all'):'all';
+  if(!['all','visible','hidden'].includes(visibility)||!['all','linked','unlinked','pending'].includes(status))throw Error('歌曲篩選不正確');
+  return await api('/rest/v1/rpc/papa_song_search_room_v3',{room_id:room.id,requested_space:room.spaceId||'space-001',query_text:q,tags,page_limit:page.limit,page_offset:page.offset,language_name:language||null,visibility,catalog_status:status});
  }
  if(op==='catalogLanguageFilter'||op==='catalogLanguageFilterSave'){
   if(op==='catalogLanguageFilterSave'&&!isManager(who))throw Error('請先登入主播管理');
