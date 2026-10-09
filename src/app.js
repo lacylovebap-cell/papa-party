@@ -1,23 +1,24 @@
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.09-QUOTA.1';
-import {fateCategories,drawSong} from './fate.js?v=10.05-P0';
-import {createBoard} from './board.js?v=10.09-QUOTA.1';
-import {createChat} from './chat.js?v=10.09-QUOTA.1';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.10-WEB.1';
+import {fateCategories,drawSong} from './fate.js?v=10.10-WEB.1';
+import {createBoard} from './board.js?v=10.10-WEB.1';
+import {createChat} from './chat.js?v=10.10-WEB.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=9.24-H';
 import {openHomeEditor} from './home-editor.js?v=9.24-H';
 import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=9.24-B.2';
-import {createNotifications} from './notifications.js?v=10.09-QUOTA.1';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js';
-import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js';
-import {createPlayerManager} from './player-manager.js';
-import {newPracticeSongs} from './new-practice.js';
-import {createSongFavorites} from './song-favorites.js';
-import {listenedSongs} from './listening-history.js';
+import {createNotifications} from './notifications.js?v=10.10-WEB.1';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.10-WEB.1';
+import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.10-WEB.1';
+import {createPlayerManager} from './player-manager.js?v=10.10-WEB.1';
+import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.10-WEB.1';
+import {newPracticeSongs} from './new-practice.js?v=10.10-WEB.1';
+import {createSongFavorites} from './song-favorites.js?v=10.10-WEB.1';
+import {listenedSongs} from './listening-history.js?v=10.10-WEB.1';
 import {API,PUBLISHABLE_KEY} from './config.js';
-import {createWebDeviceLogin} from './web-device-login.js';
-import {roomStorageKey} from './communication-context.js';
-import {createWebSpaceEntry} from './web-space-entry.js';
-import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.09-QUOTA.1';
+import {createWebDeviceLogin} from './web-device-login.js?v=10.10-WEB.1';
+import {roomStorageKey} from './communication-context.js?v=10.10-WEB.1';
+import {createWebSpaceEntry} from './web-space-entry.js?v=10.10-WEB.1';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.10-WEB.1';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.10-WEB.1';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const venueName=venue=>venue==='radio'?'📻 電台':'聲瑪';
 function venueSelector(name='venue',value=venuePolicySettings(state.settings).current_space){return venuePolicySettings(state.settings).radio_enabled?select(name,name==='storage_pool'?'存歌池':'場域',[['shengma','聲瑪'],['radio','📻 電台']],value):'';}
@@ -30,6 +31,8 @@ const streamerSlug=new URLSearchParams(location.search).get('streamer')||'papa';
 const spaceMount=new URL('../',import.meta.url).href;
 let entryPending=!demo&&requiresSpaceEntry(location.href,spaceMount),
  entryController=null,entryChoices=[],entryOffset=0,entryMembershipCount=0,entryIdentity=null,legacyEntryRoomsLoaded=false;
+const nativePlayerView={open:false,space:null,generation:0};
+const nativePlayerProvisioner=createNativePlayerProvisioner({api,context:nativePlayerProvisionContext,onChange:renderNativePlayerProvision});
 let tagsExpanded=false,drawnStreamerSong=null,eventPage=0,proxyDraft=null;let signatures={};let queueHistory=false;const selectedQueue=new Set();
 let lastFullRefreshAt=0,refreshInFlight=null;
 const selectedSongs=new Set();
@@ -149,6 +152,22 @@ async function deviceTransport(body){
  if(!r.ok||data.error)throw Object.assign(new Error(data.error||'連線失敗'),{authExpired:r.status===401||data.code==='AUTH_EXPIRED'||/(?:裝置)?登入已到期|MEMBERSHIP_|ACCOUNT_DISABLED|SESSION_ACCOUNT_MISMATCH/.test(data.error||'')});
  return data;
 }
+function acceptSessionIdentity(identity,verified){
+ if(!identity||identity.device||!verified)return;
+ const uuid=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i;
+ const role=identity.role||(identity.token?.startsWith('player:')?'player':null);
+ if(Object.keys(verified).some(key=>!['role','accountId','spaceId','playerId','streamerId'].includes(key))
+  ||verified.role!==role||!uuid.test(verified.accountId||'')
+  ||identity.accountId&&identity.accountId!==verified.accountId
+  ||role==='player'&&(verified.playerId!==identity.playerId||verified.spaceId!=='space-001'||verified.streamerId!==null)
+  ||role==='streamer_admin'&&(!(identity.streamer_id||identity.streamerId)||verified.streamerId!==(identity.streamer_id||identity.streamerId)||verified.spaceId!=='space-001'||verified.playerId!==null)
+  ||role==='super_admin'&&(verified.spaceId!==null||verified.playerId!==null||verified.streamerId!==null)
+  ||!['player','streamer_admin','super_admin'].includes(role)
+  ||identity.spaceId&&verified.spaceId&&identity.spaceId!==verified.spaceId)throw Error('登入身分已變更，請重新登入');
+ identity.accountId=verified.accountId;
+ if(verified.spaceId)identity.spaceId=verified.spaceId;
+ if(identity===admin)put('admin',identity);else if(identity===session)put('player',identity);
+}
 if(!demo)deviceLogin=createWebDeviceLogin({transport:deviceTransport,appVersion:'space-foundation-1008'});
 function saveEntryIdentity(identity){
  if(identity?.role==='player'){session=identity;put('player',session);}
@@ -157,7 +176,8 @@ function saveEntryIdentity(identity){
 function showSpaceEntry(result=null){
  if(!state.currentStreamer)state=publicView(upgradePlatform(empty()),null,clock(),'papa');
  header();entryChoices=result?.spaces||[];
- const choices=entryChoices.map(space=>button(h(space.name),'enterSpace',space.id,'tiny')).join('');
+ if(nativePlayerView.open&&!nativePlayerProvisionContext().active){const form=$('#native-player-form');closeNativePlayerProvision();if(form)$('#dialog').close();}
+ const choices=entryChoices.map(space=>'<span class="actions">'+button(h(space.name),'enterSpace',space.id,'tiny')+(nativePlayerEntryAuthority()&&space.id!=='space-001'?button('新增玩家','nativePlayerPrepare',space.id,'tiny'):'')+'</span>').join('');
  $('#app').innerHTML=card('PA Party',!entryIdentity
   ?'<p>登入後進入你已加入的空間。</p><div class="actions">'+button('登入','login','','primary')+button('管理登入','admin')+'</div>'
   :choices?'<p>選擇你的空間。</p><div class="actions">'+choices+'</div>'+((entryOffset||result.hasMore)?'<div class="pagination">'+button('上一頁','entryPage','-1','tiny',entryOffset?'':'disabled')+button('下一頁','entryPage','1','tiny',result.hasMore?'':'disabled')+'</div>':'')
@@ -181,12 +201,48 @@ async function openSpaceEntry({list=false,offset=0}={}){
   entryController=createWebSpaceEntry({deviceLogin,transport:deviceTransport,identity:entryIdentity,url:location.href,mountUrl:spaceMount});
   result=await entryController.resolve({list,offset});entryIdentity={...entryIdentity,...result.identity};saveEntryIdentity(entryIdentity);
  }else {
-  const slug=list?null:requestedSpace(location.href,spaceMount),response=await deviceTransport({op:'spaceEntry',token:entryIdentity.token,slug,streamer:entryIdentity.streamerSlug||streamerSlug,limit:50,offset});
+  const current=entryIdentity,slug=list?null:requestedSpace(location.href,spaceMount),response=await deviceTransport({op:'spaceEntry',token:current.token,slug,streamer:current.streamerSlug||streamerSlug,limit:50,offset});
+  if(current!==entryIdentity||current!==admin&&current!==session)throw Error('登入身分已變更，請重新操作');
+  acceptSessionIdentity(current,response.sessionIdentity);
   result={...response,...chooseSpaceEntry(response,list?{}:entryIdentity,slug)};
  }
  entryMembershipCount=result.membershipCount||0;
  if(result.kind==='destination')return enterSpace(result.space);
  showSpaceEntry(result);return false;
+}
+function nativePlayerProvisionContext(){
+ const space=nativePlayerView.space;
+ return {active:!!(nativePlayerView.open&&nativePlayerEntryAuthority()&&entryChoices.includes(space)),
+  role:admin?.role,accountId:admin?.accountId,spaceId:space?.id,roomId:space?.streamerId};
+}
+function closeNativePlayerProvision(){nativePlayerView.open=false;nativePlayerView.space=null;nativePlayerView.generation++;nativePlayerProvisioner.reset();}
+function nativePlayerEntryAuthority(){return !!(entryPending&&!demo&&!draft&&admin?.role==='super_admin'&&admin.accountId&&entryIdentity?.role==='super_admin'&&entryIdentity.accountId===admin.accountId);}
+function nativePlayerProvisionPanel(){
+ const view=nativePlayerProvisioner.state();
+ const selected=view.rows.find(row=>row.accountId===view.selectedAccountId);
+ return '<div class="toolbar"><input id="native-player-query" type="search" maxlength="100" aria-label="搜尋可建檔玩家" placeholder="搜尋已加入空間的玩家" value="'+h(view.q)+'" '+(view.saving?'disabled':'')+'>'+button('搜尋','nativePlayerSearch','','tiny',view.loading||view.saving?'disabled':'')+'</div>'+
+  (view.loading?blank('讀取玩家中…'):view.error?'<p class="error">'+h(view.error)+'</p>'+button('重新讀取','nativePlayerRetry'):view.rows.map(row=>'<div class="song"><div class="info"><b>'+h(row.displayLabel)+'</b></div>'+button(row.accountId===view.selectedAccountId?'已選取':'選取','nativePlayerSelect',row.accountId,row.accountId===view.selectedAccountId?'tiny active':'tiny',view.saving?'disabled':'')+'</div>').join('')||blank('沒有尚未建檔的玩家'))+
+  '<div class="pagination">'+button('上一頁','nativePlayerPage','-1','tiny',view.page&&!view.loading&&!view.saving?'':'disabled')+'<small>第 '+(view.page+1)+' 頁 · 共 '+view.total+' 位</small>'+button('下一頁','nativePlayerPage','1','tiny',(view.page+1)*20<view.total&&!view.loading&&!view.saving?'':'disabled')+'</div>'+
+  '<p class="muted">'+(selected?'已選取：'+h(selected.displayLabel):'先選擇一位已加入此空間的玩家，再填寫資料。')+'</p>';
+}
+function renderNativePlayerProvision(){
+ const form=$('#native-player-form');if(!nativePlayerView.open||!form)return;
+ if(!nativePlayerProvisionContext().active){closeNativePlayerProvision();$('#dialog').close();return;}
+ const view=nativePlayerProvisioner.state(),panel=$('#native-player-candidates');if(panel)panel.innerHTML=nativePlayerProvisionPanel();
+ form.querySelector('fieldset').disabled=view.saving;
+ form.querySelector('[type=submit]').disabled=view.saving||view.loading||!view.selectedAccountId||!Number.isSafeInteger(view.revision);
+}
+async function openNativePlayerProvision(id){
+ const space=entryChoices.find(row=>row.id===id);
+ if(!nativePlayerEntryAuthority()||!space||space.id==='space-001')throw Error('請先以 PA Party總裁選擇可管理的空間');
+ closeNativePlayerProvision();nativePlayerView.open=true;nativePlayerView.space=space;const generation=nativePlayerView.generation;
+ modal('新增玩家｜'+space.name,'<div id="native-player-candidates">'+nativePlayerProvisionPanel()+'</div><form id="native-player-form"><fieldset style="border:0;padding:0;margin:0;min-width:0"><div class="form-grid">'+field('name','玩家名稱','','text','required maxlength="200"')+field('ids','平台 ID、其他 ID（逗號分開）','','text','maxlength="1000"')+field('names','曾用名／相關名','','text','maxlength="1000"')+field('certification','平台認證','','text','maxlength="1000"')+area('note','備註').replace('<textarea','<textarea maxlength="1000"')+'</div><p class="muted">玩家資料只屬於這個空間，登入方式沿用所選玩家的帳號。</p></fieldset><p class="error" id="native-player-error"></p><div class="actions dialog-actions">'+button('取消','close')+'<button type="submit" class="primary" disabled>建立玩家資料</button></div></form>');
+ const dialog=$('#dialog'),form=$('#native-player-form');dialog.addEventListener('close',()=>{if(nativePlayerView.generation===generation)closeNativePlayerProvision();},{once:true});
+ form.onsubmit=async event=>{event.preventDefault();if(!form.isConnected||!nativePlayerProvisionContext().active)return;const data=new FormData(form);
+  try{const result=await nativePlayerProvisioner.provision({name:data.get('name'),ids:data.get('ids'),names:data.get('names'),certification:data.get('certification'),note:data.get('note')});if(result&&form.isConnected&&nativePlayerView.generation===generation){toast('已建立 '+result.created.length+' 位玩家資料');dialog.close();}}
+  catch(error){if(form.isConnected&&nativePlayerView.generation===generation)$('#native-player-error').textContent=error.message;}
+ };
+ await nativePlayerProvisioner.load();
 }
 async function api(body){
  const identity=(isAdmin()||body.management)?admin:session;
@@ -206,6 +262,8 @@ async function api(body){
  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify(payload)}),data=await r.json();
  if(!r.ok||data.error){if(managerSessionExpired(r,data)&&identity?.device){await deviceLogin.logout(identity).catch(()=>{});if(identity===session){session=null;put('player',null);}}if(managerToken&&payload.token===managerToken&&managerSessionExpired(r,data))discardManagerSession(managerToken);throw new Error(data.error||'連線失敗');}
  if(managerToken&&admin?.token!==managerToken)throw new Error('登入身分已變更，請重新操作');
+ const current=(isAdmin()||body.management)?admin:session;
+ if(current&&current.token===payload.token)acceptSessionIdentity(current,data.sessionIdentity);
  if(data.signatures)signatures=data.signatures;if(data.now)offset=timeValue(data.now)-Date.now();return data;
 }
 async function refresh(force=false){
@@ -354,7 +412,7 @@ function renderAdmin(){if(tab==='dashboard')tab='queue';let body='';
 function editHome(){openHomeEditor({home:state.settings.home,room:state.currentStreamer,modal,dispatch,demo,toast,upload:async file=>(await api({op:'upload',image:await compress(file,1800),mime:'image/webp'})).url});}
 function applyHomeTheme(){const root=document.documentElement;if(!state.settings.home){delete root.dataset.homeTheme;return;}root.dataset.homeTheme='custom';for(const [k,v] of Object.entries(themePalette(state.settings.home.color)))root.style.setProperty('--home-'+k,v);}
 function settingsHtml(){return `<div class="notice ${draft?'warning':''}">${demo?'預覽測試：資料只存在這台裝置':draft?'📝 草稿模式：只存在這台裝置':'☁️ 正式同步模式'}</div><div class="actions">${button('開始草稿測試','draft')}${button('匯出備份','backup')}${draft?button('正式同步','publish','','primary')+button('離開草稿','leaveDraft'):''}</div><hr><h3>首頁外觀與內容</h3><p class="muted">主題色、主圖、卡片顯示與排序、本日狀態欄位</p>${button('自訂首頁','editHome','','primary')}<hr><h3>直播與價格</h3><p class="muted">${h(state.settings.opening)} · 試音 ${money(state.settings.audition)} · 一般現點 ${money(state.settings.livePrice)}＋雙費 ${money(state.settings.liveDouble)}</p>${button('編輯設定與說明書','editSettings')}${button('存歌方案','editPlans')}${button('冠歌卡別價格','editTiers')}${isSuperAdmin()?'<hr><h3>系統工具／資料檢查</h3>'+button(catalogView.scanning?'掃描中…':catalogView.scanComplete?'重新掃描既有歌本':catalogView.scanCursor?'掃描下一批 100 首':'掃描既有歌本候選','catalogScan','','tiny',catalogView.scanning?'disabled':'')+'<p class="muted">已檢查 '+catalogView.scanTotal+' 首'+(catalogView.scanComplete?'，本輪完成':'；每批最多 100 首，只建立待審候選。')+'</p>'+(state.schemaVersion<3?button('讀取舊版資料並核對','migrate'):'')+(state.migrationIssues?.length?'<details class="notice warning"><summary>資料移轉待核對 '+state.migrationIssues.length+' 項</summary>'+state.migrationIssues.map(h).join('<br>')+'</details>':'<small>沒有待核對的舊版資料</small>'):''}`;}
-function render(){if(playerArchiveView.open&&(!isSuperAdmin()||playerArchiveIdentity()!==playerArchiveView.identity)){playerArchiveView.open=false;$('#dialog')?.close();}applyHomeTheme();header();if(route==='admin'&&admin)renderAdmin();else if(route==='common-book')renderCommonBook();else if(route==='book')renderBook();else if(route==='center'&&session)renderCenter();else if(route==='gallery')renderGallery();else renderHome();if(route==='admin'&&admin&&tab==='players'&&!selectedPlayer)loadPlayerManagement();loadVisibleFavoriteFlags();loadFavorites();loadListeningOverview();}
+function render(){if(nativePlayerView.open&&!nativePlayerProvisionContext().active){const form=$('#native-player-form');closeNativePlayerProvision();if(form)$('#dialog')?.close();}if(playerArchiveView.open&&(!isSuperAdmin()||playerArchiveIdentity()!==playerArchiveView.identity)){playerArchiveView.open=false;$('#dialog')?.close();}applyHomeTheme();header();if(route==='admin'&&admin)renderAdmin();else if(route==='common-book')renderCommonBook();else if(route==='book')renderBook();else if(route==='center'&&session)renderCenter();else if(route==='gallery')renderGallery();else renderHome();if(route==='admin'&&admin&&tab==='players'&&!selectedPlayer)loadPlayerManagement();loadVisibleFavoriteFlags();loadFavorites();loadListeningOverview();}
 
 async function loginDialog(){modal('👤 玩家登入','<label>名稱、ID 或曾用名<input id="login-query" placeholder="找找自己"></label><div id="login-results"></div>');}
 async function chooseLogin(id){const result=demo?full.players.find(p=>p.playerId===id):(await api({op:'search',query:id})).players.find(p=>p.playerId===id);if(!result)return;modal('登入 '+result.name,`${select('loginId','本次使用的 ID',result.ids.length?result.ids.map(x=>[x,x]):[['','沒有平台 ID']],result.ids[0])}${result.hasPassword||result.password?field('password','玩家密碼','','password','autocomplete="current-password"'):''}`,async f=>{let token='demo';if(!demo)token=(await api({op:'login',playerId:id,loginId:f.get('loginId'),password:f.get('password')||''})).token;else if(String(result.password||'')!==String(f.get('password')||''))throw new Error('玩家密碼不正確');const identity={playerId:id,loginId:f.get('loginId')||'',role:'player',token};session=deviceLogin?await deviceLogin.remember(identity,{streamer:streamerSlug}):identity;put('player',session);if(entryPending){route='home';await openSpaceEntry();return;}await go('home');});}
@@ -420,6 +478,11 @@ async function migrate(){if(demo)return toast('預覽不讀正式資料');migrat
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;try{switch(a){
 case 'pickEntity':{const box=b.closest('.entity-picker'),kind=box.dataset.entityKind,record=kind==='playerId'?state.players.find(p=>p.playerId===id):song(id);box.querySelector('[type=hidden]').value=id;box.querySelector('[data-entity-query]').value=kind==='playerId'?record.name+' · '+(record.ids.join('、')||'無平台 ID'):record.title+'－'+record.artist;box.querySelector('.entity-results').innerHTML='';break;}
 case 'enterSpace':{const chosen=entryChoices.find(space=>space.id===id);if(!chosen)throw Error('請重新選擇空間');await enterSpace(chosen);break;}
+case 'nativePlayerPrepare':await openNativePlayerProvision(id);break;
+case 'nativePlayerSearch':nativePlayerProvisioner.setQuery($('#native-player-query')?.value||'');await nativePlayerProvisioner.load();break;
+case 'nativePlayerRetry':await nativePlayerProvisioner.load({force:true});break;
+case 'nativePlayerPage':nativePlayerProvisioner.setPage(nativePlayerProvisioner.state().page+Number(id));await nativePlayerProvisioner.load();break;
+case 'nativePlayerSelect':nativePlayerProvisioner.selectAccount(id);break;
 case 'switchSpace':await openSpaceEntry({list:true});break;case 'entryPage':await openSpaceEntry({list:true,offset:Math.max(0,entryOffset+Number(id)*50)});break;
 case 'editHome':editHome();break;
 case 'close':$('#dialog').close();break;

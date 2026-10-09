@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
 import {createHash} from 'node:crypto';
-import {TABLES,DEFAULTS} from '../src/core.js';
+import {TABLES,DEFAULTS,savedQuota} from '../src/core.js';
 
 // Evaluate the actual handler and dependencies in memory. Tests do not write
 // deployment bundles or replace the canonical actor resolver.
@@ -199,6 +199,29 @@ test('personal requests, completion and cancellation preserve the original accou
  assert.deepEqual(rpc(h,'papa_room_operational_commit').at(-1).body.notices.map(n=>[n.recipient,n.type]),[['__admin__','cancel']]);
  assert.equal(scopedSnapshots(h).length,5);assert.equal(rpc(h,'papa_room_operational_commit').length,5);assert.equal(rpc(h,'papa_release_b_commit').length,0);
  assert.equal(rpc(h,'papa_manage_player_extra_quota').length,0);h.checkSource();
+});
+
+test('manager saved onBehalf includes an unqueued target allowance in the same snapshot before a profile hint',async()=>{
+ for(const profilePlayerId of [undefined,'P2']){
+  const h=edge();assert.equal(h.state().queue.some(q=>q.playerId==='P1'),false);
+  const body={op:'mutate',streamer:'papa',revision:7,action:{type:'onBehalf',data:{playerId:'P1',songId:'two',kind:'saved'}}};
+  if(profilePlayerId!==undefined)body.profilePlayerId=profilePlayerId;
+  const result=await h.request(body,tokens.manager);assert.equal(result.status,200);assert.equal(result.data.state.revision,8);
+  assert.deepEqual(rpc(h,'papa_v2_scoped_read_snapshot_with_quota').map(call=>call.body),[{requested_room:'papa',allowed_space:'space-001',quota_player:'P1'}]);
+  assert.equal(scopedSnapshots(h).length,1);assert.equal(rpc(h,'papa_catalog_song_metadata_in_space').length,1);
+  assert.equal(rpc(h,'papa_v2_snapshot').length,0);assert.equal(rpc(h,'papa_v2_quota_snapshot').length,0);
+  assert.equal(rpc(h,'papa_manage_player_extra_quota').length,0);assert.equal(rpc(h,'papa_room_admin_commit').length,0);assert.equal(rpc(h,'papa_release_b_commit').length,0);
+  const commits=rpc(h,'papa_room_operational_commit');assert.equal(commits.length,1);
+  assert.equal(commits[0].body.actor_context.account_id,account(3));assert.equal(commits[0].body.actor_context.space_id,'space-001');
+  assert.equal(commits[0].body.requested_room,'papa');assert.equal(commits[0].body.changes.some(row=>row.kind==='ledger'),false);
+  const requested=result.data.state.queue.find(q=>q.playerId==='P1');assert.equal(requested.kind,'saved');assert.equal(requested.status,'waiting');assert.equal(requested.creditCost,2);
+  assert.equal(result.data.state.hourlyUsed,0);assert.equal(result.data.state.hourlyReserved,1);assert.equal(result.data.state.hourlyPersonal.commonRemaining,1);
+  // A manager has no personal player quota. The target's allowance and the
+  // immediate returned rows supply the same calculation used by the manager UI.
+  assert.deepEqual(savedQuota(result.data.state,now,'P1'),{used:0,reserved:1,commonRemaining:1,extraQuota:2,personalUsed:2,extraRemaining:0,totalRemaining:1});
+  assert.deepEqual(result.data.state.players.find(p=>p.playerId==='P1').quotaRights.map(q=>q.extra_quota),[2,4]);
+  assert.equal(h.calls.length,4,'actor validation, one scoped snapshot, one commit and one metadata projection');h.checkSource();
+ }
 });
 
 test('failed request accounting uses the authenticated player personal allowance and weighted quote',async()=>{

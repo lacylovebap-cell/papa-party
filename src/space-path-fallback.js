@@ -1,4 +1,4 @@
-import {requestedSpace} from './space-entry.js';
+import {requestedSpace} from './space-entry.js?v=10.10-WEB.1';
 
 // Pages serves 404.html for a dedicated Space path. Only that route shape may
 // return to the app; the authenticated entry flow still verifies the Space.

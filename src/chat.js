@@ -1,4 +1,4 @@
-import {communicationIdentity} from './communication-context.js';
+import {communicationIdentity} from './communication-context.js?v=10.10-WEB.1';
 export function createChat({api,context,toast,onRead,realtimeAvailable=()=>false}){
  const h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const dialog=document.createElement('dialog');dialog.id='chat-dialog';dialog.className='chat-dialog';document.body.append(dialog);

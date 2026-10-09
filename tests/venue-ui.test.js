@@ -15,6 +15,7 @@ function harness(settings={}){
  const ctx=vm.createContext({state,session:{playerId:'p'},balance,reservedCredits,queueConfirmed,queuePrepared,queuePreparation,venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot,
   h:x=>String(x??''),button:(label,action,id='',classes='tiny')=>'<button data-act="'+action+'" data-id="'+id+'" class="'+classes+'">'+label+'</button>',
   select:(name,label,options,value)=>'<label>'+label+'<select name="'+name+'">'+options.map(([id,label])=>'<option value="'+id+'" '+(id===value?'selected':'')+'>'+label+'</option>').join('')+'</select></label>',
+  field:(name,label,value='',type='text',extra='')=>'<label>'+label+'<input name="'+name+'" type="'+type+'" value="'+value+'" '+extra+'></label>',
   modal:(title,html,submit)=>modals.push({title,html,submit}),dispatch:async(type,data)=>sent.push({type,data:structuredClone(data)}),
   loginDialog:()=>{},song:id=>state.songs.find(s=>s.songId===id),toast:()=>{},crownFor:()=>null,clock:()=>at,shortSongOptions:()=>'',check:()=>'',money:x=>x,say:()=>'',
   paginate:rows=>({rows,nav:''}),time:x=>x,timeValue:Date.parse,playerName:()=> '玩家',selectedQueue:new Set(),statusName:{completed:'已唱',cancelled:'已取消'},blank:()=>'',ledgerQuery:'',playerSearch:()=>[]});
@@ -22,10 +23,10 @@ function harness(settings={}){
  return {state,modals,sent,ctx,run:code=>vm.runInContext(code,ctx)};
 }
 
-test('disabled radio leaves the existing controls absent and legacy credits usable',()=>{
+test('disabled radio leaves the existing controls absent and legacy credits usable',async()=>{
  const u=harness();u.state.ledger.push({playerId:'p',amount:5});
  assert.equal(u.run('venueSwitch()'),'');assert.equal(u.run('venueSelector()'),'');assert.equal(u.run("storedBalanceHtml('p')"),'5 首');
- u.run("requestSong('s','saved')");assert.match(u.modals[0].title,/確認提歌/);
+ await u.run("requestSong('s','saved')");assert.match(u.modals[0].title,/確認提歌/);
 });
 
 test('enabled controls keep venue distinct from live work status and show both existing pools',()=>{

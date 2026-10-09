@@ -1,6 +1,6 @@
-import {canReplaceSound,isSuper} from './access-policy.js';
-import {communicationIdentity} from './communication-context.js';
-import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=10.09-QUOTA.1';
+import {canReplaceSound,isSuper} from './access-policy.js?v=10.10-WEB.1';
+import {communicationIdentity} from './communication-context.js?v=10.10-WEB.1';
+import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=10.10-WEB.1';
 export function createNotifications({api,context,toast,onUpdate,apiUrl,apiKey}){
  const escape=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let key='',rows=[],prefs=cleanNoticePrefs(),counts={},page=0,more=false,topic='',socket,heartbeat,reconnect,lastRealtimeAt=0,loading=false,view='',generation=0,seen=new Set(),primed=false,mutedAudio,playerSoundVersion='',boundDevice='',bindingDevice='';

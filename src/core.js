@@ -1,6 +1,6 @@
 import {validateHome} from './home-settings.js';
-import {newPracticeReorder,newPracticeRanks} from './new-practice.js';
-import {venuePolicySettings,venuePolicyRequestVenue,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicyBalance,venuePolicyReservedCredits,venuePolicyAvailableCredits,venuePolicySavedSnapshot} from './venue-policy.js';
+import {newPracticeReorder,newPracticeRanks} from './new-practice.js?v=10.10-WEB.1';
+import {venuePolicySettings,venuePolicyRequestVenue,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicyBalance,venuePolicyReservedCredits,venuePolicyAvailableCredits,venuePolicySavedSnapshot} from './venue-policy.js?v=10.10-WEB.1';
 export const TABLES=['players','songs','ledger','queue','crowns','cards','wishes'];
 export const TIERS=[{name:'金卡',fee:55599,price:4200,months:1},{name:'鉑金卡',fee:125000,price:9999,months:1},{name:'鑽石卡',fee:375000,price:18188,months:1},{name:'黑卡',fee:500000,price:27999,months:3},{name:'至尊卡',fee:925000,price:55599,months:0}];
 export const DEFAULTS={status:'空閒中',hourlyLimit:2,opening:'19:00～01:00（可能加班）',audition:387,livePrice:2990,liveDouble:500,crownDouble:18188,tiers:TIERS,plans:[{name:'一般 2 首',amount:2,fee:5555,double:990},{name:'一般 3 首',amount:3,fee:7299,double:1399},{name:'一般 6 首',amount:6,fee:13999,double:2799},{name:'🏅 金牌歌單',amount:10,fee:22887,double:4200}],tags:['嗨歌','傷感','甜歌','怪歌','慢歌'],manual:'1. 先登入玩家，再挑首喜歡的歌 ♡\n2. 提歌扣存歌，每小時有上限。\n3. 現點送出後，等{streamer}確認禮物。\n4. 冠歌主人照一般規則；其他玩家依卡別現點。'};

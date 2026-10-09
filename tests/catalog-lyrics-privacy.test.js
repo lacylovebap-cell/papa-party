@@ -36,7 +36,7 @@ test('bundled read and songSearch APIs never return lyric text to anonymous/play
  let handler;const context=vm.createContext({URL,crypto,structuredClone,TextEncoder,console,Date,Response,Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://example.supabase.co':'test'},serve:h=>handler=h},EdgeRuntime:{waitUntil:()=>{}},fetch:()=>{throw Error('unexpected network');}});
  vm.runInContext(stripTypeScriptTypes(code),context);
  context.snapshot=fixture();context.testActor=null;
- vm.runInContext('actor=async()=>testActor;load=async()=>structuredClone(snapshot);api=async()=>[];',context);
+ vm.runInContext("actor=async()=>testActor;load=async()=>structuredClone(snapshot);api=async(path)=>path.endsWith('/papa_streamer_directory')||path.endsWith('/papa_streamer_directory_in_space')?snapshot.streamers.map(room=>({id:room.id,slug:room.slug,display_name:room.display_name,spaceId:'space-001'})):[];",context);
  for(const actor of [null,{role:'player',playerId:'P1'}]){
    context.testActor=actor;
    for(const op of ['read','songSearch']){
