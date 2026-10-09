@@ -21,4 +21,22 @@ test('complete edge bundle compiles, preserves URL validators and isolates chat 
  vm.runInContext("fixture.targets=['streamer:other'];actor=async()=>({role:'streamer_admin',streamer_id:'other'});load=async()=>upgradePlatform(empty());loadCommunicationState=async()=>upgradePlatform(empty());",context);
  const boardResponse=await handler({method:'POST',json:async()=>({op:'boardList',token:'test',streamer:'papa'})});assert.equal(boardResponse.status,200);assert.equal((await boardResponse.json()).rows[0].body,'private');
  const adminResponse=await handler({method:'POST',json:async()=>({op:'read',token:'test',streamer:'papa'})});assert.equal(adminResponse.status,400);assert.match((await adminResponse.json()).error,/自己的主播/);
+ // Failed-quota events must use the same server-side pool selection as the
+ // request itself, without trusting a player's supplied venue or combining pools.
+ vm.runInContext(`
+  var venueTime=new Date().toISOString(),venueState=upgradePlatform(empty()),venueCalls=[];
+  venueState.players=[{playerId:'VP',name:'Venue Player',ids:[],names:[]}];
+  venueState.songs=[{songId:'VS',streamer_id:'papa',title:'Weighted',artist:'Artist',creditCost:2}];
+  venueState.streamerSettings.papa={...venueState.streamerSettings.papa,radio_enabled:true,current_space:'radio',hourlyLimit:0};
+  actor=async()=>({role:'player',playerId:'VP',spaceId:'space-001'});
+  load=async()=>structuredClone(venueState);schedulePush=()=>{};
+  api=async(path,body)=>{venueCalls.push({path,body});return true;};
+ `,context);
+ for(const [radio,shengma,reserved,counted] of [[0,4,0,true],[1,1,0,false],[2,0,0,true],[2,0,1,false]]){
+  context.radioAmount=radio;context.shengmaAmount=shengma;context.reservedAmount=reserved;
+  vm.runInContext(`venueCalls.length=0;venueState.ledger=[{id:'R',streamer_id:'papa',playerId:'VP',amount:radioAmount,storage_pool:'radio'},{id:'S',streamer_id:'papa',playerId:'VP',amount:shengmaAmount}];venueState.queue=reservedAmount?[{id:'Q',streamer_id:'papa',playerId:'VP',kind:'saved',status:'waiting',creditCost:reservedAmount,venue:'radio',consumed_storage_pool:'radio',at:venueTime}]:[];`,context);
+  const result=await handler({method:'POST',json:async()=>({op:'failedRequest',token:'test',streamer:'papa',songId:'VS',venue:'shengma',consumed_storage_pool:'radio'})});
+  assert.equal(result.status,200);assert.equal((await result.json()).counted,counted);
+  assert.equal(context.venueCalls.length,counted?1:0);if(counted)assert.equal(context.venueCalls[0].body.room_id,'papa');
+ }
 });

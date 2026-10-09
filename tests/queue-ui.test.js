@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {timeValue,stamp,quoteSong} from '../src/core.js';
+import {venuePolicySettings,venuePolicyLedgerPool} from '../src/venue-policy.js';
 
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8'),lines=app.split(/\r?\n/);
 const line=prefix=>lines.find(x=>x.startsWith(prefix));
 const helpers=['const field=','const area=','const nativeSelect=','const check=','const formData=','const dateInput=','const isoInput='].map(line).join('\n');
 const escaping='const '+line('const $=').slice(line('const $=').indexOf('h='));
-const functions=[line('function select('),line('function shortSongOptions('),app.slice(app.indexOf('async function queueLyrics('),app.indexOf('\nfunction editQueue(')),app.slice(app.indexOf('function editQueue('),app.indexOf('\nfunction onBehalf(')),line('function allocateDialog(')].join('\n');
+const functions=[line('function select('),line('function venueSelector('),line('function shortSongOptions('),app.slice(app.indexOf('async function queueLyrics('),app.indexOf('\nfunction editQueue(')),app.slice(app.indexOf('function editQueue('),app.indexOf('\nfunction onBehalf(')),line('function allocateDialog(')].join('\n');
 const unescape=value=>String(value).replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 function harness({repeat=false,pairOnly=false}={}){
  const songs=[{songId:'a',title:'短歌 <A>',artist:'歌手甲',creditCost:0.5,shortMode:pairOnly?'pair':'both',pairSongIds:['b'],lyrics:'第一行\n<script>alert(1)</script>'},{songId:'b',title:'短歌 B',artist:'歌手乙',creditCost:0.5,lyrics:'B & 下一行'},{songId:'double',title:'兩首歌',artist:'歌手丙',creditCost:2,lyrics:''}];
@@ -17,7 +18,7 @@ function harness({repeat=false,pairOnly=false}={}){
  function options(html){return [...html.matchAll(/<option value="([^"]*)"([^>]*)>(.*?)<\/option>/gs)].map(m=>({value:unescape(m[1]),selected:m[2].includes('selected')}));}
  const holder={_html:'',get innerHTML(){return this._html;},set innerHTML(html){this._html=html;delete fields.pairSongId;const match=html.match(/<select name="pairSongId">(.*?)<\/select>/s);if(match){const choices=options(match[1]);fields.pairSongId={options:choices,value:(choices.find(o=>o.selected)||choices[0])?.value||'',insertAdjacentHTML(position,extra){this.options.push(...options(extra));}};}}};
  nodes['#queue-edit-options']=holder;nodes['#modal-form']={addEventListener:(event,fn)=>listeners[event]=fn};
- const ctx=vm.createContext({Date,Map,Object,timeValue,stamp,quoteSong,demo:true,draft:null,setTimeout:fn=>fn(),state:{songs,queue:[q],ledger:[],crowns:[],settings:{livePrice:2990,liveDouble:500}},
+ const ctx=vm.createContext({Date,Map,Object,timeValue,stamp,quoteSong,venuePolicySettings,venuePolicyLedgerPool,demo:true,draft:null,setTimeout:fn=>fn(),state:{songs,queue:[q],ledger:[],crowns:[],settings:{livePrice:2990,liveDouble:500}},
   $:selector=>selector.startsWith('#dialog [name=')?fields[selector.slice(14,-1)]:nodes[selector],
   modal:(title,html,submit)=>{captured={title,html,submit};for(const match of html.matchAll(/<input\b([^>]+)>/g)){const attrs=match[1],name=attrs.match(/name="([^"]+)"/)?.[1];if(name)fields[name]={value:unescape(attrs.match(/value="([^"]*)"/)?.[1]||''),checked:attrs.includes('checked')};}for(const m of html.matchAll(/<textarea name="([^"]+)"[^>]*>(.*?)<\/textarea>/gs))fields[m[1]]={value:unescape(m[2])};},
   dispatch:async(type,data)=>sent.push({type,data:structuredClone(data)}),toast:()=>{},song:id=>songs.find(s=>s.songId===id),clock:()=> '2026-09-28T00:00:00Z',playerName:()=> '玩家 <P>',playerOptions:()=> [['p','玩家']],button:()=>''});

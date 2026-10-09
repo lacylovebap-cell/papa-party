@@ -9,7 +9,7 @@ const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const segment=(start,end)=>source.slice(source.indexOf(start),source.indexOf(end));
 test('new queue draws by the same homepage tag rules and preserves the chosen player',()=>{
  const picker={value:'',closest:()=>null,dispatchEvent:()=>{}},player={value:'player-unchanged'};
- const context=vm.createContext({Event,drawSong,drawnStreamerSong:null,toast:()=>{},state:{currentStreamer:{id:'papa'},songs:[{songId:'sweet',title:'甜歌',tags:['甜歌'],streamer_id:'papa'},{songId:'sad',title:'傷感',tags:['傷感'],streamer_id:'papa'},{songId:'other',title:'其他主播',tags:['甜歌'],streamer_id:'b'}]},$:sel=>sel.includes('songId')?picker:sel==='#proxy-fate-category'?{value:'tag:甜歌'}:player});
+ const context=vm.createContext({Event,drawSong,drawnStreamerSong:null,toast:()=>{},state:{currentStreamer:{id:'papa'},songs:[{songId:'sweet',title:'甜歌',tags:['甜歌'],streamer_id:'papa'},{songId:'sad',title:'傷感',tags:['傷感'],streamer_id:'papa'},{songId:'other',title:'其他主播',tags:['甜歌'],streamer_id:'b'}]},$:sel=>sel.includes('songId')?picker:sel==='#proxy-fate-category'?{querySelectorAll:()=>[{value:'tag:甜歌'}]}:player});
  vm.runInContext(source.split(/\r?\n/).find(x=>x.startsWith('function drawForStreamer()')),context);
  vm.runInContext('drawForStreamer()',context);assert.equal(picker.value,'sweet');assert.equal(player.value,'player-unchanged');
 });
@@ -120,7 +120,7 @@ test('shared catalog browse loads only one page and never renders lyric text fro
 
 test('unchanged reads coalesce and a full refresh is forced at most five minutes apart',async()=>{
  let now=1000000,resolvePending,reads=0;const requests=[],app={innerHTML:''};
- const context=contextWithCatalog({Date:{now:()=>now},demo:false,draft:null,busy:false,refreshInFlight:null,lastFullRefreshAt:0,state:{revision:7},
+ const context=contextWithCatalog({Date:{now:()=>now},demo:false,draft:null,session:null,busy:false,entryPending:false,refreshInFlight:null,lastFullRefreshAt:0,state:{revision:7},
   api:async body=>{requests.push(body);reads++;if(reads===2)return new Promise(resolve=>{resolvePending=resolve;});return {state:{revision:7},ready:true};},render:()=>{},isAdmin:()=>false,$:()=>app,button:()=>''});
  vm.runInContext(segment('async function refresh(','async function dispatch('),context);
  await vm.runInContext('refresh(true)',context);

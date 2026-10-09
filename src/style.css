@@ -14,3 +14,6 @@
 .queue-compact .queue-player{font-weight:700;color:inherit}.queue-compact .queue-more{flex-basis:100%}
 
 .song.queue-compact .info .queue-player{font-weight:600}.catalog-candidate-group{margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px}.catalog-candidate-group h3{font-size:16px;margin:0 0 8px}.catalog-candidate-group .actions{flex-wrap:wrap}#song-catalog-candidates{max-height:330px;overflow:auto}#song-catalog-candidates .song{align-items:center}#song-catalog-candidates .actions{flex-wrap:wrap}#song-catalog-candidates .actions button{font-size:12px}#catalog-review-language{max-width:140px}.action-target-hint{display:inline-flex;align-items:center;gap:3px;max-width:100%}
+/* Venue controls stay separate from the four work-status shortcuts. */
+.queue-live-tools{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-width:0}.venue-switch{display:inline-flex;gap:3px;flex:none}.venue-switch button{white-space:nowrap}.queue-more>small{display:block;margin-top:4px}
+.proxy-draw-tags{flex:1;min-width:0;font-size:12px}.proxy-draw-tags summary{cursor:pointer;overflow-wrap:anywhere}.proxy-draw-tags .chips{padding-top:6px}.proxy-draw-tags label{display:inline-flex;align-items:center;gap:3px;margin:0}
