@@ -110,7 +110,7 @@ async function api(path:string,body?:unknown,method?:string){
  const r=await fetch(SB_URL+path,{method:method||(body?'POST':'GET'),headers,body:body?JSON.stringify(body):undefined}),text=await r.text();
  if(!r.ok){
   const messages:any={DEVICE_SWITCH_SPACE_INVALID:'找不到可使用的空間',DEVICE_SWITCH_ROOM_INVALID:'此登入不適用選擇的主播',DEVICE_SWITCH_MEMBERSHIP_REQUIRED:'你沒有此空間的使用權限',DEVICE_SWITCH_PROFILE_REQUIRED:'此空間的玩家資料尚未建立',DEVICE_SWITCH_IDENTITY_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INSTALLATION_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INVALID:'裝置資訊不正確',ACCOUNT_DISABLED:'登入已到期，請重新登入',MEMBERSHIP_REQUIRED:'登入已到期，請重新登入',MEMBERSHIP_SUSPENDED:'登入已到期，請重新登入',SESSION_ACCOUNT_MISMATCH:'登入已到期，請重新登入',DEVICE_IDENTITY_MISMATCH:'登入已到期，請重新登入',BOARD_MODERATED:'此留言由管理者隱藏，請聯絡管理者恢復',BOARD_RATE_LIMIT:'留言送得太快，請稍候三秒再試',BOARD_RETRY_CHANGED:'重試內容不同，請重新開啟留言板',CHAT_RATE_LIMIT:'訊息送得太快，請稍候再送',CHAT_REQUEST_REUSED:'訊息重試內容不同，請重新開啟私訊',VERSION_CONFLICT:'資料剛更新了，請重新整理後再試一次',CATALOG_SELECTION_STALE:'共同資料剛更新，請重新選取後再操作',CATALOG_SOURCE_STALE:'原歌曲剛更新，請重新選取後再審核',CATALOG_CANDIDATE_STALE:'候選歌曲剛更新，請重新選取後再審核',CATALOG_TEMPLATE_MISSING:'這個模板已停用或不存在，請重新選擇',CATALOG_ALREADY_LINKED:'歌曲已建立共同關聯，請重新整理',CATALOG_AMBIGUOUS_TARGET:'存在多筆同版本共同歌曲，請選擇既有目標後再連結',CATALOG_BATCH_DIFFERENT_VERSIONS:'所選歌曲屬於不同版本，請分批處理'};
-  Object.assign(messages,{STREAMER_REGISTRY_DUPLICATE:'主播網址已使用',STREAMER_REGISTRY_ACTOR_INVALID:'總裁登入已到期，請重新登入',
+  Object.assign(messages,{SONG_FAVORITES_SCOPE_INVALID:'找不到可收藏的主播空間',SONG_FAVORITES_ACTOR_INVALID:'登入已到期，請重新登入',SONG_FAVORITES_SONG_INVALID:'歌曲已隱藏或更新，請重新選擇',SONG_FAVORITES_INPUT_INVALID:'收藏資料不正確',SONG_FAVORITES_PAGE_INVALID:'收藏分頁資料不正確',NEW_PRACTICE_SCOPE_INVALID:'找不到主播的新練歌曲',NEW_PRACTICE_PAGE_INVALID:'新練歌曲分頁資料不正確',STREAMER_REGISTRY_DUPLICATE:'主播網址已使用',STREAMER_REGISTRY_ACTOR_INVALID:'總裁登入已到期，請重新登入',
    STREAMER_REGISTRY_SCOPE_INVALID:'請切換到該主播空間再編輯',STREAMER_REGISTRY_ROOM_INVALID:'找不到主播',
    STREAMER_REGISTRY_SPACE_INVALID:'找不到可使用的空間',STREAMER_REGISTRY_DESCRIPTOR_INVALID:'主播資料格式錯誤'});
   throw Error(Object.entries(messages).find(([code])=>text.includes(code))?.[1]||'資料庫操作失敗');
@@ -335,6 +335,25 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   managerPasswordError(result,kind);return respond({ok:true,signOut:true});
  }
  if(b.op==='upload'){if(!isManager(who))throw new Error('只有管理員能上傳');await managerRoom(who,b.streamer||'papa');const binary=Uint8Array.from(atob(b.image),c=>c.charCodeAt(0));if(binary.length>3145728||b.mime!=='image/webp')throw new Error('請使用壓縮後圖片');const path=crypto.randomUUID()+'.webp',r=await fetch(SB_URL+'/storage/v1/object/papa-photos/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'image/webp'},body:binary});if(!r.ok)throw new Error('圖片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-photos/'+path});}
+ if(['favoritesPage','favoriteSet','favoriteFlags'].includes(b.op)){
+  if(b.token&&!who)throw Error('登入已到期，請重新登入');
+  if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
+  const room=await catalogRoom(who,b.streamer||'papa');
+  if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
+  const context={role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',streamer_id:room.id};
+  const common={requested_space:room.spaceId||'space-001',requested_room:room.id,actor_context:context};
+  if(b.op==='favoriteSet'){
+   if(typeof b.songId!=='string'||!b.songId||b.songId.length>128||typeof b.favorite!=='boolean')throw Error('收藏資料不正確');
+   return respond(await api('/rest/v1/rpc/papa_song_favorite_set',{...common,requested_song:b.songId,requested_favorite:b.favorite}));
+  }
+  if(b.op==='favoriteFlags'){
+   if(!Array.isArray(b.songIds)||b.songIds.length>50||new Set(b.songIds).size!==b.songIds.length||b.songIds.some((id:any)=>typeof id!=='string'||!id||id.length>128))throw Error('收藏歌曲清單不正確');
+   return respond(await api('/rest/v1/rpc/papa_song_favorite_flags',{...common,song_ids:b.songIds}));
+  }
+  const page=b.page??0,limit=b.limit??20;
+  if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('收藏分頁資料不正確');
+  return respond(await api('/rest/v1/rpc/papa_song_favorites_page',{...common,page_limit:limit,page_offset:page*limit}));
+ }
  if(b.op==='newPracticePage'){
   const management=b.management===true;
   if(b.management!==undefined&&typeof b.management!=='boolean'||management&&!isManager(who))throw Error('請先登入管理');

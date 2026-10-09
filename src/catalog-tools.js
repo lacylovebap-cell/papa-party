@@ -33,6 +33,7 @@ export function eventDescription(event,{playerName=()=>'',songName=()=>'',roomNa
  if(event.entity_kind==='shared_catalog'||event.actorId)return `${actor}將《${title}》${labels[event.action]||'更新共同曲庫'}${row.rooms?.length?'（'+row.rooms.map(roomName).join('、')+'）':''}`;
  if(['request_failed','failed_request'].includes(event.action))return `${player}提歌《${title}》失敗：本小時提歌額度已滿`;
  if(event.entity_kind==='extra_quota')return `${actor}${row.enabled?'設定':'停用'}${player}在${roomName(event.streamer_id)}的專屬提歌權${row.enabled?' +'+row.extra_quota:''}`;
+ if(event.entity_kind==='song_favorites')return `${actor}${row.favorite?'收藏':'取消收藏'}《${title}》`;
  if(event.action==='newPracticeOrder'&&event.entity_kind==='songs')return `${actor}調整《${title}》的新練歌曲順序`;
  if(event.entity_kind==='players')return `${actor}${event.before_data?'編輯':'新增'}玩家${player}的基本資料`;
  if(event.entity_kind==='queue'){

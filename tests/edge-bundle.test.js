@@ -61,4 +61,17 @@ test('complete edge bundle compiles, preserves URL validators and isolates chat 
  vm.runInContext("actor=async()=>({role:'streamer_admin',streamer_id:'michelle',spaceId:'space-001'});",context);
  for(const extra of [{limit:51},{page:-1},{page:10000001},{management:'true'},{streamer:'papa'}]){context.practiceCalls.length=0;const bad=await handler({method:'POST',json:async()=>({op:'newPracticePage',streamer:'michelle',management:true,...extra})});assert.equal(bad.status,400);assert.ok(context.practiceCalls.every(call=>!call.path.endsWith('papa_new_practice_page')));}
  context.practiceCalls.length=0;const managedPractice=await handler({method:'POST',json:async()=>({op:'newPracticePage',streamer:'michelle',management:true})});assert.equal(managedPractice.status,200);assert.equal(context.practiceCalls[1].body.management,true);
+ vm.runInContext(`
+  var favoriteCalls=[];
+  api=async(path,body)=>{favoriteCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'}];if(path.endsWith('papa_song_favorite_set'))return {songId:body.requested_song,favorite:body.requested_favorite,changed:true};if(path.endsWith('papa_song_favorite_flags'))return {songIds:[]};if(path.endsWith('papa_song_favorites_page'))return {rows:[],total:0,pageLimit:body.page_limit,pageOffset:body.page_offset};throw Error('unexpected favorite query');};
+ `,context);
+ for(const identity of [null,{role:'streamer_admin',streamer_id:'michelle',accountId:'account-manager'}, {role:'player',playerId:'P1'}]){
+  context.favoriteWho=identity;vm.runInContext('actor=async()=>favoriteWho;',context);context.favoriteCalls.length=0;
+  const denied=await handler({method:'POST',json:async()=>({op:'favoriteSet',streamer:'michelle',songId:'S1',favorite:true})});assert.equal(denied.status,400);assert.equal(context.favoriteCalls.length,0);
+ }
+ context.favoriteWho={role:'player',playerId:'P1',accountId:'actual-account',spaceId:'space-001'};
+ const setFavorite=await handler({method:'POST',json:async()=>({op:'favoriteSet',token:'test',streamer:'michelle',songId:'S1',favorite:true,playerId:'P2',account_id:'forged-account',actor_context:{role:'super_admin'}})});assert.equal(setFavorite.status,200);
+ assert.deepEqual(JSON.parse(JSON.stringify(context.favoriteCalls[1].body)),{requested_space:'space-001',requested_room:'michelle',actor_context:{role:'player',account_id:'actual-account',player_id:'P1',space_id:'space-001',streamer_id:'michelle'},requested_song:'S1',requested_favorite:true});
+ for(const body of [{op:'favoriteFlags',songIds:Array(51).fill('S1')},{op:'favoriteFlags',songIds:['S1','S1']},{op:'favoriteSet',songId:'S1',favorite:'true'},{op:'favoritesPage',limit:51},{op:'favoritesPage',page:-1}]){context.favoriteCalls.length=0;const bad=await handler({method:'POST',json:async()=>({streamer:'michelle',...body})});assert.equal(bad.status,400);assert.ok(context.favoriteCalls.every(call=>call.path.endsWith('papa_streamer_directory')));}
+ context.favoriteCalls.length=0;const favoritePage=await handler({method:'POST',json:async()=>({op:'favoritesPage',streamer:'michelle',page:2,limit:20})});assert.equal(favoritePage.status,200);assert.equal(context.favoriteCalls[1].body.page_offset,40);
 });
