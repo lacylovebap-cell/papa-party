@@ -116,3 +116,15 @@ Main is now 07403f388c03406e5495df1b28688df0f0c1af9b / 10.08-UI.1. All nine brow
 
 ## Priority UI.2 release — 2026-10-08
 Production main is d2ef1d8c4c907f34e7984d810a450e2bd145547d / 10.08-UI.2. Additive migration 202610080010_admin_catalog_controls.sql and party-api deployed. 266 regression tests and build passed. Business data hash guard: 2348 entities / 1255 links unchanged. Version manager filters, canonical room names, report and batch add, compact song actions and atomic guarded bulk deletion, Enter shortcuts, nested ledger allocation, tagged proxy draw and queue title/hint fixed. Merge latest main before resuming Space work; do not redeploy old UI.1 bundle. No Space foundation migrations shipped.
+
+
+## Priority exclusive quota release — 2026-10-09
+
+User explicitly prioritized standalone completed release. Production main is 9fe9b4367be36159ac5e7b15adefd72c77a403dd / 10.09-QUOTA.1 at https://paparty.app/. Separate worktree hotfix/exclusive-quota-1009 preserves CNAME. Legacy-session quota RPC + current-room saved-participant/selected-player snapshot, player crowns and variable rights, history/ledger correction attribution, audit wording, safe local-draft guard released. Full regression 287/289 initially; only cache-version and missing fixture session globals corrected, affected 32 tests then passed. Build and exact-SHA Pages deployment passed. Atomic recovery snapshot 10.09-QUOTA-before saved. Production rollback smoke proved quota/no-op/cancel/scope without changing entities or notifications; quota fixture rows returned to 0. See ../quota-release-result-1009.json.
+
+IMPORTANT BEFORE ARCHITECTURE DEPLOY: production now has same-name quota table and migration 202610090004 using text updated_by + space-001 check, with legacy-session (text proof) grant RPC overload and papa_v2_snapshot backup wrapper. This branch original004 expects Account UUID updated_by + Space FK and unconditional CREATE. Reconcile additively with the live legacy table/overload before applying foundation004; preserve grants/backup/labels and add explicit verified Account attribution. Do not deploy this branch as-is. Merge latest main carefully: preserve CNAME/new cache version/legacy hotfix semantics and dirty native-eligibility files. No foundation/Space/native architecture migrations or site released.
+
+
+## Native player explicit provisioning — 2026-10-09
+
+Checkpoint adds bounded President eligibility (013), explicit binding helper, and nativePlayerEligibility/nativePlayerProvision Edge paths. No Account or Membership is created or inferred; original006 batch transaction revalidates chosen memberships. Empty Core password scaffold is stripped; basic player data contains no authentication identity. Root Edge/helper/real013 targets: 16/16 pass. Public native activation is still closed. Pending014 duplicate platform-ID guard and015 live-quota compatibility are being implemented separately; no foundation deployed.

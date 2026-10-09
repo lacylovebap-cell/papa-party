@@ -102,6 +102,7 @@ import {deriveNotices} from '../../../src/notification-rules.js';
 // Authentication is checked here for every operation; no browser service key.
 import {empty,TABLES,mutate,publicView,migrateLegacy,previewImport,applyImport,playerSearch,upgradePlatform,scopeState,searchAcrossStreamers,balance,reservedCredits,usedHour,reservedHour,quoteSong,hourKey,canRequestSaved} from '../../../src/core.js';
 import {venuePolicySavedSnapshot} from '../../../src/venue-policy.js';
+import {buildNativePlayerBindings} from '../../../src/native-player-bindings.js';
 const SB_URL=Deno.env.get('SUPABASE_URL')!,KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,ADMIN=Deno.env.get('PAPA_ADMIN_USER_ID');
 const headers={apikey:KEY,Authorization:`Bearer ${KEY}`,'Content-Type':'application/json'};
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'content-type,authorization,apikey','Access-Control-Allow-Methods':'POST, OPTIONS'};
@@ -373,7 +374,32 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('新練歌曲分頁資料不正確');
   return respond(await api('/rest/v1/rpc/papa_new_practice_page',{requested_space:room.spaceId||'space-001',requested_room:room.id,management,page_limit:limit,page_offset:page*limit}));
  }
+ if(b.op==='nativePlayerEligibility'){
+  if(!isSuper(who)||!who?.accountId)throw Error('僅限 PA Party總裁');
+  const space=b.spaceId,page=b.page??0,limit=b.limit??20,query=b.query??'';
+  if(typeof space!=='string'||!space||space==='space-001'||space.length>200||!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000||typeof query!=='string'||query.length>100)throw Error('新空間玩家搜尋資料不正確');
+  return respond(await api('/rest/v1/rpc/papa_native_player_eligibility_page',{requested_space:space,actor_context:{role:who.role,account_id:who.accountId,space_id:space,streamer_id:null},query_text:query.trim(),page_limit:limit,page_offset:page*limit}));
+ }
+ if(b.op==='nativePlayerProvision'){
+  if(!isSuper(who)||!who?.accountId)throw Error('僅限 PA Party總裁');
+  if(typeof b.streamer!=='string'||!b.streamer||b.streamer.length>200||typeof b.spaceId!=='string'||!b.spaceId||b.spaceId==='space-001'||!Number.isSafeInteger(b.revision)||b.revision<0||!Array.isArray(b.rows)||!b.rows.length||b.rows.length>100)throw Error('新空間玩家資料不正確');
+  const fields=['accountId','membershipId','name','ids','names','certification','note'];
+  if(b.rows.some((row:any)=>!row||typeof row!=='object'||Array.isArray(row)||Object.keys(row).some(key=>!fields.includes(key))||typeof row.name!=='string'||!row.name.trim()||row.name.length>200||['ids','names','certification','note'].some(key=>row[key]!==undefined&&(typeof row[key]!=='string'||row[key].length>1000))))throw Error('新空間玩家欄位不正確');
+  const snapshot=await api('/rest/v1/rpc/papa_streamer_registry_snapshot',{requested_room:b.streamer,subject:who.accountId});
+  const source=snapshotState(snapshot),space=snapshot.canonicalSpace?.id,room=snapshot.canonicalRoom;
+  if(!space||space==='space-001'||space!==b.spaceId||!room)throw Error('玩家資料不屬於所選空間');
+  if(source.revision!==b.revision)throw Error('資料剛更新了，請重新整理後再試一次');
+  let next=source;const selections:any[]=[];
+  for(const row of b.rows){
+   next=mutate(next,{type:'player',streamer:room,data:{name:row.name,ids:row.ids||'',names:row.names||'',certification:row.certification||'',note:row.note||''}},coreActor(who),t);
+   selections.push({playerId:next.players[next.players.length-1].playerId,accountId:row.accountId,membershipId:row.membershipId});
+  }
+  const bindings=buildNativePlayerBindings({spaceId:space,source:scopeState(source,room),changes:stateChanges(source,next,{preserveOrder:true}).changes,eligible:b.rows.map((row:any)=>({accountId:row.accountId,membershipId:row.membershipId,spaceId:space})),selections});
+  next=await commit(source,next,{role:who.role,account_id:who.accountId,space_id:space,streamer_id:room,roomWriteScoped:true,action:'playerProvision',player_bindings:bindings});
+  return respond({revision:next.revision,created:selections.map(row=>({playerId:row.playerId,name:next.players.find((p:any)=>p.playerId===row.playerId)?.name||''}))});
+ }
  if(b.op==='playerArchive'){
+
   if(!isSuper(who)||!who?.accountId)throw Error('只有 PA Party總裁可以封存或恢復玩家');
   const room=await catalogRoom(who,b.streamer||'papa',true);
   if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
