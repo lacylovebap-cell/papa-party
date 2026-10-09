@@ -39,4 +39,16 @@ test('complete edge bundle compiles, preserves URL validators and isolates chat 
   assert.equal(result.status,200);assert.equal((await result.json()).counted,counted);
   assert.equal(context.venueCalls.length,counted?1:0);if(counted)assert.equal(context.venueCalls[0].body.room_id,'papa');
  }
+ vm.runInContext(`
+  var playerPageCalls=[];
+  api=async(path,body)=>{playerPageCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'}];if(path.endsWith('papa_player_management_page'))return {rows:[],total:0,pageLimit:body.page_limit,pageOffset:body.page_offset};throw Error('unexpected player-page query');};
+ `,context);
+ const deniedPage=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'michelle',mode:'all'})});assert.equal(deniedPage.status,400);assert.equal(context.playerPageCalls.length,0);
+ vm.runInContext("actor=async()=>({role:'streamer_admin',streamer_id:'michelle',spaceId:'space-001'});load=async()=>{throw Error('player page must not load business histories');};",context);
+ const page=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'michelle',mode:'stored',page:2,limit:20,query:' A '})});assert.equal(page.status,200);assert.equal((await page.json()).pageOffset,40);
+ const pageCall=context.playerPageCalls.find(call=>call.path.endsWith('papa_player_management_page'));assert.deepEqual(JSON.parse(JSON.stringify(pageCall.body)),{requested_space:'space-001',requested_room:'michelle',list_mode:'stored',query_text:'A',page_limit:20,page_offset:40});
+ for(const extra of [{limit:51},{page:-1},{query:'x'.repeat(101)},{mode:'other'},{page:10000001}]){
+  context.playerPageCalls.length=0;const bad=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'michelle',mode:'all',...extra})});assert.equal(bad.status,400);assert.ok(context.playerPageCalls.every(call=>!call.path.endsWith('papa_player_management_page')));
+ }
+ context.playerPageCalls.length=0;const foreign=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'papa',mode:'all'})});assert.equal(foreign.status,400);assert.ok(context.playerPageCalls.every(call=>!call.path.endsWith('papa_player_management_page')));
 });

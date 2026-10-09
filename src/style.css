@@ -17,3 +17,4 @@
 /* Venue controls stay separate from the four work-status shortcuts. */
 .queue-live-tools{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-width:0}.venue-switch{display:inline-flex;gap:3px;flex:none}.venue-switch button{white-space:nowrap}.queue-more>small{display:block;margin-top:4px}
 .proxy-draw-tags{flex:1;min-width:0;font-size:12px}.proxy-draw-tags summary{cursor:pointer;overflow-wrap:anywhere}.proxy-draw-tags .chips{padding-top:6px}.proxy-draw-tags label{display:inline-flex;align-items:center;gap:3px;margin:0}
+.player-search-toolbar{flex-wrap:wrap}.player-search-toolbar input{flex:1 1 240px;min-width:0}.player-search-toolbar button{flex:none}@media(max-width:640px){.player-search-toolbar input{flex-basis:100%}}
