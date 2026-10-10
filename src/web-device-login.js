@@ -1,5 +1,5 @@
-import {createDeviceSessions} from './device-session.js?v=10.10-WEB.1';
-import {createWebCredentialStore} from './web-credential-store.js?v=10.10-WEB.1';
+import {createDeviceSessions} from './device-session.js?v=10.10-WEB.2';
+import {createWebCredentialStore} from './web-credential-store.js?v=10.10-WEB.2';
 
 // Keeps the existing login UI and demo mode. Unsupported browsers retain the
 // legacy login instead of enabling an unsafe long-lived credential fallback.

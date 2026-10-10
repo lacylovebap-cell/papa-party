@@ -263,7 +263,7 @@ test('song import reuses a single scoped source and atomic commit without hydrat
 test('version relation filters are bounded and ordinary streamers cannot query adoptable lyrics or another room',async()=>{
  const {context,calls,request}=edge(),original=context.mockApi;
  context.mockApi=async(path,body)=>{
-  if(path.endsWith('papa_catalog_families_page_v3_in_space')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['華語'],versionKinds:['cover']}};}
+  if(path.endsWith('papa_catalog_families_page_v4_in_space')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['華語'],versionKinds:['cover']}};}
   if(path.endsWith('papa_catalog_variant_rooms_v3_in_space')){calls.push({path,body});return {items:[{streamerName:'怕怕'}],total:1};}
   return original(path,body);
  };
@@ -277,9 +277,9 @@ test('version relation filters are bounded and ordinary streamers cannot query a
 
 test('public common-book classification uses one bounded RPC and no business snapshot',async()=>{
  const {context,calls,request}=edge(),old=context.mockApi;
- context.mockApi=async(path,body)=>{if(path.endsWith('papa_catalog_public_page_filtered_in_space')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['英語'],performerTypes:['團體'],versionKinds:['cover']}};}return old(path,body);};
+ context.mockApi=async(path,body)=>{if(path.endsWith('papa_catalog_public_page_filtered_v2_in_space')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['英語'],performerTypes:['團體'],versionKinds:['cover']}};}return old(path,body);};
  const response=await request({op:'catalogSongbook',q:'Honey',language:'英語',performerType:'團體',versionKind:'cover',limit:1000,offset:12});
- assert.equal(response.status,200);assert.equal(calls.filter(c=>c.path.includes('public_page_filtered')).length,1);assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1).body)),{query_text:'Honey',language_filter:'英語',performer_filter:'團體',version_filter:'cover',page_limit:20,page_offset:12,requested_space:'space-001'});
+ assert.equal(response.status,200,JSON.stringify(response.data));assert.equal(calls.filter(c=>c.path.includes('public_page_filtered')).length,1);assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1).body)),{query_text:'Honey',language_filter:'英語',performer_filter:'團體',version_filter:'cover',page_limit:20,page_offset:12,requested_space:'space-001',sort_order:'default',version_label_filter:''});
  assert.equal((await request({op:'catalogSongbook',language:'x'.repeat(101)})).status,200);assert.equal(calls.filter(c=>c.path.includes('public_page_filtered')).length,1);
 });
 
@@ -426,16 +426,16 @@ test('catalog singer relationships use server-resolved Space and cannot accept c
  const {context,calls,request}=edge(),old=context.mockApi;
  context.mockApi=async(path,body)=>{
   if(path.includes('papa_streamer_directory')){calls.push({path,body});return [{id:'papa',slug:'papa',active:true,spaceId:'space-001'},{id:'other',slug:'other',active:true,spaceId:'space-002'}];}
-  if(path.includes('papa_catalog_public_page_filtered_in_space')||path.includes('papa_catalog_family_singers_in_space')||path.includes('papa_catalog_variant_rooms_v3_in_space')||path.includes('papa_catalog_families_page_v3_in_space')){calls.push({path,body});return {rows:[],items:[],total:0,hasMore:false};}
+  if(path.includes('papa_catalog_public_page_filtered_v2_in_space')||path.includes('papa_catalog_family_singers_in_space')||path.includes('papa_catalog_variant_rooms_v3_in_space')||path.includes('papa_catalog_families_page_v4_in_space')){calls.push({path,body});return {rows:[],items:[],total:0,hasMore:false};}
   return old(path,body);
  };
  const family='11111111-1111-4111-8111-111111111111';
  context.testActor={role:'player',playerId:'P1',spaceId:'space-001'};
  let result=await request({op:'catalogSongbook',streamer:'papa',spaceId:'space-002',requested_space:'space-002'});
  assert.equal(result.status,200);assert.equal(calls.at(-1).body.requested_space,'space-001');
- const before=calls.filter(c=>c.path.includes('papa_catalog_public_page_filtered_in_space')).length;
+ const before=calls.filter(c=>c.path.includes('papa_catalog_public_page_filtered_v2_in_space')).length;
  assert.equal((await request({op:'catalogSongbook',streamer:'other'})).status,400);
- assert.equal(calls.filter(c=>c.path.includes('papa_catalog_public_page_filtered_in_space')).length,before);
+ assert.equal(calls.filter(c=>c.path.includes('papa_catalog_public_page_filtered_v2_in_space')).length,before);
  context.testActor=null;assert.equal((await request({op:'catalogSongbook',streamer:'other'})).status,400);
  context.testActor={role:'streamer_admin',streamer_id:'papa',spaceId:'space-001'};
  for(const body of [{op:'catalogFamilySingers',familyId:family},{op:'catalogRooms',variantId:family},{op:'catalogReviewList',status:'families'}]){
@@ -574,15 +574,15 @@ test('room search forces public visibility and passes manager filters to one bou
   context.testActor=who;calls.length=0;
   const result=await request({op:'songSearchRoom',streamer:'michelle',q:'共同歌詞',visibility:'hidden',catalogStatus:'pending',limit:20,offset:40});
   assert.equal(result.status,200,JSON.stringify(result.data));
-  const query=calls.find(c=>c.path.endsWith('papa_song_search_room_v3'));assert.ok(query);
-  assert.deepEqual(JSON.parse(JSON.stringify(query.body)),{room_id:'michelle',requested_space:'space-001',query_text:'共同歌詞',tags:[],page_limit:20,page_offset:40,language_name:null,visibility:'visible',catalog_status:'all'});
+  const query=calls.find(c=>c.path.endsWith('papa_song_search_room_v4'));assert.ok(query);
+  assert.deepEqual(JSON.parse(JSON.stringify(query.body)),{room_id:'michelle',requested_space:'space-001',query_text:'共同歌詞',tags:[],page_limit:20,page_offset:40,language_name:null,visibility:'visible',catalog_status:'all',sort_order:'default',tag_match:'any'});
   assert.equal(calls.length,2);assert.equal(calls.some(c=>/snapshot|get_lyrics/.test(c.path)),false);
  }
  context.testActor={role:'streamer_admin',streamer_id:'michelle',spaceId:'space-001'};calls.length=0;
  const manager=await request({op:'songSearchRoom',streamer:'michelle',q:'',visibility:'hidden',catalogStatus:'linked',language:'台語',tags:['古風'],limit:20});
  assert.equal(manager.status,200,JSON.stringify(manager.data));
- const query=calls.find(c=>c.path.endsWith('papa_song_search_room_v3'));assert.equal(query.body.visibility,'hidden');assert.equal(query.body.catalog_status,'linked');assert.equal(query.body.language_name,'台語');assert.equal(query.body.query_text,'');assert.equal(query.body.page_limit,20);
+ const query=calls.find(c=>c.path.endsWith('papa_song_search_room_v4'));assert.equal(query.body.visibility,'hidden');assert.equal(query.body.catalog_status,'linked');assert.equal(query.body.language_name,'台語');assert.equal(query.body.query_text,'');assert.equal(query.body.page_limit,20);assert.equal(query.body.sort_order,'default');assert.equal(query.body.tag_match,'any');
  for(const extra of [{visibility:'wrong'},{catalogStatus:'wrong'},{streamer:'papa'}]){
-  calls.length=0;assert.equal((await request({op:'songSearchRoom',streamer:'michelle',visibility:'hidden',...extra})).status,400);assert.equal(calls.some(c=>c.path.endsWith('papa_song_search_room_v3')),false);
+  calls.length=0;assert.equal((await request({op:'songSearchRoom',streamer:'michelle',visibility:'hidden',...extra})).status,400);assert.equal(calls.some(c=>c.path.endsWith('papa_song_search_room_v4')),false);
  }
 });

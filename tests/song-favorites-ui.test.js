@@ -4,13 +4,13 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
-const prefixes=['function favoriteButton(','function syncFavoriteButtons(','function loadVisibleFavoriteFlags(','function favoritesPanelHtml(','function loadFavorites(','async function setSongFavorite(','function songRows(','function playerTabs('];
+const prefixes=['function favoritesIdentity(','function favoriteButton(','function syncFavoriteButtons(','function loadVisibleFavoriteFlags(','function favoritesPanelHtml(','function loadFavorites(','async function setSongFavorite(','function songRows(','function playerTabs('];
 const functions=prefixes.map(prefix=>source.split(/\r?\n/).find(line=>line.startsWith(prefix))).join('\n');
 function ui(){
  const calls=[],view={page:0,rows:[{songId:'S1',title:'Not previously requested',artist:'Singer',tags:[]}],total:1,loading:false,error:null,flags:{S1:true},pendingSongIds:[]};
  const state={settings:{},players:[{playerId:'P1',name:'Owner',ids:[],names:[]},{playerId:'P2',name:'Other',ids:[],names:[]}],songs:[{songId:'S1',plays:7}],queue:[],crowns:[],cards:[],wishes:[],ledger:[]};
  const nodes=Array.from({length:70},(_,i)=>({dataset:{id:'S'+i},setAttribute(key,value){this[key]=value;}}));
- const context=vm.createContext({state,session:{playerId:'P1'},route:'center',subtab:'favorites',demo:false,
+ const context=vm.createContext({state,session:{accountId:'A1',playerId:'P1'},selectedFavorites:new Set(),selectedFavoriteRows:new Map(),favoriteSelectionIdentity:'',route:'center',subtab:'favorites',demo:false,
   songFavorites:{state:()=>view,loadFlags:async ids=>calls.push({flags:ids}),load:async options=>calls.push({load:options}),setFavorite:async(songId,favorite)=>{calls.push({songId,favorite});return {songId,favorite,changed:true};}},
   document:{querySelectorAll:()=>nodes},h:x=>String(x??''),blank:x=>'<p>'+x+'</p>',say:()=>'',clock:()=>'',plays:s=>s.plays||0,crownFor:()=>null,song:id=>state.songs.find(s=>s.songId===id),
   button:(label,action,id='',cls='',extra='')=>'<button data-act="'+action+'" data-id="'+id+'" '+extra+'>'+label+'</button>',toast:x=>calls.push({toast:x}),loginDialog:async()=>calls.push({login:true})});
@@ -38,5 +38,5 @@ test('loading/errors do not show stale rows or initiate reads; retry remains exp
 });
 
 test('favorite buttons show acknowledged state and disable only the pending song',()=>{
- const h=ui();h.view.pendingSongIds=['S1'];assert.match(h.run('favoriteButton("S1")'),/已收藏/);assert.match(h.run('favoriteButton("S1")'),/disabled/);h.run('syncFavoriteButtons()');assert.equal(h.nodes[1].disabled,true);assert.equal(h.nodes[2].disabled,false);assert.equal(h.nodes[1].dataset.favorite,'false');
+ const h=ui();h.view.pendingSongIds=['S1'];assert.match(h.run('favoriteButton("S1")'),/aria-label="取消收藏"/);assert.match(h.run('favoriteButton("S1")'),/>♥<\/button>/);assert.match(h.run('favoriteButton("S1")'),/disabled/);h.run('syncFavoriteButtons()');assert.equal(h.nodes[1].disabled,true);assert.equal(h.nodes[2].disabled,false);assert.equal(h.nodes[1].dataset.favorite,'false');
 });

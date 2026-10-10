@@ -5,15 +5,16 @@ import vm from 'node:vm';
 import {timeValue,stamp,hourKey,savedQuota} from '../src/core.js';
 import {eventDescription} from '../src/catalog-tools.js';
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8'),lines=app.split(/\r?\n/),line=prefix=>lines.find(x=>x.startsWith(prefix));
+function takeFunction(name){const start=lines.findIndex(x=>x.startsWith('function '+name+'('));const end=lines.findIndex((x,i)=>i>start&&x==='}');assert.ok(start>=0&&end>start);return lines.slice(start,end+1).join('\n');}
 function ui(){
  const sent=[],now='2026-10-09T14:30:00Z',state={currentStreamer:{id:'papa'},settings:{hourlyLimit:2},extraQuotas:[{streamer_id:'papa',player_id:'P1',extra_quota:2,enabled:true}],hourBucket:hourKey(now),hourlyPersonal:{used:0,reserved:1,extraQuota:2,personalUsed:0,extraRemaining:2,commonRemaining:1},
   songs:[],ledger:[],crowns:[],cards:[],wishes:[],badges:[],queue:[{id:'Q1',kind:'saved',status:'completed',playerId:'P1',title:'Song',at:'2026-10-09T12:50:00Z',effective_at:'2026-10-09T12:55:00Z',completedAt:'2026-10-09T12:55:00Z'}],
   players:[{playerId:'P1',name:'玩家',ids:[],names:[],quotaRights:[{streamer_id:'papa',streamer_name:'怕怕',extra_quota:2},{streamer_id:'second',streamer_name:'主播B',extra_quota:3}]}]};
  let captured,manager=true;
  const context=vm.createContext({state,sent,draft:null,demo:false,Date,Object,Number,Map,timeValue,stamp,hourKey,savedQuota,offset:0,subtab:'overview',session:{playerId:'P1'},clock:()=>now,isAdmin:()=>manager,hostName:()=> '怕怕',balance:()=>10,me:()=>state.players[0],say:()=>'',blank:()=>'',time:x=>x,
-  storedBalanceHtml:()=> '10 首',listeningOverviewHtml:()=>'',isSuperAdmin:()=>false,song:()=>null,button:(label,action)=>'<button data-act="'+action+'">'+label+'</button>',modal:(title,html,submit)=>captured={title,html,submit},dispatch:async(type,data)=>sent.push({type,data})});
+  centerWaitingHtml:()=>'',storedBalanceHtml:()=> '10 首',listeningOverviewHtml:()=>'',isSuperAdmin:()=>false,song:()=>null,button:(label,action)=>'<button data-act="'+action+'">'+label+'</button>',modal:(title,html,submit)=>captured={title,html,submit},dispatch:async(type,data)=>sent.push({type,data})});
  const escapeLine=line('const $=');vm.runInContext('const '+escapeLine.slice(escapeLine.indexOf('h=')),context);
- vm.runInContext(['const field=','const area=','const check=','const dateInput=','const isoInput='].map(line).join('\n')+'\n'+app.slice(app.indexOf('function editExtraQuota('))+'\n'+line('function hour(){')+'\n'+line('function playerTabs('),context);
+ vm.runInContext(['const field=','const area=','const check=','const dateInput=','const isoInput='].map(line).join('\n')+'\n'+takeFunction('editExtraQuota')+'\n'+takeFunction('recordTime')+'\n'+line('function hour(){')+'\n'+line('function playerTabs('),context);
  return {context,state,sent,run:source=>vm.runInContext(source,context),setManager:value=>manager=value,get modal(){return captured;}};
 }
 test('history time button opens a real editor and submits business time without credit, song or player edits',async()=>{

@@ -14,9 +14,11 @@ test('new queue draws by the same homepage tag rules and preserves the chosen pl
  vm.runInContext('drawForStreamer()',context);assert.equal(picker.value,'sweet');assert.equal(player.value,'player-unchanged');
 });
 function contextWithCatalog(values){
- if(values.catalogView){values.catalogView.selectedRows??=new Map();values.catalogView.selectedVariants??=new Map();}
- if(values.sharedBrowse)values.sharedBrowse.selectedRows??=new Map();
- const context=vm.createContext({session:null,songCatalogStatusFilter:'all',songVisibilityFilter:'visible',state:{currentStreamer:{id:'papa'},streamers:[]},playerName:()=>'玩家',song:()=>null,admin:true,isSuperAdmin:()=>true,invalidateCatalogTabs:()=>{},...values,catalogGroupKey,canonicalLanguage,eventDescription});
+ for(const view of [values.catalogView,values.sharedBrowse].filter(Boolean)){view.membership??='missing';view.membershipViews??=new Map();view.sort??='default';view.versionLabel??='';view.versionKind??='';view.filterOptions??={};view.selectedRows??=new Map();}
+ if(values.catalogView)values.catalogView.selectedVariants??=new Map();
+ if(values.sharedBrowse){values.sharedBrowse.language??='';values.sharedBrowse.performerType??='';values.sharedBrowse.searchMode??='metadata';}
+ const context=vm.createContext({session:null,listSorts:{songs:'default',book:'default',home:'default',catalog:'default',shared:'default'},songCatalogStatusFilter:'all',songVisibilityFilter:'visible',state:{currentStreamer:{id:'papa'},streamers:[]},playerName:()=>'玩家',song:()=>null,admin:true,isSuperAdmin:()=>true,invalidateCatalogTabs:()=>{},...values,catalogGroupKey,canonicalLanguage,eventDescription});
+ vm.runInContext(['function sortControl(','function membershipTabs(','function versionOptions(','function setVersionFilter('].map(prefix=>source.split(/\r?\n/).find(line=>line.startsWith(prefix))).join('\n'),context);
  vm.runInContext(segment('function catalogPager(','function selectCatalogRows('),context);
  return context;
 }
@@ -97,7 +99,7 @@ test('room lyric search is debounced by caller, bounded, room-scoped and cached 
   isAdmin:()=>false,api:async body=>{calls.push(body);return {songIds:['a'],total:21,hasMore:body.offset===0};},song:id=>songs.find(s=>s.songId===id),renderSongResults:()=>{},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:()=>null});
  vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
  await vm.runInContext("loadRoomSongSearch('book','夜',[],0)",context);
- assert.deepEqual(JSON.parse(JSON.stringify(calls[0])),{op:'songSearchRoom',q:'夜',tags:[],limit:20,offset:0});
+ assert.deepEqual(JSON.parse(JSON.stringify(calls[0])),{op:'songSearchRoom',q:'夜',tags:[],sort:'default',limit:20,offset:0});
  assert.deepEqual([...roomSearch.book.songIds],['a']);
  await vm.runInContext("loadRoomSongSearch('book','夜',[],0)",context);
  assert.equal(calls.length,1,'short-term repeat should reuse metadata-only IDs');
@@ -112,7 +114,7 @@ test('shared catalog browse loads only one page and never renders lyric text fro
   api:async body=>{calls.push(body);return {items:[{variantId:'v1',title:'愛你',artist:'歌手',lyrics:'HIDDEN_LYRICS'}],total:31,hasMore:true};}});
  vm.runInContext(segment('function sharedBrowseHtml()','async function chooseCatalogTarget('),context);
  await vm.runInContext('loadSharedBrowse(0)',context);
- assert.deepEqual(JSON.parse(JSON.stringify(calls[0])),{op:'catalogSearch',q:'愛',limit:20,offset:0,management:true});
+ assert.deepEqual(JSON.parse(JSON.stringify(calls[0])),{op:'catalogSearch',q:'愛',language:'',performerType:'',searchMode:'metadata',membership:'missing',sort:'default',versionKind:'',versionLabel:'',limit:20,offset:0,management:true});
  assert.match(holder.innerHTML,/愛你/);assert.doesNotMatch(holder.innerHTML,/HIDDEN_LYRICS/);
  await vm.runInContext('loadSharedBrowse(1)',context);
  assert.equal(calls[1].offset,20);

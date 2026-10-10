@@ -97,4 +97,4 @@ dialog .dialog-head button{flex:0 0 auto;min-width:34px;min-height:34px}
 .common-book-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .common-book-filters>input{grid-column:1/-1;width:100%;min-width:0}
 .common-book-filters label{margin:0;min-width:0}.common-book-filters select{width:100%;max-width:none}
-@media(max-width:480px){.song-title-row{flex-wrap:wrap}.song-title-row>label{flex-basis:100%}.song-title-actions{margin-left:auto;padding:0}.common-book-filters{grid-template-columns:1fr}.catalog-review-toolbar input{flex-basis:100%}.header-actions>button{font-size:12px;padding:5px 9px}}
+@media(max-width:480px){.song-title-row{flex-wrap:wrap}.song-title-row>label{flex-basis:100%}.song-title-actions{margin-left:auto;padding:0}.common-book-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.catalog-review-toolbar input{flex-basis:100%}.header-actions>button{font-size:12px;padding:5px 9px}}

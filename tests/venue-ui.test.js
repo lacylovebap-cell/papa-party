@@ -7,12 +7,12 @@ import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venueP
 
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8').split(/\r?\n/);
 const take=prefix=>{const value=source.find(line=>line.startsWith(prefix));assert.ok(value,prefix);return value;};
-const functions=['const venueName=','function venueSelector(','function venueSwitch(','function storedBalanceHtml(','function ledgerRows(','function queueRows(','function updateProxyCredits(','async function requestSong('].map(take).join('\n');
+const functions=['function sortControl(','const venueName=','function venueSelector(','function venueSwitch(','function storedBalanceHtml(','function ledgerRows(','function queueRows(','function updateProxyCredits(','async function requestSong('].map(take).join('\n');
 const at='2026-10-09T12:30:00Z';
 function harness(settings={}){
  const state={settings:{hourlyLimit:2,...settings},players:[{playerId:'p',name:'玩家'}],songs:[{songId:'s',title:'原本的歌曲',artist:'歌手',creditCost:2}],crowns:[],ledger:[],queue:[]};
  const modals=[],sent=[];
- const ctx=vm.createContext({state,session:{playerId:'p'},balance,reservedCredits,queueConfirmed,queuePrepared,queuePreparation,venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot,
+ const ctx=vm.createContext({listSorts:{queueHistory:'newest'},state,session:{playerId:'p'},balance,reservedCredits,queueConfirmed,queuePrepared,queuePreparation,venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot,
   h:x=>String(x??''),button:(label,action,id='',classes='tiny')=>'<button data-act="'+action+'" data-id="'+id+'" class="'+classes+'">'+label+'</button>',
   select:(name,label,options,value)=>'<label>'+label+'<select name="'+name+'">'+options.map(([id,label])=>'<option value="'+id+'" '+(id===value?'selected':'')+'>'+label+'</option>').join('')+'</select></label>',
   field:(name,label,value='',type='text',extra='')=>'<label>'+label+'<input name="'+name+'" type="'+type+'" value="'+value+'" '+extra+'></label>',
@@ -64,8 +64,8 @@ test('proxy player hints use available credits after reservations and follow the
  u.state.ledger.push({playerId:'p',amount:8},{playerId:'p',amount:3,storage_pool:'radio'});
  u.state.queue.push({id:'held',playerId:'p',kind:'saved',status:'waiting',creditCost:2,consumed_storage_pool:'shengma'});
  u.ctx.$=selector=>selector==='#proxy-credits'?hint:fields[selector.match(/name=([^\]]+)/)?.[1]];
- u.run('updateProxyCredits(state.songs[0])');assert.equal(hint.textContent,'可用 6｜保留 2｜本次占 2 首');
- fields.venue.value='radio';u.run('updateProxyCredits(state.songs[0])');assert.match(hint.textContent,/可用 電台 3｜聲瑪 6/);
+ u.run('updateProxyCredits(state.songs[0])');assert.equal(hint.textContent,'可用存歌數：6｜保留 2｜本次占 2 首');
+ fields.venue.value='radio';u.run('updateProxyCredits(state.songs[0])');assert.match(hint.textContent,/可用存歌數：電台 3｜聲瑪 6/);
  fields.kind.value='live';u.run('updateProxyCredits(state.songs[0])');assert.doesNotMatch(hint.textContent,/本次占/);
  fields.playerId.value='';u.run('updateProxyCredits(state.songs[0])');assert.equal(hint.textContent,'');assert.equal(u.sent.length,0);
 });

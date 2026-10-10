@@ -1,4 +1,4 @@
-import {newPracticeSongs} from '../src/new-practice.js';
+import {newPracticeSongs,newPracticeSongTags} from '../src/new-practice.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -13,7 +13,7 @@ const drawStart=app.indexOf("case 'fate':{"),draw=app.slice(drawStart,app.indexO
 function ui(){
  const nodes={'#app':{innerHTML:''},'#fate-result':{innerHTML:''},'#fate-category':{value:'all'}};
  let onChange;
- const ctx=vm.createContext({fateCategories,drawSong,venuePolicySettings,newPracticeSongs,structuredClone,document:{addEventListener:(type,fn)=>{if(type==='change')onChange=fn;}},$:selector=>nodes[selector]});
+ const ctx=vm.createContext({fateCategories,drawSong,venuePolicySettings,newPracticeSongs,newPracticeSongTags,structuredClone,document:{addEventListener:(type,fn)=>{if(type==='change')onChange=fn;}},$:selector=>nodes[selector]});
  vm.runInContext(`
   var state={settings:{status:'空閒中',tags:['古風','甜歌'],home:{},manual:''},songs:[{songId:'g',title:'古風歌曲',artist:'歌手甲',tags:['古風']},{songId:'s',title:'甜歌歌曲',artist:'歌手乙',tags:['甜歌']}],players:[],queue:[],crowns:[],cards:[],streamers:[],currentStreamer:{display_name:'QA'}},fateCategory='all',fateSeen=[],fateId=null,streamerSlug='qa',offset=0;
   function h(x){return String(x??'');}function clock(){return '2026-09-28T10:00:00Z';}function me(){return null;}function hostName(){return 'QA';}function hostText(x){return x;}function plays(){return 0;}function recommendSongs(){return [];}function normalizeHome(){return {order:['fate'],visible:{fate:true},imageMode:'none',fieldOrder:[],fields:{}};}function stats(){return {};}function hour(){return '';}function blank(){return '';}function songRows(){return '';}function photoCarousel(){return '';}function crownsHtml(){return '';}function dayLabel(){return '';}function statsHtml(){return '';}function crownFor(){return null;}function toast(){return '';}function switchStreamer(){}function card(title,body){return body;}function button(label,action,id=''){return '<button data-act="'+action+'" data-id="'+id+'">'+label+'</button>';}
@@ -40,4 +40,12 @@ test('a drawn song offers the two normal request paths without marking a player 
  assert.match(source,/button\('🎤 提歌','request',fateId,'tiny','data-kind="saved"'\)/);
  assert.match(source,/button\('🎁 現點','request',fateId,'tiny','data-kind="live"'\)/);
  assert.doesNotMatch(source,/data-self="true"|streamerDraw|dispatch\(/);
+});
+
+test('legacy undated new-practice flags appear as a draw tag and their results survive refresh without mutating old tags',()=>{
+ const u=ui();u.run('state.songs[0].new=true;state.songs[0].tags=[];renderHome()');
+ assert.match(u.nodes['#app'].innerHTML,/<option value="tag:新練"/);u.select('tag:新練');u.run('clickDraw();renderHome()');
+ assert.equal(u.run('fateId'),'g');assert.match(u.nodes['#app'].innerHTML,/古風歌曲/);assert.deepEqual(JSON.parse(u.run('JSON.stringify(state.songs[0].tags)')),[]);
+ u.run('state=structuredClone(state);renderHome()');assert.match(u.nodes['#app'].innerHTML,/古風歌曲/);
+ u.run('state.songs[0].new=false;renderHome()');assert.doesNotMatch(u.nodes['#app'].innerHTML,/命運選中了/);
 });

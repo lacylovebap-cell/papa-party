@@ -50,8 +50,8 @@ test('bulk editing adds tags to only selected songs, preserves identities/histor
  let s=fixture();s=mutate(s,{type:'song',data:{title:'新歌',artist:'歌手',tags:['甜歌'],murmur:'原本的碎碎念'}},admin,t);s=mutate(s,{type:'song',data:{title:'未選取',artist:'歌手',tags:[]}},admin,t);s=request(s);s=queue(s,'complete');
  const ids=s.songs.slice(0,2).map(x=>x.songId),original=structuredClone(s);
  s=mutate(s,{type:'songsBulk',data:{songIds:ids,tagMode:'add',tags:['動感','動感'],cat:'韓語',new:true}},admin,t);
- assert.deepEqual(s.songs[0].tags,['嗨歌','動感']);assert.deepEqual(s.songs[1].tags,['甜歌','動感']);assert.equal(s.songs[1].murmur,'原本的碎碎念');assert.deepEqual(s.songs[2],original.songs[2]);assert.equal(songPlays(s,ids[0]),1);assert.deepEqual(s.queue,original.queue);assert.deepEqual(s.ledger,original.ledger);assert.deepEqual(s.songs.map(x=>x.songId),original.songs.map(x=>x.songId));
- s=mutate(s,{type:'songsBulk',data:{songIds:ids,tagMode:'remove',tags:['動感']}},admin,t);assert.deepEqual(s.songs[0].tags,['嗨歌']);assert.deepEqual(s.songs[1].tags,['甜歌']);
+ assert.deepEqual(s.songs[0].tags,['嗨歌','動感','新練']);assert.deepEqual(s.songs[1].tags,['甜歌','動感','新練']);assert.equal(s.songs[1].murmur,'原本的碎碎念');assert.deepEqual(s.songs[2],original.songs[2]);assert.equal(songPlays(s,ids[0]),1);assert.deepEqual(s.queue,original.queue);assert.deepEqual(s.ledger,original.ledger);assert.deepEqual(s.songs.map(x=>x.songId),original.songs.map(x=>x.songId));
+ s=mutate(s,{type:'songsBulk',data:{songIds:ids,tagMode:'remove',tags:['動感']}},admin,t);assert.deepEqual(s.songs[0].tags,['嗨歌','新練']);assert.deepEqual(s.songs[1].tags,['甜歌','新練']);
  s=mutate(s,{type:'songsBulk',data:{songIds:ids,tagMode:'replace',tags:['抒情'],new:false,murmur:'統一文字'}},admin,t);assert.deepEqual(s.songs[1].tags,['抒情']);assert.equal(s.songs[1].new,false);
  s=mutate(s,{type:'songsBulk',data:{songIds:ids,tagMode:'clear',murmur:''}},admin,t);assert.deepEqual(s.songs[0].tags,[]);assert.equal(s.songs[1].murmur,'');
 });

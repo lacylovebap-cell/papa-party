@@ -44,16 +44,16 @@ test('complete edge bundle compiles, preserves URL validators and isolates chat 
  vm.runInContext("venueState.players[0].archived=false;",context);
  vm.runInContext(`
   var playerPageCalls=[];
-  api=async(path,body)=>{playerPageCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'}];if(path.endsWith('papa_player_management_page_v2'))return {rows:[],total:0,pageLimit:body.page_limit,pageOffset:body.page_offset};throw Error('unexpected player-page query');};
+  api=async(path,body)=>{playerPageCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'}];if(path.endsWith('papa_player_management_page_v3'))return {rows:[],total:0,pageLimit:body.page_limit,pageOffset:body.page_offset};throw Error('unexpected player-page query');};
  `,context);
  const deniedPage=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'michelle',mode:'all'})});assert.equal(deniedPage.status,400);assert.equal(context.playerPageCalls.length,0);
  vm.runInContext("actor=async()=>({role:'streamer_admin',streamer_id:'michelle',spaceId:'space-001'});load=async()=>{throw Error('player page must not load business histories');};",context);
  const page=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'michelle',mode:'stored',page:2,limit:20,query:' A '})});assert.equal(page.status,200);assert.equal((await page.json()).pageOffset,40);
- const pageCall=context.playerPageCalls.find(call=>call.path.endsWith('papa_player_management_page_v2'));assert.deepEqual(JSON.parse(JSON.stringify(pageCall.body)),{requested_space:'space-001',requested_room:'michelle',list_mode:'stored',query_text:'A',page_limit:20,page_offset:40,archived_filter:false});
+ const pageCall=context.playerPageCalls.find(call=>call.path.endsWith('papa_player_management_page_v3'));assert.deepEqual(JSON.parse(JSON.stringify(pageCall.body)),{requested_space:'space-001',requested_room:'michelle',list_mode:'stored',query_text:'A',page_limit:20,page_offset:40,archived_filter:false,sort_order:'default'});
  for(const extra of [{limit:51},{page:-1},{query:'x'.repeat(101)},{mode:'other'},{page:10000001}]){
-  context.playerPageCalls.length=0;const bad=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'michelle',mode:'all',...extra})});assert.equal(bad.status,400);assert.ok(context.playerPageCalls.every(call=>!call.path.endsWith('papa_player_management_page_v2')));
+  context.playerPageCalls.length=0;const bad=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'michelle',mode:'all',...extra})});assert.equal(bad.status,400);assert.ok(context.playerPageCalls.every(call=>!call.path.endsWith('papa_player_management_page_v3')));
  }
- context.playerPageCalls.length=0;const foreign=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'papa',mode:'all'})});assert.equal(foreign.status,400);assert.ok(context.playerPageCalls.every(call=>!call.path.endsWith('papa_player_management_page_v2')));
+ context.playerPageCalls.length=0;const foreign=await handler({method:'POST',json:async()=>({op:'playerManagementPage',token:'test',streamer:'papa',mode:'all'})});assert.equal(foreign.status,400);assert.ok(context.playerPageCalls.every(call=>!call.path.endsWith('papa_player_management_page_v3')));
  vm.runInContext(`
   var practiceCalls=[];actor=async()=>null;
   api=async(path,body)=>{practiceCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'}];if(path.endsWith('papa_new_practice_page'))return {rows:[],total:0,pageLimit:body.page_limit,pageOffset:body.page_offset};throw Error('unexpected practice query');};
@@ -94,7 +94,7 @@ test('complete edge bundle compiles, preserves URL validators and isolates chat 
 
  vm.runInContext(`
   var archiveCalls=[],archiveWho=null;actor=async()=>archiveWho;
-  api=async(path,body)=>{archiveCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'},{id:'native-room',slug:'native-room',active:true,spaceId:'space-native'}];if(path.endsWith('papa_player_archive'))return {playerId:body.requested_player,archived:body.requested_archived,revision:8,changed:true};if(path.endsWith('papa_player_management_page_v2'))return {rows:[],total:0};throw Error('unexpected archive query');};
+  api=async(path,body)=>{archiveCalls.push({path,body});if(path.endsWith('papa_streamer_directory'))return [{id:'michelle',slug:'michelle',active:true,spaceId:'space-001'},{id:'native-room',slug:'native-room',active:true,spaceId:'space-native'}];if(path.endsWith('papa_player_archive'))return {playerId:body.requested_player,archived:body.requested_archived,revision:8,changed:true};if(path.endsWith('papa_player_management_page_v3'))return {rows:[],total:0};throw Error('unexpected archive query');};
   load=async()=>{throw Error('archive must not download business histories');};
  `,context);
  for(const who of [null,{role:'player',playerId:'P1',accountId:'player-account'},{role:'streamer_admin',streamer_id:'michelle',accountId:'streamer-account'},{role:'super_admin'}]){

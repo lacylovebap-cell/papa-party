@@ -1,3 +1,4 @@
+import {applyPlayerRequestBatch,validateRequestBatch} from '../../../src/player-bulk-tools.js';
 import {isSuper,isManager,coreActor,requireRoom,authorizeManagerOperation,managementView,noticeIdentity,validNoticeAudio,prepareManagerAction} from '../../../src/access-policy.js';
 import {stateChanges,scopedOperationalAction,scopedRoomMutationAction} from '../../../src/state-patch.js';
 import {applyRoomImport} from '../../../src/room-import.js';
@@ -114,7 +115,8 @@ async function api(path:string,body?:unknown,method?:string){
   Object.assign(messages,{LISTENING_HISTORY_SCOPE_INVALID:'找不到主播的常聽歌單',LISTENING_HISTORY_ACTOR_INVALID:'無法查看其他玩家的常聽歌單',LISTENING_HISTORY_PLAYER_INVALID:'找不到此玩家',LISTENING_HISTORY_PAGE_INVALID:'常聽歌單分頁資料不正確',SONG_FAVORITES_SCOPE_INVALID:'找不到可收藏的主播空間',SONG_FAVORITES_ACTOR_INVALID:'登入已到期，請重新登入',SONG_FAVORITES_SONG_INVALID:'歌曲已隱藏或更新，請重新選擇',SONG_FAVORITES_INPUT_INVALID:'收藏資料不正確',SONG_FAVORITES_PAGE_INVALID:'收藏分頁資料不正確',NEW_PRACTICE_SCOPE_INVALID:'找不到主播的新練歌曲',NEW_PRACTICE_PAGE_INVALID:'新練歌曲分頁資料不正確',STREAMER_REGISTRY_DUPLICATE:'主播網址已使用',STREAMER_REGISTRY_ACTOR_INVALID:'總裁登入已到期，請重新登入',
    STREAMER_REGISTRY_SCOPE_INVALID:'請切換到該主播空間再編輯',STREAMER_REGISTRY_ROOM_INVALID:'找不到主播',
    STREAMER_REGISTRY_SPACE_INVALID:'找不到可使用的空間',STREAMER_REGISTRY_DESCRIPTOR_INVALID:'主播資料格式錯誤'});
-  throw Error(Object.entries(messages).find(([code])=>text.includes(code))?.[1]||'資料庫操作失敗');
+  let rejected=false;try{const detail=JSON.parse(text);rejected=path.startsWith('/rest/v1/rpc/')&&r.status<500&&typeof detail?.code==='string'&&/^(?:[0-9A-Z]{5}|PGRST\d{3})$/.test(detail.code);}catch{}
+  throw Object.assign(Error(Object.entries(messages).find(([code])=>text.includes(code))?.[1]||'資料庫操作失敗'),{rpcRejected:rejected});
  }
  return text?JSON.parse(text):null;
 }
@@ -361,13 +363,14 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   managerPasswordError(result,kind);return respond({ok:true,signOut:true});
  }
  if(b.op==='upload'){if(!isManager(who))throw new Error('只有管理員能上傳');await managerRoom(who,b.streamer||'papa');const binary=Uint8Array.from(atob(b.image),c=>c.charCodeAt(0));if(binary.length>3145728||b.mime!=='image/webp')throw new Error('請使用壓縮後圖片');const path=crypto.randomUUID()+'.webp',r=await fetch(SB_URL+'/storage/v1/object/papa-photos/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'image/webp'},body:binary});if(!r.ok)throw new Error('圖片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-photos/'+path});}
- if(['favoritesPage','favoriteSet','favoriteFlags'].includes(b.op)){
+ if(['favoritesPage','favoriteSet','favoriteFlags','favoritesSetBatch'].includes(b.op)){
   if(b.token&&!who)throw Error('登入已到期，請重新登入');
   if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
   const room=await catalogRoom(who,b.streamer||'papa');
   if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
   const context={role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',streamer_id:room.id};
   const common={requested_space:room.spaceId||'space-001',requested_room:room.id,actor_context:context};
+  if(b.op==='favoritesSetBatch'){if(!Array.isArray(b.songIds)||!b.songIds.length||b.songIds.length>50||new Set(b.songIds).size!==b.songIds.length||b.songIds.some((id:any)=>typeof id!=='string'||!id||id.length>128)||typeof b.favorite!=='boolean')throw Error('收藏歌曲清單不正確');return respond(await api('/rest/v1/rpc/papa_song_favorites_set_batch',{...common,song_ids:b.songIds,requested_favorite:b.favorite}));}
   if(b.op==='favoriteSet'){
    if(typeof b.songId!=='string'||!b.songId||b.songId.length>128||typeof b.favorite!=='boolean')throw Error('收藏資料不正確');
    return respond(await api('/rest/v1/rpc/papa_song_favorite_set',{...common,requested_song:b.songId,requested_favorite:b.favorite}));
@@ -379,6 +382,31 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   const page=b.page??0,limit=b.limit??20;
   if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('收藏分頁資料不正確');
   return respond(await api('/rest/v1/rpc/papa_song_favorites_page',{...common,page_limit:limit,page_offset:page*limit}));
+ }
+ if(b.op==='playerStreamerSummary'||b.op==='playerSongChoices'){
+  if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
+  const room=await catalogRoom(who,b.streamer||'papa');if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
+  const page=b.page??0,limit=b.limit??20;if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('分頁資料不正確');
+  const context={role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',streamer_id:room.id};
+  if(b.op==='playerStreamerSummary')return respond(await api('/rest/v1/rpc/papa_player_streamer_summary',{requested_space:room.spaceId||'space-001',actor_context:context,page_limit:limit,page_offset:page*limit}));
+  const q=b.q??'',tags=b.tags??[];if(typeof q!=='string'||q.length>100||!Array.isArray(tags)||tags.length>20||tags.some((t:any)=>typeof t!=='string'||!t||t.length>50)||b.random!==undefined&&typeof b.random!=='boolean')throw Error('歌曲篩選不正確');
+  return respond(await api('/rest/v1/rpc/papa_player_song_choices',{requested_space:room.spaceId||'space-001',requested_room:room.id,actor_context:context,query_text:q.trim(),tags,page_limit:b.random?1:Math.min(limit,20),page_offset:b.random?0:page*Math.min(limit,20),random_choice:b.random===true}));
+ }
+ if(b.op==='requestsBatch'){
+  if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
+  if(!Number.isSafeInteger(b.revision)||b.revision<0||!Array.isArray(b.jobs)||!b.jobs.length||b.jobs.length>10||new Set(b.jobs.map((j:any)=>j?.streamer)).size!==b.jobs.length||b.jobs.some((j:any)=>!j||typeof j.streamer!=='string'||!j.streamer||j.streamer.length>200)||b.jobs.reduce((n:number,j:any)=>n+(j.rows?.length||0),0)>50)throw Error('批次點歌資料不正確');
+  for(const job of b.jobs)validateRequestBatch(job.rows);
+  const results:any[]=[],resolvedRooms=new Set<string>();let checkedRevision=false;
+  for(const job of b.jobs){let commitStarted=false;try{
+   const room=await catalogRoom(who,job.streamer);if((room.spaceId||'space-001')!==(who.spaceId||'space-001'))throw Error('主播不屬於目前空間');
+   if(resolvedRooms.has(room.id))throw Error('同一批不能重複指定同一位主播');resolvedRooms.add(room.id);
+   const source=await load(true,room.id,room.spaceId||'space-001',null,who.playerId);
+   if(!checkedRevision){if(source.revision!==b.revision)throw Error('資料剛更新了，請重新整理後再試一次');checkedRevision=true;}
+   const next=applyPlayerRequestBatch(source,job.rows,coreActor(who),t,room.id);
+   commitStarted=true;const committed=await commit(source,next,{role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',actor_streamer_id:null,streamer_id:room.id,roomScoped:true,action:'requestBatch'});
+   results.push({streamer:job.streamer,ok:true,count:job.rows.length,revision:committed.revision});
+  }catch(error){const unknown=commitStarted&&error.rpcRejected!==true;results.push({streamer:job.streamer,ok:false,...(unknown?{unknown:true}:{}),error:unknown?'結果待確認，請先查看待播，避免重複送出':error.message||'點歌失敗'});}}
+  return respond({results});
  }
  if(b.op==='listeningHistoryPage'){
   if(b.token&&!who)throw Error('登入已到期，請重新登入');
@@ -423,11 +451,12 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   next=await commit(source,next,{role:who.role,account_id:who.accountId,space_id:space,streamer_id:room,roomWriteScoped:true,action:'playerProvision',player_bindings:bindings});
   return respond({revision:next.revision,created:selections.map(row=>({playerId:row.playerId,name:next.players.find((p:any)=>p.playerId===row.playerId)?.name||''}))});
  }
- if(b.op==='playerArchive'){
+ if(b.op==='playerArchive'||b.op==='playersArchive'){
 
   if(!isSuper(who)||!who?.accountId)throw Error('只有 PA Party總裁可以封存或恢復玩家');
   const room=await catalogRoom(who,b.streamer||'papa',true);
   if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
+  if(b.op==='playersArchive'){if(!Array.isArray(b.playerIds)||!b.playerIds.length||b.playerIds.length>100||new Set(b.playerIds).size!==b.playerIds.length||b.playerIds.some((id:any)=>typeof id!=='string'||!id||id.length>128)||typeof b.archived!=='boolean'||!Number.isSafeInteger(b.revision)||b.revision<0)throw Error('批次封存資料不正確');return respond(await api('/rest/v1/rpc/papa_players_archive',{requested_space:room.spaceId||'space-001',requested_players:b.playerIds,expected_revision:b.revision,actor_context:{role:'super_admin',account_id:who.accountId,space_id:room.spaceId||'space-001',streamer_id:null,action:b.archived?'playersArchive':'playersRestore'},requested_archived:b.archived}));}
   if(typeof b.playerId!=='string'||!b.playerId||b.playerId.length>128||typeof b.archived!=='boolean'||!Number.isSafeInteger(b.revision)||b.revision<0)throw Error('玩家封存資料不正確');
   const context={role:'super_admin',account_id:who.accountId,space_id:room.spaceId||'space-001',streamer_id:null,action:b.archived?'playerArchive':'playerRestore'};
   return respond(await api('/rest/v1/rpc/papa_player_archive',{requested_space:room.spaceId||'space-001',requested_player:b.playerId,expected_revision:b.revision,actor_context:context,requested_archived:b.archived}));
@@ -439,7 +468,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
   const page=b.page??0,limit=b.limit??20,query=b.query??'';
   if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000||typeof query!=='string'||query.length>100||!['stored','all'].includes(b.mode))throw Error('玩家搜尋或分頁資料不正確');
-  return respond(await api('/rest/v1/rpc/papa_player_management_page_v2',{requested_space:room.spaceId||'space-001',requested_room:room.id,list_mode:b.mode,query_text:query.trim(),page_limit:limit,page_offset:page*limit,archived_filter:b.archived===true}));
+  return respond(await api('/rest/v1/rpc/papa_player_management_page_v3',{requested_space:room.spaceId||'space-001',requested_room:room.id,list_mode:b.mode,query_text:query.trim(),page_limit:limit,page_offset:page*limit,archived_filter:b.archived===true,sort_order:checkedListSort(b.sort)}));
  }
  if(b.op==='events'){if(!isManager(who))throw new Error('請先登入管理');const room=await catalogRoom(who,b.streamer||'papa',true),page=Math.max(0,Math.min(200,Math.floor(Number(b.page)||0)));return respond(await api('/rest/v1/rpc/papa_event_page_v2',{room_id:room.id,page_number:page,include_global:isSuper(who),module_filter:null,page_limit:50,page_offset:page*50}));}
  if(b.op==='pushWorker'){const [config]=await api('/rest/v1/papa_notice_config?id=eq.worker');if(!b.secret||await hash(b.secret)!==await hash(config?.value?.secret||''))throw Error('驗證失敗');await deliverPush();return respond({ok:true});}
@@ -528,3 +557,5 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   streamer_id:scopeState(s,b.streamer||'papa').currentStreamer.id,
   roomScoped,roomWriteScoped,action:b.op==='mutate'?b.action?.type+(b.action?.data?.operation?':'+b.action.data.operation:''):b.op})));
  }catch(e){return respond({error:e.message||'操作失敗'},400);}});
+
+function checkedListSort(value:any){if(value===undefined)return 'default';if(!['default','newest','oldest'].includes(value))throw Error('排序不正確');return value;}

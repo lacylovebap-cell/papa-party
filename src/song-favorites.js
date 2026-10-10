@@ -133,5 +133,15 @@ export function createSongFavorites({api,context,onChange=()=>{},maxAgeMs=30000,
   });
   writes.set(songId,{favorite,promise});setError=null;notify();return promise;
  }
- return Object.freeze({state,setPage,load,loadFlags,setFavorite});
+ function setBatch(songIds,favorite){
+  syncContext();if(!Array.isArray(songIds)||!songIds.length||songIds.length>50||new Set(songIds).size!==songIds.length||typeof favorite!=='boolean')throw Error('一次請選 1 到 50 首收藏');const ids=songIds.map(songFavoritesId),requestGeneration=generation;
+  if(writes.size)throw Error('收藏正在更新，請稍後再試');
+  const active=()=>{try{syncContext();return generation===requestGeneration;}catch{return false;}};
+  const promise=Promise.resolve().then(()=>active()?api({op:'favoritesSetBatch',songIds:ids,favorite}):null).then(response=>{
+   if(!active())return null;if(!response||typeof response.changed!=='boolean'||!Array.isArray(response.rows)||response.rows.length!==ids.length||response.rows.some((row,index)=>row.songId!==ids[index]||row.favorite!==favorite))throw Error('收藏更新回應不正確');
+   for(const id of ids){writes.delete(id);remember(id,favorite);}if(!favorite){view.rows=view.rows.filter(s=>!ids.includes(s.songId));view.total=Math.max(0,view.total-ids.length);}pageGeneration++;view.pending=null;view.loading=false;view.dirty=true;view.at=now();flagsGeneration++;flagsPending=null;flagsLoading=false;notify();return response;
+  }).catch(error=>{if(active()){for(const id of ids)writes.delete(id);setError=String(error.message).slice(0,500);notify();}throw error;});
+  for(const id of ids)writes.set(id,{favorite,promise});notify();return promise;
+ }
+ return Object.freeze({state,setPage,load,loadFlags,setFavorite,setBatch});
 }

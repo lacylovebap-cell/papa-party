@@ -37,12 +37,12 @@ function playerManagerFreeze(value){
 export function createPlayerManager({api,context,onChange=()=>{},pageLimit=20}){
  if(typeof api!=='function'||typeof context!=='function'||typeof onChange!=='function')throw playerManagerError('玩家清單控制器設定不正確');
  if(!Number.isSafeInteger(pageLimit)||pageLimit<20||pageLimit>50)throw playerManagerError('每頁玩家數量必須是 20 到 50');
- const fresh=mode=>({mode,q:'',page:0,rows:[],total:0,loading:false,error:null,key:null,pending:null});
+ const fresh=mode=>({mode,q:'',sort:'default',page:0,rows:[],total:0,loading:false,error:null,key:null,pending:null});
  const modes=Object.fromEntries(PLAYER_MANAGER_MODES.map(mode=>[mode,fresh(mode)]));
  let currentMode='stored',scope=null,generation=0;
  const snapshot=(mode=currentMode)=>{
-  const {q,page,rows,total,loading,error}=modes[playerManagerMode(mode)];
-  return playerManagerFreeze(structuredClone({mode,q,page,rows,total,loading,error}));
+  const {q,sort,page,rows,total,loading,error}=modes[playerManagerMode(mode)];
+  return playerManagerFreeze(structuredClone({mode,q,page,rows,total,loading,error,...(sort==='default'?{}:{sort})}));
  };
  let notified=JSON.stringify(snapshot());
  function notify(){
@@ -63,8 +63,8 @@ export function createPlayerManager({api,context,onChange=()=>{},pageLimit=20}){
    const changedIdentity=identity!==scope.identity;
    invalidate();
    for(const mode of PLAYER_MANAGER_MODES){
-    const {q,page}=modes[mode];
-    modes[mode]={...fresh(mode),q:changedIdentity?'':q,page:changedIdentity?0:page};
+    const {q,sort,page}=modes[mode];
+    modes[mode]={...fresh(mode),q:changedIdentity?'':q,sort:changedIdentity?'default':sort,page:changedIdentity?0:page};
    }
    scope={identity,revision};
   }
@@ -79,23 +79,24 @@ export function createPlayerManager({api,context,onChange=()=>{},pageLimit=20}){
   syncContext();
   if(typeof query!=='string'||query.length>100)throw playerManagerError('玩家搜尋內容不正確');
   const q=query.trim(),view=modes[currentMode];
-  if(q!==view.q||view.page!==0){invalidate();modes[currentMode]={...fresh(currentMode),q};}
+  if(q!==view.q||view.page!==0){invalidate();modes[currentMode]={...fresh(currentMode),q,sort:view.sort};}
   notify();return snapshot();
  }
  function setPage(page){
   syncContext();
   if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(page*pageLimit)||page*pageLimit>10000000)throw playerManagerError('玩家清單頁碼不正確');
   const view=modes[currentMode];
-  if(page!==view.page){invalidate();modes[currentMode]={...fresh(currentMode),q:view.q,page};}
+  if(page!==view.page){invalidate();modes[currentMode]={...fresh(currentMode),q:view.q,sort:view.sort,page};}
   notify();return snapshot();
  }
+ function setSort(sort){syncContext();if(!['default','newest','oldest'].includes(sort))throw playerManagerError('排序不正確');const view=modes[currentMode];if(sort!==view.sort){invalidate();modes[currentMode]={...fresh(currentMode),q:view.q,sort};}notify();return snapshot();}
  function load({force=false}={}){
   syncContext();
   if(typeof force!=='boolean')throw playerManagerError('玩家清單重新讀取設定不正確');
-  const mode=currentMode,view=modes[mode],key=JSON.stringify([scope.identity,scope.revision,mode,view.q,view.page,pageLimit]);
+  const mode=currentMode,view=modes[mode],key=JSON.stringify([scope.identity,scope.revision,mode,view.q,view.sort,view.page,pageLimit]);
   if(view.pending?.key===key&&view.pending.generation===generation)return view.pending.promise;
   if(!force&&view.key===key)return Promise.resolve(snapshot(mode));
-  const requestGeneration=generation,payload={op:'playerManagementPage',mode,query:view.q,page:view.page,limit:pageLimit};
+  const requestGeneration=generation,payload={op:'playerManagementPage',mode,query:view.q,page:view.page,limit:pageLimit,...(view.sort==='default'?{}:{sort:view.sort})};
   const active=()=>{
    syncContext();
    return generation===requestGeneration&&currentMode===mode&&modes[mode]===view;
@@ -112,5 +113,5 @@ export function createPlayerManager({api,context,onChange=()=>{},pageLimit=20}){
   view.pending={key,generation:requestGeneration,promise};view.loading=true;view.error=null;
   notify();return promise;
  }
- return Object.freeze({state,setMode,search,setPage,load});
+ return Object.freeze({state,setMode,search,setSort,setPage,load});
 }

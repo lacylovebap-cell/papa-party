@@ -22,6 +22,7 @@ function harness({songs=[],respond,values={}}={}){
   JSON,Date,Map,Set,admin:{role:'streamer',accountId:'account-a',streamer_id:'room-a'},session:null,
   state:{currentStreamer:{spaceId:'space-a',id:'room-a'},revision:7,songs},streamerSlug:'room-a',
   route:'admin',tab:'songs',demo:false,draft:null,filters:{q:'',tags:[],language:''},
+  listSorts:{songs:'default',book:'default',home:'default'},
   songCatalogStatusFilter:'all',songVisibilityFilter:'visible',pages:{songs:1},selectedSongs:new Set(),songUndo:null,
   roomSearch:{songs:null,book:null,home:null,unsupported:false,generation:0,timer:null,cache:new Map()},
   isAdmin:()=>!!context.admin,song:id=>context.state.songs.find(row=>row.songId===id),
@@ -65,7 +66,7 @@ test('ordinary songs default to visible and hidden songs have their own active t
  assert.deepEqual(h.cleared,['pending-debounce']);assert.equal(h.counts.render,1);
  const hidden=h.run('songStatusToolbar()');
  assert.match(hidden,/data-id="hidden" class="active">隱藏歌曲/);
- assert.match(hidden,/可恢復顯示/);assert.doesNotMatch(hidden,/data-id="visible" class="active"/);
+ assert.match(h.run('adminSongResults(filteredSongs().slice(0,1))'),/data-act="songHide"[^>]*>恢復顯示/);assert.doesNotMatch(hidden,/data-id="visible" class="active"/);
  assert.equal(h.run('filteredSongs().length'),48);
  await h.run("visibilityAction('songVisibilityMode','visible')");
  assert.deepEqual(plain(h.run('filteredSongs().map(row=>row.songId)')),['visible']);
@@ -89,7 +90,7 @@ test('blank manager lists send visibility and catalog status before requesting o
  }});
  h.context.songVisibilityFilter='hidden';h.context.songCatalogStatusFilter='linked';h.context.filters.language='日語';
  await h.run("loadRoomSongSearch('songs','',[],0)");
- assert.deepEqual(h.calls[0],{op:'songSearchRoom',q:'',tags:[],limit:20,offset:0,language:'日語',visibility:'hidden',catalogStatus:'linked'});
+ assert.deepEqual(h.calls[0],{op:'songSearchRoom',q:'',tags:[],sort:'default',limit:20,offset:0,language:'日語',visibility:'hidden',catalogStatus:'linked'});
  let page=h.run('adminSongPage()');
  assert.equal(page.loading,false);assert.equal(page.rows.length,20);
  assert.deepEqual(plain(page.rows.map(row=>row.songId)),songs.slice(0,20).map(row=>row.songId));
@@ -105,7 +106,7 @@ test('public book and home requests cannot carry manager visibility or catalog s
  h.context.songVisibilityFilter='hidden';h.context.songCatalogStatusFilter='pending';h.context.filters.q='歌';h.context.filters.language='日語';
  await h.run("loadRoomSongSearch('book','歌',[],0)");
  h.context.route='home';await h.run("loadRoomSongSearch('home','歌',[],0)");
- assert.deepEqual(h.calls,[{op:'songSearchRoom',q:'歌',tags:[],limit:20,offset:0,language:'日語'},{op:'songSearchRoom',q:'歌',tags:[],limit:5,offset:0}]);
+ assert.deepEqual(h.calls,[{op:'songSearchRoom',q:'歌',tags:[],sort:'default',limit:20,offset:0,language:'日語'},{op:'songSearchRoom',q:'歌',tags:[],sort:'default',limit:5,offset:0}]);
  h.context.filters.q='';h.context.route='book';
  await h.run("loadRoomSongSearch('book','',[],0)");
  assert.equal(h.run('bookSearchResult()'),null);assert.equal(h.calls.length,2);assert.equal(h.timers.length,0);
@@ -123,7 +124,8 @@ test('room search cache keys separate identities, scopes and every active manage
   [()=>c.state.revision=8,()=>c.state.revision=7],
   [()=>c.filters.language='日語',()=>c.filters.language=''],
   [()=>c.songVisibilityFilter='hidden',()=>c.songVisibilityFilter='visible'],
-  [()=>c.songCatalogStatusFilter='linked',()=>c.songCatalogStatusFilter='all']
+  [()=>c.songCatalogStatusFilter='linked',()=>c.songCatalogStatusFilter='all'],
+  [()=>c.listSorts.songs='newest',()=>c.listSorts.songs='default']
  ];
  for(const [change,restore] of changes){change();assert.notEqual(key(),baseline);restore();assert.equal(key(),baseline);}
  assert.equal(h.run("roomSearchKey('歌',['嗨歌','甜歌'],0,'songs')"),baseline,'query whitespace and tag order are normalized');
@@ -144,6 +146,7 @@ test('identical pending reads coalesce and old scope or filter responses never r
   ['revision',h=>h.context.state.revision++],
   ['catalog status',h=>h.context.songCatalogStatusFilter='pending'],
   ['language',h=>h.context.filters.language='日語'],
+  ['sort',h=>h.context.listSorts.songs='oldest'],
   ['query',h=>h.context.filters.q='new'],
   ['admin page',h=>h.context.tab='players']
  ];

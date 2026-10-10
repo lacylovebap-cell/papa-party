@@ -6,7 +6,7 @@ import {stripTypeScriptTypes} from 'node:module';
 
 // Use the real handler and role resolver while replacing only the database/network boundary.
 const root=new URL('../',import.meta.url),read=f=>fs.readFileSync(new URL(f,root),'utf8');
-const source=[read('src/home-settings.js'),read('src/venue-policy.js'),read('src/new-practice.js'),read('src/core.js'),read('src/state-patch.js'),read('src/access-policy.js'),read('src/notification-rules.js'),read('supabase/functions/party-api/index.ts')]
+const source=[read('src/home-settings.js'),read('src/venue-policy.js'),read('src/new-practice.js'),read('src/core.js'),read('src/player-bulk-tools.js'),read('src/state-patch.js'),read('src/access-policy.js'),read('src/notification-rules.js'),read('supabase/functions/party-api/index.ts')]
  .map(s=>s.replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'')).join('\n');
 function server(authUser=''){
  let handler;
@@ -40,10 +40,17 @@ function server(authUser=''){
    if(path.endsWith('papa_switch_device_space'))return responses.deviceSwitch||null;
    if(path.endsWith('papa_read_device_space_preferences'))return responses.devicePreferences||null;
    if(path.endsWith('papa_bind_verified_legacy_session')){
+    const row=sessionRows[0],accountId='00000000-0000-4000-8000-000000000001';
+    if(row){
+     row.account_id=accountId;
+     if(row.player_id==='__admin__'&&(!row.role||row.role==='super_admin'))return {accountId,role:'president',spaceId:null};
+     if(row.role==='streamer_admin')return {accountId,role:'streamer_admin',streamerId:row.streamer_id,spaceId:row.space_id||'space-001'};
+     return {accountId,role:'player',spaceId:row.space_id||'space-001',playerId:row.player_id};
+    }
     const manager=calls.findLast(x=>x.path.endsWith('papa_manager_login'));
-    return manager?.body.kind==='president'?{role:'president'}:
-     manager?.body.kind==='streamer'?{role:'streamer_admin',streamerId:manager.body.room}:
-     {role:'player',spaceId:'space-001'};
+    return manager?.body.kind==='president'?{accountId,role:'president',spaceId:null}:
+     manager?.body.kind==='streamer'?{accountId,role:'streamer_admin',streamerId:manager.body.room,spaceId:'space-001'}:
+     {accountId,role:'player',spaceId:'space-001'};
    }
    if(path.endsWith('papa_change_manager_password')||path.endsWith('papa_manage_streamer_login'))return responses.change||{ok:true};
    if(path.endsWith('papa_account_space_list'))return responses.spaces||[];
@@ -68,10 +75,10 @@ test('president login never forwards a chosen streamer or accepts a client role'
 test('Space discovery is account-bound, never enumerates customers anonymously, and does not fall through to a room snapshot',async()=>{
  const s=server();const anonymous=await s.request({op:'spaces',accountId:'forged'});
  assert.equal(anonymous.status,400);assert.equal(s.calls().some(c=>c.path.endsWith('papa_account_space_list')),false);
- s.set("calls=[];sessionRows=[{player_id:'P1',role:'player',account_id:'verified-account',space_id:'space-002'}];responses.spaces=[{id:'space-002',slug:'other',name:'Other'}]");
+ s.set("calls=[];sessionRows=[{player_id:'P1',role:'player',account_id:'00000000-0000-4000-8000-000000000002',space_id:'space-002'}];responses.spaces=[{id:'space-002',slug:'other',name:'Other'}]");
  const list=await s.request({op:'spaces',token:'device:verified',accountId:'forged',streamer:'papa'});
  assert.equal(list.status,200);assert.deepEqual(list.data.spaces,[{id:'space-002',slug:'other',name:'Other'}]);
- assert.equal(s.calls().find(c=>c.path.endsWith('papa_account_space_list')).body.subject,'verified-account');
+ assert.equal(s.calls().find(c=>c.path.endsWith('papa_account_space_list')).body.subject,'00000000-0000-4000-8000-000000000002');
  assert.equal(s.calls().find(c=>c.path.endsWith('papa_verified_session_actor')).body.requested_room,null);
  const denied=await s.request({op:'spaceResolve',token:'device:verified',slug:'not-a-membership'});
  assert.equal(denied.status,400);assert.match(denied.data.error,/找不到可使用/);
@@ -96,13 +103,13 @@ test('explicit device Space switch is one atomic credential RPC, ignores forged 
 
 test('entry resolves only the verified role and Account with bounded public destinations',async()=>{
  const s=server();assert.equal((await s.request({op:'spaceEntry',slug:'star',accountId:'forged'})).status,400);assert.equal(s.calls().length,0);
- s.set("sessionRows=[{player_id:'P-NATIVE',role:'player',account_id:'verified-account',space_id:'space-002'}];responses.entry={spaces:[{id:'space-002',slug:'star',streamerId:'r2',streamerSlug:'lina',streamerCount:1}],total:1,hasMore:false}");
+ s.set("sessionRows=[{player_id:'P-NATIVE',role:'player',account_id:'00000000-0000-4000-8000-000000000002',space_id:'space-002'}];responses.entry={spaces:[{id:'space-002',slug:'star',streamerId:'r2',streamerSlug:'lina',streamerCount:1}],total:1,hasMore:false}");
  const r=await s.request({op:'spaceEntry',token:'device:verified',slug:'star',streamer:'papa',role:'president',chosen_streamer:'papa',accountId:'forged',limit:10000,offset:-1});
  assert.equal(r.status,200);assert.equal(r.data.spaces[0].id,'space-002');
- const call=s.calls().at(-1);assert.equal(call.path,'/rest/v1/rpc/papa_account_space_entry');assert.deepEqual(call.body,{subject:'verified-account',actor_role:'player',chosen_streamer:'papa',requested_slug:'star',requested_hostname:null,page_limit:100,page_offset:0});assert.equal(s.calls()[0].body.requested_room,null);
+ const call=s.calls().at(-1);assert.equal(call.path,'/rest/v1/rpc/papa_account_space_entry');assert.deepEqual(call.body,{subject:'00000000-0000-4000-8000-000000000002',actor_role:'player',chosen_streamer:'papa',requested_slug:'star',requested_hostname:null,page_limit:100,page_offset:0});assert.equal(s.calls()[0].body.requested_room,null);
  assert.equal(s.calls().some(c=>c.path.includes('papa_v2_snapshot')),false);
  const count=s.calls().length;const bad=await s.request({op:'spaceEntry',token:'device:verified',hostname:'../invalid'});assert.equal(bad.status,400);assert.equal(s.calls().length,count+1,'only identity verification happens for invalid URL');
- s.set("calls=[];sessionRows=[{player_id:'__streamer__:michelle',role:'streamer_admin',streamer_id:'michelle',account_id:'verified-manager'}]");
+ s.set("calls=[];sessionRows=[{player_id:'__streamer__:michelle',role:'streamer_admin',streamer_id:'michelle',account_id:'00000000-0000-4000-8000-000000000003'}]");
  const manager=await s.request({op:'spaceEntry',token:'device:manager',streamer:'forged-room',role:'president'});
  assert.equal(manager.status,200);assert.equal(s.calls().at(-1).body.chosen_streamer,'michelle');assert.equal(s.calls().at(-1).body.actor_role,'streamer_admin');
 });
@@ -188,7 +195,7 @@ test('ordinary player token cannot complete a queue item or adjust another playe
  assert.equal(s.calls().some(x=>x.path.includes('papa_release_b_commit')),false);
 });
 test('a Space 002 player cannot fall through to the default Space 001 room',async()=>{
- const s=server();s.set("sessionRows=[{player_id:'P2',role:'player',space_id:'space-002'}]");
+ const s=server();s.set("sessionRows=[{player_id:'P2',role:'player',space_id:'space-002',account_id:'00000000-0000-4000-8000-000000000002'}]");
  const denied=await s.request({op:'changeManagerPassword',token:'player:other',currentPassword:'a',newPassword:'b'});
  assert.equal(denied.status,400);
  const check=s.calls().find(x=>x.path.endsWith('papa_verified_session_actor'));

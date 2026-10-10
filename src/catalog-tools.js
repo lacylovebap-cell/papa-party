@@ -29,6 +29,7 @@ export function eventDescription(event,{playerName=()=>'',songName=()=>'',roomNa
   (role==='player'?event.actor_player_id:null);
  const player=event.target_player_name_snapshot||row.name||playerName(targetId)||'玩家';
  const title=row.songSnapshot?.title||row.title||row.titles?.join('、')||details.title||songName(row.songId||row.song_id)||'歌曲',artist=row.songSnapshot?.artist||row.artist;
+ if(event.action==='favoriteBatchSet')return actor+'批次'+(row.favorite===false?'移除':'加入')+'收藏 '+(row.songs?.length||0)+' 首：'+(row.songs||[]).map(s=>'《'+s.title+'》').join('、');
  const labels={candidate_edit:'編輯待審共同資料',independent:'獨立建立另一首歌曲',different_versions:'建立同一作品的不同版本',approve_new:'建立共同歌曲',confirm_same:'確認是同一首共同歌曲',link_variant:'確認是同一首並連到共同歌曲',create_variant:'建立同一首的不同版本',reject:'判定不是同一首',remove:'移除待審候選',unlink:'從共同曲庫分開',merge_family:'整理為同一首的不同版本',split_variant:'分開共同版本',update_variant:'更新共同主資料',lyric_save:'更新共同歌詞',lyric_choice:'修改歌詞來源',batch_add:'從共同曲庫加入歌本',template_change:'修改共用設定',language_filter:'修改語言篩選'};
  if(event.entity_kind==='shared_catalog'||event.actorId)return `${actor}將《${title}》${labels[event.action]||'更新共同曲庫'}${row.rooms?.length?'（'+row.rooms.map(roomName).join('、')+'）':''}`;
  if(['request_failed','failed_request'].includes(event.action))return `${player}提歌《${title}》失敗：本小時提歌額度已滿`;

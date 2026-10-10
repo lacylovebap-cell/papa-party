@@ -5,7 +5,7 @@ import {PGlite} from '@electric-sql/pglite';
 
 const migration=name=>fs.readFileSync('supabase/migrations/'+name,'utf8');
 const pageMigration='202610090008_new_practice_page.sql',nativeSpace='space-new-practice',nativeRoom='new-practice-room';
-const publicKeys=new Set(['id','songId','streamer_id','title','artist','cat','artistType','tags','new','murmur','creditCost','shortMode','pairSongIds','hidden',
+const publicKeys=new Set(['id','songId','streamer_id','title','artist','cat','artistType','tags','new','newPracticeAt','murmur','creditCost','shortMode','pairSongIds','hidden',
  '_order','sort_order','version','catalogVariantId','hasLyrics','lyricsMode','hasSharedLyrics','hasCustomLyrics']);
 async function fixture(t){
  const db=new PGlite();t.after(()=>db.close());
@@ -78,7 +78,7 @@ async function fixture(t){
   notes:await q('select streamer_id,song_id,body,updated_at from papa_catalog_private_notes order by streamer_id,song_id'),
   candidates:await q('select id,streamer_id,song_id,source_hash,status,updated_at from papa_catalog_candidates order by streamer_id,song_id'),
   audit:await q('select id,actor_id,action,details from papa_catalog_audit order by id'),revision:await q('select id,revision from papa_v2_revision')});
- const before=await stable();await db.exec(migration(pageMigration));assert.deepEqual(await stable(),before,'migration is additive and preserves original/catalog/private bodies');
+ const before=await stable();await db.exec(migration(pageMigration));await db.exec(migration('202610100016_new_practice_controls.sql'));assert.deepEqual(await stable(),before,'migrations preserve original/catalog/private bodies');
  const page=(space='space-001',room='papa',management=false,limit=5,offset=0)=>rpc('papa_new_practice_page',[space,room,management,limit,offset]);
  return {db,q,rpc,page,stable,sourceBodies,shared};
 }
@@ -94,7 +94,7 @@ for(const [space,room] of [['space-001','papa'],[nativeSpace,nativeRoom]])test(r
  for(const row of all){
   assert.equal(row.new,true);assert.equal(row.hidden,false);assert.equal(row.streamer_id,room);
   assert.ok(Object.keys(row).every(key=>publicKeys.has(key)),'only lightweight fields reach public list rows');
-  assert.deepEqual(row.tags,['room tag']);assert.equal(row.creditCost,2);assert.equal(row.shortMode,'both');
+  assert.deepEqual(row.tags,['room tag','新練']);assert.equal(row.creditCost,2);assert.equal(row.shortMode,'both');assert.equal(row.newPracticeAt,null,'legacy flags have no invented date');
   const common=overlay.find(song=>song.songId===row.songId);
   for(const field of ['title','artist','cat','artistType','version','catalogVariantId','hasLyrics','lyricsMode'])
    if(common[field]!==undefined)assert.deepEqual(row[field],common[field],'shared overlay matches current room snapshot: '+field);
@@ -112,12 +112,28 @@ for(const [space,room] of [['space-001','papa'],[nativeSpace,nativeRoom]])test(r
  assert.equal(all.find(row=>suffix(row)==='s08').sort_order,7168,'unsafe ranks return the full-room fallback without page-local renumbering');
  assert.equal(all.find(row=>suffix(row)==='s12').sort_order,3072,'virtual rank includes non-new rows in the original canonical source position');
  assert.equal(Object.hasOwn(all.find(row=>suffix(row)==='s12'),'_order'),false,'unsafe scaled source rank falls back to canonical full-room position');
- assert.equal(own._order,0);assert.equal(own.sort_order,4096);assert.deepEqual(sourceBodies[own.songId].tags,own.tags);
+ assert.equal(own._order,0);assert.equal(own.sort_order,4096);assert.deepEqual(sourceBodies[own.songId].tags,own.tags.filter(tag=>tag!=='新練'));
  assert.deepEqual(await stable(),before,'pages never rewrite originals, common masters, private notes, lyrics, audit or revision');
  await q("update papa_catalog_variants set title='Live Shared Canonical' where id=$1",[shared]);
  assert.equal((await page(space,room,false,50)).rows.find(row=>suffix(row)==='s01').title,'Live Shared Canonical','common metadata resolves live without copying to each room');
  assert.equal((await q("select data->>'title' title from papa_v2_entities where kind='songs' and id=$1",[room+'-s01']))[0].title,'Original s01');
  await q("update papa_catalog_variants set title='Shared Canonical' where id=$1",[shared]);assert.deepEqual(await stable(),before);
+});
+
+test('reserved tags and dates are lean derived metadata; originals, other Spaces and unknown dates remain intact',async t=>{
+ const {page,q,stable}=await fixture(t),date='2026-10-10T03:00:00.000Z';
+ await q("update papa_v2_entities set data=data||$1 where kind='songs' and id='papa-s01'",[{newPracticeAt:date}]);
+ await q("update papa_v2_entities set data=data||$1 where kind='songs' and id='papa-s02'",[{newPracticeAt:{secret:'PRIVATE_DATE_BODY'}}]);
+ for(const [id,room,tags] of [['tag-only','papa',['甜歌','新練']],['wrong-string','papa','新練'],['foreign-tag','practice-foreign',['新練']]])
+  await q("insert into papa_v2_entities(kind,id,data) values('songs',$1,$2)",[id,{songId:id,streamer_id:room,title:id,artist:'Artist',new:false,tags,_order:100,lyrics:'SECRET_ORIGINAL_BODY'}]);
+ const before=await stable(),result=await page('space-001','papa',false,50);
+ assert.equal(result.total,11);assert.equal(result.rows.find(row=>row.songId==='papa-s01').newPracticeAt,date);
+ assert.equal(result.rows.find(row=>row.songId==='papa-s02').newPracticeAt,null);
+ const tagged=result.rows.find(row=>row.songId==='tag-only');assert.equal(tagged.new,true);assert.deepEqual(tagged.tags,['甜歌','新練']);assert.equal(tagged.newPracticeAt,null);
+ assert.equal(result.rows.some(row=>['wrong-string','foreign-tag'].includes(row.songId)),false);
+ assert.doesNotMatch(JSON.stringify(result),/SECRET_ORIGINAL_BODY|PRIVATE_DATE_BODY|lyrics"|privateNotes|sourceHash/);
+ assert.deepEqual(await stable(),before,'page metadata does not backfill tags, flags or dates');
+ assert.equal((await q("select data->'new' flag from papa_v2_entities where kind='songs' and id='tag-only'"))[0].flag,false);
 });
 
 test('manager new-practice neighbors span pages and remain private to the canonical room',async t=>{

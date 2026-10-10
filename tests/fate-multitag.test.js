@@ -16,10 +16,10 @@ function cycle(category,count){
  return ids;
 }
 
-test('multiple tags select their OR union without giving an overlapping song extra chances',()=>{
+test('multiple tags require their intersection without giving duplicate tags extra chances',()=>{
  const tags=['tag:嗨歌','tag:甜歌'];
- assert.deepEqual(cycle(tags,3),['high','sweet','both']);
- assert.equal(choose(tags,[],null,()=>0.5).song.songId,'sweet');
+ assert.deepEqual(cycle(tags,3),['both','both','both']);
+ assert.equal(choose(tags,[],null,()=>0.5).song.songId,'both');
  assert.equal(choose(tags,[],null,()=>0.99).song.songId,'both');
 });
 
@@ -28,9 +28,9 @@ test('duplicate tag keys and selection order do not duplicate or reorder candida
  assert.deepEqual(cycle(['tag:甜歌','tag:嗨歌','tag:甜歌','tag:嗨歌'],3),original);
 });
 
-test('an unknown selected tag neither broadens the draw nor removes another matching tag',()=>{
+test('an unknown selected tag cannot be ignored when every selected tag is required',()=>{
  assert.deepEqual(choose(['tag:不存在'],['high'],'high'),{song:null,seen:[]});
- assert.deepEqual(cycle(['tag:不存在','tag:甜歌'],2),['sweet','both']);
+ assert.deepEqual(choose(['tag:不存在','tag:甜歌']),{song:null,seen:[]});
  assert.deepEqual(choose(['unknown'],['high'],'high'),{song:null,seen:[]});
 });
 
@@ -49,18 +49,18 @@ test('legacy single tag, all and fate strings preserve their existing results an
  assert.deepEqual(choose('tag:不存在'),{song:null,seen:[]});
 });
 
-test('changing selected tags drops stale seen entries and exhausted union avoids an immediate repeat',()=>{
+test('changing selected tags drops stale seen entries and the intersection remains bounded to matching songs',()=>{
  const result=choose(['tag:甜歌'],['sad','high','sweet'],'high');
  assert.equal(result.song.songId,'both');assert.deepEqual(result.seen,['sweet','both']);
  const repeated=choose(['tag:嗨歌','tag:甜歌'],['high','sweet','both'],'high');
- assert.equal(repeated.song.songId,'sweet');assert.deepEqual(repeated.seen,['sweet']);
- const single=drawSong([songs[0]],['tag:嗨歌','tag:不存在'],['high'],'high',()=>0);
- assert.equal(single.song.songId,'high');assert.deepEqual(single.seen,['high']);
+ assert.equal(repeated.song.songId,'both');assert.deepEqual(repeated.seen,['both']);
+ const single=drawSong([songs[2]],['tag:嗨歌','tag:甜歌'],['both'],'both',()=>0);
+ assert.equal(single.song.songId,'both');assert.deepEqual(single.seen,['both']);
 });
 
 test('empty catalogs return no result and draws leave supplied songs, selections and history untouched',()=>{
  assert.deepEqual(drawSong([],[],['old'],'old'),{song:null,seen:[]});
  const selections=['tag:嗨歌','tag:甜歌'],seen=['high'],before=structuredClone({songs,selections,seen});
- const result=choose(selections,seen,'high');assert.equal(result.song,songs[1]);
+ const result=choose(selections,seen,'high');assert.equal(result.song,songs[2]);
  assert.deepEqual({songs,selections,seen},before);
 });

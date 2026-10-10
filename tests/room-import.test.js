@@ -27,7 +27,7 @@ test('matched lean song import omits synthesized lyrics and preserves private so
  const song=after.songs.find(song=>song.songId==='own-song');
  assert.equal(Object.hasOwn(song,'lyrics'),false);
  assert.equal(Object.hasOwn(song,'privateNotes'),false);
- assert.equal(song.cat,'台語');assert.deepEqual(song.tags,['New']);assert.equal(song.murmur,'Updated');
+ assert.equal(song.cat,'台語');assert.deepEqual(song.tags,['New','新練']);assert.equal(song.new,true);assert.equal(song.newPracticeAt,new Date(at).toISOString());assert.equal(song.murmur,'Updated');
  const patch=stateChanges(before,after,{preserveOrder:true});
  const changed=patch.changes.find(row=>row.kind==='songs'&&row.id==='own-song').data;
  assert.equal(Object.hasOwn(changed,'lyrics'),false);assert.equal(changed._order,91);assert.deepEqual(patch.removed,[]);

@@ -1,6 +1,30 @@
 const NEW_PRACTICE_GAP=1024;
 const NEW_PRACTICE_RENUMBER_LIMIT=2000;
 const NEW_PRACTICE_ORDER_MAX=Math.floor(Number.MAX_SAFE_INTEGER/NEW_PRACTICE_GAP);
+export const NEW_PRACTICE_TAG='新練';
+
+const practiceTags=song=>Array.isArray(song?.tags)?[...new Set(song.tags.filter(tag=>typeof tag==='string').map(tag=>tag.trim()).filter(Boolean))]:[];
+export function isNewPracticeSong(song){return song?.new===true||practiceTags(song).includes(NEW_PRACTICE_TAG);}
+export function newPracticeSongTags(song){
+ const tags=practiceTags(song);if(isNewPracticeSong(song)&&!tags.includes(NEW_PRACTICE_TAG))tags.push(NEW_PRACTICE_TAG);return tags;
+}
+export function newPracticeDate(song){
+ return typeof song?.newPracticeAt==='string'&&song.newPracticeAt.length<=50&&Number.isFinite(Date.parse(song.newPracticeAt))?song.newPracticeAt:null;
+}
+// Only a transition into the list gets a date. Legacy membership with unknown
+// dates stays undated, and callers cannot supply a replacement historical date.
+export function setNewPracticeSong(song,enabled,time,tags=song?.tags){
+ if(typeof enabled!=='boolean')throw Error('新練設定不正確');
+ const next={...song,new:enabled,tags:practiceTags({tags}).filter(tag=>tag!==NEW_PRACTICE_TAG)};
+ if(enabled){
+  next.tags.push(NEW_PRACTICE_TAG);
+  if(!isNewPracticeSong(song)){
+   if(typeof time!=='string'||!Number.isFinite(Date.parse(time)))throw Error('新練日期不正確');
+   next.newPracticeAt=new Date(time).toISOString();
+  }
+ }else if(isNewPracticeSong(song)||Object.hasOwn(next,'newPracticeAt'))next.newPracticeAt=null;
+ return next;
+}
 
 export function newPracticeRank(value){return typeof value==='number'&&Number.isSafeInteger(value)?value:null;}
 function newPracticeOrder(value){
@@ -12,7 +36,7 @@ function newPracticeEntries(songs){
  const entries=songs.map((song,index)=>({song,index,order:newPracticeOrder(song?._order),id:String(song?.songId??'')}));
  const canonical=[...entries].sort((a,b)=>(a.order??0)-(b.order??0)||newPracticeIdCompare(a.id,b.id));
  canonical.forEach((entry,index)=>{entry.rank=newPracticeRank(entry.song.sort_order)??(entry.order===null?index:entry.order)*NEW_PRACTICE_GAP;});
- return entries.filter(entry=>entry.song?.new===true).sort((a,b)=>a.rank-b.rank||(a.order??0)-(b.order??0)||newPracticeIdCompare(a.id,b.id));
+ return entries.filter(entry=>isNewPracticeSong(entry.song)).sort((a,b)=>a.rank-b.rank||(a.order??0)-(b.order??0)||newPracticeIdCompare(a.id,b.id));
 }
 
 // Pass the full scoped room, including old/hidden songs; filter public visibility after sorting.
