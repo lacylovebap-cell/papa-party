@@ -1,4 +1,4 @@
-import {mutate} from './core.js?v=10.10-WEB.2';
+import {mutate} from './core.js?v=10.11-WEB.1';
 
 export function validateRequestBatch(rows){
  if(!Array.isArray(rows)||!rows.length||rows.length>50)throw Error('一次請選 1 到 50 首歌曲');

@@ -20,7 +20,7 @@ async function load(f,response=page(),options={}){const task=f.m.load(options);a
 async function choose(f,response=page()){await load(f,response);f.m.selectAccount(response.rows[0].accountId);}
 
 test('construction and explicit query/page/selection edits do not read, pages are bounded and one response cache stays bounded',async()=>{
- const f=fixture(),m=f.m;assert.deepEqual(m.state(),{q:'',page:0,rows:[],total:0,revision:null,loading:false,saving:false,error:null,selectedAccountId:null,result:null});
+ const f=fixture(),m=f.m;assert.deepEqual(m.state(),{q:'',page:0,rows:[],total:0,revision:null,loading:false,saving:false,error:null,selectedAccountId:null,result:null,batch:{text:'',rows:[],revision:null,activeIndex:null}});
  m.setQuery('  明選玩家  ');m.setPage(2);assert.equal(f.calls.length,0);assert.equal(m.state().q,'明選玩家');
  for(const query of [null,{},'q'.repeat(101)])assert.throws(()=>m.setQuery(query));
  for(const index of [-1,0.5,500001,Number.MAX_SAFE_INTEGER,'1'])assert.throws(()=>m.setPage(index));
