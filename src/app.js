@@ -1,26 +1,52 @@
-import {installPageJumps} from './ui-page-jumps.js?v=10.11-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.11-WEB.1';
-import {fateCategories,drawSong} from './fate.js?v=10.11-WEB.1';
-import {createBoard} from './board.js?v=10.11-WEB.1';
-import {createChat} from './chat.js?v=10.11-WEB.1';
-import {normalizeHome,themePalette} from './home-settings.js?v=10.11-WEB.1';
-import {openHomeEditor} from './home-editor.js?v=10.11-WEB.1';
-import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.11-WEB.1';
-import {createNotifications} from './notifications.js?v=10.11-WEB.1';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.11-WEB.1';
-import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.11-WEB.1';
-import {createPlayerManager} from './player-manager.js?v=10.11-WEB.1';
-import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.11-WEB.1';
-import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.11-WEB.1';
-import {createSongFavorites} from './song-favorites.js?v=10.11-WEB.1';
-import {listenedSongs} from './listening-history.js?v=10.11-WEB.1';
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.11-WEB.1';
-import {createWebDeviceLogin} from './web-device-login.js?v=10.11-WEB.1';
-import {roomStorageKey} from './communication-context.js?v=10.11-WEB.1';
-import {createWebSpaceEntry} from './web-space-entry.js?v=10.11-WEB.1';
-import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.11-WEB.1';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.11-WEB.1';
+import {installPageJumps} from './ui-page-jumps.js?v=10.11-WEB.2';
+import {createWebAppInstall} from './web-app-install.js?v=10.11-WEB.2';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.11-WEB.2';
+import {fateCategories,drawSong} from './fate.js?v=10.11-WEB.2';
+import {createBoard} from './board.js?v=10.11-WEB.2';
+import {createChat} from './chat.js?v=10.11-WEB.2';
+import {normalizeHome,themePalette} from './home-settings.js?v=10.11-WEB.2';
+import {openHomeEditor} from './home-editor.js?v=10.11-WEB.2';
+import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.11-WEB.2';
+import {createNotifications} from './notifications.js?v=10.11-WEB.2';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.11-WEB.2';
+import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.11-WEB.2';
+import {createPlayerManager} from './player-manager.js?v=10.11-WEB.2';
+import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.11-WEB.2';
+import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.11-WEB.2';
+import {createSongFavorites} from './song-favorites.js?v=10.11-WEB.2';
+import {listenedSongs} from './listening-history.js?v=10.11-WEB.2';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.11-WEB.2';
+import {createWebDeviceLogin} from './web-device-login.js?v=10.11-WEB.2';
+import {roomStorageKey} from './communication-context.js?v=10.11-WEB.2';
+import {createWebSpaceEntry} from './web-space-entry.js?v=10.11-WEB.2';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.11-WEB.2';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.11-WEB.2';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let appInstallMessage='';
+const appInstall=createWebAppInstall({onChange:syncAppInstall});
+function appInstallPlatform(){const ua=navigator.userAgent||'';return /iPad|iPhone|iPod/i.test(ua)||(/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1)?'ios':/Android/i.test(ua)?'android':'desktop';}
+function appInstallGuide(platform){
+ if(platform==='ios')return '<ol class="app-install-steps"><li>使用 Safari 開啟 PA Party。</li><li>按瀏覽器的分享按鈕，選「加入主畫面」。</li><li>確認名稱為 PA Party，再按「加入」。</li></ol>';
+ if(platform==='android')return '<ol class="app-install-steps"><li>使用 Chrome 開啟 PA Party。</li><li>開啟瀏覽器選單，選「安裝應用程式」或「加到主畫面」。</li><li>依畫面提示確認，之後從主畫面開啟。</li></ol>';
+ return '<ol class="app-install-steps"><li>使用 Chrome 或 Edge 開啟 PA Party。</li><li>按網址列的安裝圖示，或在瀏覽器選單中找「安裝 PA Party」。</li><li>依畫面提示確認，之後從應用程式清單開啟。</li></ol>';
+}
+function appInstallPanelHtml(){
+ const view=appInstall.snapshot(),platform=appInstallPlatform(),status=view.installed?'PA Party App 已安裝，可從主畫面或應用程式清單開啟。':view.prompting?'請在瀏覽器的安裝視窗中確認。':view.error||appInstallMessage;
+ return '<div class="app-install-brand"><img src="assets/app-icon-192.png" width="56" height="56" alt=""><div><b>PA Party</b><small>把歌本放進主畫面</small></div></div><p>使用原本的帳號登入，歌曲、存歌與點歌紀錄都會保留。</p><p id="app-install-status" class="muted" role="status" aria-live="polite">'+h(status)+'</p>'+(view.installed?'':view.canPrompt||view.prompting?'<div class="actions">'+button(view.prompting?'等待安裝確認…':'安裝 PA Party App','appInstallPrompt','','primary',view.prompting?'disabled':'')+'</div>':'')+(view.installed?'':'<h3>'+({ios:'iPhone／iPad 加入主畫面',android:'Android 安裝方式',desktop:'電腦安裝方式'}[platform])+'</h3>'+appInstallGuide(platform)+'<p class="muted app-install-note">若找不到安裝選項，請先離開 Facebook／LINE 內建瀏覽器，改用上面的瀏覽器開啟。安裝選項依瀏覽器與裝置而異。</p><details class="app-install-other"><summary>其他裝置的安裝方式</summary>'+['ios','android','desktop'].filter(value=>value!==platform).map(value=>'<h3>'+({ios:'iPhone／iPad',android:'Android',desktop:'電腦'}[value])+'</h3>'+appInstallGuide(value)).join('')+'</details>')+'<div class="actions app-install-dismiss">'+button('知道了','close')+'</div>';
+}
+function syncAppInstall(){
+ const view=appInstall.snapshot();for(const entry of document.querySelectorAll('[data-act=appInstallHelp]'))entry.textContent=view.installed?'App 已安裝':'安裝 PA Party App';
+ const panel=$('#app-install-panel');if(!panel)return;
+ const focused=document.activeElement,restoreFocus=panel.contains(focused),action=focused?.dataset?.act,expanded=panel.querySelector('.app-install-other')?.open,body=panel.closest('.dialog-body'),scroll=body?.scrollTop;
+ panel.innerHTML=appInstallPanelHtml();const other=panel.querySelector('.app-install-other');if(other)other.open=!!expanded;
+ if(restoreFocus){const control=[...panel.querySelectorAll('[data-act]')].find(el=>el.dataset.act===action&&!el.disabled)||panel.querySelector('.app-install-other>summary')||panel.querySelector('[data-act=close]');control?.focus({preventScroll:true});}
+ if(body)body.scrollTop=scroll;
+}
+function showAppInstall(){appInstallMessage='';modal('安裝 PA Party App','<div id="app-install-panel">'+appInstallPanelHtml()+'</div>');const menu=$('.header-menu');if(menu&&window.matchMedia('(max-width:650px)').matches)menu.open=false;}
+async function promptAppInstall(){
+ const result=await appInstall.prompt();
+ appInstallMessage=result.outcome==='accepted'?'已送出安裝要求，請完成瀏覽器的安裝步驟。':result.outcome==='dismissed'?'這次已取消。也可以依下方步驟，稍後再安裝。':result.outcome==='unavailable'?'目前請使用下方的瀏覽器安裝步驟。':'';syncAppInstall();
+}
 const venueName=venue=>venue==='radio'?'📻 電台':'聲瑪';
 function venueSelector(name='venue',value=venuePolicySettings(state.settings).current_space){return venuePolicySettings(state.settings).radio_enabled?select(name,name==='storage_pool'?'存歌池':'場域',[['shengma','聲瑪'],['radio','📻 電台']],value):'';}
 function venueSwitch(){const settings=venuePolicySettings(state.settings);return settings.radio_enabled?'<div class="venue-switch" aria-label="目前場域">'+['shengma','radio'].map(venue=>button(venueName(venue),'venue',venue,settings.current_space===venue?'tiny active':'tiny')).join('')+'</div>':'';}
@@ -306,7 +332,7 @@ const chat=createChat({api,context:()=>({spaceId:(isAdmin()?admin?.spaceId:sessi
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-chat]'))chat.open().catch(e=>toast(e.message));});
 const board=createBoard({api,context:()=>({spaceId:(isAdmin()?admin?.spaceId:session?.spaceId)||state.currentStreamer?.spaceId||'space-001',manager:isAdmin(),role:isAdmin()?admin?.role:'player',playerId:session?.playerId,streamer:streamerSlug,streamerName:hostName(),demo:demo||entryPending||!!draft}),toast});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-board]'))board.open().catch(e=>toast(e.message));});
-function header(){const p=me();$('#header').innerHTML=`${demo?'<div class="offline">預覽測試模式 · 資料只在這台裝置，未連正式資料庫</div>':''}<div class="header-inner">${button('<span class="brand-logo" role="img" aria-label="PA • PARTY"></span>','home','','brand')}<div class="login-status">${p?`<b title="${h(p.name)}">👤 ${h(p.name)}${session.loginId?'｜ID '+h(session.loginId):''}</b><small>可以開始點歌嚕 ♡</small>`:''}</div><details class="header-menu" ${window.matchMedia('(min-width:651px)').matches?'open':''}><summary>選單</summary><div class="header-actions"><label class="header-streamer"><span>主播</span><select id="header-streamer" aria-label="切換主播">${state.streamers?.filter(r=>r.active||isAdmin()&&isSuperAdmin()).map(r=>`<option value="${h(r.slug)}" ${r.slug===streamerSlug?'selected':''}>${h(r.display_name)}</option>`).join('')||''}</select></label>${button(h('回'+hostName()+'首頁'),'home')}${button('歌本','book')}${button('共同歌本','common-book')}${p?button('玩家中心','center')+button('登出','logout'):button('登入','login')}${entryMembershipCount>1?button('切換空間','switchSpace'):''}${!p||isAdmin()?button('管理','admin'):''}${chat.button()}${board.button()}${notifications.button()}</div></details></div>`;}
+function header(){const p=me();$('#header').innerHTML=`${demo?'<div class="offline">預覽測試模式 · 資料只在這台裝置，未連正式資料庫</div>':''}<div class="header-inner">${button('<span class="brand-logo" role="img" aria-label="PA • PARTY"></span>','home','','brand')}<div class="login-status">${p?`<b title="${h(p.name)}">👤 ${h(p.name)}${session.loginId?'｜ID '+h(session.loginId):''}</b><small>可以開始點歌嚕 ♡</small>`:''}</div><details class="header-menu" ${window.matchMedia('(min-width:651px)').matches?'open':''}><summary>選單</summary><div class="header-actions"><label class="header-streamer"><span>主播</span><select id="header-streamer" aria-label="切換主播">${state.streamers?.filter(r=>r.active||isAdmin()&&isSuperAdmin()).map(r=>`<option value="${h(r.slug)}" ${r.slug===streamerSlug?'selected':''}>${h(r.display_name)}</option>`).join('')||''}</select></label>${button(h('回'+hostName()+'首頁'),'home')}${button('歌本','book')}${button('共同歌本','common-book')}${p?button('玩家中心','center')+button('登出','logout'):button('登入','login')}${entryMembershipCount>1?button('切換空間','switchSpace'):''}${!p||isAdmin()?button('管理','admin'):''}${chat.button()}${board.button()}${notifications.button()}${button(appInstall.snapshot().installed?'App 已安裝':'安裝 PA Party App','appInstallHelp','','tiny')}</div></details></div>`;}
 function card(title,body,wide=false,action=''){return `<section class="card ${wide?'wide':''}">${title||action?`<div class="section-head"><h2>${title}</h2>${action}</div>`:''}${body}</section>`;}
 function songRows(rows){return rows.map((s,i)=>{const c=crownFor(state,s.songId,clock());return `<div class="song"><span class="song-gutter"><span class="number">${i+1}</span>${route==='center'&&subtab==='favorites'?'<input type="checkbox" data-favorite-select="'+h(s.songId)+'" aria-label="選取 '+h(s.title)+'" '+(selectedFavorites.has(s.songId)?'checked':'')+'>':''}${favoriteButton(s.songId)}</span><div class="info"><b>${h(s.title)}${c?' 👑':''}</b><small>${h(s.artist)} · ${plays(s)} 次</small>${s.murmur?`<div class="subtle">💬 ${h(hostName())}碎碎念：${h(s.murmur)}</div>`:''}<div>${(s.tags||[]).map(t=>`<span class="tag">${h(t)}</span>`).join('')}</div></div><div class="actions">${button('提歌','request',s.songId,'tiny','data-kind="saved"')}${button('現點','request',s.songId,'tiny','data-kind="live"')}</div></div>`;}).join('')||blank(say('empty'));}
 function hour(){const current=state.hourBucket===hourKey(clock()),grant=(me()?.quotaRights||[]).find(x=>x.streamer_id===state.currentStreamer?.id),quota=isAdmin()?savedQuota(state,clock()):current?(state.hourlyPersonal||{used:state.hourlyUsed||0,reserved:state.hourlyReserved||0,extraQuota:0,personalUsed:0,extraRemaining:0,commonRemaining:Math.max(0,state.settings.hourlyLimit-(state.hourlyUsed||0)-(state.hourlyReserved||0))}):{used:0,reserved:0,extraQuota:grant?.extra_quota||0,personalUsed:0,extraRemaining:grant?.extra_quota||0,commonRemaining:Number(state.settings.hourlyLimit)},available=quota.commonRemaining+quota.extraRemaining,limit=Number(state.settings.hourlyLimit)+quota.extraQuota,occupied=quota.used+quota.reserved+quota.personalUsed,remaining=Math.ceil((3600000-(Date.now()+offset)%3600000)/60000);return '<small>🕒 本小時提歌額度</small><strong>'+occupied+' / '+limit+(!available?' <span class="quota-full">提滿了</span>':'')+'</strong><small>還可使用 '+available+' 首額度'+(quota.extraQuota?'（共用 '+quota.commonRemaining+' ＋ 專屬 '+quota.extraRemaining+'）':'；待唱保留 '+quota.reserved+' 首')+'</small><small>距離下一次提歌重置還有 '+remaining+' 分鐘</small>';}
@@ -559,6 +585,8 @@ function backup(data=state,name='backup'){if(demo&&location.origin==='http://127
 async function migrate(){if(demo)return toast('預覽不讀正式資料');migrationPreview=await api({op:'migrate'});backup(migrationPreview.backup,'v1-before-migration');modal('舊資料移轉核對',`<p>舊資料備份已下載。請先保存。</p><div class="notice">${Object.entries(migrationPreview.counts).map(([k,v])=>`${h(k)}：${v}`).join('<br>')}</div><details><summary>待核對 ${migrationPreview.issues.length} 項</summary><div class="notice warning">${migrationPreview.issues.map(h).join('<br>')}</div></details>${button('保留舊資料，建立 V2','confirmMigration','','primary')}`);}
 
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;try{switch(a){
+case 'appInstallHelp':showAppInstall();break;
+case 'appInstallPrompt':await promptAppInstall();break;
 case 'songCatalogStatus':songCatalogStatusFilter=id;pages.songs=1;roomSearch.generation++;renderSongResults();break;
 case 'practiceMode':if(!newPracticeView.open||!newPracticeView.management||!isAdmin()||!['current','add'].includes(id))break;newPracticeView.mode=id;newPracticeView.selected.clear();newPracticeView.cache.clear();await loadNewPractice(0);break;case 'practiceSearch':if(!newPracticeView.open||!newPracticeView.management||!isAdmin()||newPracticeView.mode!=='add'||!$('#practice-query'))break;newPracticeView.q=$('#practice-query').value;await loadNewPractice(0);break;case 'practiceSelectPage':selectNewPracticePage();break;case 'practiceClear':newPracticeView.selected.clear();renderNewPractice();break;case 'practiceSet':await setSelectedNewPractice(newPracticeView.mode==='add');break;
 case 'favoriteSelectPage':for(const row of songFavorites.state().rows){selectedFavorites.add(row.songId);selectedFavoriteRows.set(row.songId,row);}$('#favorites-panel').innerHTML=favoritesPanelHtml();break;case 'favoriteClear':selectedFavorites.clear();selectedFavoriteRows.clear();$('#favorites-panel').innerHTML=favoritesPanelHtml();break;case 'favoritesRemove':await removeSelectedFavorites();break;case 'favoritesRequest':await requestSelectedFavorites(id);break;case 'playersSelectPage':for(const row of playerManagement.state().rows)selectedPlayers.add(row.playerId);$('#player-management').innerHTML=playerManagementPanel();break;case 'playersClear':selectedPlayers.clear();$('#player-management').innerHTML=playerManagementPanel();break;case 'playersArchiveBatch':await archiveSelectedPlayers();break;case 'crossStreamers':await openCrossStreamers();break;case 'crossSelectPage':for(const row of crossView.rows)if(row.status!=='paused')crossView.selected.set(row.streamerId,row);renderCrossStreamers();break;case 'crossClear':crossView.selected.clear();renderCrossStreamers();break;case 'crossRequest':await openCrossRequest(id);break;case 'crossSummaryPage':await loadCrossSummary(crossView.page+Number(id));break;case 'crossSongSearch':await loadCrossSongs(id,false,0);break;case 'crossSongPage':await loadCrossSongs(id,false,Number(b.dataset.page));break;case 'crossSongDraw':await loadCrossSongs(id,true,0);break;case 'crossSongChoose':chooseCrossSong(id,b.dataset.song);break;

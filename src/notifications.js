@@ -1,6 +1,6 @@
-import {canReplaceSound,isSuper} from './access-policy.js?v=10.11-WEB.1';
-import {communicationIdentity} from './communication-context.js?v=10.11-WEB.1';
-import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=10.11-WEB.1';
+import {canReplaceSound,isSuper} from './access-policy.js?v=10.11-WEB.2';
+import {communicationIdentity} from './communication-context.js?v=10.11-WEB.2';
+import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=10.11-WEB.2';
 export function createNotifications({api,context,toast,onUpdate,apiUrl,apiKey}){
  const escape=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let key='',rows=[],prefs=cleanNoticePrefs(),counts={},page=0,more=false,topic='',socket,heartbeat,reconnect,lastRealtimeAt=0,loading=false,view='',generation=0,seen=new Set(),primed=false,mutedAudio,playerSoundVersion='',boundDevice='',bindingDevice='';
@@ -33,14 +33,17 @@ export function createNotifications({api,context,toast,onUpdate,apiUrl,apiKey}){
  const countUnread=items=>items.filter(n=>!n.read_at).reduce((a,n)=>(a[n.type]=(a[n.type]||0)+1,a),{});
  async function registration(){if(!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window))throw Error('此瀏覽器尚不支援推播，通知中心仍可使用');return navigator.serviceWorker.register(new URL('../sw.js',import.meta.url));}
  async function bindRememberedPush(c,g){
-  const device=c.deviceSessionId,bindingKey=key+':'+device;if(c.demo||!device||!prefs.pushEnabled||boundDevice===bindingKey||bindingDevice===bindingKey||!navigator.serviceWorker)return;
+  const device=c.deviceSessionId,identityKey=key,bindingKey=identityKey+':'+device;if(c.demo||!device||!prefs.pushEnabled||boundDevice===bindingKey||bindingDevice===bindingKey||!navigator.serviceWorker)return;
+  const currentBinding=()=>{const current=context();return g===generation&&key===identityKey&&!current.demo&&current.deviceSessionId===device&&current.recipient&&communicationIdentity(current,`${current.streamer}:${current.recipient}`)===identityKey;};
   bindingDevice=bindingKey;try{
    // Reuse a permission/subscription the player already granted. Never prompt,
    // create a second subscription, or rebind on each short access rotation.
    const reg=await navigator.serviceWorker.getRegistration(new URL('../',import.meta.url)),sub=await reg?.pushManager.getSubscription();
-   if(g!==generation||context().deviceSessionId!==device)return;
-   if(sub)await api({op:'pushSubscribe',subscription:sub.toJSON(),expectedDeviceSessionId:device});
-   if(g===generation)boundDevice=bindingKey;
+   if(!sub||!currentBinding())return;
+   await api({op:'pushSubscribe',subscription:sub.toJSON(),expectedDeviceSessionId:device});
+   // A missing registration/subscription or failed upsert must remain retryable
+   // on the next lifecycle refresh. Only this successfully bound identity is done.
+   if(currentBinding())boundDevice=bindingKey;
   }finally{if(bindingDevice===bindingKey)bindingDevice='';}
  }
  async function pushOn(){if(context().demo)throw Error('預覽模式不訂閱正式推播');if(!('serviceWorker'in navigator)||!('PushManager'in window))throw Error('此瀏覽器尚不支援推播，通知中心仍可使用');const permissionRequest=Notification.requestPermission();toast('請在瀏覽器的通知權限提示中選擇允許');const permission=await permissionRequest;if(permission!=='granted')throw Error('通知未獲允許，請在瀏覽器設定開啟');await registration();const reg=await navigator.serviceWorker.ready;const {publicKey}=await api({op:'pushKey'});const decoded=atob(publicKey.replace(/-/g,'+').replace(/_/g,'/'));const sub=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:Uint8Array.from(decoded,c=>c.charCodeAt(0))});await api({op:'pushSubscribe',subscription:sub.toJSON()});await save({...prefs,pushEnabled:true});showSettings();toast('此裝置已啟用推播');}
