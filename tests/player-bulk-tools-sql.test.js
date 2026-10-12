@@ -34,7 +34,7 @@ async function fixture(t){
  await db.exec(directory.slice(directory.indexOf('create or replace function public.papa_streamer_directory'),directory.indexOf('$$;')+3));
  await db.exec(migration('202610070013_space_player_profiles.sql'));
  const communication=migration('202610080012_communication_space.sql');
- for(const name of ['papa_communication_player_name','papa_native_meta_audit_projection','papa_event_actor_snapshot']){
+ for(const name of ['papa_communication_player_name','papa_communication_player_exists','papa_native_meta_audit_projection','papa_event_actor_snapshot']){
   const start=communication.indexOf('function '+name+'('),statement=communication.lastIndexOf('create ',start);
   await db.exec(communication.slice(statement,communication.indexOf('$$;',start)+3));
  }
@@ -106,6 +106,31 @@ async function fixture(t){
  await db.exec(migration('202610120003_common_first_quota_summary.sql'));assert.deepEqual({business:await business(),favorites:await allFavorites(),events:await events()},baseline);
  return {db,q,rpc,player,other,unbound,members,actor,batch,summary,choices,allFavorites,events,business,originalSongs,current,variant};
 }
+
+test('carry read migration changes quota eligibility without rewriting formal records or permissions',async t=>{
+ const f=await fixture(t),before=await f.summary(),get=result=>result.rows.find(row=>row.streamerId==='papa');
+ const compat=migration('202610090015_quota_native_compatibility.sql'),start=compat.indexOf('create function public.papa_extra_quota_snapshot_metadata(snapshot jsonb,requested_room text,allowed_space text,quota_player text)');
+ await f.db.exec(compat.slice(start,compat.indexOf('-- Preserve the released three-argument',start)>start?compat.indexOf('-- Preserve the released three-argument',start):compat.indexOf('create or replace function public.papa_extra_quota_snapshot_metadata',start)));
+ const old='2020-01-01T00:00:00Z';
+ for(const [id,flag] of [['carry-live',true],['ordinary-live',false],['invalid-flag','true']])
+  await f.q("insert into papa_v2_entities(kind,id,data) values('queue',$1,$2)",[id,{id,streamer_id:'papa',playerId:'P1',kind:'live',status:'completed',at:old,quota_effective_at:f.current,quota_carried:flag,creditCost:1}]);
+ assert.equal(get(await f.summary()).personalRemaining,get(before).personalRemaining);
+ const protectedRows=await f.business(),events=await f.q('select to_jsonb(e) row from papa_events e order by id');
+ const acl=()=>f.q("select oid::regprocedure::text signature,proacl from pg_proc where oid in ('public.papa_extra_quota_snapshot_metadata(jsonb,text,text,text)'::regprocedure,'public.papa_player_streamer_summary(text,jsonb,integer,integer)'::regprocedure) order by 1");
+ const permissions=await acl();await f.db.exec(migration('202610120005_queue_hour_carry.sql'));
+ assert.deepEqual(await f.business(),protectedRows);assert.deepEqual(await f.q('select to_jsonb(e) row from papa_events e order by id'),events);assert.deepEqual(await acl(),permissions);
+ assert.equal(get(await f.summary()).personalRemaining,get(before).personalRemaining-1);
+ for(const [data,expected] of [[{kind:'saved'},true],[{kind:'live',status:'completed',quota_carried:true},true],[{kind:'live',status:'waiting',quota_carried:true},false],[{kind:'live',status:'completed',quota_carried:'true'},false],[{},false]])
+  assert.equal((await f.q('select papa_queue_uses_quota($1) eligible',[data]))[0].eligible,expected);
+ const rows=(await f.q("select data from papa_v2_entities where kind='queue' and data->>'streamer_id'='papa'")).map(r=>r.data);
+ const core=savedQuota({queue:rows,currentStreamer:{id:'papa'},settings:{hourlyLimit:2},extraQuotas:[{streamer_id:'papa',player_id:'P1',extra_quota:5,enabled:true}]},f.current,'P1');
+ assert.equal(get(await f.summary()).personalRemaining,core.extraRemaining);
+ for(const role of ['anon','authenticated','service_role'])assert.equal((await f.q("select has_function_privilege($1,'public.papa_queue_uses_quota(jsonb)','EXECUTE') allowed",[role]))[0].allowed,false);
+ await f.q("insert into papa_player_extra_quotas(streamer_id,player_id,space_id,extra_quota,updated_by) values('papa','P2','space-001',2,'local fixture')");
+ const snapshot={rows:[{kind:'meta',id:'1',data:{streamers:[{id:'papa',active:true}]}},{kind:'players',id:'P2',data:{playerId:'P2'}},{kind:'queue',id:'carry-P2',data:{streamer_id:'papa',playerId:'P2',kind:'live',status:'completed',quota_carried:true}}]};
+ const enriched=await f.rpc('papa_extra_quota_snapshot_metadata',[snapshot,'papa','space-001',null]);
+ assert.deepEqual(enriched.extraQuotas,[{streamer_id:'papa',player_id:'P2',extra_quota:2,enabled:true}]);
+});
 
 for(const [space,room,name] of [['space-001','papa','Legacy P1'],[nativeSpace,nativeRoom,'Native P1']])test(room+' favorites batch is own-bound, idempotent, one summarized audit and independent of accounting/source data',async t=>{
  const f=await fixture(t),context=f.actor(room,space),ids=[room+'-S0',room+'-S1',room+'-S2'],protectedRows=await f.business();

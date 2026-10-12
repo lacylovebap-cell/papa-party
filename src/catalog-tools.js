@@ -39,7 +39,7 @@ export function eventDescription(event,{playerName=()=>'',songName=()=>'',roomNa
  if(event.entity_kind==='players'&&['playerArchive','playerRestore'].includes(event.action||event.actor_context?.action))return `${actor}${(event.action||event.actor_context?.action)==='playerArchive'?'封存':'恢復'}了玩家${player}`;
  if(event.entity_kind==='players')return `${actor}${event.before_data?'編輯':'新增'}玩家${player}的基本資料`;
  if(event.entity_kind==='queue'){
-  if(event.action==='recordTime')return `${actor}修改${player}的《${title}》實際時間${row.kind==='saved'?'，並重新計算提歌額度':''}`;
+  if(event.action==='recordTime')return `${actor}修改${player}的《${title}》實際時間${row.kind==='saved'||row.quota_carried===true?'，並重新計算提歌額度':''}`;
   const states={waiting:'加入待播',pending:'送出現點，等待確認禮物',completed:'完成演唱',cancelled:'取消待播',stored:'轉為存歌'};
   const description=row.status!=='waiting'?states[row.status]:row.awaitingAcknowledgment?'收到提歌，等待主播確認':row.awaitingPreparation?'已確認，等待準備時間':row.preparationEndsAt?(row.readyAt?'已準備好':`設定準備 ${row.preparationMinutes} 分鐘`):states[row.status];
   return `${actor}為${row.kind==='self'?'主播自帶':player}的《${title}》${description||'修改待播資料'}`;

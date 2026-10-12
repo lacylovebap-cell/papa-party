@@ -14,7 +14,7 @@ const code=stripTypeScriptTypes(fs.readFileSync(new URL('../supabase/functions/p
 const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
 test('deployment version probe is public, performs no database reads and labels unfinished V2/native features honestly',async()=>{
  const f=fixture({expired:true}),r=await f.invoke({op:'releaseInfo',token:'invalid'});
- assert.equal(r.status,200);assert.deepEqual(r.body,{version:'10.12-WEB.1',messageCenterV2:false,scopedRealtimeV2:false,nativeApps:false});
+ assert.equal(r.status,200);assert.deepEqual(r.body,{version:'10.12-WEB.3',messageCenterV2:false,scopedRealtimeV2:false,nativeApps:false});
  assert.equal(f.calls.length,0);
 });
 function fixture(options={}){

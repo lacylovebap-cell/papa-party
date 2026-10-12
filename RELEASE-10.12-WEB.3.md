@@ -1,0 +1,15 @@
+# 10.12-WEB.3 — explicit cross-hour completion
+
+Completing a saved or live request in a later clock hour now asks whether to carry its quota into the actual completion hour. The manager must choose before submitting the completion. Declining keeps the original request hour. Saved completion retains one debit; carrying a live request uses hourly saved-request capacity without another debit or changed gift fees. The original request ID, player, song, request time and quote remain intact. Existing clients keep the prior behavior unless they explicitly choose carry.
+
+The six management navigation controls now stay in a single row at 320/390/636/1280px. The catalog entry is exactly `共同曲庫`. The More menu is anchored within the navigation bounds and reserves space above the waiting-song panel when expanded, preventing clipping and overlap. Carry radio controls use an explicit 18px width instead of inheriting full-width input styling.
+
+Correcting a completed request's actual time recalculates its hour attribution and retains the original timestamps and linked financial history. Moving a carried live completion back into its original hour removes its carried quota. Carried records display `已過檔` in queue/history metadata. Common capacity still precedes exclusive player rights.
+
+The required migration `202610120005_queue_hour_carry.sql` adds an internal predicate and changes only the eligibility predicate in two existing service-only read functions. It does not update songs, queue/history rows, ledgers, badges, rights or event records. It fails closed if the expected installed function definitions have changed. Migrations `202610120001` and `202610120002` remain uninstalled; no message-center/native completion is claimed.
+
+Validation: 1,076/1,076 full regression checks passed after correcting backward history-time compatibility. Web/Edge builds and assembled Edge syntax passed. The final radio layout fix passed 13 targeted UI/cache/editor checks. At 390px, the carry choices have 18px radios and 44px clickable rows with no horizontal overflow. All write tests use isolated local fixtures. Production acceptance uses only bounded reads and definition/permission checks, without synthetic production queue, credit or event writes.
+
+Production SQL verification: the two read-function ACLs are unchanged; hashes are `515117ba3c093f00e3c47670c77d5323` (quota metadata) and `b6e68f74a98a2fb2e2af8bcc24b59d1e` (player streamer summary). Business revision remained 3825 before/after the migration. Released definitions and Edge source are backed up outside Git. The dashboard reports Healthy, CPU 3%, Disk 43%, RAM 62%; the existing Free usage warning remains. A bounded one-song production read returned HTTP 200. This release does not claim reduced billed capacity or completed Android delivery acceptance.
+
+Remaining work: player cross-host operation details and batch cancellation/song replacement, three-category message-center UI, Android background/lock-screen notification acceptance, scoped transport/domain deltas and native deliverables.
