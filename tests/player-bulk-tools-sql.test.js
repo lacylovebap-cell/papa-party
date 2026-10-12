@@ -107,6 +107,26 @@ async function fixture(t){
  return {db,q,rpc,player,other,unbound,members,actor,batch,summary,choices,allFavorites,events,business,originalSongs,current,variant};
 }
 
+test('own queue page is read-only, bounded, owner/Space scoped, current-room first and safe for inactive-room cancellation',async t=>{
+ const f=await fixture(t),before=await f.business(),events=await f.events();
+ await f.db.exec(migration('202610120006_player_own_queue_page.sql'));assert.deepEqual(await f.business(),before);assert.deepEqual(await f.events(),events);
+ const page=(context=f.actor(),sort='newest',limit=20,offset=0)=>f.rpc('papa_player_queue_page',[context.space_id,context,sort,limit,offset]);
+ const initial=await page();assert.equal(initial.total,3);assert.ok(initial.rows.every(row=>row.streamerId==='papa'));assert.doesNotMatch(JSON.stringify(initial),/private|password|another player/);
+ await f.q("insert into papa_v2_entities(kind,id,data) values('queue','inactive-own',$1),('queue','idle-own',$2)",[
+  {id:'inactive-own',streamer_id:'inactive-room',playerId:'P1',kind:'saved',status:'waiting',title:'Inactive',at:f.current,lyrics:'private lyrics'},
+  {id:'idle-own',streamer_id:'idle-room',playerId:'P1',kind:'live',status:'pending',title:'Idle',at:f.current,privateHistory:['private source']}]);
+ const all=await page();assert.equal(all.total,5);assert.ok(all.rows.slice(0,3).every(row=>row.streamerId==='papa'));assert.equal(all.rows.find(row=>row.id==='inactive-own').active,false);
+ const first=await page(f.actor(),'oldest',1,0),second=await page(f.actor(),'oldest',1,1);assert.notEqual(first.rows[0].id,second.rows[0].id);assert.equal(first.total,5);
+ assert.equal((await page(f.actor('papa','space-001',f.other,'P2'))).total,1);
+ assert.ok((await page(f.actor(nativeRoom,nativeSpace))).rows.every(row=>row.streamerId===nativeRoom));
+ for(const context of [f.actor('papa','space-001',f.unbound),f.actor('papa','space-001',f.player,'P2'),f.actor('papa',nativeSpace),{...f.actor(),role:'admin'}])await assert.rejects(page(context),/SONG_FAVORITES_(ACTOR|SCOPE)_INVALID/);
+ for(const args of [['invalid',20,0],['newest',21,0],['newest',20,-1]])await assert.rejects(page(f.actor(),...args),/PLAYER_QUEUE_PAGE_INVALID/);
+ for(const role of ['anon','authenticated']){
+  await f.db.exec('set role '+role);await assert.rejects(page(),/permission denied/);await f.db.exec('reset role');
+ }
+ assert.doesNotMatch(JSON.stringify(all),/private|lyrics|account|membership|ledger|other-player/);assert.deepEqual(await f.events(),events);
+});
+
 test('carry read migration changes quota eligibility without rewriting formal records or permissions',async t=>{
  const f=await fixture(t),before=await f.summary(),get=result=>result.rows.find(row=>row.streamerId==='papa');
  const compat=migration('202610090015_quota_native_compatibility.sql'),start=compat.indexOf('create function public.papa_extra_quota_snapshot_metadata(snapshot jsonb,requested_room text,allowed_space text,quota_player text)');

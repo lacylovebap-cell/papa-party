@@ -1,7 +1,7 @@
-import {validateHome} from './home-settings.js?v=10.12-WEB.3';
-import {requestSource} from './request-source.js?v=10.12-WEB.3';
-import {newPracticeReorder,newPracticeRanks,NEW_PRACTICE_TAG,isNewPracticeSong,newPracticeSongTags,newPracticeDate,setNewPracticeSong} from './new-practice.js?v=10.12-WEB.3';
-import {venuePolicySettings,venuePolicyRequestVenue,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicyBalance,venuePolicyReservedCredits,venuePolicyAvailableCredits,venuePolicySavedSnapshot} from './venue-policy.js?v=10.12-WEB.3';
+import {validateHome} from './home-settings.js?v=10.12-WEB.4';
+import {requestSource} from './request-source.js?v=10.12-WEB.4';
+import {newPracticeReorder,newPracticeRanks,NEW_PRACTICE_TAG,isNewPracticeSong,newPracticeSongTags,newPracticeDate,setNewPracticeSong} from './new-practice.js?v=10.12-WEB.4';
+import {venuePolicySettings,venuePolicyRequestVenue,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicyBalance,venuePolicyReservedCredits,venuePolicyAvailableCredits,venuePolicySavedSnapshot} from './venue-policy.js?v=10.12-WEB.4';
 export const TABLES=['players','songs','ledger','queue','crowns','cards','wishes'];
 export const TIERS=[{name:'金卡',fee:55599,price:4200,months:1},{name:'鉑金卡',fee:125000,price:9999,months:1},{name:'鑽石卡',fee:375000,price:18188,months:1},{name:'黑卡',fee:500000,price:27999,months:3},{name:'至尊卡',fee:925000,price:55599,months:0}];
 export const DEFAULTS={status:'空閒中',hourlyLimit:2,opening:'19:00～01:00（可能加班）',audition:387,livePrice:2990,liveDouble:500,crownDouble:18188,tiers:TIERS,plans:[{name:'一般 2 首',amount:2,fee:5555,double:990},{name:'一般 3 首',amount:3,fee:7299,double:1399},{name:'一般 6 首',amount:6,fee:13999,double:2799},{name:'🏅 金牌歌單',amount:10,fee:22887,double:4200}],tags:['嗨歌','傷感','甜歌','怪歌','慢歌'],manual:'1. 先登入玩家，再挑首喜歡的歌 ♡\n2. 提歌扣存歌，每小時有上限。\n3. 現點送出後，等{streamer}確認禮物。\n4. 冠歌主人照一般規則；其他玩家依卡別現點。'};
@@ -72,19 +72,19 @@ function deleteQueue(s,q,t){
  if(allocated(q))return;
  s.queue=s.queue.filter(x=>x.id!==q.id);s.ledger=s.ledger.filter(x=>x.queueId!==q.id);
 }
-function editQueue(s,q,p,t){
+function editQueue(s,q,p,t,quoteAt){
  requireThat(['pending','waiting'].includes(q.status),'僅待確認或待唱紀錄可以編輯');
  requireThat(Object.keys(p).every(k=>['id','operation','songId','pairSongId','selfProvided','note','at','effective_at'].includes(k)),'只能修改待播歌曲、演唱方式、備註與實際時間');
  const songId=p.songId??q.songId,oldPair=q.items?.[1]?.songId||'',pairSongId=p.pairSongId??(songId===q.songId?oldPair:'');
- const changed=songId!==q.songId||pairSongId!==oldPair;
+ const changed=songId!==q.songId||pairSongId!==oldPair||quoteAt!==undefined;
  const editedTime=p.effective_at!==undefined?p.effective_at:p.at;
  const at=editedTime===undefined?q.at:validTime(editedTime,t);
  if(allocated(q))q.receivedCreditCost??=queueCost(q);
  if(changed){
   const song=s.songs.find(x=>x.songId===songId);requireThat(song,'找不到目前主播的歌曲');
-  const crown=crownFor(s,songId,at||t),other=crown&&crown.playerId!==q.playerId;
+  const quoteTime=quoteAt??(at||t),crown=crownFor(s,songId,quoteTime),other=crown&&crown.playerId!==q.playerId;
   requireThat(!other||q.kind==='live','這首是冠歌，請依卡別現點 👑');
-  const quote=quoteSong(s,songId,{pairSongId},q.playerId,at||t),oldCost=queueCost(q),delta=oldCost-quote.creditCost;
+  const quote=quoteSong(s,songId,{pairSongId},q.playerId,quoteTime),oldCost=queueCost(q),delta=oldCost-quote.creditCost;
   if(q.kind==='saved')requireThat(venuePolicyAvailableCredits(s,q.playerId,venuePolicyConsumedPool(q),{excludeQueueId:q.id})>=quote.creditCost,'存歌不足，請先核對玩家餘額');
   if(allocated(q)&&delta){
    requireThat(delta>0||venuePolicyAvailableCredits(s,q.playerId,allocationPool(q))>=-delta,'可用存歌不足，無法增加分配首數');
@@ -97,12 +97,43 @@ function editQueue(s,q,p,t){
  if(p.note!==undefined)q.note=String(p.note).trim().slice(0,1000);
  if(editedTime!==undefined){q.at=at;if(q.recordedAt)q.recordedAt=at;}
 }
+export function ownQueueReplacementQuote(s,p,actor,t=stamp()){
+ requireThat(actor?.role==='player'&&actor.playerId,'請先登入玩家');
+ requireThat(p&&typeof p==='object'&&!Array.isArray(p)&&Object.keys(p).every(k=>['id','songId','pairSongId','giftConfirmed'].includes(k))&&typeof p.id==='string'&&typeof p.songId==='string'&&p.songId.length>0&&p.songId.length<=128&&(p.pairSongId===undefined||typeof p.pairSongId==='string'&&p.pairSongId.length<=128)&&(p.giftConfirmed===undefined||typeof p.giftConfirmed==='boolean'),'換歌資料不正確');
+ const q=s.queue.find(row=>row.id===p.id&&row.playerId===actor.playerId&&(!row.streamer_id||row.streamer_id===s.currentStreamer?.id));
+ requireThat(q&&['pending','waiting'].includes(q.status)&&['saved','live'].includes(q.kind),'只能更換自己尚未演唱的點歌');
+ requireThat(!requirePlayer(s,actor.playerId).archived,'玩家已封存，請先恢復玩家');
+ requireThat(s.currentStreamer?.active!==false,'主播頁暫未開放，仍可取消自己的點歌');
+ const song=s.songs.find(row=>row.songId===p.songId);requireThat(song&&!song.hidden&&!song.deleted&&!song.disabled&&song.active!==false&&song.available!==false,'歌曲目前未開放');
+ const pair=p.pairSongId?s.songs.find(row=>row.songId===p.pairSongId):null;
+ requireThat(!p.pairSongId||pair&&!pair.hidden&&!pair.deleted&&!pair.disabled&&pair.active!==false&&pair.available!==false,'搭配歌曲目前未開放');
+ const crown=crownFor(s,song.songId,t);requireThat(!crown||crown.playerId===actor.playerId||q.kind==='live','這首是冠歌，請依卡別現點 👑');
+ const quote=quoteSong(s,song.songId,p,actor.playerId,t);
+ if(q.kind==='saved'){
+  requireThat(venuePolicyAvailableCredits(s,actor.playerId,venuePolicyConsumedPool(q),{excludeQueueId:q.id})>=quote.creditCost,'存歌不足，請先核對玩家餘額');
+  if(quote.creditCost>queueCost(q))requireThat(canRequestSaved({...s,queue:s.queue.filter(row=>row.id!==q.id)},quotaTime(q)||t,quote.creditCost,actor.playerId),'原小時剩餘提歌額度不足，請選首數相同的歌曲');
+ }
+ if(allocated(q)&&quote.creditCost>queueCost(q))requireThat(venuePolicyAvailableCredits(s,actor.playerId,allocationPool(q))>=quote.creditCost-queueCost(q),'可用存歌不足，無法增加分配首數');
+ return {...quote,...requestFees(s,crown,actor.playerId),songId:song.songId,title:song.title,artist:song.artist,kind:q.kind};
+}
 function mutateRoom(source,action,actor,t=stamp()){
  const s=structuredClone(source),a=action,payload=a.data||{};const admin=actor?.role==='admin';
- if(!['request','wish','self','cancelOwn'].includes(a.type))requireThat(admin,'請先登入管理');
- if(['request','wish','self','cancelOwn'].includes(a.type))requirePlayer(s,actor?.playerId);
+ if(!['request','wish','self','cancelOwn','replaceOwn'].includes(a.type))requireThat(admin,'請先登入管理');
+ if(['request','wish','self','cancelOwn','replaceOwn'].includes(a.type))requirePlayer(s,actor?.playerId);
  switch(a.type){
  case 'cancelOwn':{const q=s.queue.find(x=>x.id===payload.id);requireThat(q&&q.playerId===actor.playerId,'只能取消自己的點歌');cancelQueue(s,q,t,actor.playerId);break;}
+ case 'replaceOwn':{
+  const quote=ownQueueReplacementQuote(s,payload,actor,t),q=s.queue.find(row=>row.id===payload.id);
+  const performances=row=>JSON.stringify((row.items||[{songId:row.songId,performances:1}]).map(item=>[item.songId,item.performances||1]));
+  const changed=quote.songId!==q.songId||performances(quote)!==performances(q);
+  requireThat(changed,'請選擇不同歌曲或演唱方式');
+  requireThat(q.kind!=='live'||payload.giftConfirmed===true,'請確認換歌後的現點禮物價格');
+  const feesChanged=q.kind==='live'&&(quote.price!==q.price||quote.double!==q.double||quote.creditCost!==queueCost(q));
+  editQueue(s,q,{id:q.id,operation:'edit',songId:payload.songId,pairSongId:payload.pairSongId||''},t,t);
+  if(feesChanged)q.status='pending';q.awaitingAcknowledgment=true;q.awaitingPreparation=true;
+  q.preparationMinutes=null;q.preparationStartedAt=null;q.preparationEndsAt=null;q.readyAt=null;q.stage='⏳ 等待中';
+  q.replacedAt=t;q.replaced_by=actor.playerId;break;
+ }
  case 'streamerDraw':{const item=s.songs.find(x=>x.songId===payload.songId);requireThat(item&&!item.hidden&&item.active!==false&&!item.disabled&&item.available!==false,'找不到可用歌曲');s.queue.push({id:uid(),songId:item.songId,title:item.title,artist:item.artist,playerId:null,venue:venuePolicyRequestVenue(s),kind:'self',source:'streamer_draw',selfProvided:true,creditCost:0,status:'waiting',at:t,acceptedAt:t,stage:'⏳ 等待中',items:[{songId:item.songId,title:item.title,artist:item.artist,performances:1}]});break;}
  case 'onBehalf':{const proxy={role:'admin',playerId:payload.playerId,loginId:''};const at=validTime(payload.effective_at||payload.at||t,t);let next=mutateRoom(s,{type:'request',data:payload},proxy,at);const q=next.queue.at(-1);q.recordedAt=payload.at?at:null;q.createdAt=t;q.created_at=t;q.effective_at=at;q.note=String(payload.note||'').trim().slice(0,1000);if(payload.completed){q.awaitingAcknowledgment=false;setPreparation(q,0,at);if(q.kind==='live')next=mutateRoom(next,{type:'queue',data:{id:q.id,operation:'approve',preparationMinutes:0}},actor,at);next=mutateRoom(next,{type:'queue',data:{id:q.id,operation:'complete'}},actor,at);}return next;}
  case 'request':{const p=requirePlayer(s,actor.playerId),song=s.songs.find(x=>x.songId===payload.songId);requireThat(!p.archived,'玩家已封存，請先恢復玩家再新增點歌');requireThat(song&&!song.hidden,'找不到歌曲');requireThat(admin||s.settings.status!=='暫停點歌',(s.currentStreamer?.display_name||'主播')+'休息一下，等等再來 ♡');requireThat(['saved','live'].includes(payload.kind),'請選提歌或現點');const requestNote=payload.requestNote===undefined?'':requestNoteText(payload.requestNote);const c=crownFor(s,song.songId,t),other=c&&c.playerId!==p.playerId;requireThat(!other||payload.kind==='live','這首是冠歌，請依卡別現點 👑');const quote=quoteSong(s,song.songId,payload,p.playerId,t),venueOptions={venue:payload.venue,allowOverride:admin};let venueSnapshot={venue:venuePolicyRequestVenue(s,venueOptions)};if(payload.kind==='saved'){requireThat(admin||canRequestSaved(s,t,quote.creditCost,p.playerId),'本小時剩餘提歌額度不足，請改用現點或下個小時再提歌。');try{venueSnapshot=venuePolicySavedSnapshot(s,p.playerId,quote.creditCost,venueOptions);}catch(error){if(error.message==='可用存歌不足，請先核對玩家餘額')throw Error('存歌袋空空，風吹進去都有回音。');throw error;}}else requireThat(payload.giftConfirmed===true,'請先確認現點禮物價格');const q={...quote,...venueSnapshot,...(requestNote?{requestNote}:{}),id:uid(),songId:song.songId,playerId:p.playerId,loginId:actor.loginId||'',title:song.title,artist:song.artist,kind:payload.kind,...requestSource(payload),status:payload.kind==='saved'?'waiting':'pending',awaitingAcknowledgment:true,awaitingPreparation:true,at:t,acceptedAt:payload.kind==='saved'?t:null,stage:'⏳ 等待中',test:!!p.test,...requestFees(s,c,p.playerId),crownId:other?c.id:null};s.queue.push(q);break;}

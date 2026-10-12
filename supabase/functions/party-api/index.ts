@@ -1,4 +1,4 @@
-import {applyPlayerRequestBatch,validateRequestBatch} from '../../../src/player-bulk-tools.js';
+import {applyPlayerRequestBatch,validateRequestBatch,applyOwnQueueBatch,validateOwnQueueBatch} from '../../../src/player-bulk-tools.js';
 import {isSuper,isManager,coreActor,requireRoom,authorizeManagerOperation,managementView,noticeIdentity,validNoticeAudio,prepareManagerAction} from '../../../src/access-policy.js';
 import {stateChanges,scopedOperationalAction,scopedRoomMutationAction} from '../../../src/state-patch.js';
 import {applyRoomImport} from '../../../src/room-import.js';
@@ -103,7 +103,7 @@ function schedulePush(room?:string,recipients:string[]=[]){EdgeRuntime.waitUntil
 
 import {deriveNotices} from '../../../src/notification-rules.js';
 // Authentication is checked here for every operation; no browser service key.
-import {empty,TABLES,mutate,publicView,migrateLegacy,previewImport,applyImport,playerSearch,upgradePlatform,scopeState,searchAcrossStreamers,balance,reservedCredits,usedHour,reservedHour,quoteSong,hourKey,canRequestSaved} from '../../../src/core.js';
+import {empty,TABLES,mutate,publicView,migrateLegacy,previewImport,applyImport,playerSearch,upgradePlatform,scopeState,searchAcrossStreamers,balance,reservedCredits,usedHour,reservedHour,quoteSong,hourKey,canRequestSaved,ownQueueReplacementQuote} from '../../../src/core.js';
 import {venuePolicySavedSnapshot} from '../../../src/venue-policy.js';
 import {buildNativePlayerBindings} from '../../../src/native-player-bindings.js';
 import {chatAccess} from '../../../src/chat-policy.js';
@@ -397,7 +397,7 @@ function managerPasswordError(result:any,kind:string){
  if(!result?.ok)throw Error(messages[result?.reason]||'密碼設定未完成，請重新登入後再試');
 }
 
-Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();if(b.op==='releaseInfo')return respond({version:'10.12-WEB.3',messageCenterV2:false,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();if(b.op==='releaseInfo')return respond({version:'10.12-WEB.4',messageCenterV2:false,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));
  if(b.op==='entryLegacyRooms'){
   const rooms=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:'space-001'});
@@ -556,14 +556,38 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('收藏分頁資料不正確');
   return respond(await api('/rest/v1/rpc/papa_song_favorites_page',{...common,page_limit:limit,page_offset:page*limit}));
  }
- if(b.op==='playerStreamerSummary'||b.op==='playerSongChoices'){
+ if(b.op==='playerStreamerSummary'||b.op==='playerSongChoices'||b.op==='ownQueuePage'){
   if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
   const room=await catalogRoom(who,b.streamer||'papa');if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
   const page=b.page??0,limit=b.limit??20;if(!Number.isSafeInteger(page)||page<0||!Number.isSafeInteger(limit)||limit<1||limit>50||page*limit>10000000)throw Error('分頁資料不正確');
   const context={role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',streamer_id:room.id};
   if(b.op==='playerStreamerSummary')return respond(await api('/rest/v1/rpc/papa_player_streamer_summary',{requested_space:room.spaceId||'space-001',actor_context:context,page_limit:limit,page_offset:page*limit}));
+  if(b.op==='ownQueuePage'){if(limit>20||!['newest','oldest'].includes(b.sort??'newest'))throw Error('待播分頁資料不正確');return respond(await api('/rest/v1/rpc/papa_player_queue_page',{requested_space:room.spaceId||'space-001',actor_context:context,requested_sort:b.sort??'newest',page_limit:limit,page_offset:page*limit}));}
   const q=b.q??'',tags=b.tags??[];if(typeof q!=='string'||q.length>100||!Array.isArray(tags)||tags.length>20||tags.some((t:any)=>typeof t!=='string'||!t||t.length>50)||b.random!==undefined&&typeof b.random!=='boolean')throw Error('歌曲篩選不正確');
   return respond(await api('/rest/v1/rpc/papa_player_song_choices',{requested_space:room.spaceId||'space-001',requested_room:room.id,actor_context:context,query_text:q.trim(),tags,page_limit:b.random?1:Math.min(limit,20),page_offset:b.random?0:page*Math.min(limit,20),random_choice:b.random===true}));
+ }
+ if(b.op==='ownQueueQuote'){
+  if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
+  validateOwnQueueBatch([{...b.choice,operation:'replace'}]);
+  const room=await catalogRoom(who,b.streamer||'papa');if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');
+  const source=await load(true,room.id,room.spaceId||'space-001',null,who.playerId),scoped=scopeState(source,room.id),quote=ownQueueReplacementQuote(scoped,b.choice,coreActor(who),t);
+  return respond({revision:source.revision,quote:{songId:quote.songId,title:quote.title,artist:quote.artist,kind:quote.kind,creditCost:quote.creditCost,price:quote.price,double:quote.double,items:quote.items}});
+ }
+ if(b.op==='ownQueueBatch'){
+  if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
+  if(!Number.isSafeInteger(b.revision)||b.revision<0||!Array.isArray(b.jobs)||!b.jobs.length||b.jobs.length>10||new Set(b.jobs.map((j:any)=>j?.streamer)).size!==b.jobs.length||b.jobs.some((j:any)=>!j||typeof j.streamer!=='string'||!j.streamer||j.streamer.length>200)||b.jobs.reduce((n:number,j:any)=>n+(j.rows?.length||0),0)>50)throw Error('待播批次資料不正確');
+  for(const job of b.jobs)validateOwnQueueBatch(job.rows);
+  const results:any[]=[],resolvedRooms=new Set<string>();let checkedRevision=false;
+  for(const job of b.jobs){let commitStarted=false;try{
+   const room=await catalogRoom(who,job.streamer,true);if((room.spaceId||'space-001')!=='space-001'||(room.spaceId||'space-001')!==(who.spaceId||'space-001'))throw Error('主播不屬於目前空間');
+   if(resolvedRooms.has(room.id))throw Error('同一批不能重複指定同一位主播');resolvedRooms.add(room.id);
+   const source=await load(true,room.id,room.spaceId||'space-001',null,who.playerId);
+   if(!checkedRevision){if(source.revision!==b.revision)throw revisionConflictError();checkedRevision=true;}
+   const next=applyOwnQueueBatch(source,job.rows,coreActor(who),t,room.id);
+   commitStarted=true;const committed=await commit(source,next,{role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',actor_streamer_id:null,streamer_id:room.id,roomScoped:true,action:'ownQueueBatch'});
+   results.push({streamer:job.streamer,ok:true,count:job.rows.length,revision:committed.revision});
+  }catch(error){const unknown=commitStarted&&error.rpcRejected!==true;results.push({streamer:job.streamer,ok:false,...(unknown?{unknown:true}:{}),error:unknown?'結果待確認，請先查看待播，避免重複送出':error.message||'操作失敗'});}}
+  return respond({results});
  }
  if(b.op==='requestsBatch'){
   if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
@@ -664,7 +688,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   }
  }
  if(b.op==='mutate'&&!who)throw Error('請先登入');
- if(b.op==='mutate'&&who?.role==='player'&&!['request','wish','self','cancelOwn'].includes(b.action?.type))throw Error('請先登入管理');
+ if(b.op==='mutate'&&who?.role==='player'&&!['request','wish','self','cancelOwn','replaceOwn'].includes(b.action?.type))throw Error('請先登入管理');
  if(b.op==='mutate'&&b.action?.type==='streamer')return respond(await mutateStreamerRegistry(b,who,t));
  if(b.op==='songSearch'){const room=await catalogRoom(who,b.streamer||'papa',true);if((room.spaceId||'space-001')!=='space-001')throw Error('此 Space 的資料頁尚未開放');const query=String(b.query||'').trim();if(query.length>100)throw Error('搜尋文字過長');return respond({songs:query?await api('/rest/v1/rpc/papa_song_search_in_space',{query_text:query,requested_space:room.spaceId||'space-001',page_limit:100}):[]});}
  const roomScoped=b.op==='mutate'&&scopedOperationalAction(b.action);
