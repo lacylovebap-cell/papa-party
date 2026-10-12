@@ -60,3 +60,6 @@ revision3899取樣：未找到缺失queue的allocationSettlement、同queue有�
 整合最終驗證：1,117/1,117通過，Web/Edge build成功；新002/007/008在隔離PostgreSQL同時安裝後仍通過原子RPC、rollback及統計測試。合法正向人工回補有獨立用途、不算新增收歌，更正沿用用途及原來源。390px實際本機UI六個按鈕同top、document無水平溢出，More選單留在視窗內。
 
 一般存歌混合額度沿用既有存歌池ledger及queue/performance/settlement連結；新分配有精確原receipt ID。沒有為歷史混合池扣款臆測FIFO來源或新增第二套帳本。詳細事件來源/容量與封存辨識另見AUDIT-EVENT-SOURCES-2026-10-12.md。
+
+
+2026-10-13使用者再次確認既有台灣時間19:00換場規則必須保留。上述午夜換日假設由10.13-WEB.1及202610130001取代：帳務日期為場次開始日期，跨午夜仍屬同場，19:00才換場。只改查詢與顯示邊界，不改任何既有正式帳務紀錄。

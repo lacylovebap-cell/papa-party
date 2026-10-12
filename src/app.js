@@ -1,34 +1,34 @@
-import {accountingDay} from './accounting.js?v=10.12-WEB.5';
-import {installPageJumps} from './ui-page-jumps.js?v=10.12-WEB.5';
-import {createWebAppInstall} from './web-app-install.js?v=10.12-WEB.5';
-import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.12-WEB.5';
-import {webApiFailure} from './web-api-errors.js?v=10.12-WEB.5';
-import {canonicalNoticeLink} from './notification-rules.js?v=10.12-WEB.5';
-import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.12-WEB.5';
-import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.12-WEB.5';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.12-WEB.5';
-import {fateCategories,drawSong} from './fate.js?v=10.12-WEB.5';
-import {createBoard} from './board.js?v=10.12-WEB.5';
-import {createChat} from './chat.js?v=10.12-WEB.5';
-import {requestSourceLabel} from './request-source.js?v=10.12-WEB.5';
-import {normalizeHome,themePalette} from './home-settings.js?v=10.12-WEB.5';
-import {openHomeEditor} from './home-editor.js?v=10.12-WEB.5';
-import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.12-WEB.5';
-import {createNotifications} from './notifications.js?v=10.12-WEB.5';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.12-WEB.5';
-import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.12-WEB.5';
-import {createPlayerManager} from './player-manager.js?v=10.12-WEB.5';
-import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.12-WEB.5';
-import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.12-WEB.5';
-import {createSongFavorites} from './song-favorites.js?v=10.12-WEB.5';
-import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.12-WEB.5';
-import {listenedSongs} from './listening-history.js?v=10.12-WEB.5';
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.12-WEB.5';
-import {createWebDeviceLogin} from './web-device-login.js?v=10.12-WEB.5';
-import {roomStorageKey} from './communication-context.js?v=10.12-WEB.5';
-import {createWebSpaceEntry} from './web-space-entry.js?v=10.12-WEB.5';
-import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.12-WEB.5';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.12-WEB.5';
+import {accountingDay} from './accounting.js?v=10.13-WEB.1';
+import {installPageJumps} from './ui-page-jumps.js?v=10.13-WEB.1';
+import {createWebAppInstall} from './web-app-install.js?v=10.13-WEB.1';
+import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.13-WEB.1';
+import {webApiFailure} from './web-api-errors.js?v=10.13-WEB.1';
+import {canonicalNoticeLink} from './notification-rules.js?v=10.13-WEB.1';
+import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.13-WEB.1';
+import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.13-WEB.1';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.13-WEB.1';
+import {fateCategories,drawSong} from './fate.js?v=10.13-WEB.1';
+import {createBoard} from './board.js?v=10.13-WEB.1';
+import {createChat} from './chat.js?v=10.13-WEB.1';
+import {requestSourceLabel} from './request-source.js?v=10.13-WEB.1';
+import {normalizeHome,themePalette} from './home-settings.js?v=10.13-WEB.1';
+import {openHomeEditor} from './home-editor.js?v=10.13-WEB.1';
+import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.13-WEB.1';
+import {createNotifications} from './notifications.js?v=10.13-WEB.1';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.13-WEB.1';
+import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.13-WEB.1';
+import {createPlayerManager} from './player-manager.js?v=10.13-WEB.1';
+import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.13-WEB.1';
+import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.13-WEB.1';
+import {createSongFavorites} from './song-favorites.js?v=10.13-WEB.1';
+import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.13-WEB.1';
+import {listenedSongs} from './listening-history.js?v=10.13-WEB.1';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.13-WEB.1';
+import {createWebDeviceLogin} from './web-device-login.js?v=10.13-WEB.1';
+import {roomStorageKey} from './communication-context.js?v=10.13-WEB.1';
+import {createWebSpaceEntry} from './web-space-entry.js?v=10.13-WEB.1';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.13-WEB.1';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.13-WEB.1';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let appInstallMessage='';
 const appInstall=createWebAppInstall({onChange:syncAppInstall});
@@ -363,7 +363,7 @@ function header(){const p=me();$('#header').innerHTML=`${demo?'<div class="offli
 function card(title,body,wide=false,action=''){return `<section class="card ${wide?'wide':''}">${title||action?`<div class="section-head"><h2>${title}</h2>${action}</div>`:''}${body}</section>`;}
 function songRows(rows){return rows.map((s,i)=>{const c=crownFor(state,s.songId,clock());return `<div class="song"><span class="song-gutter"><span class="number">${i+1}</span>${route==='center'&&subtab==='favorites'?'<input type="checkbox" data-favorite-select="'+h(s.songId)+'" aria-label="選取 '+h(s.title)+'" '+(selectedFavorites.has(s.songId)?'checked':'')+'>':''}</span><div class="info"><b>${h(s.title)}${c?' 👑':''}</b><small>${h(s.artist)} · ${plays(s)} 次</small>${s.murmur?`<div class="subtle">💬 ${h(hostName())}碎碎念：${h(s.murmur)}</div>`:''}<div>${(s.tags||[]).map(t=>`<span class="tag">${h(t)}</span>`).join('')}</div></div><div class="actions song-actions">${favoriteButton(s.songId)}${button('提歌','request',s.songId,'tiny','data-kind="saved"')}${button('現點','request',s.songId,'tiny','data-kind="live"')}</div></div>`;}).join('')||blank(say('empty'));}
 function hour(){const current=state.hourBucket===hourKey(clock()),grant=(me()?.quotaRights||[]).find(x=>x.streamer_id===state.currentStreamer?.id),quota=isAdmin()?savedQuota(state,clock()):current?(state.hourlyPersonal||{used:state.hourlyUsed||0,reserved:state.hourlyReserved||0,extraQuota:0,personalUsed:0,extraRemaining:0,commonRemaining:Math.max(0,state.settings.hourlyLimit-(state.hourlyUsed||0)-(state.hourlyReserved||0))}):{used:0,reserved:0,extraQuota:grant?.extra_quota||0,personalUsed:0,extraRemaining:grant?.extra_quota||0,commonRemaining:Number(state.settings.hourlyLimit)},available=quota.commonRemaining+quota.extraRemaining,limit=Number(state.settings.hourlyLimit)+quota.extraQuota,occupied=quota.used+quota.reserved+quota.personalUsed,remaining=Math.ceil((3600000-(Date.now()+offset)%3600000)/60000);return '<small>🕒 本小時提歌額度</small><strong>'+occupied+' / '+limit+(!available?' <span class="quota-full">提滿了</span>':'')+'</strong><small>還可使用 '+available+' 首額度'+(quota.extraQuota?'（共用 '+quota.commonRemaining+' ＋ 專屬 '+quota.extraRemaining+'）':'；待唱保留 '+quota.reserved+' 首')+'</small><small>距離下一次提歌重置還有 '+remaining+' 分鐘</small>';}
-function currentAccounting(){return state.summary||(demo||draft&&isAdmin()?stats(state,clock()):null);}
+function currentAccounting(){if(state.summary?.day===accountingDay(clock()))return state.summary;return demo||draft&&isAdmin()?stats(state,clock()):null;}
 function statsHtml(s){if(!s)return blank('帳務摘要尚未確認');return `<div class="stats"><div class="stat">🎵 今日收到<b>${s.received}</b></div><div class="stat">🎤 今日已唱<b>${s.sung}</b></div><div class="stat">💾 剩餘存歌<b>${s.saved}</b></div></div>`;}
 function crownsHtml(rows,adminMode=false){return `<div class="crown-grid">${rows.map(c=>{const remaining=c.expiresAt?(timeValue(c.expiresAt)-Date.now()-offset)/86400000:Infinity,status=!c.activatedAt?'⏳ 待確認':!isActive(c,clock())?'🕒 已過期':remaining<=7?'⚠️ 即將到期':!c.expiresAt?'♾️ 永久':'👑 生效中';return `<div class="crown"><h3>${h(song(c.songId)?.title||c.title||'歌曲待核對')} 👑</h3><p>${h(c.tier)} · ${h(c.ownerName||playerName(c.playerId))}</p>${adminMode||c.activatedAt?`<p>${h(status)}${c.expiresAt?' · '+time(c.expiresAt):''}</p>`:''}<p>其他玩家現點 ${money(c.price)}／首<br><span>＋雙費 ${money(state.settings.liveDouble??500)} 探鑽</span></p>${adminMode?button('編輯／生效','editCrown',c.id)+button('時間','recordTime',c.id,'tiny','data-table="crowns"'):button('👑 點冠歌','requestCrown',c.id,'tiny primary')}</div>`;}).join('')||blank('還沒有冠歌，王冠等你戴 ♡')}</div>`;}
 function currentCards(){return state.cards.filter(c=>timeValue(c.startsAt)<=Date.now()+offset&&(!c.expiresAt||timeValue(c.expiresAt)>Date.now()+offset));}
@@ -540,7 +540,7 @@ function renderAdmin(){if(tab==='dashboard')tab='queue';let body='';
  if(tab==='crowns')body=`<div class="toolbar">${button('新增冠歌','editCrown')}${button('批量匯入','import','crowns')}${button('如何冠歌？','crownHelp')}</div>${crownsHtml(state.crowns,true)}`;
  if(tab==='cards')body=`<div class="toolbar">${button('上傳照片卡','editCard')}</div><div class="gallery">${state.cards.map(c=>`<div>${photoHtml(c)}${button('編輯','editCard',c.id)}${button('刪除','deleteCard',c.id,'tiny danger')}</div>`).join('')||blank()}</div>`;
  if(tab==='wishes')body=wishRows(state.wishes,true);
- if(tab==='stats')body=`<label>帳務日期<input id="stats-day" type="date" value="${accountingDay(clock())}"></label><div id="stats-result">${statsHtml(currentAccounting())}</div><p class="muted">台灣時間每日 00:00 換日。今日收到為有效收歌，今日已唱包含已過檔與不計熱門的正式演唱。剩餘存歌為目前帳務餘額，包含保留額度；跨日不以收到減已唱推算。測試資料不列入。</p>`;
+ if(tab==='stats')body=`<label>帳務日期<input id="stats-day" type="date" value="${accountingDay(clock())}"></label><div id="stats-result">${statsHtml(currentAccounting())}</div><p class="muted">台灣時間每日 19:00 換場，帳務日期為場次開始日期。今日收到為有效收歌，今日已唱包含已過檔與不計熱門的正式演唱。剩餘存歌為目前帳務餘額，包含保留額度；跨日不以收到減已唱推算。測試資料不列入。</p>`;
  if(tab==='events'){body='<p class="muted">重要操作永久保留，依登記時間由新到舊。可展開核對修改前後資料。</p><div id="event-list">讀取中…</div>';setTimeout(loadEvents,0);}if(tab==='settings')body=settingsHtml();
  if(tab==='catalog'&&admin){if(!isSuperAdmin()&&!['approved','issues'].includes(catalogView.section))catalogView.section='approved';body=catalogReviewHtml();}
  $('#app').innerHTML=`<div class="admin-banner"><b>🔐 ${isSuperAdmin()?'PA Party總裁 · ':''}${h(hostName())}的管理後台</b><div class="actions">${button(h('回'+hostName()+'首頁'),'home')}${button('修改密碼','changeManagerPassword')}${button('登出管理','adminLogout')}</div></div><div class="streamer-toolbar"><details class="room-picker"><summary>目前管理主播：${h(state.currentStreamer.display_name)}</summary><input type="search" data-room-filter placeholder="搜尋主播"><div class="room-options">${state.streamers.map(r=>button(h(r.display_name)+(r.active?'':'（未開放）'),'switchStreamer',r.slug)).join('')}</div></details>${isSuperAdmin()?'<details class="streamer-management-tools"><summary>主播管理</summary><div class="actions">'+button('新增主播','editStreamer')+button('編輯主播','editStreamer',state.currentStreamer.id)+button('主播帳號與密碼','streamerAccounts')+'</div></details>':''}</div><div class="tabs admin-section-tabs" aria-label="管理功能">${adminTabs.slice(0,4).map(([id,label])=>button(label+(id==='wishes'&&state.wishes.some(w=>w.status==='收到')?' <span class="notice-count">'+Math.min(99,state.wishes.filter(w=>w.status==='收到').length)+'</span>':''),'adminTab',id,tab===id?'active':'')).join('')}${button('共同曲庫','adminTab','catalog',tab==='catalog'?'active':'')}<details class="admin-more-tabs ${adminTabs.slice(0,4).some(([id])=>id===tab)||tab==='catalog'?'':'active'}"><summary>更多</summary><div class="admin-more-options">${adminTabs.slice(4).map(([id,label])=>button(label+(id==='wishes'&&state.wishes.some(w=>w.status==='收到')?' <span class="notice-count">'+Math.min(99,state.wishes.filter(w=>w.status==='收到').length)+'</span>':''),'adminTab',id,tab===id?'active':'')).join('')}</div></details></div><section class="card">${body}</section>`;if(!isSuperAdmin()){for(const el of document.querySelectorAll('[data-act=editStreamer],[data-act=draft],[data-act=publish],[data-act=backup],[data-act=migrate],[data-act=import][data-id=players]'))el.remove();document.querySelector('.room-picker')?.remove();}if(tab==='catalog'&&!catalogView.loaded&&!catalogView.loading)setTimeout(loadCatalogReview,0);
@@ -769,7 +769,7 @@ async function updateSearch(input){const id=input.id;try{
  if(id==='ledger-query'){ledgerQuery=input.value;pages.ledger=1;const holder=document.createElement('div');holder.innerHTML=ledgerRows(null,true);$('#ledger-results').replaceWith(holder.querySelector('#ledger-results'));}
  if(id==='stats-day'){
   const target=$('#stats-result'),day=input.value,scope=syncReadIdentity();target.innerHTML=blank('讀取帳務摘要…');
-  try{const value=demo||draft&&isAdmin()?stats(state,day+'T12:00:00+08:00'):(await api({op:'accountingSummary',day,management:true})).summary;
+  try{const value=demo||draft&&isAdmin()?stats(state,day+'T19:00:00+08:00'):(await api({op:'accountingSummary',day,management:true})).summary;
    if(scope===syncReadIdentity()&&input.isConnected&&input.value===day&&$('#stats-result')===target)target.innerHTML=statsHtml(value);
   }catch(error){if(scope===syncReadIdentity()&&input.isConnected&&input.value===day&&$('#stats-result')===target)target.innerHTML=blank('帳務摘要尚未確認：'+error.message);}
  }

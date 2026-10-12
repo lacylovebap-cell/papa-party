@@ -1,5 +1,6 @@
 // Shared server/domain projection over the existing ledger. Never a second book.
-export const accountingDay=t=>new Date(Date.parse(t)+8*3600000).toISOString().slice(0,10);
+// Preserve the existing Taipei 19:00 show boundary (UTC 11:00).
+export const accountingDay=t=>new Date(Date.parse(t)-11*3600000).toISOString().slice(0,10);
 const cost=q=>Number(q.creditCost??1);
 export const reservationAllocation=q=>q.kind==='live'&&q.allocation_model==='reservation-v1';
 export function accountingStats(s,t){

@@ -16,7 +16,7 @@ test('real atomic RPC, deferred linkage, stale-device replay, rollback and selec
  for(const r of stateEntries(state))await q('insert into papa_v2_entities values($1,$2,$3)',[r.kind,r.id,r.data]);
  await q('update papa_v2_revision set revision=$1',[state.revision]);
  await db.exec('alter table papa_notifications add column space_id text;');
- for(const file of ['202610070001_space_foundation.sql','202610070011_room_operational_commit.sql','202610120002_message_center_categories.sql','202610120007_message_center_preferences.sql','202610120008_accounting_integrity.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
+ for(const file of ['202610070001_space_foundation.sql','202610070011_room_operational_commit.sql','202610120002_message_center_categories.sql','202610120007_message_center_preferences.sql','202610120008_accounting_integrity.sql','202610130001_accounting_show_boundary.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
  const commit=async(before,after,notices=[])=>{const patch=stateChanges(before,after,{preserveOrder:true});return (await q('select papa_room_operational_commit($1,$2,$3,$4,$5,$6) rev',[before.revision,patch.changes,patch.removed,ctx,notices,'papa']))[0].rev;};
  const run=async(type,data,time=at)=>{const next=mutate(state,{streamer:'papa',type,data},actor,time);next.revision=await commit(state,next);state=next;};
  const summary=async(day='2026-10-12')=>(await q('select papa_accounting_summary($1,$2,$3) value',['space-001','papa',day]))[0].value;
@@ -58,5 +58,17 @@ test('real atomic RPC, deferred linkage, stale-device replay, rollback and selec
  await assert.rejects(commit(state,reversed),/DUPLICATE_REVERSAL|VOID_INVALID/);assert.deepEqual(await snapshot(),original);
  assert.equal((await summary('2026-10-13')).received,0);assert.equal((await summary('2026-10-13')).saved,2);
  await assert.rejects(q("select papa_accounting_summary('another-space','papa','2026-10-12')"),/SCOPE_INVALID/);
+ await t.test('server aggregates retain the show across midnight and switch only at Taipei 19:00',async()=>{
+  await run('ledger',{playerId:player,amount:1},'2026-10-13T10:59:59Z');
+  await run('ledger',{playerId:player,amount:2},'2026-10-13T11:00:00Z');
+  await run('ledger',{playerId:player,amount:3},'2026-10-13T16:00:00Z');
+  await run('onBehalf',{playerId:player,songId:song,kind:'saved',completed:true},'2026-10-13T16:00:00Z');
+  assert.equal((await summary('2026-10-12')).received,4);
+  assert.equal((await summary('2026-10-13')).received,5);
+  assert.equal((await summary('2026-10-13')).sung,1);
+  assert.equal((await summary('2026-10-13')).rolloverHour,19);
+  const local=stats(scopeState(state,'papa'),'2026-10-13T16:00:00Z');
+  for(const [key,value] of Object.entries(local))assert.equal((await summary('2026-10-13'))[key],value);
+ });
  await db.exec('set role anon');await assert.rejects(summary(),/permission denied/);await db.exec('reset role');
 });

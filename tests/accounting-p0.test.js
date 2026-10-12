@@ -49,9 +49,9 @@ test('linked receipt cannot be voided or shrunk while allocations/performances w
  let s=allocate(fixture()),before=structuredClone(s);assert.throws(()=>run(s,'ledger',{...s.ledger[0],remove:true}),/已有分配/);assert.deepEqual(s,before);
  s=complete(s,s.queue[0].id);before=structuredClone(s);assert.throws(()=>run(s,'ledger',{...s.ledger[0],amount:0,at}),/已有分配/);assert.deepEqual(s,before);
 });
-test('Taipei midnight, current balance, test exclusion and last ten displayed rows are independent',()=>{
- let s=fixture();s.ledger[0].at='2026-10-11T15:59:59Z';s=run(s,'onBehalf',{playerId:pid(s),songId:s.songs[0].songId,kind:'saved',completed:true},'2026-10-11T16:00:01Z');
- for(let i=0;i<11;i++)s=run(s,'ledger',{playerId:pid(s),amount:1},'2026-10-12T00:00:00Z');
+test('Taipei 19:00 rollover, current balance, test exclusion and last ten displayed rows are independent',()=>{
+ let s=fixture();s.ledger[0].at='2026-10-12T10:59:59Z';s=run(s,'onBehalf',{playerId:pid(s),songId:s.songs[0].songId,kind:'saved',completed:true},'2026-10-12T11:00:01Z');
+ for(let i=0;i<11;i++)s=run(s,'ledger',{playerId:pid(s),amount:1},'2026-10-12T12:00:00Z');
  assert.equal(stats(room(s),at).received,11);assert.equal(stats(room(s),at).sung,1);assert.equal(stats(room(s),at).saved,13);assert.equal(s.ledger.slice(-10).length,10);
 });
 test('wrong Room, player or source, failed allocation and non-manager calls leave entire state intact',()=>{

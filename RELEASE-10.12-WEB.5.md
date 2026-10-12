@@ -15,3 +15,6 @@ Production Edge deployed successfully. Before/after installation revision remain
 Pre-release Dashboard:Healthy,CPU5%,Disk43%,RAM63%,13/60 connections,100% requests success; one prior Postgres42601 query syntax error, no API/Edge errors. Existing Free quota warning remains; no upgrade, event cleanup or billed-capacity reduction is claimed.
 
 Historical correction remains pending:the user confirmed three以妳為榮 registrations represent one performance. Missing sources, repeated registration and earlier returns are in a separate review report, not automatically repaired to5/3/2. Formal adjustment and event archival require separate reviewed scope and approval. SeeACCOUNTING-P0-PHASE-0.md andAUDIT-EVENT-SOURCES-2026-10-12.md. Android background/lock-screen physical delivery, Windows native deliverables and scoped transport/domain deltas remain unfinished; this release is not a claim that the entire V2 program is complete.
+
+
+2026-10-13使用者再次確認既有台灣時間19:00換場規則必須保留。上述午夜換日假設由10.13-WEB.1及202610130001取代：帳務日期為場次開始日期，跨午夜仍屬同場，19:00才換場。只改查詢與顯示邊界，不改任何既有正式帳務紀錄。
