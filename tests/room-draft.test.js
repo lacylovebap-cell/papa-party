@@ -36,7 +36,7 @@ test('allocation group IDs, initial ledger and queue settlement reuse the exact 
  const player=before.players[0],song=before.songs.find(row=>row.streamer_id==='papa');
  ({state,journal}=record(state,journal,'allocate',{playerId:player.playerId,total:3,stored:2,items:[{songId:song.songId}]}));
  const queued=state.queue.at(-1),group=queued.allocation_id;
- assert.ok(journal.actions[0].ids.includes(group));assert.ok(state.ledger.some(row=>row.allocation_id===group));
+ assert.ok(journal.actions[0].ids.includes(group));assert.ok(state.ledger.some(row=>row.id===state.queue[0].source_transaction_id&&row.receipt_quantity===3));
  ({state,journal}=record(state,journal,'queue',{id:queued.id,operation:'cancel'}));
  assert.deepEqual(replayRoomDraft(before,journal,admin,at),state);
  const colliding=structuredClone(journal);colliding.actions[0].ids[0]=before.ledger[0].id;

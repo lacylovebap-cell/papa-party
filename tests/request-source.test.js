@@ -13,14 +13,14 @@ test('every declared random/self source forces the common exclusion flag; explic
  assert.throws(()=>requestSource({selfProvided:'false'}),/設定/);
  assert.match(requestSourceLabel({selfProvided:true,source:'cross_draw'}),/骰子/);assert.equal(requestSourceLabel({selfProvided:false,source:'manual'}),'');
 });
-test('all new self/draw performances retain accounting but do not enter plays, sung totals or listening achievements',()=>{
+test('all new self/draw performances retain accounting but count in accounting sung totals but not plays or listening achievements',()=>{
  let s=fixture();const playerId=s.players[0].playerId,songId=s.songs[0].songId,actor={role:'player',playerId};
  for(const source of ['self','draw','cross_self','cross_draw','proxy_draw','manual']){
   s=run(s,'request',{songId,kind:'saved',source},actor);const id=s.queue.at(-1).id;
   s=run(s,'queue',{id,operation:'acknowledge',preparationMinutes:0});s=run(s,'queue',{id,operation:'complete'});
  }
  assert.equal(s.queue.filter(row=>row.selfProvided).length,5);assert.equal(s.queue.at(-1).selfProvided,false);
- assert.equal(songPlays(s,songId),1);assert.equal(stats(s,now).sung,1);assert.ok(!achievements(s,playerId,now).includes('🔁 這首是真愛'));
+ assert.equal(songPlays(s,songId),1);assert.equal(stats(s,now).sung,6);assert.ok(!achievements(s,playerId,now).includes('🔁 這首是真愛'));
  assert.equal(balance(s,playerId),14);assert.equal(s.ledger.filter(row=>row.queueId).length,6,'source flags never erase or waive actual settlement');
 });
 test('batch provenance survives core and rejects unsupported fields before committing',()=>{

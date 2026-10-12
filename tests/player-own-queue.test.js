@@ -55,13 +55,13 @@ test('half-song replacement releases reservations and blocks increases that exce
  assert.throws(()=>run(full,'replaceOwn',{id,songId:s.songs[0].songId},actor,now),/原小時/);
  const insufficient=structuredClone(s);insufficient.ledger=[];assert.throws(()=>run(insufficient,'replaceOwn',{id,songId:s.songs[1].songId},actor,now),/存歌不足/);
 });
-test('allocated live replacements and cancellation conserve received credits through linked adjustments and one refund',()=>{
+test('allocated live replacements and cancellation conserve original receipt through reservations without adjustment or refund',()=>{
  let {s,actor}=fixture('live');s.queue=[];s.songs[0].creditCost=2;
  s=run(s,'allocate',{playerId:actor.playerId,total:3,stored:0,items:[{songId:s.songs[0].songId},{songId:s.songs[1].songId}]},admin,at);
  const id=s.queue[0].id,half=s.songs[2].songId,oldBalance=balance(scopeState(s),actor.playerId);
- const next=run(s,'replaceOwn',{id,songId:half,giftConfirmed:true},actor,now);assert.equal(balance(scopeState(next),actor.playerId),oldBalance+1);assert.equal(next.queue[0].receivedCreditCost,2);
- const cancelled=run(next,'cancelOwn',{id},actor,now);assert.equal(balance(scopeState(cancelled),actor.playerId),oldBalance+2);
- assert.equal(cancelled.ledger.filter(x=>x.queueId===id&&x.allocationSettlement==='return').length,1);
+ const next=run(s,'replaceOwn',{id,songId:half,giftConfirmed:true},actor,now);assert.equal(balance(scopeState(next),actor.playerId),oldBalance);assert.equal(next.queue[0].receivedCreditCost,2);
+ const cancelled=run(next,'cancelOwn',{id},actor,now);assert.equal(balance(scopeState(cancelled),actor.playerId),oldBalance);
+ assert.equal(cancelled.ledger.filter(x=>x.queueId===id&&x.allocationSettlement==='return').length,0);
  assert.throws(()=>run(cancelled,'cancelOwn',{id},actor,now),/已結束/);
 });
 const row=(id,slug='papa')=>({id,streamerId:slug,slug,name:slug,title:id,artist:'Singer',kind:'saved',status:'waiting',active:true});

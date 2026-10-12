@@ -41,7 +41,7 @@ export function venuePolicyBalance(room,playerId,pool='shengma'){
 }
 export function venuePolicyReservedCredits(room,playerId,pool='shengma',{excludeQueueId}={}){
  venuePolicyPool(pool);
- return (room.queue||[]).filter(queue=>queue.playerId===playerId&&queue.kind==='saved'&&['pending','waiting'].includes(queue.status)&&(excludeQueueId===undefined||queue.id!==excludeQueueId)&&venuePolicyConsumedPool(queue)===pool)
+ return (room.queue||[]).filter(queue=>queue.playerId===playerId&&(queue.kind==='saved'||queue.kind==='live'&&queue.allocation_model==='reservation-v1')&&['pending','waiting'].includes(queue.status)&&(excludeQueueId===undefined||queue.id!==excludeQueueId)&&(queue.allocation_model==='reservation-v1'?venuePolicyLedgerPool({storage_pool:queue.allocation_storage_pool}):venuePolicyConsumedPool(queue))===pool)
   .reduce((total,queue)=>total+venuePolicyQuotedCost(queue.creditCost??1),0);
 }
 export function venuePolicyAvailableCredits(room,playerId,pool='shengma',options={}){

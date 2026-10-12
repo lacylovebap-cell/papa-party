@@ -206,10 +206,10 @@ test('native draft replay commits dependent player/song/allocation/refund IDs on
  assert.deepEqual(new Set(queue.map(row=>row.id)),new Set([cancelledId,completedId]));
  for(const row of queue){assert.equal(row.songId,songId);assert.equal(row.allocation_id,allocationId);assert.equal(row.items[0].songId,songId);assert.equal(row.receivedCreditCost,1);}
  const cancelled=queue.find(row=>row.id===cancelledId),completed=queue.find(row=>row.id===completedId);
- assert.equal(cancelled.status,'cancelled');assert.equal(cancelled.allocationReturnedCredits,1);assert.ok(cancelled.allocationReturnedAt);
+ assert.equal(cancelled.status,'cancelled');assert.equal(cancelled.allocationReturnedCredits,undefined);assert.equal(cancelled.allocation_model,'reservation-v1');
  assert.equal(completed.status,'completed');assert.ok(completed.completedAt);
  const settlement=entities.filter(row=>row.kind==='ledger'&&row.data.queueId===cancelledId&&row.data.allocationSettlement==='return');
- assert.equal(settlement.length,1);assert.equal(settlement[0].data.amount,1);assert.equal(settlement[0].data.allocation_id,allocationId);
+ assert.equal(settlement.length,0);
  assert.equal(entities.filter(row=>row.kind==='ledger'&&row.data.playerId===playerId).reduce((sum,row)=>sum+row.data.amount,0),7);
  const profile=(await q('select account_id,membership_id,data from papa_space_player_profiles where space_id=$1 and player_id=$2',[space,playerId]))[0];
  assert.equal(profile.account_id,bound.account_id);assert.equal(profile.membership_id,bound.membership_id);assert.equal(profile.data.name,'Draft newcomer');assert.equal(Object.hasOwn(profile.data,'password'),false);
@@ -224,10 +224,10 @@ test('native draft replay commits dependent player/song/allocation/refund IDs on
  assert.deepEqual(final.profiles.filter(row=>row.space_id===foreignSpace),baseline.profiles.filter(row=>row.space_id===foreignSpace));
  assert.deepEqual(final.accounts,baseline.accounts);assert.deepEqual(final.memberships,baseline.memberships);
  assert.equal(final.notices.length,notices.length);assert.ok(final.notices.some(row=>row.type==='completed'&&row.entity_id==='KEEP-Q'));
- assert.ok(final.notices.some(row=>row.type==='credit'&&row.entity_id===settlement[0].id));
+ assert.ok(final.notices.some(row=>row.type==='credit'&&row.entity_id===completed.settlement_id));
  assert.ok(final.events.some(row=>row.entity_kind==='players'&&row.entity_id===playerId&&row.action==='publish'));
  assert.ok(final.events.some(row=>row.entity_kind==='queue'&&row.entity_id===cancelledId&&row.action==='publish'));
- assert.ok(final.events.some(row=>row.entity_kind==='ledger'&&row.entity_id===settlement[0].id&&row.action==='publish'));
+ assert.ok(final.events.some(row=>row.entity_kind==='ledger'&&row.entity_id===completed.settlement_id&&row.action==='publish'));
 });
 
 test('replayed draft stale revision and downstream notice failure roll back profiles, dependent rows, private bodies and history together',async t=>{

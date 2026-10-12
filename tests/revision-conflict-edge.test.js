@@ -1,3 +1,4 @@
+import {accountingDay} from '../src/accounting.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -42,9 +43,10 @@ function fixture(outcome='success'){
    if(outcome==='projectionConflict')return new Response(JSON.stringify({code:'PT409',message:'VERSION_CONFLICT'}),{status:409});
    return new Response('[]');
   }
+  if(path.endsWith('/papa_accounting_summary')){const b=JSON.parse(options.body);return new Response(JSON.stringify({day:b.requested_day,timezone:'Asia/Taipei',scope:{spaceId:b.requested_space,roomId:b.requested_room},...core.stats(core.scopeState(state),new Date().toISOString()),revision:state.revision}));}
   throw Error('Unexpected fixture endpoint');
  };
- const context=vm.createContext({...core,...access,...patch,...rules,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
+ const context=vm.createContext({accountingDay,...core,...access,...patch,...rules,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
   Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://db.example':'fixture-key'},serve:fn=>handler=fn},EdgeRuntime:{waitUntil(){}},
   CATALOG_OPS:new Set(),catalogMetadataView:view=>view,fixtureState:state,fixtureWho:who});
  vm.runInContext(code,context);

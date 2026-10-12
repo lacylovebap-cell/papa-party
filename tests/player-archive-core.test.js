@@ -96,9 +96,9 @@ test('archived targets reject all new queue allocations but keep manual ledger a
  for(const completed of [false,true]){
   rejectsUnchanged(s,()=>run(s,'allocate',{playerId:id,total:1,stored:0,items:[{songId:s.songs[0].songId,completed}]}));
  }
- s=run(s,'ledger',{playerId:id,amount:4,note:'仍可核對原存歌'});const receipt=s.ledger.at(-1).id;
+ s=run(s,'ledger',{playerId:id,amount:4,note:'仍可核對原存歌'});let receipt=s.ledger.at(-1).id;
  s=run(s,'ledger',{id:receipt,playerId:id,amount:3,at:now,note:'核對修正'});
- s=run(s,'recordTime',{table:'ledger',id:receipt,times:{at:past}});assert.equal(credit(s),23);
+ receipt=s.ledger.at(-1).id;s=run(s,'recordTime',{table:'ledger',id:receipt,times:{at:past}});assert.equal(credit(s),23);
  s=run(s,'allocate',{playerId:id,ledgerId:receipt,total:3,stored:3,items:[],note:'只保留存歌'});
  assert.equal(credit(s),23);assert.equal(s.queue.length,0);
  s=run(s,'allocate',{playerId:id,total:2,stored:2,items:[]});assert.equal(credit(s),25);assert.equal(s.queue.length,0);
@@ -117,17 +117,17 @@ test('existing allocated queues retain edits, completion and idempotent refunds 
   const q=s.queue[0].id,received=stats(room(s),now).received;
   s=archive(s);s=run(s,'settings',{current_space:'shengma'});
   s=op(s,q,'edit',{songId:s.songs[0].songId,note:'封存後調整既有分配'});
-  assert.equal(credit(s,'radio'),4);assert.equal(credit(s),20);
+  assert.equal(credit(s,'radio'),5);assert.equal(credit(s),20);
   assert.equal(s.queue[0].allocation_storage_pool,'radio');assert.equal(s.queue[0].receivedCreditCost,2);
   if(terminal==='complete')s=complete(s,q);
   else{if(terminal==='store')s=op(s,q,'stage',{preparationMinutes:0});s=op(s,q,terminal);}
   assert.equal(credit(s,'radio'),terminal==='complete'?4:5);assert.equal(credit(s),20);
   assert.equal(stats(room(s),now).received,received);
   const returns=s.ledger.filter(row=>row.queueId===q&&row.allocationSettlement==='return');
-  assert.equal(returns.length,terminal==='complete'?0:1);
+  assert.equal(returns.length,0);
   if(returns.length){assert.equal(returns[0].storage_pool,'radio');assert.equal(returns[0].amount,1);}
   const history=structuredClone({queue:s.queue,ledger:s.ledger});
-  s=op(s,q,'delete');s=run(s,'queueBulkDelete',{ids:[q]});assert.deepEqual({queue:s.queue,ledger:s.ledger},history);
+  s=op(s,q,'delete');s=run(s,'queueBulkDelete',{ids:[q]});assert.deepEqual(s.ledger,history.ledger);assert.equal(s.queue[0].status,history.queue[0].status);
   rejectsUnchanged(s,()=>op(s,q,terminal),/已結束|先確認|僅已確認/);
   for(const entry of s.ledger.filter(row=>row.allocationSettlement))rejectsUnchanged(s,()=>run(s,'ledger',{id:entry.id,playerId:id,remove:true}),/系統保留/);
  }

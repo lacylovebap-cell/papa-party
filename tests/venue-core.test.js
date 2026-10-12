@@ -63,7 +63,7 @@ test('one insufficient radio pool and one insufficient shengma pool cannot be co
 
 test('completion cannot consume credits still reserved by another request in the original pool',()=>{
  let s=deposit(radio(setup()),3,'radio');s=request(s,2);const id=s.queue[0].id;s=request(s,1);const second=s.queue[1].id;
- const receipt=s.ledger[0];s=run(s,'ledger',{...receipt,amount:2,at:now});
+ const receipt=s.ledger[0];assert.throws(()=>run(s,'ledger',{...receipt,amount:2,at:now}),/可用存歌不足/);s.ledger.find(l=>l.id===receipt.id).amount=2;
  s=op(s,id,'acknowledge',{preparationMinutes:0});const before=structuredClone(s);
  assert.equal(held(s,'radio'),3);assert.throws(()=>op(s,id,'complete'),/存歌不足/);assert.deepEqual(s,before);
  s=run(s,'cancelOwn',{id:second},player(s));s=op(s,id,'complete');
@@ -119,14 +119,14 @@ test('switching or disabling venues keeps one weighted hourly quota for a stream
  s=radio(s);assert.equal(usedHour(room(s),now),3);assert.throws(()=>request(s,1),/額度不足/);
 });
 
-test('saved cancellation releases only its original reservation and completed deletion reverses the original debit',()=>{
+test('saved cancellation releases only its original reservation and completed archive preserves the original debit',()=>{
  let s=deposit(radio(deposit(setup(),7)),5,'radio');s=request(s,2);const cancelled=s.queue[0].id,ledger=structuredClone(s.ledger);
  s=settings(s,{current_space:'shengma'});s=run(s,'cancelOwn',{id:cancelled},player(s));
  assert.equal(held(s,'radio'),0);assert.equal(credits(s,'radio'),5);assert.equal(credits(s),7);assert.deepEqual(s.ledger,ledger);
  assert.throws(()=>run(s,'cancelOwn',{id:cancelled},player(s)),/已結束/);
  s=radio(s);s=request(s,2);const completed=s.queue.at(-1).id;s=settings(s,{current_space:'shengma'});s=complete(s,completed);
- assert.equal(credits(s,'radio'),3);s=op(s,completed,'delete');assert.equal(credits(s,'radio'),5);assert.equal(credits(s),7);
- assert.throws(()=>op(s,completed,'delete'),/找不到/);assert.equal(credits(s,'radio'),5);
+ assert.equal(credits(s,'radio'),3);s=op(s,completed,'delete');assert.equal(credits(s,'radio'),3);assert.equal(credits(s),7);
+ s=op(s,completed,'delete');assert.equal(credits(s,'radio'),3);
 });
 
 test('allocated receipt edits, cancellation and storage always settle their original storage pool once',()=>{
@@ -134,14 +134,14 @@ test('allocated receipt edits, cancellation and storage always settle their orig
   let s=deposit(radio(deposit(setup(),20)),3,'radio'),ledgerId=s.ledger.at(-1).id;
   s=run(s,'allocate',{playerId:player(s).playerId,ledgerId,total:3,stored:1,items:[{songId:song(s,2).songId}]});const id=s.queue[0].id;
   assert.equal(s.queue[0].venue,'radio');assert.equal(s.queue[0].allocation_storage_pool,'radio');
-  assert.equal(s.queue[0].consumed_storage_pool,undefined);assert.equal(credits(s,'radio'),1);assert.equal(credits(s),20);
+  assert.equal(s.queue[0].consumed_storage_pool,undefined);assert.equal(credits(s,'radio'),3);assert.equal(credits(s),20);
   s=settings(s,{radio_enabled:false,current_space:'shengma'});s=op(s,id,'edit',{songId:song(s,1).songId});
-  assert.equal(credits(s,'radio'),2);assert.equal(credits(s),20);
-  assert.equal(s.ledger.find(l=>l.allocationSettlement==='adjustment').storage_pool,'radio');
+  assert.equal(credits(s,'radio'),3);assert.equal(credits(s),20);
+  assert.equal(s.ledger.some(l=>l.allocationSettlement==='adjustment'),false);
   s=op(s,id,operation);assert.equal(credits(s,'radio'),3);assert.equal(credits(s),20);
-  const returned=s.ledger.find(l=>l.allocationSettlement==='return');assert.equal(returned.amount,1);assert.equal(returned.storage_pool,'radio');
+  assert.equal(s.ledger.some(l=>l.allocationSettlement==='return'),false);assert.equal(held(s,'radio'),0);
   const history=structuredClone({queue:s.queue,ledger:s.ledger});s=op(s,id,'delete');s=run(s,'queueBulkDelete',{ids:[id]});
-  assert.deepEqual({queue:s.queue,ledger:s.ledger},history);assert.throws(()=>op(s,id,operation),/已結束|未演唱/);
+  assert.deepEqual(s.ledger,history.ledger);assert.equal(s.queue[0].status,history.queue[0].status);assert.throws(()=>op(s,id,operation),/已結束|未演唱/);
  }
 });
 
@@ -149,9 +149,9 @@ test('allocation cost increases cannot use another pool or credits reserved in t
  let s=deposit(radio(deposit(setup(),50)),3,'radio'),ledgerId=s.ledger.at(-1).id;
  s=run(s,'allocate',{playerId:player(s).playerId,ledgerId,total:3,stored:1,items:[{songId:song(s,2).songId}]});const id=s.queue[0].id;
  s=request(s,1);const before=structuredClone(s);
- assert.equal(held(s,'radio'),1);assert.throws(()=>op(s,id,'edit',{songId:song(s,3).songId}),/可用存歌不足/);assert.deepEqual(s,before);
+ assert.equal(held(s,'radio'),3);assert.throws(()=>op(s,id,'edit',{songId:song(s,3).songId}),/可用存歌不足/);assert.deepEqual(s,before);
  s=run(s,'cancelOwn',{id:s.queue[1].id},player(s));s=op(s,id,'edit',{songId:song(s,3).songId});
- assert.equal(credits(s,'radio'),0);assert.equal(credits(s),50);
+ assert.equal(credits(s,'radio'),3);assert.equal(credits(s),50);
  s=op(s,id,'cancel');assert.equal(credits(s,'radio'),3);assert.equal(credits(s),50);
 });
 
@@ -161,7 +161,7 @@ test('radio allocations made from a shengma receipt return to shengma and cannot
  assert.equal(s.queue[0].venue,'radio');assert.equal(s.queue[0].allocation_storage_pool,'shengma');
  s=settings(s,{current_space:'shengma'});s=op(s,id,'cancel');
  assert.equal(credits(s),3);assert.equal(credits(s,'radio'),5);
- assert.equal(s.ledger.find(l=>l.allocationSettlement==='return').storage_pool,'shengma');
+ assert.equal(s.ledger.some(l=>l.allocationSettlement==='return'),false);
  const radioReceipt=s.ledger.find(l=>l.storage_pool==='radio'),before=structuredClone(s);
  assert.throws(()=>run(s,'allocate',{playerId:player(s).playerId,ledgerId:radioReceipt.id,total:5,stored:3,items:[{songId:song(s,2).songId}]}),/聲瑪不能/);
  assert.throws(()=>run(s,'ledger',{...radioReceipt,amount:5,at:now,storage_pool:'shengma'}),/不能移到/);
@@ -191,8 +191,8 @@ test('balances and venue settings remain isolated by streamer; time edits preser
  assert.equal(q.venue,'radio');assert.equal(q.consumed_storage_pool,'radio');assert.equal(debit.storage_pool,'radio');
  assert.equal(debit.at,past.replace('Z','.000Z'));assert.equal(credits(s,'radio'),3);assert.equal(credits(s),7);
  assert.equal(credits(s,'radio',second),4);assert.equal(usedHour(room(s),past),2);assert.equal(usedHour(room(s),now),0);
- s=run(s,'recordTime',{table:'ledger',id:debit.id,times:{at:now}});
+ assert.throws(()=>run(s,'recordTime',{table:'ledger',id:debit.id,times:{at:now}}),/系統保留/);s=run(s,'recordTime',{table:'queue',id:debit.queueId,times:{completedAt:now}});
  assert.equal(s.ledger.find(l=>l.id===debit.id).storage_pool,'radio');assert.equal(s.queue.find(x=>x.id===id).consumed_storage_pool,'radio');
- const immutable=structuredClone(s);assert.throws(()=>run(s,'ledger',{...debit,at:now,storage_pool:'shengma'}),/不能移到/);assert.deepEqual(s,immutable);
+ const immutable=structuredClone(s);assert.throws(()=>run(s,'ledger',{...debit,at:now,storage_pool:'shengma'}),/不能移到|系統保留/);assert.deepEqual(s,immutable);
  assert.throws(()=>op(s,id,'edit',{venue:'shengma'},now,second),/找不到/);
 });

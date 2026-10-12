@@ -72,6 +72,6 @@ test('ordinary completion retains the request hour; only explicit correction ove
 test('editing the linked debit time after a history correction keeps display, quota and ledger time aligned',()=>{
  let s=grant(setup(),1);s=request(s,2,0,old);s=done(s,s.queue[0].id,old);const id=s.queue[0].id,a=who(s);
  s=run(s,'recordTime',{table:'queue',id,times:{effective_at:nextHour}});const original=s.queue[0].original_times,ledger=s.ledger.find(l=>l.queueId===id);
- s=run(s,'ledger',{...ledger,at:old});assert.equal(s.queue[0].effective_at,old);assert.equal(s.queue[0].quota_effective_at,old);assert.equal(savedQuota(scopeState(s),nextHour,a.playerId).personalUsed,0);assert.deepEqual(s.queue[0].original_times,original);
- s=run(s,'recordTime',{table:'ledger',id:ledger.id,times:{at:nextHour}});assert.equal(s.queue[0].quota_effective_at,nextHour);assert.equal(s.queue[0].effective_at,nextHour);assert.equal(balance(s,a.playerId),8);
+ assert.throws(()=>run(s,'ledger',{...ledger,at:old}),/系統保留/);s=run(s,'recordTime',{table:'queue',id,times:{completedAt:old}});assert.equal(s.queue[0].effective_at,old);assert.equal(s.queue[0].quota_effective_at,old);assert.equal(savedQuota(scopeState(s),nextHour,a.playerId).personalUsed,0);assert.deepEqual(s.queue[0].original_times,original);
+ assert.throws(()=>run(s,'recordTime',{table:'ledger',id:ledger.id,times:{at:nextHour}}),/系統保留/);s=run(s,'recordTime',{table:'queue',id,times:{completedAt:nextHour}});assert.equal(s.queue[0].quota_effective_at,nextHour);assert.equal(s.queue[0].effective_at,nextHour);assert.equal(balance(s,a.playerId),8);
 });

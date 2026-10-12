@@ -10,7 +10,7 @@ import {DEFAULTS,TABLES} from '../src/core.js';
 const read=path=>fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const code=['src/native-player-bindings.js','src/board-policy.js','supabase/functions/party-api/board.ts',
  'src/chat-policy.js','supabase/functions/party-api/chat.ts','src/home-settings.js','src/venue-policy.js','src/new-practice.js',
- 'src/request-source.js','src/core.js','src/state-patch.js','src/room-import.js','src/room-draft.js','src/notification-rules.js','src/access-policy.js',
+ 'src/request-source.js','src/accounting.js','src/core.js','src/state-patch.js','src/room-import.js','src/room-draft.js','src/notification-rules.js','src/access-policy.js',
  'supabase/functions/party-api/catalog.ts','supabase/functions/party-api/index.ts']
  .map(path=>read(path).replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'')).join('\n');
 const uuid=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
@@ -52,6 +52,7 @@ function edge({actors={},bound,bindError,expired=[]}={}){
   return {revision:server.revision,rows,extraQuotas:structuredClone(server.extraQuotas),extraQuotaRights:{}};
  }
  context.mockApi=async(path,body)=>{
+  if(path.includes('papa_accounting_summary'))return {day:body.requested_day,timezone:'Asia/Taipei',scope:{spaceId:body.requested_space,roomId:body.requested_room},received:0,sung:0,saved:0,reserved:0,available:0,revision:7};
   calls.push({path,body:plain(body)});
   if(path.endsWith('/papa_verified_session_actor')){
    const session=sessions.get(body.session_hash),actor=session?.actor;

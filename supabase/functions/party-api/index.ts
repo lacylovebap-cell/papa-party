@@ -1,3 +1,4 @@
+import {accountingDay} from '../../../src/accounting.js';
 import {applyPlayerRequestBatch,validateRequestBatch,applyOwnQueueBatch,validateOwnQueueBatch} from '../../../src/player-bulk-tools.js';
 import {isSuper,isManager,coreActor,requireRoom,authorizeManagerOperation,managementView,noticeIdentity,validNoticeAudio,prepareManagerAction} from '../../../src/access-policy.js';
 import {stateChanges,scopedOperationalAction,scopedRoomMutationAction} from '../../../src/state-patch.js';
@@ -184,6 +185,14 @@ async function loadCommunicationState(allowedSpace:string|null='space-001',reque
   streamers=streamers.filter((r:any)=>(r.spaceId||'space-001')===roomSpace);
  }
  return {...empty(),schemaVersion:3,streamers,streamerSettings:{}};
+}
+async function accountingSummary(room:any,day:string){
+ const summary=await api('/rest/v1/rpc/papa_accounting_summary',{requested_space:room.spaceId||'space-001',requested_room:room.id,requested_day:day});
+ if(!summary||summary.scope?.spaceId!==(room.spaceId||'space-001')||summary.scope?.roomId!==room.id||summary.day!==day||summary.timezone!=='Asia/Taipei'
+  ||['received','sung','saved','reserved','available'].some(key=>typeof summary[key]!=='number'||!Number.isFinite(summary[key]))
+  ||!Number.isSafeInteger(summary.revision)||summary.received<0||summary.sung<0||summary.reserved<0
+  ||summary.available!==summary.saved-summary.reserved)throw Error('帳務摘要範圍或數量不正確');
+ return summary;
 }
 async function managerRoom(who:any,requestedRoom:string){
  if(!isManager(who))throw Error('請先登入管理');
@@ -688,12 +697,17 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  // Most 30-second reads are unchanged. Check the tiny revision row first and
  // retain a periodic forced read on the client for time-dependent displays.
  if(b.op==='read'&&b.token&&!who)throw Error('登入已到期，請重新登入');
- if(b.op==='read'&&Number.isInteger(b.revision)&&b.revision>=0&&b.signatures&&typeof b.signatures==='object'&&!Array.isArray(b.signatures)&&Object.keys(b.signatures).length){
+ if(b.op==='read'&&(b.accountingDay===undefined||b.accountingDay===accountingDay(t))&&Number.isInteger(b.revision)&&b.revision>=0&&b.signatures&&typeof b.signatures==='object'&&!Array.isArray(b.signatures)&&Object.keys(b.signatures).length){
   const [row]=await api('/rest/v1/papa_v2_revision?id=eq.1&select=revision&limit=1');
   if(row&&Number(row.revision)===b.revision){
    const comm=await loadCommunicationState(isSuper(who)?null:who?.spaceId||'space-001',b.streamer||'papa').catch(()=>null);
    if(comm){const room=scopeState(comm,b.streamer||'papa').currentStreamer;requireRoom(who,room.id);if(!room.active&&!isManager(who))throw Error('主播頁暫未開放');return respond({state:{},now:t,ready:true});}
   }
+ }
+ if(b.op==='accountingSummary'){
+  const room=await managerRoom(who,b.streamer||'papa');
+  if(typeof b.day!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(b.day))throw Error('帳務日期不正確');
+  return respond({summary:await accountingSummary(room,b.day)});
  }
  if(b.op==='mutate'&&!who)throw Error('請先登入');
  if(b.op==='mutate'&&who?.role==='player'&&!['request','wish','self','cancelOwn','replaceOwn'].includes(b.action?.type))throw Error('請先登入管理');
@@ -719,7 +733,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  if(b.op==='draftStart')return respond({draft:{state:s,journal:createRoomDraft(s,draftScope.id),baseRevision:s.revision},now:t});
  if(b.op==='failedRequest'){if(who?.role!=='player')throw new Error('請先登入玩家');const room=scopeState(s,b.streamer||'papa'),p=room.players.find((p:any)=>p.playerId===who.playerId);if(!room.currentStreamer.active||!p)throw new Error('找不到玩家');if(p.archived)return respond({counted:false});const quote=quoteSong(room,b.songId,b,who.playerId,t),full=!canRequestSaved(room,t,quote.creditCost,who.playerId);if(!full)return respond({counted:false});try{venuePolicySavedSnapshot(room,who.playerId,quote.creditCost);}catch{return respond({counted:false});}const counted=await api('/rest/v1/rpc/papa_record_failed_request',{room_id:room.currentStreamer.id,player_id:who.playerId,song_id:b.songId,bucket:hourKey(t)});schedulePush(room.currentStreamer.id,['__admin__',who.playerId]);return respond({counted});}if(b.op==='login'){if(who?.playerId)throw new Error('請先登出再登入');const p=s.players.find((p:any)=>p.playerId===b.playerId);if(!p||String(p.password||'')!==String(b.password||''))throw new Error('玩家密碼不正確');const token='player:'+crypto.randomUUID()+crypto.randomUUID(),sessionHash=await hash(token);await api('/rest/v1/papa_v2_sessions',{token_hash:sessionHash,player_id:p.playerId,login_id:p.ids.includes(b.loginId)?b.loginId:'',expires_at:new Date(Date.now()+30*86400000).toISOString()});const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});if(identity?.role!=='player'||identity?.spaceId!=='space-001')throw new Error('玩家登入身分尚未完成設定');return respond({token});}
  if(b.op==='search'){return respond({players:b.query?.trim()?playerSearch(s,b.query,true).slice(0,20).map((p:any)=>({playerId:p.playerId,name:p.name,ids:p.ids,hasPassword:!!p.password})):[]});}
- const project=async(value:any)=>{try{const base=leanSongView(managementView(publicView(value,coreActor(who),t,b.streamer||'papa'),who)),rows=await api('/rest/v1/rpc/papa_catalog_song_metadata_in_space',{room_id:base.currentStreamer.id}),view=catalogMetadataView(base,rows,isManager(who)),signatures:any={},delta:any={};for(const [key,v] of Object.entries(view)){signatures[key]=await hash(JSON.stringify(v));if(b.signatures?.[key]!==signatures[key])delta[key]=v;}return {state:delta,signatures,now:t,ready:value.schemaVersion>=3,...(who?.accountId?{sessionIdentity:sessionIdentity(who)}:{})};}catch(error){throw unknownOperationOutcome(error);}};
+ const project=async(value:any)=>{try{const base=leanSongView(managementView(publicView(value,coreActor(who),t,b.streamer||'papa'),who)),rows=await api('/rest/v1/rpc/papa_catalog_song_metadata_in_space',{room_id:base.currentStreamer.id}),view={...catalogMetadataView(base,rows,isManager(who)),summary:await accountingSummary(base.currentStreamer,accountingDay(t))},signatures:any={},delta:any={};for(const [key,v] of Object.entries(view)){signatures[key]=await hash(JSON.stringify(v));if(b.signatures?.[key]!==signatures[key])delta[key]=v;}return {state:delta,signatures,now:t,ready:value.schemaVersion>=3,...(who?.accountId?{sessionIdentity:sessionIdentity(who)}:{})};}catch(error){throw unknownOperationOutcome(error);}};
  if(b.op==='mutate'&&b.action?.type==='extraQuota'){
   if(!isManager(who))throw Error('請先登入管理');
   if(b.revision!==s.revision)throw revisionConflictError();

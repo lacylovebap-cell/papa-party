@@ -11,7 +11,11 @@ function setup(){let s=run(empty(),'player',{name:'分配玩家',ids:['allocatio
 function allocate(s=setup(),{existing=true,openingBalance=false,selfProvided=false,completed=false}={}){
  let ledgerId;
  if(existing){s=run(s,'ledger',{playerId:player(s).playerId,amount:3,openingBalance,note:'收到歌單'});ledgerId=s.ledger.at(-1).id;}
- return run(s,'allocate',{playerId:player(s).playerId,ledgerId,total:3,stored:1,effective_at:now,openingBalance,items:[{songId:s.songs[0].songId,selfProvided,completed}]});
+ // Retain the old prepaid fixtures to verify compatibility without backfill.
+ s=run(s,'allocate',{playerId:player(s).playerId,ledgerId,total:3,stored:1,effective_at:now,openingBalance,items:[{songId:s.songs[0].songId,selfProvided,completed}]});
+ const q=s.queue.at(-1),receipt=s.ledger.find(l=>l.id===q.source_transaction_id);receipt.amount=1;delete receipt.receipt_quantity;delete receipt.accounting_kind;
+ s.ledger=s.ledger.filter(l=>l.queueId!==q.id);delete q.allocation_model;delete q.source_transaction_id;delete q.settlement_id;delete q.performance_id;
+ return s;
 }
 
 test('allocated cancellation returns prepaid credits once without erasing the received total',()=>{
@@ -48,11 +52,11 @@ test('legacy allocated rows without snapshots return correctly and terminal lega
 test('changing allocated cost 2 to 1 and back to 2 settles only the delta; cancel restores the remaining cost',()=>{
  let s=allocate(),q=s.queue[0],created=q.created_at;
  s=op(s,q.id,'edit',{songId:s.songs[1].songId,note:'改成一首',selfProvided:true});q=s.queue[0];
- assert.equal(q.creditCost,1);assert.equal(q.receivedCreditCost,2);assert.equal(credit(s),2);assert.equal(stats(s,now).received,1);
+ assert.equal(q.creditCost,1);assert.equal(q.receivedCreditCost,2);assert.equal(credit(s),2);assert.equal(stats(s,now).received,3);
  assert.equal(q.created_at,created);assert.equal(q.status,'waiting');assert.equal(q.selfProvided,true);
  s=op(s,q.id,'edit',{songId:s.songs[0].songId});q=s.queue[0];assert.equal(q.creditCost,2);assert.equal(credit(s),1);
  assert.deepEqual(s.ledger.filter(l=>l.allocationSettlement==='adjustment').map(l=>l.amount),[1,-1]);
- s=op(s,q.id,'cancel');assert.equal(credit(s),3);assert.equal(stats(s,now).received,1);assert.equal(s.queue[0].allocationReturnedCredits,2);
+ s=op(s,q.id,'cancel');assert.equal(credit(s),3);assert.equal(stats(s,now).received,3);assert.equal(s.queue[0].allocationReturnedCredits,2);
 });
 
 test('allocation cost increase cannot consume stored credits reserved by another request',()=>{
@@ -91,10 +95,10 @@ test('saved edits exclude their own reservation, retain admin override and never
 
 test('completed allocations preserve consumed credits and cannot be refunded by deletion or editing',()=>{
  let s=allocate(undefined,{selfProvided:true,completed:true}),id=s.queue[0].id;
- assert.equal(credit(s),1);assert.equal(songPlays(s,s.songs[0].songId),0);assert.equal(stats(s,now).sung,0);
+ assert.equal(credit(s),1);assert.equal(songPlays(s,s.songs[0].songId),0);assert.equal(stats(s,now).sung,1);
  assert.throws(()=>op(s,id,'cancel'));assert.throws(()=>op(s,id,'edit',{songId:s.songs[1].songId}));
  const previous=structuredClone(s);s=op(s,id,'delete');s=run(s,'queueBulkDelete',{ids:[id]});assert.deepEqual(s.queue,previous.queue);assert.deepEqual(s.ledger,previous.ledger);
- assert.equal(credit(s),1);assert.equal(stats(s,now).received,1);
+ assert.equal(credit(s),1);assert.equal(stats(s,now).received,3);
 });
 
 test('settlement ledger cannot be manually edited, deleted, reallocated or time-edited',()=>{
