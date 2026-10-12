@@ -34,10 +34,11 @@ function playerManagerFreeze(value){
 }
 
 // This controller owns two bounded page results; only load reads the server.
-export function createPlayerManager({api,context,onChange=()=>{},pageLimit=20}){
+export function createPlayerManager({api,context,onChange=()=>{},pageLimit=20,initialSort='default'}){
  if(typeof api!=='function'||typeof context!=='function'||typeof onChange!=='function')throw playerManagerError('玩家清單控制器設定不正確');
  if(!Number.isSafeInteger(pageLimit)||pageLimit<20||pageLimit>50)throw playerManagerError('每頁玩家數量必須是 20 到 50');
- const fresh=mode=>({mode,q:'',sort:'default',page:0,rows:[],total:0,loading:false,error:null,key:null,pending:null});
+ if(!['default','newest','oldest'].includes(initialSort))throw playerManagerError('排序不正確');
+ const fresh=mode=>({mode,q:'',sort:initialSort,page:0,rows:[],total:0,loading:false,error:null,key:null,pending:null});
  const modes=Object.fromEntries(PLAYER_MANAGER_MODES.map(mode=>[mode,fresh(mode)]));
  let currentMode='stored',scope=null,generation=0;
  const snapshot=(mode=currentMode)=>{
@@ -64,7 +65,7 @@ export function createPlayerManager({api,context,onChange=()=>{},pageLimit=20}){
    invalidate();
    for(const mode of PLAYER_MANAGER_MODES){
     const {q,sort,page}=modes[mode];
-    modes[mode]={...fresh(mode),q:changedIdentity?'':q,sort:changedIdentity?'default':sort,page:changedIdentity?0:page};
+    modes[mode]={...fresh(mode),q:changedIdentity?'':q,sort:changedIdentity?initialSort:sort,page:changedIdentity?0:page};
    }
    scope={identity,revision};
   }

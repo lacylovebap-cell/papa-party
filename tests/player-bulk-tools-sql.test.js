@@ -86,7 +86,7 @@ async function fixture(t){
    ['pending-live',{kind:'live',status:'pending',creditCost:99,at:current}],['old',{kind:'saved',status:'waiting',creditCost:9,at:old}],
    ['cancelled',{kind:'saved',status:'cancelled',creditCost:99,at:current}],['bad-date',{kind:'saved',status:'completed',creditCost:99,at:'invalid'}],
    ['other-player',{kind:'saved',status:'waiting',creditCost:99,at:current,playerId:'P2'}]])
-   await q("insert into papa_v2_entities(kind,id,data) values('queue',$1,$2)",[room+'-'+suffix,{id:room+'-'+suffix,streamer_id:room,playerId:'P1',...data,title:'private original snapshot',privateHistory:['keep source']}]);
+   await q("insert into papa_v2_entities(kind,id,data) values('queue',$1,$2)",[room+'-'+suffix,{id:room+'-'+suffix,streamer_id:room,playerId:'P1',...data,title:suffix==='other-player'?'another player title':'own waiting title',privateHistory:['private keep source']}]);
  }
  const actor=(room='papa',space='space-001',subject=player,id='P1')=>({role:'player',account_id:subject,space_id:space,streamer_id:room,player_id:id});
  const batch=(ids,desired=true,context=actor())=>rpc('papa_song_favorites_set_batch',[context.space_id,context.streamer_id,context,ids,desired]);
@@ -103,6 +103,7 @@ async function fixture(t){
  };
  const baseline={business:await business(),favorites:await allFavorites(),events:await events()};
  await db.exec(migration('202610100019_player_bulk_tools.sql'));assert.deepEqual({business:await business(),favorites:await allFavorites(),events:await events()},baseline);
+ await db.exec(migration('202610120003_common_first_quota_summary.sql'));assert.deepEqual({business:await business(),favorites:await allFavorites(),events:await events()},baseline);
  return {db,q,rpc,player,other,unbound,members,actor,batch,summary,choices,allFavorites,events,business,originalSongs,current,variant};
 }
 
@@ -142,17 +143,17 @@ test('own streamer summary counts/grouped weighted quotas match Core, isolate Sp
  const f=await fixture(t),protectedRows=await f.business();
  for(const [space,room] of [['space-001','papa'],[nativeSpace,nativeRoom]]){
   const context=f.actor(room,space),result=await f.summary(context),row=result.rows.find(row=>row.streamerId===room);
-  assert.equal(row.storedCredits,6);assert.equal(row.waitingCount,3);assert.equal(row.personalRemaining,1.5);
+  assert.equal(row.storedCredits,6);assert.equal(row.waitingCount,3);assert.equal(row.personalRemaining,3.5);assert.equal(row.waitingTitle,'own waiting title');
   const queue=(await f.q("select data from papa_v2_entities where kind='queue' and space_id=$1 and data->>'streamer_id'=$2",[space,room])).map(row=>row.data);
   const ledger=(await f.q("select data from papa_v2_entities where kind='ledger' and space_id=$1 and data->>'streamer_id'=$2",[space,room])).map(row=>row.data);
   const core={currentStreamer:{id:room},settings:{hourlyLimit:2},queue,ledger,extraQuotas:[{streamer_id:room,player_id:'P1',extra_quota:5,enabled:true}]};
   assert.equal(row.personalRemaining,savedQuota(core,f.current,'P1').extraRemaining);assert.equal(row.storedCredits,venuePolicyBalance(core,'P1','radio'));
-  assert.ok(result.rows.every(row=>Object.keys(row).sort().join(',')==='name,personalRemaining,slug,status,storedCredits,streamerId,waitingCount'));
+  assert.ok(result.rows.every(row=>Object.keys(row).sort().join(',')==='name,personalRemaining,slug,status,storedCredits,streamerId,waitingCount,waitingTitle'));
   assert.ok(result.rows.every(row=>row.streamerId!=='inactive-room'&&row.streamerId!=='bulk-foreign-room'));
   assert.deepEqual(result.rows.map(row=>row.status),space==='space-001'?['idle','preparing','busy','paused']:['idle','paused']);
   const first=await f.summary(context,1,0),second=await f.summary(context,1,1);assert.equal(first.total,result.total);assert.deepEqual(first.rows.concat(second.rows),result.rows.slice(0,2));
   const other=await f.summary(f.actor(room,space,f.other,'P2'));assert.equal(other.rows.find(row=>row.streamerId===room).storedCredits,99);assert.equal(other.rows.find(row=>row.streamerId===room).personalRemaining,0);
-  assert.doesNotMatch(JSON.stringify(result),/private|password|account|membership|history|quota_effective|creditCost/);
+  assert.doesNotMatch(JSON.stringify(result),/another player title|private|password|account|membership|history|quota_effective|creditCost/);
  }
  assert.deepEqual(await f.business(),protectedRows);assert.equal((await f.events()).length,0);
 });

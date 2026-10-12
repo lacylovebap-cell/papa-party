@@ -57,3 +57,66 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
 
 /* Installation help stays inside the shared responsive dialog. */
 .app-install-brand{display:flex;align-items:center;gap:12px}.app-install-brand img{border-radius:12px;flex:0 0 56px}.app-install-brand b{font-size:18px}.app-install-brand small{display:block;margin-top:4px;color:#bdb2ce}.app-install-steps{padding-left:22px;line-height:1.7}.app-install-steps li{margin:6px 0}.app-install-note{font-size:12px;line-height:1.6}.app-install-other{border-top:1px solid #504162;padding-top:12px;margin-top:14px}.app-install-other summary{cursor:pointer;font-size:13px}.app-install-other h3,#app-install-panel h3{font-size:14px;margin-bottom:8px}.app-install-dismiss{justify-content:flex-end;margin-top:16px}#app-install-status:empty{display:none}#app-install-panel{min-width:0;overflow-wrap:anywhere}#app-install-panel>p{line-height:1.6}#app-install-panel .actions{flex-wrap:wrap}
+.notification-target{outline:2px solid #cba4ea;outline-offset:-2px;background:#30213e!important;border-radius:10px}.notice-target-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;line-height:1.5;margin-bottom:12px}.notice-target-banner>button{flex:0 0 auto}.notice-health{border:1px solid #504162;border-radius:12px;padding:12px;margin:12px 0}.notice-health h3{margin:0 0 8px;font-size:14px}.notice-health dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;margin:8px 0;font-size:12px}.notice-health dt{color:#bdb2ce}.notice-health dd{margin:0;overflow-wrap:anywhere}.notice-health .actions{flex-wrap:wrap;gap:7px}.notice-health-note{font-size:11px;line-height:1.6;color:#bdb2ce}
+@media(max-width:650px){.notice-target-banner{font-size:12px;padding:10px}.notice-dialog .actions{flex-wrap:wrap;gap:6px}.notice-health{padding:10px}.notice-health dl{gap:6px 8px}.notice-health .actions button{font-size:12px;padding:7px 9px}.notice-dialog .notice-list .actions button{font-size:12px;padding:7px 9px}}
+.notice-health .notice-health-summary{display:block}.notice-health-summary>div{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;margin:6px 0}.notice-health-summary dd{margin:0}
+.notice-dialog .notice-settings-body{display:flex;overflow:hidden;min-height:0;padding:0}.notice-dialog #notice-settings{display:flex;flex-direction:column;min-height:0;flex:1;max-width:100%}.notice-settings-fields{overflow:auto;min-height:0;flex:1;padding:14px;overscroll-behavior:contain}.notice-dialog .notice-settings-footer{flex:0 0 auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:0;padding:12px 14px;border-top:1px solid #504162;background:#171321}.notice-settings-footer .error{flex-basis:100%;margin:0;overflow-wrap:anywhere}.notice-settings-footer .error:empty{display:none}.notice-type-details{margin:14px 0}.notice-type-details>summary{cursor:pointer;font-size:13px;padding:10px;border:1px solid #504162;border-radius:10px}.notice-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.notice-settings-grid fieldset{min-width:0;border:1px solid #504162;border-radius:9px;padding:8px 10px}.notice-settings-grid label{display:inline-flex;align-items:center;gap:5px;margin:5px 10px 5px 0}.notice-settings-grid input{margin:0}
+@media(max-width:650px){.notice-settings-grid{grid-template-columns:minmax(0,1fr)}.notice-dialog .notice-settings-footer{padding:10px 14px}.notice-settings-footer button{min-height:36px}}
+.login-status .live-sync-status{display:block!important;color:#d9b7f2;font-size:10px;white-space:normal;line-height:1.4;margin-top:3px}
+
+/* Shared controls and mobile spacing requested in the October 12 review. */
+:root{--song-title-size:14px}
+.song .info b,.queue-title,.common-family h2,.catalog-row .info b{font-size:var(--song-title-size)!important}
+.compact-sort{display:inline-flex!important;align-items:center;justify-content:flex-end;gap:2px;white-space:nowrap;margin:0!important}
+.compact-sort button{padding:3px 5px!important;border:0!important;background:transparent!important;box-shadow:none!important;font-size:11px!important;min-height:28px;color:var(--muted)}
+.compact-sort button.active{color:var(--home-accent,#b997dc)!important;text-decoration:underline;text-underline-offset:4px;font-weight:700}
+.pagination{justify-content:center;align-items:center;gap:6px!important}
+.pagination>label:not(.page-jump):has([data-catalog-size]){flex:1 0 100%;display:flex;justify-content:center;align-items:center;gap:6px;margin:4px 0 0}
+.pagination [data-catalog-size]{width:66px;margin:0;padding:5px;font-size:11px}
+.pagination>.page-jump{display:inline-flex;align-items:center;justify-content:center;gap:5px;margin:0}
+.pagination>.page-jump input{width:48px!important;margin:0;padding:6px 4px}
+.song-actions{display:grid!important;grid-template-columns:repeat(2,max-content);align-content:center;justify-content:center!important;gap:5px!important}
+.song-actions>.favorite-song{grid-column:1/-1;justify-self:center;margin:0!important}
+.song:not(.queue-row) .actions{flex-direction:row!important;flex-wrap:wrap;align-items:center;gap:6px}
+.song-create-actions{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:10px 0}
+.song-create-actions>button{min-height:34px;padding:7px 9px;font-size:11px}
+.song-create-actions>[data-act=newSong]{font-size:13px!important;font-family:Georgia,'Times New Roman',serif}
+#song-q{font-size:14px!important;font-family:Arial,sans-serif;font-weight:500;border-radius:9px;border-width:0}
+.queue-row .queue-meta{font-size:12px!important;line-height:1.65;white-space:normal;overflow-wrap:anywhere}
+.queue-row .queue-artist,.queue-row .queue-player{font-size:12px!important;line-height:1.5}
+.crown{text-align:center}.crown p{line-height:1.65}.crown button{margin:3px}
+.mini-pair .card,.home-bottom-pair>.card{text-align:center}
+.mini-pair .card>.tiny,.home-bottom-pair>.card>.primary{margin:4px auto}
+.home-stack .notice{text-align:center}
+.cross-song-row,.cross-song-controls,.cross-song-results,.cross-song-results button{min-width:0;overflow-wrap:anywhere}
+.cross-song-results button{white-space:normal!important;line-height:1.5}
+.cross-room-option>span{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 6px;min-width:0}
+.cross-room-option b{font-size:14px}.cross-room-option small{font-size:12px;line-height:1.5}
+@media(max-width:650px){
+ .header-inner{grid-template-columns:92px minmax(0,1fr) auto!important;align-items:center!important}
+ .header-inner .brand-logo{width:92px!important;height:77px!important}
+ .home-search-card{padding-top:12px;padding-bottom:10px}
+ .home-search-card .section-head{margin-bottom:8px}
+ .home-search-card #home-results .empty{padding:8px 4px}
+ .song-search-toolbar>.compact-sort{grid-column:2;grid-row:2;justify-self:end}
+ .common-book-filters>.compact-sort{grid-column:1/-1!important;justify-self:end}
+ .common-book-filters>input{order:0}.common-book-filters>label{order:1}.common-book-filters>.compact-sort{order:2}
+ .catalog-review-toolbar{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px!important}
+ .catalog-review-toolbar>input,.catalog-review-toolbar>.catalog-membership-tabs{grid-column:1/-1!important;min-width:0;width:100%}
+ .catalog-review-toolbar>select{width:100%;min-width:0;max-width:none;padding:7px 4px;font-size:11px}
+ .catalog-review-toolbar>[data-act=catalogFilter]{grid-column:1/-1;justify-self:start;min-width:64px}
+ .catalog-batch-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+ .catalog-batch-actions>.compact-sort{margin-left:auto!important}
+ .cross-room-option{padding:8px;gap:7px}
+ .cross-room-description{min-width:0;flex:1}
+ .cross-room-summary-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+ .cross-room-summary-line>b{font-size:14px!important}
+ .cross-room-summary-line>small{font-size:12px!important}
+ .cross-room-waiting-title{font-size:12px!important;overflow-wrap:anywhere;margin-top:3px}
+ .admin-section-tabs{flex-wrap:wrap!important;overflow-x:visible!important}
+ .admin-section-tabs>button{padding:7px 8px;white-space:normal}
+ .catalog-review-toolbar>input{order:0}.catalog-review-toolbar>[data-act=catalogFilter]{order:1}.catalog-review-toolbar>.catalog-membership-tabs{order:2}.catalog-review-toolbar>select{order:3}
+ .home-search-card #home-results .empty{padding:6px 4px}
+ .queue-row .queue-artist{display:block!important;white-space:normal}
+ .queue-row .queue-meta .queue-state{font-size:12px!important}
+}

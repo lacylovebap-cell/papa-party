@@ -35,11 +35,11 @@ test('a result whose song no longer has the chosen tag is removed on refreshed c
  const u=ui();u.select('tag:古風');u.run('clickDraw();state.songs[0].tags=["甜歌"];renderHome()');assert.doesNotMatch(u.nodes['#app'].innerHTML,/古風歌曲/);assert.match(u.nodes['#app'].innerHTML,/讓命運幫你選一首/);
 });
 
-test('a drawn song offers the two normal request paths without marking a player request as self-provided',()=>{
+test('a drawn song keeps saved/live confirmation paths while carrying the requested self-provided provenance',()=>{
  const source=app.split(/\r?\n/).find(line=>line.startsWith('function fateResultHtml()'));
- assert.match(source,/button\('🎤 提歌','request',fateId,'tiny','data-kind="saved"'\)/);
- assert.match(source,/button\('🎁 現點','request',fateId,'tiny','data-kind="live"'\)/);
- assert.doesNotMatch(source,/data-self="true"|streamerDraw|dispatch\(/);
+ assert.match(source,/button\('🎤 提歌','request',fateId,'tiny','data-kind="saved" data-self="true"'\)/);
+ assert.match(source,/button\('🎁 現點','request',fateId,'tiny','data-kind="live" data-self="true"'\)/);
+ assert.doesNotMatch(source,/streamerDraw|dispatch\(/);
 });
 
 test('legacy undated new-practice flags appear as a draw tag and their results survive refresh without mutating old tags',()=>{

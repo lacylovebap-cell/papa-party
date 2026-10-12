@@ -16,7 +16,8 @@ function declaration(name){
 }
 const start=source.indexOf(" if(b.op==='requestsBatch'){"),end=source.indexOf(" if(b.op==='listeningHistoryPage'){",start);
 assert.ok(start>=0&&end>start);
-const code=stripTypeScriptTypes(declaration('api')+'\n'+declaration('commit')+'\nasync function request(b,who){const t="2026-10-10T04:30:00Z";'+source.slice(start,end)+'}');
+const conflictHelpers=source.slice(source.indexOf('const revisionConflictMessage='),source.indexOf('async function api('));
+const code=stripTypeScriptTypes(conflictHelpers+'\n'+declaration('api')+'\n'+declaration('commit')+'\nasync function request(b,who){const t="2026-10-10T04:30:00Z";'+source.slice(start,end)+'}');
 const now='2026-10-10T04:30:00Z',admin={role:'admin'};
 const change=(state,type,data,streamer='papa')=>mutate(state,{type,data,streamer},admin,now);
 

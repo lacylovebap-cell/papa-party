@@ -39,7 +39,7 @@ test('half repeat and paired halves each reserve their complete one-credit quote
  const next=batch(source,[row(source,0),row(source,1,{pairSongId:source.songs[2].songId})]);assert.deepEqual(next.queue.map(q=>q.creditCost),[1,1]);assert.equal(next.queue[0].items[0].performances,2);assert.equal(next.queue[1].items.length,2);assert.equal(reservedHour(room(next),now),2);assert.equal(reservedCredits(room(next),actor(next).playerId),2);
 });
 
-test('batch consumes personal quota before common capacity and validates subsequent rows against both',()=>{
+test('batch fills common capacity before personal quota and validates subsequent rows against both',()=>{
  let source=setup({limit:1,costs:[1,1,1]});source=run(source,'extraQuota',{player_id:actor(source).playerId,extra_quota:1,enabled:true});
  const next=batch(source,[row(source,0),row(source,1)]),quota=savedQuota(room(next),now,actor(next).playerId);assert.equal(quota.personalUsed,1);assert.equal(quota.reserved,1);assert.equal(quota.totalRemaining,0);
  const before=structuredClone(next);assert.throws(()=>batch(next,[row(next,2)]),/額度不足/);assert.deepEqual(next,before);

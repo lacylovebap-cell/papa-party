@@ -9,14 +9,14 @@ export function installPageJumps({root=document,onJump,onError=()=>{}}){
   for(const nav of root.querySelectorAll('.pagination')){
    if(nav.dataset.jumpReady||nav.querySelector('[data-page-key]'))continue;
    const catalog=nav.querySelector('[data-catalog-page]');
-   if(catalog){const button=document.createElement('button');button.type='button';button.textContent='跳頁';button.dataset.remoteJump=catalog.dataset.catalogPage;nav.append(button);nav.dataset.jumpReady='true';continue;}
+   if(catalog){const button=document.createElement('button');button.type='button';button.textContent='跳頁';button.dataset.remoteJump=catalog.dataset.catalogPage;const label=catalog.closest('label');label.classList.add('page-jump');label.append(button);nav.dataset.jumpReady='true';continue;}
    const previous=nav.querySelector('[data-act]');if(!previous)continue;
    const page=Number(nav.textContent.match(/第\s*(\d+)\s*頁/)?.[1]);if(!page)continue;
    const label=document.createElement('label');label.className='page-jump';label.textContent='頁碼';
    const sizes={favoritesPage:20,listeningPage:20,playersPage:20,playerArchivesPage:20,newPracticePage:20,commonBookPage:12,roomSearchPage:20,entryPage:50,nativePlayerPage:20,crossSummaryPage:20,crossSongPage:20,catalogProposalPage:3};
    const count=nav.textContent.match(/共\s*(\d+)\s*(?:首|位|筆)/),size=sizes[previous.dataset.act]||20;
    const input=document.createElement('input');input.type='number';input.min='1';input.max=String(count?Math.max(1,Math.ceil(Number(count[1])/size)):Math.floor(10000000/size)+1);input.value=String(page);input.setAttribute('aria-label','跳至頁碼');input.dataset.remotePage=previous.dataset.act;input.dataset.targetId=previous.dataset.id||'';label.append(input);
-   const button=document.createElement('button');button.type='button';button.textContent='跳頁';button.dataset.remoteJump=previous.dataset.act;nav.append(label,button);nav.dataset.jumpReady='true';
+   const button=document.createElement('button');button.type='button';button.textContent='跳頁';button.dataset.remoteJump=previous.dataset.act;label.append(button);const next=[...nav.querySelectorAll('[data-act]')].find(control=>control!==previous&&control.textContent.includes('下一頁'));if(next)nav.insertBefore(label,next);else nav.append(label);nav.dataset.jumpReady='true';
   }
  };
  const jump=async button=>{try{const nav=button.closest('.pagination'),input=nav.querySelector('[data-remote-page],[data-catalog-page]');if(!input)return;const page=checkedPage(input.value,Number(input.max)||500001);await onJump(button.dataset.remoteJump||input.dataset.remotePage,page,input.dataset.targetId);}catch(error){onError(error.message);}};

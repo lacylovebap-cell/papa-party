@@ -26,7 +26,7 @@ test('saved and live confirmation forms include one optional note in the existin
   assert.match(u.modal.body,/想說的話（選填，最多 30 字）/);assert.match(u.modal.body,/name="requestNote"/);
   assert.equal((u.modal.body.match(/name="requestNote"/g)||[]).length,1);
   await u.modal.submit(new Map([['requestNote','今晚想聽這首 ❤️'],['gift','yes']]));
-  assert.deepEqual(u.calls,[{type:'request',data:{songId:'S1',kind,selfProvided:false,pairSongId:'',giftConfirmed:true,requestNote:'今晚想聽這首 ❤️'}}]);
+  assert.deepEqual(u.calls,[{type:'request',data:{songId:'S1',kind,selfProvided:false,source:'manual',pairSongId:'',giftConfirmed:true,requestNote:'今晚想聽這首 ❤️'}}]);
  }
 });
 test('blank optional note keeps the original request route and quote data unchanged',async()=>{

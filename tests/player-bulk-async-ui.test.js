@@ -38,7 +38,7 @@ function ui(){
   api:async body=>{calls.push(structuredClone(body));if(body.op==='requestsBatch')return writeResponse(body);if(body.op==='playerStreamerSummary')return {rows:[],total:0};return {rows:[{songId:body.streamer+'-song',title:'可點歌曲',artist:'演唱者',tags:[],creditCost:1}],total:1,tagOptions:[]};},
  });
  vm.runInContext("let favoriteSelectionIdentity=JSON.stringify(['a1','p1','space-001','r1']); const crossStatusName={idle:'空閒中',preparing:'準備中',busy:'忙碌中',paused:'暫停点歌'};",ctx);
- vm.runInContext(['modal','favoritesIdentity','requestSelectedFavorites','favoritePairOptions','crossIdentity','crossSummaryHtml','centerWaitingHtml','renderCrossStreamers','loadCrossSummary','openCrossRequest','crossRowElement','renderCrossSong','loadCrossSongs','chooseCrossSong','crossPairOptions'].map(declaration).join('\n'),ctx);
+ vm.runInContext(['modal','favoritesIdentity','requestSelectedFavorites','favoritePairOptions','crossIdentity','crossSummaryHtml','centerWaitingHtml','renderCrossStreamers','loadCrossSummary','openCrossRequest','crossRowElement','resetConfirmedCrossBatch','renderCrossSong','loadCrossSongs','chooseCrossSong','crossPairOptions'].map(declaration).join('\n'),ctx);
  const run=code=>vm.runInContext(code,ctx);
  return {ctx,dialog,crossView,calls,toasts,selectedFavorites,selectedFavoriteRows,run,setWrite:fn=>writeResponse=fn,get current(){return current;},get closed(){return closed;},get refreshes(){return refreshes;},async favorite(kind='saved'){await run("requestSelectedFavorites('"+kind+"')");return current.form;},async cross(id='a'){crossView.selected.clear();crossView.selected.set(id,room(id));await run("openCrossRequest('saved')");run("chooseCrossSong('"+id+"','"+id+"-slug-song')");return current.form;}};
 }
@@ -96,4 +96,19 @@ test('unknown per-room receipts show pending confirmation and preserve the no-re
   assert.match(favorite?form.error.textContent:form.results.innerHTML,/結果待確認.*待播.*避免重複/);
   await form.onsubmit(event(form));assert.equal(u.calls.filter(body=>body.op==='requestsBatch').length,1);
  }
+});
+
+test('a confirmed cross batch can start a fresh choice in the same modal without replaying its successful songs',async()=>{
+ const u=ui(),form=await u.cross();await form.onsubmit(event(form));
+ assert.equal(u.closed,0);assert.equal(u.crossView.submitted,false);assert.equal(u.crossView.drafts.get('a').chosen,null);assert.equal(form.submit.disabled,false);
+ await form.onsubmit(event(form));assert.equal(u.calls.filter(body=>body.op==='requestsBatch').length,1,'empty success selections cannot resend');
+ await u.run("loadCrossSongs('a',false,0)");u.run("chooseCrossSong('a','a-slug-song')");await form.onsubmit(event(form));
+ assert.equal(u.calls.filter(body=>body.op==='requestsBatch').length,2);assert.equal(u.crossView.drafts.get('a').chosen,null);assert.equal(u.dialog.open,true);
+});
+
+test('cross dice provenance survives the submitted row and explicit manual selection clears that provenance',async()=>{
+ const u=ui(),form=await u.cross();await u.run("loadCrossSongs('a',true,0)");await form.onsubmit(event(form));
+ const job=u.calls.find(body=>body.op==='requestsBatch').jobs[0];assert.equal(job.rows[0].selfProvided,true);assert.equal(job.rows[0].source,'cross_draw');
+ await u.run("loadCrossSongs('a',true,0,'cross_self')");assert.equal(u.crossView.drafts.get('a').source,'cross_self');
+ await u.run("loadCrossSongs('a',false,0)");u.run("chooseCrossSong('a','a-slug-song')");assert.equal(u.crossView.drafts.get('a').source,'manual');assert.equal(u.crossView.drafts.get('a').selfProvided,false);
 });

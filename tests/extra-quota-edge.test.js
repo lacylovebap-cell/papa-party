@@ -11,7 +11,7 @@ import {TABLES,DEFAULTS,savedQuota} from '../src/core.js';
 const root=new URL('../',import.meta.url),read=path=>fs.readFileSync(new URL(path,root),'utf8');
 const bundle=['src/native-player-bindings.js','src/board-policy.js','supabase/functions/party-api/board.ts',
  'src/chat-policy.js','supabase/functions/party-api/chat.ts','src/home-settings.js','src/venue-policy.js','src/new-practice.js',
- 'src/core.js','src/state-patch.js','src/room-import.js','src/room-draft.js','src/notification-rules.js','src/access-policy.js',
+ 'src/request-source.js','src/core.js','src/state-patch.js','src/room-import.js','src/room-draft.js','src/notification-rules.js','src/access-policy.js',
  'supabase/functions/party-api/catalog.ts','supabase/functions/party-api/index.ts']
  .map(path=>read(path).replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'')).join('\n');
 const now='2026-10-09T12:30:00Z',hash=token=>createHash('sha256').update(token).digest('hex');
@@ -117,8 +117,8 @@ test('one quota-aware snapshot binds player reads to their own identity and incl
  assert.equal(result.status,200);assert.deepEqual(rpc(h,'papa_verified_session_actor').map(call=>call.body),[{session_hash:hash(tokens.player),requested_room:'papa'}]);
  assert.deepEqual(rpc(h,'papa_v2_scoped_read_snapshot_with_quota').map(call=>call.body),[{requested_room:'papa',allowed_space:'space-001',quota_player:'P1'}]);
  assert.equal(scopedSnapshots(h).length,1);
- assert.equal(result.data.state.hourlyPersonal.commonRemaining,1);assert.equal(result.data.state.hourlyPersonal.reserved,1);
- assert.equal(result.data.state.hourlyPersonal.extraRemaining,2);assert.equal(result.data.state.hourlyPersonal.totalRemaining,3);
+ assert.equal(result.data.state.hourlyPersonal.commonRemaining,0);assert.equal(result.data.state.hourlyPersonal.reserved,2);
+ assert.equal(result.data.state.hourlyPersonal.extraRemaining,2);assert.equal(result.data.state.hourlyPersonal.totalRemaining,2);
  assert.deepEqual(result.data.state.players.map(p=>p.playerId),['P1']);assert.deepEqual(result.data.state.players[0].quotaRights.map(q=>q.extra_quota),[2,4]);
  for(const secret of ['PRIVATE_PASSWORD','PRIVATE_PROFILE_NOTE','PRIVATE_LYRICS','Other Space private room'])assert.equal(JSON.stringify(result.data).includes(secret),false);
  assert.equal(result.data.state.players[0].quotaRights.some(right=>right.extra_quota===99),false,'identical player ID never joins rights from another Space');
@@ -181,8 +181,9 @@ test('invalid grants, stale revisions, player or foreign manager actors never us
 });
 
 test('personal requests, completion and cancellation preserve the original accounting and notice pipeline',async()=>{
- const h=edge(),result=await h.request({op:'mutate',streamer:'papa',revision:h.revision,profilePlayerId:'P2',action:{type:'request',data:{songId:'two',kind:'saved'}}});
- assert.equal(result.status,200);assert.equal(result.data.state.hourlyPersonal.extraRemaining,0);assert.equal(result.data.state.hourlyPersonal.commonRemaining,1);
+ const source=fixture();source.extraQuotas.find(row=>row.streamer_id==='papa'&&row.player_id==='P1').extra_quota=3;
+ const h=edge(source),result=await h.request({op:'mutate',streamer:'papa',revision:h.revision,profilePlayerId:'P2',action:{type:'request',data:{songId:'two',kind:'saved'}}});
+ assert.equal(result.status,200);assert.equal(result.data.state.hourlyPersonal.extraRemaining,1);assert.equal(result.data.state.hourlyPersonal.commonRemaining,0);
  const queueId=result.data.state.queue[0].id,first=rpc(h,'papa_room_operational_commit')[0].body;
  assert.equal(first.actor_context.player_id,'P1');assert.deepEqual(first.notices.map(n=>[n.recipient,n.type]).sort(),[['P1','accepted'],['__admin__','saved']]);
  assert.equal(first.actor_context.account_id,account(1));assert.equal(first.actor_context.space_id,'space-001');assert.equal(first.requested_room,'papa');
@@ -195,7 +196,7 @@ test('personal requests, completion and cancellation preserve the original accou
  response=await h.request({op:'mutate',streamer:'papa',revision:h.revision,action:{type:'request',data:{songId:'one',kind:'saved'}}});assert.equal(response.status,200);
  const cancelId=response.data.state.queue.find(q=>q.status==='waiting').id,ledger=structuredClone(h.state().ledger);
  response=await h.request({op:'mutate',streamer:'papa',revision:h.revision,action:{type:'cancelOwn',data:{id:cancelId}}});
- assert.equal(response.status,200);assert.equal(response.data.state.hourlyPersonal.commonRemaining,1);assert.deepEqual(h.state().ledger,ledger);
+ assert.equal(response.status,200);assert.equal(response.data.state.hourlyPersonal.commonRemaining,0);assert.deepEqual(h.state().ledger,ledger);
  assert.deepEqual(rpc(h,'papa_room_operational_commit').at(-1).body.notices.map(n=>[n.recipient,n.type]),[['__admin__','cancel']]);
  assert.equal(scopedSnapshots(h).length,5);assert.equal(rpc(h,'papa_room_operational_commit').length,5);assert.equal(rpc(h,'papa_release_b_commit').length,0);
  assert.equal(rpc(h,'papa_manage_player_extra_quota').length,0);h.checkSource();
@@ -215,10 +216,10 @@ test('manager saved onBehalf includes an unqueued target allowance in the same s
   assert.equal(commits[0].body.actor_context.account_id,account(3));assert.equal(commits[0].body.actor_context.space_id,'space-001');
   assert.equal(commits[0].body.requested_room,'papa');assert.equal(commits[0].body.changes.some(row=>row.kind==='ledger'),false);
   const requested=result.data.state.queue.find(q=>q.playerId==='P1');assert.equal(requested.kind,'saved');assert.equal(requested.status,'waiting');assert.equal(requested.creditCost,2);
-  assert.equal(result.data.state.hourlyUsed,0);assert.equal(result.data.state.hourlyReserved,1);assert.equal(result.data.state.hourlyPersonal.commonRemaining,1);
+  assert.equal(result.data.state.hourlyUsed,0);assert.equal(result.data.state.hourlyReserved,2);assert.equal(result.data.state.hourlyPersonal.commonRemaining,0);
   // A manager has no personal player quota. The target's allowance and the
   // immediate returned rows supply the same calculation used by the manager UI.
-  assert.deepEqual(savedQuota(result.data.state,now,'P1'),{used:0,reserved:1,commonRemaining:1,extraQuota:2,personalUsed:2,extraRemaining:0,totalRemaining:1});
+  assert.deepEqual(savedQuota(result.data.state,now,'P1'),{used:0,reserved:2,commonRemaining:0,extraQuota:2,personalUsed:2,extraRemaining:0,totalRemaining:0});
   assert.deepEqual(result.data.state.players.find(p=>p.playerId==='P1').quotaRights.map(q=>q.extra_quota),[2,4]);
   assert.equal(h.calls.length,4,'actor validation, one scoped snapshot, one commit and one metadata projection');h.checkSource();
  }

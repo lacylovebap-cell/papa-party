@@ -11,6 +11,17 @@ function fixture(options={}){
  return {manager,calls,pending,changes,setContext:next=>{ctx=next;}};
 }
 const tick=()=>Promise.resolve();
+test('newest initial sort reaches the first bounded read and resets consistently on room changes',async()=>{
+ const f=fixture({initialSort:'newest'}),m=f.manager;
+ assert.equal(m.state().sort,'newest');
+ await finish(f);assert.equal(f.calls[0].sort,'newest');
+ m.setSort('oldest');m.search('舊空間');
+ f.setContext({spaceId:'space-002',roomId:'other',revision:1});
+ assert.equal(m.state().sort,'newest');assert.equal(m.state().q,'');
+ assert.equal(m.state('all').sort,'newest');
+ await finish(f);assert.equal(f.calls[1].sort,'newest');
+ assert.throws(()=>fixture({initialSort:'unknown'}));
+});
 async function finish(f,response={rows:[row()],total:1}){
  const task=f.manager.load();await tick();f.pending.at(-1).resolve(response);await task;return task;
 }

@@ -71,6 +71,27 @@ function server(){
  }};
 }
 
+test('an old notice opens one exact message window without walking newest pages or reading newer messages',async()=>{
+ const service=server(),messageId='00000000-0000-4000-8000-000000000030';service.state.rows=Array.from({length:700},(_,i)=>({...row(i+1),...(i===29?{id:messageId}:{})}));
+ const ui=frontend(service.api);
+ try{
+  await ui.chat.open({found:true,kind:'chat',spaceId:'space-001',streamerId:'papa',playerId:'P1',messageId,seq:30});
+  assert.deepEqual(ui.seqs(),Array.from({length:30},(_,i)=>i+1));
+  assert.equal(ui.calls.filter(c=>c.op==='chatMessages').length,1);assert.equal(ui.calls[0].before,31);
+  assert.equal(ui.calls.at(-1).through,30);assert.match(ui.box.innerHTML,/notification-target/);
+  const count=ui.calls.length;await ui.chat.refresh();assert.equal(ui.calls.length,count,'anchor does not download future history on each fallback tick');
+ }finally{ui.restore();}
+});
+
+test('an unavailable or mismatched notice anchor cannot acknowledge conversation contents',async()=>{
+ const service=server();service.state.rows=Array.from({length:50},(_,i)=>row(i+1));const ui=frontend(service.api);
+ try{
+  const target={found:true,kind:'chat',spaceId:'space-001',streamerId:'papa',playerId:'P1',messageId:'00000000-0000-4000-8000-000000000030',seq:30};
+  await assert.rejects(ui.chat.open({...target,playerId:'P2'}),/無法查看/);assert.equal(ui.calls.length,0);
+  await ui.chat.open(target);assert.match(ui.nodes.error.textContent,/原訊息目前無法查看/);assert.equal(ui.calls.filter(c=>c.op==='chatRead').length,0);
+ }finally{ui.restore();}
+});
+
 test('chat appends all pages after a 120-message burst while preserving loaded older history',async()=>{
  const service=server();service.state.rows=Array.from({length:100},(_,i)=>row(i+101));
  const ui=frontend(service.api);

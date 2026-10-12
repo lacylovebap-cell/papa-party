@@ -13,7 +13,7 @@ function page(){
   full,state:publicView(full,{role:'admin'},at,'papa'),draft:{state:full,journal:createRoomDraft(full,'papa'),baseRevision:7},demo:false,busy:false,
   streamerSlug:'papa',actor:()=>({role:'admin'}),isAdmin:()=>true,clock:()=>at,put:(key,value)=>writes.push({key,value:structuredClone(value)}),
   notifications:{localChange:()=>{},refresh:async()=>{}},invalidateCatalogTabs:()=>{},render:()=>{},toast:()=>{},confirm:()=>true,
-  refresh:async()=>{},backup:(value,name)=>backups.push({value:structuredClone(value),name}),
+  refresh:async()=>{},syncRecovery:{resume(){}},syncReadIdentity:()=>'draft-fixture',appliedReadScope:'draft-fixture',backup:(value,name)=>backups.push({value:structuredClone(value),name}),
   api:async body=>{requests.push(body);throw Error('unexpected request');}});
  const fn=name=>source.split('\n').find(line=>line.startsWith('async function '+name+'('));
  vm.runInContext(fn('dispatch'),c);vm.runInContext(fn('executeImport'),c);

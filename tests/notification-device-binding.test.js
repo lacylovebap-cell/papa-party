@@ -80,10 +80,10 @@ for(const [label,patch] of [['recipient',{recipient:'P2'}],['room',{streamer:'mi
  });
 }
 
-test('an old device completion cannot overwrite a newer successful binding',async t=>{
+ test('an old in-flight device write finishes before the newer device binds and cannot overwrite it',async t=>{
  const pending=deferred();const harness=pushHarness(t,{upsert:b=>b.expectedDeviceSessionId==='device-one'?pending.promise:Promise.resolve({})});
  await harness.refresh();harness.setContext({deviceSessionId:'device-two'});await harness.refresh();
- assert.equal(harness.bindings().length,2);pending.resolve({});await harness.settle();await harness.refresh();
+ assert.equal(harness.bindings().length,1,'new route write waits for the old in-flight request');pending.resolve({});await harness.settle();await harness.refresh();
  assert.equal(harness.bindings().length,2,'current device remains successfully bound');
  assert.equal(harness.bindings()[1].expectedDeviceSessionId,'device-two');
 });

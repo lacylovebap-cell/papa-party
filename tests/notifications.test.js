@@ -5,6 +5,20 @@ const state=()=>({streamers:[{id:'a',slug:'a',display_name:'怕怕'},{id:'b',slu
 const context={streamer_id:'a',role:'player'},request={id:'1',streamer_id:'a',playerId:'p',kind:'saved',title:'歌曲甲',status:'waiting'};
 test('saved request has separate host and player notices, with source',()=>{const before=state(),after=state();after.queue=[request];const rows=deriveNotices(before,after,context);assert.equal(rows.length,2);assert.deepEqual(rows.map(n=>n.recipient),['__admin__','p']);assert.ok(rows.every(n=>n.streamer_id==='a'&&n.body.startsWith('怕怕｜')));});
 test('other room and other player cannot receive a request notification',()=>{const before=state(),after=state();after.queue=[{...request,streamer_id:'b'}];assert.deepEqual(deriveNotices(before,after,context),[]);});
+
+test('receipt with preparation minutes produces one important scoped reminder instead of duplicate acceptance',()=>{
+ const before=state();before.queue=[{...request,kind:'live',status:'pending',preparationMinutes:null}];const after=structuredClone(before);
+ Object.assign(after.queue[0],{status:'waiting',preparationMinutes:5,preparationStartedAt:'2026-10-12T12:00:00Z',stage:'準備中'});
+ const rows=deriveNotices(before,after,{...context,role:'admin'});assert.equal(rows.length,1);assert.equal(rows[0].type,'accepted');assert.equal(rows[0].recipient,'p');assert.match(rows[0].body,/歌曲甲.*5 分鐘/);assert.equal(rows[0].level,2);
+ assert.equal(noticeChannels({pushEnabled:true},rows[0].type).push,true);assert.equal(noticeChannels({},rows[0].type).popup,true);
+});
+
+test('wish creation and status results notify only the correct host and owner without private request notes',()=>{
+ const before=state(),after=state();after.wishes=[{id:'w1',streamer_id:'a',playerId:'p',title:'願望曲',status:'收到',note:'private wish note'},{id:'w2',streamer_id:'b',playerId:'q',title:'別的主播',status:'收到'}];
+ const received=deriveNotices(before,after,context);assert.deepEqual(received.map(row=>[row.recipient,row.type]),[['__admin__','wish'],['p','wish']]);assert.ok(received.every(row=>row.entity_id==='w1'));assert.doesNotMatch(JSON.stringify(received),/private wish note|別的主播/);
+ for(const status of ['考慮中','學習中','已學會','暫不學']){const next=structuredClone(after);next.wishes[0].status=status;const rows=deriveNotices(after,next,{...context,role:'admin'});assert.equal(rows.length,1);assert.equal(rows[0].recipient,'p');assert.match(rows[0].body,new RegExp(status));}
+ assert.deepEqual(deriveNotices(after,structuredClone(after),context),[]);
+});
 test('live request only notifies the host; old unchanged queue never replays',()=>{const before=state(),after=state();after.queue=[{...request,kind:'live',status:'pending'}];assert.deepEqual(deriveNotices(before,after,context).map(n=>n.type),['live']);assert.deepEqual(deriveNotices(after,structuredClone(after),context),[]);});
 test('ready, completion and cancellation target the correct recipient',()=>{for(const [patch,type] of [[{preparationMinutes:0},'ready'],[{status:'completed'},'completed'],[{status:'cancelled'},'cancel']]){const before=state();before.queue=[{...request,preparationMinutes:5}];const after=structuredClone(before);Object.assign(after.queue[0],patch);const n=deriveNotices(before,after,{...context,role:'admin'});assert.equal(n[0].type,type);assert.equal(n[0].recipient,'p');}const before=state();before.queue=[request];const after=structuredClone(before);after.queue[0].status='cancelled';assert.equal(deriveNotices(before,after,context)[0].recipient,'__admin__');});
 test('backdating or reordering alone does not send false changes',()=>{const before=state();before.queue=[request];const after=structuredClone(before);Object.assign(after.queue[0],{_order:22,at:'2026-01-01',updated_at:'2026-09-24'});assert.deepEqual(deriveNotices(before,after,context),[]);});
@@ -16,9 +30,9 @@ test('canonical notification link carries one Space/entity identity for every pl
  const notice={id:'notice-1',space_id:'space-001',streamer_id:'michelle',recipient:'__admin__',type:'message',entity_id:'thread-1'};
  const link=canonicalNoticeLink(notice,'michelle');
  assert.deepEqual(link,{version:1,spaceId:'space-001',streamerId:'michelle',streamerSlug:'michelle',section:'admin',entityType:'message',entityId:'thread-1',notificationId:'notice-1'});
- assert.equal(webNoticePath(link),'./?streamer=michelle#admin');
+ assert.equal(webNoticePath(link),'./?streamer=michelle&streamerId=michelle&spaceId=space-001&entityType=message&entityId=thread-1&notificationId=notice-1#admin');
  assert.equal(canonicalNoticeLink({...notice,recipient:'P1'},'mi chelle').section,'center');
- assert.equal(webNoticePath(canonicalNoticeLink({...notice,recipient:'P1'},'mi chelle')),'./?streamer=mi%20chelle#center');
+ assert.equal(webNoticePath(canonicalNoticeLink({...notice,recipient:'P1'},'mi chelle')),'./?streamer=mi%20chelle&streamerId=michelle&spaceId=space-001&entityType=message&entityId=thread-1&notificationId=notice-1#center');
  assert.equal(JSON.stringify(link).includes('https://'),false,'native adapters receive a URL-independent target');
- assert.equal(webNoticePath(canonicalNoticeLink({...notice,space_id:'space-002'},'other-room')),'./?streamer=other-room&spaceId=space-002#admin','native Space notification retains its canonical Space when opened on Web');
+ assert.equal(webNoticePath(canonicalNoticeLink({...notice,space_id:'space-002'},'other-room')),'./?streamer=other-room&streamerId=michelle&spaceId=space-002&entityType=message&entityId=thread-1&notificationId=notice-1#admin','native Space notification retains its canonical Space when opened on Web');
 });

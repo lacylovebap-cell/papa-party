@@ -14,8 +14,10 @@ async function noticeKeys(){
 }
 async function notificationOperation(b:any,who:any,s:any){
  if(!who)throw Error('請先登入');
- const sourceRoom=scopeState(s,b.streamer||'papa').currentStreamer.id,{room,recipient}=noticeIdentity(who,sourceRoom);
+ const source=scopeState(s,b.streamer||'papa').currentStreamer,sourceRoom=source.id,{room,recipient}=noticeIdentity(who,sourceRoom);
  if(!recipient)throw Error('請先登入');
+ if(['messageCenter','messageCenterCounts','messageCenterRead'].includes(b.op))return messageCenterOperation(b,who,source);
+ if(b.op==='noticeTarget')return noticeTarget(b,who,source);
  const filter='streamer_id=eq.'+encodeURIComponent(room)+'&recipient=eq.'+encodeURIComponent(recipient),noticeFilter=(room==='__global__'?'':('streamer_id=eq.'+encodeURIComponent(room)+'&'))+'recipient=eq.'+encodeURIComponent(recipient);
  if(b.op==='notifications'){
   const inbox=await api('/rest/v1/rpc/papa_notice_inbox',{room,owner_id:recipient,page_number:Math.max(0,Math.min(100000,Math.floor(Number(b.page)||0)))});
@@ -104,19 +106,42 @@ import {deriveNotices} from '../../../src/notification-rules.js';
 import {empty,TABLES,mutate,publicView,migrateLegacy,previewImport,applyImport,playerSearch,upgradePlatform,scopeState,searchAcrossStreamers,balance,reservedCredits,usedHour,reservedHour,quoteSong,hourKey,canRequestSaved} from '../../../src/core.js';
 import {venuePolicySavedSnapshot} from '../../../src/venue-policy.js';
 import {buildNativePlayerBindings} from '../../../src/native-player-bindings.js';
+import {chatAccess} from '../../../src/chat-policy.js';
+import {boardActor,boardThreadVisible,boardUuid} from '../../../src/board-policy.js';
 const SB_URL=Deno.env.get('SUPABASE_URL')!,KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,ADMIN=Deno.env.get('PAPA_ADMIN_USER_ID');
 const headers={apikey:KEY,Authorization:`Bearer ${KEY}`,'Content-Type':'application/json'};
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'content-type,authorization,apikey','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const hash=async(s:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))).map(x=>x.toString(16).padStart(2,'0')).join('');
+const revisionConflictMessage='資料剛更新了，請重新整理後再試一次';
+const revisionConflictCommits=new Set(['papa_v2_commit','papa_release_b_commit','papa_room_operational_commit','papa_room_admin_commit','papa_room_admin_commit_with_player_bindings','papa_streamer_registry_commit','papa_manage_player_extra_quota','papa_player_archive','papa_players_archive']);
+function revisionConflictError(){return Object.assign(Error(revisionConflictMessage),{code:'VERSION_CONFLICT',notCommitted:true});}
+// Only a known atomic write RPC's actual SQL rejection proves that write was
+// rolled back. A failed fetch/5xx or a later projection cannot provide proof.
+function rejectedRevisionConflict(path:string,status:number,detail:any){
+ const rpc=/^\/rest\/v1\/rpc\/([a-z_]+)$/.exec(path)?.[1];
+ return status>=400&&status<500&&revisionConflictCommits.has(rpc||'')&&detail?.message==='VERSION_CONFLICT'&&['PT409','40001','P0001'].includes(detail.code);
+}
+function unknownOperationOutcome(error:any){return Object.assign(error instanceof Error?error:Error('資料讀取失敗'),{notCommitted:false,outcome:'unknown'});}
+function operationErrorResponse(error:any){
+ if(error?.code==='NOTICE_SNAPSHOT_INVALID')return {error:error.message,code:'NOTICE_SNAPSHOT_INVALID'};
+ const definite=error?.code==='VERSION_CONFLICT'&&error.notCommitted===true&&error.outcome!=='unknown';
+ return {error:error?.message||'操作失敗',...(definite?{code:'VERSION_CONFLICT',notCommitted:true}:{outcome:'unknown'})};
+}
+function missingRoomSyncHead(path:string,status:number,detail:any){
+ return path==='/rest/v1/rpc/papa_room_sync_head'&&status===404&&detail?.code==='PGRST202'
+  &&typeof detail.message==='string'&&/^Could not find the function public\.papa_room_sync_head(?:\(|\s|$)/.test(detail.message);
+}
 async function api(path:string,body?:unknown,method?:string){
- const r=await fetch(SB_URL+path,{method:method||(body?'POST':'GET'),headers,body:body?JSON.stringify(body):undefined}),text=await r.text();
+ let r:any,text:string;try{r=await fetch(SB_URL+path,{method:method||(body?'POST':'GET'),headers,body:body?JSON.stringify(body):undefined});text=await r.text();}catch(error){throw unknownOperationOutcome(error);}
  if(!r.ok){
   const messages:any={DEVICE_SWITCH_SPACE_INVALID:'找不到可使用的空間',DEVICE_SWITCH_ROOM_INVALID:'此登入不適用選擇的主播',DEVICE_SWITCH_MEMBERSHIP_REQUIRED:'你沒有此空間的使用權限',DEVICE_SWITCH_PROFILE_REQUIRED:'此空間的玩家資料尚未建立',DEVICE_SWITCH_IDENTITY_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INSTALLATION_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INVALID:'裝置資訊不正確',ACCOUNT_DISABLED:'登入已到期，請重新登入',MEMBERSHIP_REQUIRED:'登入已到期，請重新登入',MEMBERSHIP_SUSPENDED:'登入已到期，請重新登入',SESSION_ACCOUNT_MISMATCH:'登入已到期，請重新登入',DEVICE_IDENTITY_MISMATCH:'登入已到期，請重新登入',BOARD_MODERATED:'此留言由管理者隱藏，請聯絡管理者恢復',BOARD_RATE_LIMIT:'留言送得太快，請稍候三秒再試',BOARD_RETRY_CHANGED:'重試內容不同，請重新開啟留言板',CHAT_RATE_LIMIT:'訊息送得太快，請稍候再送',CHAT_REQUEST_REUSED:'訊息重試內容不同，請重新開啟私訊',PLAYER_ARCHIVE_PENDING_QUEUE:'此玩家仍有待播歌曲，請先完成或取消後再封存',PLAYER_ARCHIVE_TARGET_INVALID:'找不到此空間的玩家',PLAYER_ARCHIVE_ACTOR_INVALID:'只有 PA Party總裁可以封存或恢復玩家',VERSION_CONFLICT:'資料剛更新了，請重新整理後再試一次',CATALOG_SELECTION_STALE:'共同資料剛更新，請重新選取後再操作',CATALOG_SOURCE_STALE:'原歌曲剛更新，請重新選取後再審核',CATALOG_CANDIDATE_STALE:'候選歌曲剛更新，請重新選取後再審核',CATALOG_TEMPLATE_MISSING:'這個模板已停用或不存在，請重新選擇',CATALOG_ALREADY_LINKED:'歌曲已建立共同關聯，請重新整理',CATALOG_AMBIGUOUS_TARGET:'存在多筆同版本共同歌曲，請選擇既有目標後再連結',CATALOG_BATCH_DIFFERENT_VERSIONS:'所選歌曲屬於不同版本，請分批處理'};
   Object.assign(messages,{LISTENING_HISTORY_SCOPE_INVALID:'找不到主播的常聽歌單',LISTENING_HISTORY_ACTOR_INVALID:'無法查看其他玩家的常聽歌單',LISTENING_HISTORY_PLAYER_INVALID:'找不到此玩家',LISTENING_HISTORY_PAGE_INVALID:'常聽歌單分頁資料不正確',SONG_FAVORITES_SCOPE_INVALID:'找不到可收藏的主播空間',SONG_FAVORITES_ACTOR_INVALID:'登入已到期，請重新登入',SONG_FAVORITES_SONG_INVALID:'歌曲已隱藏或更新，請重新選擇',SONG_FAVORITES_INPUT_INVALID:'收藏資料不正確',SONG_FAVORITES_PAGE_INVALID:'收藏分頁資料不正確',NEW_PRACTICE_SCOPE_INVALID:'找不到主播的新練歌曲',NEW_PRACTICE_PAGE_INVALID:'新練歌曲分頁資料不正確',STREAMER_REGISTRY_DUPLICATE:'主播網址已使用',STREAMER_REGISTRY_ACTOR_INVALID:'總裁登入已到期，請重新登入',
    STREAMER_REGISTRY_SCOPE_INVALID:'請切換到該主播空間再編輯',STREAMER_REGISTRY_ROOM_INVALID:'找不到主播',
    STREAMER_REGISTRY_SPACE_INVALID:'找不到可使用的空間',STREAMER_REGISTRY_DESCRIPTOR_INVALID:'主播資料格式錯誤'});
-  let rejected=false;try{const detail=JSON.parse(text);rejected=path.startsWith('/rest/v1/rpc/')&&r.status<500&&typeof detail?.code==='string'&&/^(?:[0-9A-Z]{5}|PGRST\d{3})$/.test(detail.code);}catch{}
-  throw Object.assign(Error(Object.entries(messages).find(([code])=>text.includes(code))?.[1]||'資料庫操作失敗'),{rpcRejected:rejected});
+  let rejected=false,conflict=false,headUnavailable=false,snapshotInvalid=false;try{const detail=JSON.parse(text);rejected=path.startsWith('/rest/v1/rpc/')&&r.status<500&&typeof detail?.code==='string'&&/^(?:[0-9A-Z]{5}|PGRST\d{3})$/.test(detail.code);conflict=rejectedRevisionConflict(path,r.status,detail);headUnavailable=missingRoomSyncHead(path,r.status,detail);snapshotInvalid=path==='/rest/v1/rpc/papa_notice_category_page'&&r.status>=400&&r.status<500&&detail.code==='P0001'&&detail.message==='NOTICE_SNAPSHOT_INVALID';}catch{}
+  if(snapshotInvalid)throw Object.assign(Error('通知列表已更新，請重新讀取第一頁'),{code:'NOTICE_SNAPSHOT_INVALID',rpcRejected:true});
+  if(conflict)throw Object.assign(revisionConflictError(),{rpcRejected:rejected});
+  throw Object.assign(Error(Object.entries(messages).find(([code])=>text.includes(code))?.[1]||'資料庫操作失敗'),{rpcRejected:rejected,roomSyncHeadUnavailable:headUnavailable});
  }
  return text?JSON.parse(text):null;
 }
@@ -131,7 +156,7 @@ async function mutateStreamerRegistry(b:any,who:any,t:string){
  const snapshot=await api('/rest/v1/rpc/papa_streamer_registry_snapshot',{requested_room:b.streamer||'papa',subject:who.accountId});
  const source=snapshotState(snapshot),space=snapshot.canonicalSpace?.id,room=snapshot.canonicalRoom;
  if(!space||!room)throw Error('找不到主播空間');
- if(b.revision!==source.revision)throw Error('資料剛更新了，請重新整理後再試一次');
+ if(b.revision!==source.revision)throw revisionConflictError();
  const previous=data.id?source.streamers.find((r:any)=>r.id===data.id):null;
  if(data.id&&!previous||previous&&previous.spaceId!==space)throw Error('請切換到該主播空間再編輯');
  const next=mutate(source,{...b.action,streamer:room},coreActor(who),t);
@@ -220,12 +245,160 @@ function sessionIdentity(who:any){
  return {role:who.role,accountId:who.accountId,spaceId:who.role==='super_admin'?null:who.spaceId,
   playerId:who.role==='player'?who.playerId:null,streamerId:who.role==='streamer_admin'?who.streamer_id:null};
 }
+async function roomSyncHead(b:any,who:any){
+ // Initial aggregate heads are manager-only. Player-private heads and private
+ // channel authorization are separate capabilities, not inferred from counters.
+ if(!isManager(who)||!who.accountId)throw Error('請先登入管理');
+ const valid=(value:any)=>typeof value==='string'&&value.length>0&&value.length<=200&&value.trim()===value&&!/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/u.test(value);
+ if(!valid(b.streamer)||!valid(b.spaceId))throw Error('同步空間資料不正確');
+ requireRoom(who,b.streamer);
+ if(!isSuper(who)&&who.spaceId!==b.spaceId)throw Error('找不到主播');
+ const capabilities={scopedRevision:false,authoritative:false,delta:false,realtime:false};
+ let head:any;
+ try{head=await api('/rest/v1/rpc/papa_room_sync_head',{requested_room:b.streamer,requested_space:b.spaceId});}
+ catch(error:any){if(error?.roomSyncHeadUnavailable===true)return {supported:false,reason:'migration_unavailable',capabilities};throw error;}
+ const record=(value:any)=>!!value&&typeof value==='object'&&!Array.isArray(value);
+ if(!record(head)||head.version!==1||head.spaceId!==b.spaceId||head.streamerId!==b.streamer
+  ||head.capabilities?.scopedRevision!==true||head.capabilities?.authoritative!==false
+  ||head.capabilities?.delta!==false||head.capabilities?.realtime!==false
+  ||!Number.isSafeInteger(head.globalRevision)||head.globalRevision<0)throw Error('同步摘要資料不正確');
+ const counters=(value:any,domains:string[])=>{
+  if(!record(value))throw Error('同步摘要資料不正確');
+  return Object.fromEntries(domains.map(domain=>{const revision=value[domain]??0;
+   if(!Number.isSafeInteger(revision)||revision<0)throw Error('同步摘要資料不正確');
+   return [domain,revision];}));
+ };
+ // Projection remains a bounded diagnostic head. It cannot advance write CAS,
+ // suppress a snapshot, supply record authority or advertise a live channel.
+ return {supported:true,head:{version:1,spaceId:b.spaceId,streamerId:b.streamer,
+  room:counters(head.room,['songs','queue','ledger','crowns','cards','wishes','settings']),
+  space:counters(head.space,['players','settings','directory','metadata','catalog_relations']),
+  catalog:counters(head.catalog,['shared_catalog']),globalRevision:head.globalRevision,
+  capabilities:{...capabilities,scopedRevision:true}}};
+}
+async function messageCenterOperation(b:any,who:any,room:any){
+ if(!who?.accountId)throw Error('請重新登入');
+ const spaceId=room.spaceId||'space-001',scopeMode=b.scopeMode??'room';
+ if(b.spaceId!==undefined&&b.spaceId!==spaceId||!['room','space'].includes(scopeMode)
+  ||scopeMode==='space'&&!isSuper(who))throw Error('通知空間資料不正確');
+ const common={requested_space:spaceId,requested_room:room.id,scope_mode:scopeMode,
+  actor_context:{role:who.role,account_id:who.accountId,space_id:spaceId,
+   player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamerId:null}};
+ const expectedScope={spaceId,streamerId:scopeMode==='room'?room.id:null,mode:scopeMode};
+ const checkScope=(value:any)=>{
+  if(value?.version!==1||value.scope?.spaceId!==expectedScope.spaceId||value.scope?.streamerId!==expectedScope.streamerId||value.scope?.mode!==expectedScope.mode)throw Error('通知空間資料不正確');
+ };
+ const category=b.category;
+ if(b.op!=='messageCenterCounts'&&!['system','message','board'].includes(category))throw Error('通知分類不正確');
+ if(b.op==='messageCenter'){
+  const page=b.page??0,snapshotAt=b.snapshotAt??null,snapshotId=b.snapshotId??null;
+  if(!Number.isSafeInteger(page)||page<0||page>100000||snapshotAt!==null&&(typeof snapshotAt!=='string'||snapshotAt.length>40||!/^\d{4}-\d{2}-\d{2}T/.test(snapshotAt)||!Number.isFinite(Date.parse(snapshotAt))))throw Error('通知分頁資料不正確');
+  if(snapshotId!==null&&!boardUuid(snapshotId))throw Error('通知分頁資料不正確');
+  const result=await api('/rest/v1/rpc/papa_notice_category_page',{...common,category_filter:category,page_number:page,snapshot_at:snapshotAt,snapshot_id:snapshotId});
+  checkScope(result);
+  if(result.category!==category||result.page!==page||result.pageSize!==50||!Number.isSafeInteger(result.total)||result.total<0
+   ||typeof result.snapshotAt!=='string'||!Number.isFinite(Date.parse(result.snapshotAt))||!boardUuid(result.snapshotId)
+   ||snapshotId!==null&&result.snapshotId!==snapshotId||typeof result.hasMore!=='boolean'
+   ||!Array.isArray(result.rows)||result.rows.length>50)throw Error('通知分頁資料不正確');
+  const recipient=noticeIdentity(who,room.id).recipient,ids=new Set();
+  const rows=result.rows.map((row:any)=>{
+   if(!row||!boardUuid(row.id)||ids.has(row.id)||row.space_id!==spaceId||scopeMode==='room'&&row.streamer_id!==room.id
+    ||row.recipient!==recipient||typeof row.type!=='string'||row.type.length>100||typeof row.body!=='string'
+    ||row.body.length>10000||typeof row.created_at!=='string'||!Number.isFinite(Date.parse(row.created_at))
+    ||row.read_at!==null&&(typeof row.read_at!=='string'||!Number.isFinite(Date.parse(row.read_at)))
+    ||!Number.isSafeInteger(row.level)||row.level<1||row.level>2
+    ||(row.type==='message'?'message':['comment','announcement'].includes(row.type)?'board':'system')!==category)throw Error('通知分頁資料不正確');
+   ids.add(row.id);
+   return {id:row.id,space_id:spaceId,streamer_id:row.streamer_id,streamer_name:String(row.streamer_name||'').slice(0,200),
+    type:row.type,level:row.level,body:row.body,entity_id:typeof row.entity_id==='string'?row.entity_id.slice(0,200):null,
+    created_at:row.created_at,read_at:row.read_at};
+  });
+  return {version:1,scope:expectedScope,category,page,pageSize:50,total:result.total,snapshotAt:result.snapshotAt,snapshotId:result.snapshotId,hasMore:result.hasMore,rows};
+ }
+ if(b.op==='messageCenterRead'){
+  const ids=b.ids??null;
+  if(ids===null&&b.all!==true||ids!==null&&(b.all===true||!Array.isArray(ids)||ids.length>50||ids.some((id:any)=>!boardUuid(id))||new Set(ids).size!==ids.length))throw Error('通知編號不正確');
+  const result=await api('/rest/v1/rpc/papa_notice_category_read',{...common,category_filter:category,notice_ids:ids});
+  checkScope(result);
+  if(result.category!==category||!Number.isSafeInteger(result.marked)||result.marked<0)throw Error('通知已讀結果不正確');
+  return {version:1,scope:expectedScope,category,marked:result.marked};
+ }
+ const result=await api('/rest/v1/rpc/papa_notice_category_counts',common);checkScope(result);
+ const counts=(value:any,types=false)=>{
+  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length>100)throw Error('通知計數不正確');
+  const entries=Object.entries(value);
+  if(entries.some(([key,count])=>typeof count!=='number'||!Number.isSafeInteger(count)||count<0||key.length>100||!types&&!['system','message','board'].includes(key)))throw Error('通知計數不正確');
+  return Object.fromEntries(entries);
+ };
+ return {version:1,scope:expectedScope,totalsByCategory:counts(result.totalsByCategory),unreadByCategory:counts(result.unreadByCategory),
+  unreadByType:counts(result.unreadByType,true),badgeUnreadByCategory:counts(result.badgeUnreadByCategory)};
+}
+
+async function noticeTarget(b:any,who:any,room:any){
+ if(!who?.accountId)throw Error('請先登入');
+ const notificationId=boardUuid(b.notificationId),space=room.spaceId||'space-001';
+ const {recipient}=noticeIdentity(who,room.id);
+ if(!isSuper(who)&&who.spaceId!==space)throw Error('通知目前無法查看');
+ const notices=await api('/rest/v1/papa_notifications?id=eq.'+notificationId
+  +'&space_id=eq.'+encodeURIComponent(space)+'&streamer_id=eq.'+encodeURIComponent(room.id)
+  +'&recipient=eq.'+encodeURIComponent(recipient)+'&select=id,type,entity_id,streamer_id,space_id,recipient&limit=1');
+ const notice=Array.isArray(notices)&&notices.length===1?notices[0]:null;
+ if(!notice||notice.id!==notificationId||notice.space_id!==space||notice.streamer_id!==room.id||notice.recipient!==recipient)return {found:false,kind:'generic'};
+ const kind=notice.type==='message'?'chat':['comment','announcement'].includes(notice.type)?'board':'generic';
+ const unavailable={found:false,kind};
+ if(kind==='generic'||typeof notice.entity_id!=='string'||!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(notice.entity_id))return unavailable;
+ if(kind==='chat'){
+  // Player equality is part of the query before any conversation locator can
+  // leave the server. Notice entity/type fields always come from its own row.
+  const access=chatAccess(who,room),rows=await api('/rest/v1/papa_chat_messages?id=eq.'+notice.entity_id
+   +'&streamer_id=eq.'+encodeURIComponent(room.id)+(access.manager?'':'&player_id=eq.'+encodeURIComponent(access.player))
+   +'&select=id,seq,player_id,streamer_id&limit=1');
+  const message=Array.isArray(rows)&&rows.length===1?rows[0]:null;
+  if(!message||message.id!==notice.entity_id||message.streamer_id!==room.id
+   ||!access.manager&&message.player_id!==who.playerId||!Number.isSafeInteger(message.seq)||message.seq<1)return unavailable;
+  try{chatAccess(who,room,message.player_id);}catch{return unavailable;}
+  return {found:true,kind,spaceId:space,streamerId:room.id,playerId:message.player_id,messageId:message.id,seq:message.seq};
+ }
+ const actor=boardActor(who);
+ if(!room.active&&actor.role!=='super')return unavailable;
+ const namespace=space==='space-001'?'':'space:'+Array.from(new TextEncoder().encode(space),value=>value.toString(16).padStart(2,'0')).join('')+':';
+ const globalRoom=space==='space-001'?'__global__':'__global__:'+namespace.slice(6,-1);
+ const stored=(key:string)=>namespace+key,local=(key:any)=>typeof key==='string'&&key.startsWith(namespace)?key.slice(namespace.length):null;
+ const fields='id,seq,scope,streamer_id,origin_room,root_id,author_key,anonymous,visibility,targets,deleted,moderated,space_id';
+ const getPost=async(id:string)=>{
+  const rows=await api('/rest/v1/papa_board_posts?id=eq.'+boardUuid(id)+'&space_id=eq.'+encodeURIComponent(space)+'&select='+fields+'&limit=1');
+  const post=Array.isArray(rows)&&rows.length===1?rows[0]:null;
+  if(!post||post.id!==id||post.space_id!==space||!['global','streamer'].includes(post.scope)
+   ||post.streamer_id!==(post.scope==='global'?globalRoom:room.id)||post.scope==='streamer'&&post.origin_room!==room.id
+   ||!Number.isSafeInteger(post.seq)||post.seq<1||!Array.isArray(post.targets)||post.targets.length>50)return null;
+  const author=local(post.author_key),targets=post.targets.map(local);
+  if(!author||targets.some((key:any)=>key===null))return null;
+  return {...post,author_key:author,targets};
+ };
+ const post=await getPost(notice.entity_id);if(!post)return unavailable;
+ let root=post;
+ if(post.root_id){
+  if(typeof post.root_id!=='string'||!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(post.root_id))return unavailable;
+  root=await getPost(post.root_id);
+ }
+ if(!root||root.root_id||root.scope!==post.scope||root.streamer_id!==post.streamer_id||root.origin_room!==post.origin_room)return unavailable;
+ // Only two necessary nonanonymous author block keys are queried together.
+ // An anonymous locator never returns or resolves its hidden author identity.
+ const keys=[...new Set<string>([post,root].filter(item=>!item.anonymous).map(item=>stored(item.author_key)))];
+ const quoted=(value:string)=>encodeURIComponent('"'+value.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"');
+ const blocks=keys.length?await api('/rest/v1/papa_board_blocks?space_id=eq.'+encodeURIComponent(space)
+  +'&owner_key=eq.'+encodeURIComponent(stored(actor.key))+'&target_key=in.('+keys.map(quoted).join(',')+')&select=target_key&limit=2'):[];
+ const blocked=Array.isArray(blocks)?blocks.map((row:any)=>local(row.target_key)).filter((key:any)=>key!==null):[];
+ if(!boardThreadVisible(actor,post,root,blocked))return unavailable;
+ return {found:true,kind,spaceId:space,streamerId:room.id,scope:post.scope,rootId:root.id,postId:post.id,seq:post.seq,canReply:!root.deleted&&!root.moderated};
+}
 function managerPasswordError(result:any,kind:string){
  const messages:any={expired:'登入已到期，請重新登入',rate_limit:'嘗試過多，請 15 分鐘後再試',invalid_current:'目前密碼不正確',weak_password:kind==='president'?'總裁新密碼請使用至少 8 字、72 位元組以內':'主播新密碼請使用至少 4 字、72 位元組以內',same_password:'新密碼不能與目前密碼相同',same_as_president:'主播密碼不能與 PA Party總裁密碼相同',same_as_streamer:'總裁密碼不能與任一主播密碼相同',password_required:'請先設定主播密碼'};
  if(!result?.ok)throw Error(messages[result?.reason]||'密碼設定未完成，請重新登入後再試');
 }
 
-Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json(),credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();if(b.op==='releaseInfo')return respond({version:'10.12-WEB.1',messageCenterV2:false,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+ if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));
  if(b.op==='entryLegacyRooms'){
   const rooms=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:'space-001'});
   return respond({rooms:rooms.map((room:any)=>({id:room.id,slug:room.slug,display_name:room.display_name}))});
@@ -401,7 +574,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
    const room=await catalogRoom(who,job.streamer);if((room.spaceId||'space-001')!==(who.spaceId||'space-001'))throw Error('主播不屬於目前空間');
    if(resolvedRooms.has(room.id))throw Error('同一批不能重複指定同一位主播');resolvedRooms.add(room.id);
    const source=await load(true,room.id,room.spaceId||'space-001',null,who.playerId);
-   if(!checkedRevision){if(source.revision!==b.revision)throw Error('資料剛更新了，請重新整理後再試一次');checkedRevision=true;}
+   if(!checkedRevision){if(source.revision!==b.revision)throw revisionConflictError();checkedRevision=true;}
    const next=applyPlayerRequestBatch(source,job.rows,coreActor(who),t,room.id);
    commitStarted=true;const committed=await commit(source,next,{role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',actor_streamer_id:null,streamer_id:room.id,roomScoped:true,action:'requestBatch'});
    results.push({streamer:job.streamer,ok:true,count:job.rows.length,revision:committed.revision});
@@ -441,7 +614,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   const snapshot=await api('/rest/v1/rpc/papa_streamer_registry_snapshot',{requested_room:b.streamer,subject:who.accountId});
   const source=snapshotState(snapshot),space=snapshot.canonicalSpace?.id,room=snapshot.canonicalRoom;
   if(!space||space==='space-001'||space!==b.spaceId||!room)throw Error('玩家資料不屬於所選空間');
-  if(source.revision!==b.revision)throw Error('資料剛更新了，請重新整理後再試一次');
+  if(source.revision!==b.revision)throw revisionConflictError();
   let next=source;const selections:any[]=[];
   for(const row of b.rows){
    next=mutate(next,{type:'player',streamer:room,data:{name:row.name,ids:row.ids||'',names:row.names||'',certification:row.certification||'',note:row.note||''}},coreActor(who),t);
@@ -474,7 +647,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  if(b.op==='pushWorker'){const [config]=await api('/rest/v1/papa_notice_config?id=eq.worker');if(!b.secret||await hash(b.secret)!==await hash(config?.value?.secret||''))throw Error('驗證失敗');await deliverPush();return respond({ok:true});}
  if(CATALOG_OPS.has(b.op))return respond(await catalogOperation(b,who));
  if(['boardRooms','boardDirectory','boardBlocks','boardUnblock','boardBlock','boardList','boardCreate','boardChange'].includes(b.op))return respond(await boardOperation(b,who,await loadCommunicationState(isSuper(who)?null:who?.spaceId||'space-001',b.streamer||'papa')));
- if(['noticeSound','notifications','noticeTest','noticeRead','noticePreferences','pushKey','pushSubscribe','pushUnsubscribe','chatInbox','chatMessages','chatSend','chatRead'].includes(b.op)){
+ if(['messageCenter','messageCenterCounts','messageCenterRead','noticeSound','notifications','noticeTest','noticeRead','noticePreferences','noticeTarget','pushKey','pushSubscribe','pushUnsubscribe','chatInbox','chatMessages','chatSend','chatRead'].includes(b.op)){
   const comm=await loadCommunicationState(isSuper(who)?null:who?.spaceId||'space-001',b.streamer||'papa');
   if(who?.role==='streamer_admin')requireRoom(who,scopeState(comm,b.streamer||'papa').currentStreamer.id);
   if(['chatInbox','chatMessages','chatSend','chatRead'].includes(b.op))return respond(await chatOperation(b,who,comm));
@@ -514,10 +687,10 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  if(b.op==='draftStart')return respond({draft:{state:s,journal:createRoomDraft(s,draftScope.id),baseRevision:s.revision},now:t});
  if(b.op==='failedRequest'){if(who?.role!=='player')throw new Error('請先登入玩家');const room=scopeState(s,b.streamer||'papa'),p=room.players.find((p:any)=>p.playerId===who.playerId);if(!room.currentStreamer.active||!p)throw new Error('找不到玩家');if(p.archived)return respond({counted:false});const quote=quoteSong(room,b.songId,b,who.playerId,t),full=!canRequestSaved(room,t,quote.creditCost,who.playerId);if(!full)return respond({counted:false});try{venuePolicySavedSnapshot(room,who.playerId,quote.creditCost);}catch{return respond({counted:false});}const counted=await api('/rest/v1/rpc/papa_record_failed_request',{room_id:room.currentStreamer.id,player_id:who.playerId,song_id:b.songId,bucket:hourKey(t)});schedulePush(room.currentStreamer.id,['__admin__',who.playerId]);return respond({counted});}if(b.op==='login'){if(who?.playerId)throw new Error('請先登出再登入');const p=s.players.find((p:any)=>p.playerId===b.playerId);if(!p||String(p.password||'')!==String(b.password||''))throw new Error('玩家密碼不正確');const token='player:'+crypto.randomUUID()+crypto.randomUUID(),sessionHash=await hash(token);await api('/rest/v1/papa_v2_sessions',{token_hash:sessionHash,player_id:p.playerId,login_id:p.ids.includes(b.loginId)?b.loginId:'',expires_at:new Date(Date.now()+30*86400000).toISOString()});const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});if(identity?.role!=='player'||identity?.spaceId!=='space-001')throw new Error('玩家登入身分尚未完成設定');return respond({token});}
  if(b.op==='search'){return respond({players:b.query?.trim()?playerSearch(s,b.query,true).slice(0,20).map((p:any)=>({playerId:p.playerId,name:p.name,ids:p.ids,hasPassword:!!p.password})):[]});}
- const project=async(value:any)=>{const base=leanSongView(managementView(publicView(value,coreActor(who),t,b.streamer||'papa'),who)),rows=await api('/rest/v1/rpc/papa_catalog_song_metadata_in_space',{room_id:base.currentStreamer.id}),view=catalogMetadataView(base,rows,isManager(who)),signatures:any={},delta:any={};for(const [key,v] of Object.entries(view)){signatures[key]=await hash(JSON.stringify(v));if(b.signatures?.[key]!==signatures[key])delta[key]=v;}return {state:delta,signatures,now:t,ready:value.schemaVersion>=3,...(who?.accountId?{sessionIdentity:sessionIdentity(who)}:{})};};
+ const project=async(value:any)=>{try{const base=leanSongView(managementView(publicView(value,coreActor(who),t,b.streamer||'papa'),who)),rows=await api('/rest/v1/rpc/papa_catalog_song_metadata_in_space',{room_id:base.currentStreamer.id}),view=catalogMetadataView(base,rows,isManager(who)),signatures:any={},delta:any={};for(const [key,v] of Object.entries(view)){signatures[key]=await hash(JSON.stringify(v));if(b.signatures?.[key]!==signatures[key])delta[key]=v;}return {state:delta,signatures,now:t,ready:value.schemaVersion>=3,...(who?.accountId?{sessionIdentity:sessionIdentity(who)}:{})};}catch(error){throw unknownOperationOutcome(error);}};
  if(b.op==='mutate'&&b.action?.type==='extraQuota'){
   if(!isManager(who))throw Error('請先登入管理');
-  if(b.revision!==s.revision)throw Error('資料剛更新了，請重新整理後再試一次');
+  if(b.revision!==s.revision)throw revisionConflictError();
   const room=scopeState(s,b.streamer||'papa').currentStreamer;requireRoom(who,room.id);
   const next=mutate(s,{...b.action,streamer:room.id},coreActor(who),t),p=b.action.data;
   const quotaProof=who.accountId?{actor_context:{role:who.role,account_id:who.accountId,
@@ -539,7 +712,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   if(b.revision!==s.revision||b.sourceHash!==sourceHash)throw Error('移轉來源已更新，請重新核對並保存備份');
   return respond({state:publicView(await commit(s,upgradePlatform(migrated),{role:who.role,account_id:who.accountId,space_id:'space-001',streamer_id:'papa',action:'migrate'}),coreActor(who),t,'papa'),now:t});
  }
- if(b.revision!==s.revision)throw new Error('資料剛更新了，請重新整理後再試一次');
+ if(b.revision!==s.revision)throw revisionConflictError();
  let next;
  if(b.op==='import')next=applyRoomImport(s,b.kind,b.text,b.choices,coreActor(who),t,b.streamer||'papa');
  else if(b.op==='publish'){
@@ -556,6 +729,6 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   actor_streamer_id:who?.role==='streamer_admin'?who.streamer_id:null,
   streamer_id:scopeState(s,b.streamer||'papa').currentStreamer.id,
   roomScoped,roomWriteScoped,action:b.op==='mutate'?b.action?.type+(b.action?.data?.operation?':'+b.action.data.operation:''):b.op})));
- }catch(e){return respond({error:e.message||'操作失敗'},400);}});
+ }catch(e){return respond(operationErrorResponse(e),400);}});
 
 function checkedListSort(value:any){if(value===undefined)return 'default';if(!['default','newest','oldest'].includes(value))throw Error('排序不正確');return value;}

@@ -1,0 +1,21 @@
+# 10.12-WEB.1 — first tested release
+
+The user authorized publishing the tested work first, then continuing device testing and the remaining V2 work on 2026-10-12. This supersedes the earlier instruction to hold every change for one complete V2 release.
+
+This release restores the mobile logo and compact song, search, sorting, pagination, favorite and management layouts. Reads recover after temporary failures or a context change, discard obsolete account/Space/Room responses, and preserve editing forms while data updates. Protected writes retain their existing authorization and version checks; uncertain writes are not replayed. Notification settings keep their save footer visible and device-specific Push choices survive refresh. Authorized notification links locate queue/credit records and old chat/board targets without walking every history page.
+
+New self/dice requests retain explicit provenance and stay out of the specified popularity/listening/performance counts. Financial ledger settlement remains intact, and old requests are not rewritten to guess a source. Public hourly saved-song quota is used before an exclusive player unit. A confirmed cross-host batch can start another batch without replaying the prior one. Preparation and wish changes produce the corresponding important notices; physical Push delivery still requires device verification.
+
+The required database updates are only `202610120003_common_first_quota_summary.sql` and `202610120004_catalog_visible_metadata_search.sql`: replace two existing service-only selected-page functions and add a bounded queue-query index. They preserve formal songs, IDs, requests, ledgers, histories, notifications and their read states. Approved lyrics can match server-side without exposing lyric bodies, snippets or match indicators. Old function definitions/permissions and the deployed Edge ZIP are backed up outside the repository for recovery.
+
+The production account is currently Healthy but exceeds Free Egress and Database limits. The baseline and historical traffic figures are in `AUDIT-SUPABASE-LIVE-2026-10-12.md`; this release does not claim a measured GB reduction or solved capacity limit. It does not delete audits, remove indexes, scan candidates, upgrade the plan or run an undeployed backfill.
+
+Not included as completed V2: the three-tab message-center UI, authoritative scoped transport/domain deltas, cross-device/native acceptance, Android/Windows native deliverables, cross-hour carry and all remaining 37-comment items. Migrations `202610120001` and `202610120002` remain uninstalled for this first release. Their prepared API foundations have no frontend entry. The public `releaseInfo` probe explicitly labels messageCenterV2/scopedRealtimeV2/nativeApps false.
+
+Validation before publication: 1,064/1,064 full regression tests, Web build, Edge build and assembled Edge syntax check; editor source matches the built artifact after newline normalization. Existing local 390px evidence verifies the restored logo, 14px song titles and favorite placement without horizontal overflow. Production version, SQL definition/privilege checks, bounded API smoke checks and final mobile screenshot are recorded after deployment below.
+
+## Production verification
+
+- Required SQL updates committed and verified: common-first summary hash `5bd74eb0f60c593685a4844f1d5c41e3`; catalog search hash `fe85a9257fba6f6303504ef6e9a05dac`. Summary migration left business revision at 3823. A bounded one-family catalog query succeeded and returned total 1,230 with existing language/version filters.
+- Deployed `party-api` version probe returns HTTP 200 with `version:10.12-WEB.1`; unfinished V2/native flags remain false.
+- Frontend publication and final production mobile verification are still in progress. Do not infer those results from this file or local tests alone.

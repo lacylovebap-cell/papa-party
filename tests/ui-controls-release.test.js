@@ -135,10 +135,10 @@ function favoritesHarness(){
  return {ctx,view,calls,panel,run:code=>run(ctx,code),get modal(){return modal;},select:async(id,checked=true)=>{for(const fn of handlers)await fn({target:{dataset:{favoriteSelect:id},checked}});}};
 }
 
-test('favorite hearts occupy the gutter and selections retain canonical metadata across pages',async()=>{
+test('favorite hearts precede request buttons and selections retain canonical metadata across pages',async()=>{
  const u=favoritesHarness();await u.select('s1');u.view.page=1;u.view.rows=[{songId:'s2',title:'第二首',artist:'乙',plays:2}];await u.select('s2');
- const html=u.run('favoritesPanelHtml()'),gutter=html.match(/<span class="song-gutter">([\s\S]*?)<div class="info">/)[1],actions=html.match(/<div class="actions">([\s\S]*?)<\/div>/)[1];
- assert.match(gutter,/data-favorite-select="s2"/);assert.match(gutter,/data-act="favoriteSet"/);assert.doesNotMatch(actions,/favoriteSet/);assert.match(html,/已選 2 首/);
+ const html=u.run('favoritesPanelHtml()'),gutter=html.match(/<span class="song-gutter">([\s\S]*?)<div class="info">/)[1],actions=html.match(/<div class="actions song-actions">([\s\S]*?)<\/div>/)[1];
+ assert.match(gutter,/data-favorite-select="s2"/);assert.doesNotMatch(gutter,/data-act="favoriteSet"/);assert.match(actions,/favoriteSet/);assert.ok(actions.indexOf('favoriteSet')<actions.indexOf('data-kind="saved"'));assert.match(html,/已選 2 首/);
  await u.run("requestSelectedFavorites('saved')");assert.match(u.modal.html,/第一首/);assert.match(u.modal.html,/第二首/);
  await u.modal.submit(new Map());assert.equal(u.calls.length,1);assert.deepEqual(u.calls[0].jobs[0].rows.map(r=>r.songId),['s1','s2']);assert.equal(u.ctx.selectedFavorites.size,0);
 });

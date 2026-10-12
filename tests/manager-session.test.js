@@ -2,18 +2,22 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {createWebSyncRecovery} from '../src/web-sync-recovery.js';
+import {webApiFailure} from '../src/web-api-errors.js';
 
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
-const source=app.slice(app.indexOf('function managerSessionExpired('),app.indexOf('\nasync function refresh('));
+const sourceStart=app.indexOf('function managerSessionExpired('),sourceEnd=app.indexOf('\nfunction refresh(');
+assert.ok(sourceStart>=0&&sourceEnd>sourceStart,'actual manager/API and read coordinator source');
+const source=app.slice(sourceStart,sourceEnd);
 const verifiedAccount='00000000-0000-4000-8000-000000000001';
 function client({legacy=true,response={error:'登入已到期，請重新登入'},status=400,networkError=false}={}){
  const saved={'papa-v2-draft-papa':'private','papa-v2-draft-other':'private','papa-v2-player':'keep'};
  const storage={...saved};Object.defineProperty(storage,'removeItem',{enumerable:false,value:key=>delete storage[key]});
- const appNode={innerHTML:''},ctx=vm.createContext({Date,JSON,Error,createWebDeviceLogin:()=>null,localStorage:storage,location:{hash:'admin'},document:{querySelectorAll:()=>[{close(){}}]},fetch:async()=>{if(networkError)throw Error('network offline');return {ok:status===200,status,json:async()=>response};}});
+ const ctx=vm.createContext({URL,Date,JSON,Error,queueMicrotask,createWebSyncRecovery,webApiFailure,createWebDeviceLogin:()=>null,localStorage:storage,location:{href:'https://party.example.test/?streamer=papa&spaceId=space-001#admin',hash:'admin'},navigator:{onLine:true},document:{hidden:false,activeElement:null,querySelector:()=>null,querySelectorAll:()=>[{close(){}}]},fetch:async()=>{if(networkError)throw Error('network offline');return {ok:status===200,status,json:async()=>response};}});
  vm.runInContext(`
   var deviceLogin=null,admin={token:'admin:old',legacy:${legacy},accessUntil:0,refreshToken:'old-refresh'},session={token:'player:keep'},draft={state:{private:true}},full={private:true},signatures={private:'old'},selectedPlayer='P1',state={streamers:[{id:'papa',slug:'papa'}],currentStreamer:{id:'papa'},players:[{password:'private'}]},route='admin',demo=false,offset=0,streamerSlug='papa',API='test',PUBLISHABLE_KEY='public',writes={};
-  var node={innerHTML:''};
-  function isAdmin(){return !!admin&&route==='admin';}function put(key,value){writes[key]=value;}function empty(){return {players:[],songs:[]};}function header(){}function card(title,body){return title+body;}function button(label,act){return '<button data-act="'+act+'">'+label+'</button>';}function $(selector){return node;}function timeValue(value){return Date.parse(value);}
+  var node={innerHTML:''},entryPending=false,busy=false,lastFullRefreshAt=0;
+  function isAdmin(){return !!admin&&route==='admin';}function put(key,value){writes[key]=value;}function empty(){return {players:[],songs:[]};}function header(){}function render(){}function card(title,body){return title+body;}function button(label,act){return '<button data-act="'+act+'">'+label+'</button>';}function $(selector){return node;}function timeValue(value){return Date.parse(value);}
  `+source,ctx);
  return {ctx,storage,async request(body={op:'read'}){return vm.runInContext('api('+JSON.stringify(body)+')',ctx);},value(expression){return vm.runInContext(expression,ctx);}};
 }
@@ -90,7 +94,7 @@ test('legacy Account upgrade rejects role, player, room, Space, Account or unexp
 test('a stale player response cannot attach its Account to a newer player login',async()=>{
  const c=client({status:200});c.value("route='home';session={token:'player:old',playerId:'P1'}");
  c.ctx.fetch=async()=>{c.value("session={token:'player:new',playerId:'P2'}");return {ok:true,status:200,json:async()=>({sessionIdentity:{role:'player',accountId:verifiedAccount,spaceId:'space-001',playerId:'P1',streamerId:null}})};};
- await c.request();assert.equal(c.value('session.accountId'),undefined);assert.equal(c.value('writes.player'),undefined);
+ await assert.rejects(c.request(),/已變更/);assert.equal(c.value('session.accountId'),undefined);assert.equal(c.value('writes.player'),undefined);
 });
 
 test('legacy Space entry upgrades the current identity before displaying verified choices',async()=>{

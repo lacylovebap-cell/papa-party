@@ -1,5 +1,5 @@
-const routes=new Set(['home','book','center','gallery','admin']);
-const playerTabs=new Set(['overview','ledger','queue','crowns','cards','wishes']);
+const routes=new Set(['home','book','common-book','center','gallery','admin']);
+const playerTabs=new Set(['overview','favorites','ledger','queue','crowns','cards','wishes']);
 export const streamerName=room=>room?.display_name||'主播';
 export const streamerText=(text,room)=>String(text||'').replace(/\{streamer\}|怕怕|帕帕/g,()=>streamerName(room));
 export function streamerDestination(href,slug,{role,managedSlug,subtab,adminTab}={}){

@@ -16,7 +16,8 @@ function declaration(name){
 }
 const start=source.indexOf(" if(b.op==='nativePlayerEligibility'){"),end=source.indexOf(" if(b.op==='playerArchive'",start);
 assert.ok(start>=0&&end>start);
-const code=stripTypeScriptTypes(lines.find(line=>line.startsWith('function snapshotState('))+'\n'+declaration('commit')+'\nasync function request(b,who){const t="2026-10-11T08:00:00Z";'+source.slice(start,end)+'}');
+const conflictHelpers=source.slice(source.indexOf('const revisionConflictMessage='),source.indexOf('async function api('));
+const code=stripTypeScriptTypes(conflictHelpers+'\n'+lines.find(line=>line.startsWith('function snapshotState('))+'\n'+declaration('commit')+'\nasync function request(b,who){const t="2026-10-11T08:00:00Z";'+source.slice(start,end)+'}');
 const space='native-batch-space',room='native-batch-room',uuid=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
 const plain=value=>JSON.parse(JSON.stringify(value));
 const rows=(count=100)=>Array.from({length:count},(_,index)=>({accountId:uuid(index+10),membershipId:uuid(index+1010),

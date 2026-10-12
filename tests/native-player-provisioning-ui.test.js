@@ -42,7 +42,7 @@ function harness({respond}={}){
   admin:{role:'super_admin',accountId:manager},demo:false,draft:null,route:'admin',
   state:{revision:9,currentStreamer:{id:'papa',spaceId:'space-001'},players:[],queue:[{id:'preserved'}],ledger:[{id:'credit',amount:3}]},
   h:escape,blank:text=>'<p>'+escape(text)+'</p>',button:(label,action,id='',classes='',extra='')=>'<button type="button" data-act="'+action+'" data-id="'+escape(id)+'" class="'+classes+'" '+extra+'>'+label+'</button>',
-  card:(title,html)=>'<section>'+html+'</section>',header:()=>{},toast:message=>messages.push(message),isSuperAdmin:()=>context.admin?.role==='super_admin',
+  card:(title,html)=>'<section>'+html+'</section>',header:()=>{},prepareNoticeLanding:()=>null,renderNoticeLanding:()=>{},unavailableReadScope:null,syncReadIdentity:()=>'fixture-scope',toast:message=>messages.push(message),isSuperAdmin:()=>context.admin?.role==='super_admin',
   FormData:class {get(key){return data[key]??'';}},
   $:selector=>selector==='#dialog'?dialog:nodes.get(selector)||null,
   modal:(title,html,submit)=>{dialogs.push({title,html,submit});dialog.open=true;if(html.includes('native-player-form'))createForm(html);},

@@ -83,6 +83,7 @@ async function fixture(t){
    result[table]=await q('select to_jsonb(source) row from '+table+' source order by '+order);return result;
  };
  const before=await stable();await db.exec(migration('202610100018_list_order_and_membership.sql'));assert.deepEqual(await stable(),before);
+ await db.exec(migration('202610120004_catalog_visible_metadata_search.sql'));assert.deepEqual(await stable(),before);
  const search=({query='',room='papa',space='space-001',membership='all',sort='default',limit=10,offset=0,kind='',label='',mode='metadata'}={})=>
   rpc('papa_catalog_search_filtered_v2',[query,limit,offset,room,null,null,mode,space,membership,sort,kind,label]);
  const familyPage=({query='',room='papa',space='space-001',membership='all',sort='default',limit=20,offset=0,kind='',label=''}={})=>
@@ -96,6 +97,15 @@ async function fixture(t){
  return {db,q,rpc,search,familyPage,publicPage,songs,players,stable,families,needle,originalA,originalB,dj,cover,hidden};
 }
 const safe=result=>assert.doesNotMatch(JSON.stringify(result),/private lyric|secret|privateNotes|password|lyricHistory|source_hash|account_id|membership_id/);
+
+test('approved family search matches visible classification and approved lyrics without exposing lyric text or private room song content',async t=>{
+ const f=await fixture(t);
+ await f.q("update papa_catalog_variants set performer_detail='男歌手',version_note='慢板改編' where id=$1",[f.originalA]);
+ await f.q("insert into papa_catalog_lyric_revisions(variant_id,revision,body,active,actor_id) values($1,1,'approved secret melodicneedle',true,'president')",[f.originalA]);
+ for(const query of ['英語 團體 男歌手','慢板改編','melodicneedle']){const result=await f.familyPage({query});assert.equal(result.total,1);assert.equal(result.rows[0].id,f.families[0]);safe(result);assert.doesNotMatch(JSON.stringify(result),/melodicneedle|lyricMatch|snippet|matchedLyrics/);}
+ assert.equal((await f.familyPage({query:'private lyric body'})).total,0);
+ await f.q('update papa_catalog_lyric_revisions set active=false where variant_id=$1',[f.originalA]);assert.equal((await f.familyPage({query:'melodicneedle'})).total,0);
+});
 const stripDates=value=>JSON.parse(JSON.stringify(value),(key,value)=>key==='createdAt'?undefined:value);
 
 test('018 additive sort and catalog membership pages preserve projections, counts, privacy and scoped authority',async t=>{
