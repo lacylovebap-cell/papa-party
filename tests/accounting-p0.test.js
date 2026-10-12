@@ -58,3 +58,11 @@ test('wrong Room, player or source, failed allocation and non-manager calls leav
  let s=fixture(),before=structuredClone(s);assert.throws(()=>run(s,'allocate',{playerId:pid(s),ledgerId:s.ledger[0].id,total:3,stored:0,items:[{songId:'wrong'}]}));assert.deepEqual(s,before);
  assert.throws(()=>mutate(s,{type:'allocate',streamer:'papa',data:{}},{role:'player',playerId:pid(s)},at),/管理/);assert.deepEqual(s,before);
 });
+
+test('manual compensation changes balance without posing as a new receipt; correction preserves classification and Audit links',()=>{
+ let s=fixture();s=run(s,'ledger',{playerId:pid(s),amount:2,note:'合法回補',accounting_adjustment:true});
+ assert.equal(stats(room(s),at).received,3);assert.equal(balance(room(s),pid(s)),5);const id=s.ledger.at(-1).id;
+ s=run(s,'ledger',{id,playerId:pid(s),amount:3,note:'合法回補修正',at});
+ assert.equal(stats(room(s),at).received,3);assert.equal(balance(room(s),pid(s)),6);assert.equal(s.ledger.at(-1).correction_of,id);assert.equal(s.ledger.at(-1).accounting_adjustment,true);
+ const before=structuredClone(s);assert.throws(()=>run(s,'ledger',{playerId:pid(s),amount:1,accounting_adjustment:'true'}),/帳務用途/);assert.deepEqual(s,before);
+});
