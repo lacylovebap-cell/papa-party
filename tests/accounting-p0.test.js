@@ -10,20 +10,20 @@ function complete(s,id,extra={},t=at){s=op(s,id,'stage',{preparationMinutes:0},t
 test('3 received / 2 reserved / 1 available; source amount and receipt fact stay 3',()=>{
  let s=allocate(fixture());assert.equal(s.ledger[0].amount,3);assert.equal(s.ledger[0].receipt_quantity,3);
  assert.equal(balance(room(s),pid(s)),3);assert.equal(reservedCredits(room(s),pid(s)),2);
- assert.deepEqual(stats(room(s),at),{received:3,sung:0,saved:3,reserved:2,available:1});
+ assert.deepEqual(stats(room(s),at),{received:3,sung:0,saved:3,reserved:2,available:1,stored:1});
  for(const q of s.queue)assert.equal(q.source_transaction_id,s.ledger[0].id);
  assert.throws(()=>allocate(s),/已有使用|不足/);
 });
 test('cancel both releases reservations, does not add gifts or orphan refunds; repeat is safe',()=>{
  let s=allocate(fixture()),ledger=structuredClone(s.ledger);
  for(const q of [...s.queue])s=op(s,q.id,'cancel');
- assert.deepEqual(s.ledger,ledger);assert.deepEqual(stats(room(s),at),{received:3,sung:0,saved:3,reserved:0,available:3});
+ assert.deepEqual(s.ledger,ledger);assert.deepEqual(stats(room(s),at),{received:3,sung:0,saved:3,reserved:0,available:3,stored:3});
  const before=structuredClone(s);assert.throws(()=>op(s,s.queue[0].id,'cancel'),/已結束/);assert.deepEqual(s,before);
  s=run(s,'queueBulkDelete',{ids:s.queue.map(q=>q.id)});assert.deepEqual(s.ledger,ledger);assert.equal(s.queue.length,2);
 });
 test('two completed allocations consume once, preserve links and cannot refund after archive/cancel',()=>{
  let s=allocate(fixture());for(const q of [...s.queue])s=complete(s,q.id);
- assert.deepEqual(stats(room(s),at),{received:3,sung:2,saved:1,reserved:0,available:1});
+ assert.deepEqual(stats(room(s),at),{received:3,sung:2,saved:1,reserved:0,available:1,stored:1});
  for(const q of s.queue){const l=s.ledger.find(l=>l.id===q.settlement_id);assert.equal(l.source_transaction_id,q.source_transaction_id);assert.equal(l.queueId,q.id);assert.equal(l.performance_id,q.id);assert.equal(l.amount,-1);}
  const ledger=structuredClone(s.ledger);for(const q of [...s.queue]){assert.throws(()=>op(s,q.id,'cancel'));assert.throws(()=>op(s,q.id,'complete'));s=op(s,q.id,'delete');}
  assert.deepEqual(s.ledger,ledger);assert.equal(stats(room(s),at).sung,2);assert.equal(s.queue.filter(q=>q.status==='completed').length,2);
@@ -31,7 +31,7 @@ test('two completed allocations consume once, preserve links and cannot refund a
 test('3 plus 2 received / 3 completed / balance 2 with selfProvided and hour carry; popularity unchanged',()=>{
  let s=fixture();s=run(s,'allocate',{ledgerId:s.ledger[0].id,playerId:pid(s),total:3,stored:0,items:[1,2,3].map(()=>({songId:s.songs[0].songId,selfProvided:true}))});
  s=run(s,'ledger',{playerId:pid(s),amount:2});for(const q of [...s.queue])s=complete(s,q.id,{carryOver:true,effective_at:'2026-10-12T12:30:00Z'},'2026-10-12T12:30:00Z');
- assert.deepEqual(stats(room(s),'2026-10-12T12:30:00Z'),{received:5,sung:3,saved:2,reserved:0,available:2});
+ assert.deepEqual(stats(room(s),'2026-10-12T12:30:00Z'),{received:5,sung:3,saved:2,reserved:0,available:2,stored:2});
  assert.equal(songPlays(room(s),s.songs[0].songId),0);
 });
 test('archive completed saved request never reverses debit or deletes the performance',()=>{
@@ -45,8 +45,8 @@ test('receipt void/correction uses one linked reversal and retains original amou
  assert.equal(s.ledger.find(l=>l.correction_of===receipt.id).amount,2);assert.equal(stats(room(s),at).received,2);assert.equal(balance(room(s),pid(s)),2);
  assert.throws(()=>run(s,'ledger',{...receipt,remove:true}),/已撤銷/);
 });
-test('linked receipt cannot be voided or shrunk while allocations/performances would become orphaned',()=>{
- let s=allocate(fixture()),before=structuredClone(s);assert.throws(()=>run(s,'ledger',{...s.ledger[0],remove:true}),/已有分配/);assert.deepEqual(s,before);
+test('linked receipt cannot be shrunk while allocations/performances would become orphaned',()=>{
+ let s=allocate(fixture()),before=structuredClone(s);assert.throws(()=>run(s,'ledger',{...s.ledger[0],amount:0}),/已有分配/);assert.deepEqual(s,before);
  s=complete(s,s.queue[0].id);before=structuredClone(s);assert.throws(()=>run(s,'ledger',{...s.ledger[0],amount:0,at}),/已有分配/);assert.deepEqual(s,before);
 });
 test('Taipei 19:00 rollover, current balance, test exclusion and last ten displayed rows are independent',()=>{

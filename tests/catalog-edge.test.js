@@ -23,7 +23,7 @@ function edge(allowRead=false){
  context.testActor=null;
  context.mockApi=async(path,body)=>{
   calls.push({path,body});
-  if(path.includes('papa_accounting_summary'))return {day:body.requested_day,timezone:'Asia/Taipei',scope:{spaceId:body.requested_space,roomId:body.requested_room},received:0,sung:0,saved:0,reserved:0,available:0,revision:7};
+  if(path.includes('papa_accounting_summary'))return {day:body.requested_day||'2026-10-13',timezone:'Asia/Taipei',rolloverHour:19,stored:0,scope:{spaceId:body.requested_space,roomId:body.requested_room},received:0,sung:0,saved:0,reserved:0,available:0,revision:7};
   if(path.includes('papa_streamer_directory'))return meta.data.streamers;
   if(path.includes('papa_v2_revision?'))return [{revision:7}];
   if(path.includes('papa_v2_scoped_read_snapshot'))return {revision:7,rows:[{kind:'meta',id:'1',data:{schemaVersion:3,...meta.data}},{kind:'settings',id:'1',data:{}}]};

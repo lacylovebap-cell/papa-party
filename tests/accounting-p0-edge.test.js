@@ -10,7 +10,7 @@ const code=stripTypeScriptTypes(take('accountingSummary')+'\nasync function hand
 function fixture({role='streamer_admin',invalid=false}={}){
  const calls=[],scope={spaceId:'space-001',id:'verified-room'};
  const ctx=vm.createContext({respond:r=>r,managerRoom:async who=>{if(!['streamer_admin','super_admin'].includes(who?.role))throw Error('manager required');return scope;},
-  api:async(path,body)=>{calls.push({path,body});return {scope:{spaceId:scope.spaceId,roomId:invalid?'other-room':scope.id},day:body.requested_day,timezone:'Asia/Taipei',received:5,sung:3,saved:2,reserved:1,available:1,revision:10};}});
+  api:async(path,body)=>{calls.push({path,body});return {scope:{spaceId:scope.spaceId,roomId:invalid?'other-room':scope.id},day:body.requested_day,timezone:'Asia/Taipei',rolloverHour:19,stored:2,received:5,sung:3,saved:2,reserved:1,available:1,revision:10};}});
  vm.runInContext(code,ctx);return {calls,invoke:body=>ctx.handle(body,role?{role}:null)};
 }
 test('stats request ignores caller Space/Room/player identities and returns only authority aggregates',async()=>{
