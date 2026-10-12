@@ -39,7 +39,7 @@ export function validPushSubscription(s){try{const u=new URL(s?.endpoint);return
 // open the same notification without embedding a browser URL in its identity.
 export function canonicalNoticeLink(notice,streamerSlug){return {
  version:1,spaceId:notice.space_id||null,streamerId:notice.streamer_id,
- streamerSlug:streamerSlug||'papa',section:['__admin__','__super__'].includes(notice.recipient)?'admin':'center',
+ streamerSlug:streamerSlug||'papa',section:['admin','center'].includes(notice.section)?notice.section:['__admin__','__super__'].includes(notice.recipient)?'admin':'center',
  entityType:notice.type||null,entityId:notice.entity_id||null,notificationId:notice.id
 };}
 export function webNoticePath(link){

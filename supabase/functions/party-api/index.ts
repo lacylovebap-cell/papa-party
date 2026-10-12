@@ -327,7 +327,7 @@ async function messageCenterOperation(b:any,who:any,room:any){
     ||(row.type==='message'?'message':['comment','announcement'].includes(row.type)?'board':'system')!==category)throw Error('通知分頁資料不正確');
    ids.add(row.id);
    return {id:row.id,space_id:spaceId,streamer_id:row.streamer_id,streamer_name:String(row.streamer_name||'').slice(0,200),
-    type:row.type,level:row.level,body:row.body,entity_id:typeof row.entity_id==='string'?row.entity_id.slice(0,200):null,
+    section:['__admin__','__super__'].includes(recipient)?'admin':'center',type:row.type,level:row.level,body:row.body,entity_id:typeof row.entity_id==='string'?row.entity_id.slice(0,200):null,
     created_at:row.created_at,read_at:row.read_at};
   });
   return {version:1,scope:expectedScope,category,page,pageSize:50,total:result.total,snapshotAt:result.snapshotAt,snapshotId:result.snapshotId,hasMore:result.hasMore,rows};
@@ -414,7 +414,7 @@ function managerPasswordError(result:any,kind:string){
  if(!result?.ok)throw Error(messages[result?.reason]||'密碼設定未完成，請重新登入後再試');
 }
 
-Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();if(b.op==='releaseInfo')return respond({version:'10.13-WEB.2',messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();if(b.op==='releaseInfo')return respond({version:'10.13-WEB.3',messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));
  if(b.op==='entryLegacyRooms'){
   const rooms=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:'space-001'});

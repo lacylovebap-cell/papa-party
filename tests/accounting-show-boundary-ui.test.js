@@ -21,12 +21,16 @@ test('today UI rejects a previous-show aggregate only at Taipei 19:00 without re
  assert.equal(context.currentAccounting().saved,2);
 });
 
-test('home uses plain text in received/stored/sung order and the selected Space boundary',()=>{
+test('home keeps three cards while queue keeps plain text and both use the selected Space summary',()=>{
  const code=app.split(/\r?\n/).filter(line=>line.startsWith('function statsHtml(')||line.startsWith('function homeAccounting(')).join('\n');
- const ctx=vm.createContext({state:{summary:{rolloverHour:19}},accountingDay,accountingRollover,blank:()=>'',clock:()=> '2026-10-12T16:00:00Z'});
+ const ctx=vm.createContext({state:{summary:{rolloverHour:19}},accountingDay,accountingRollover,h:String,blank:()=>'',clock:()=> '2026-10-12T16:00:00Z'});
  vm.runInContext(code,ctx);let html=ctx.homeAccounting({received:5,stored:2,sung:5,saved:379});
- assert.ok(html.includes('收到新歌 5 首 ｜ 存歌 2 首 ｜ 已唱 5 首'));
- assert.ok(!html.includes('379'));assert.ok(!html.includes('class="stat"'));assert.ok(html.includes('19:00 換場'));
+ assert.match(html,/<section class="card home-accounting">/);
+ assert.equal((html.match(/class="stat"/g)||[]).length,3);
+ assert.match(html,/收到新歌<b>5 首<\/b>.*存歌<b>2 首<\/b>.*已唱<b>5 首<\/b>/);
+ const queue=ctx.statsHtml({received:5,stored:2,sung:5,saved:379});
+ assert.match(queue,/收到新歌 5 首 ｜ 存歌 2 首 ｜ 已唱 5 首/);assert.doesNotMatch(queue,/class="stat"/);
+ assert.ok(!html.includes('379'));assert.ok(html.includes('19:00 換場'));
  ctx.state.summary.rolloverHour=0;html=ctx.homeAccounting({received:0,stored:0,sung:0});assert.ok(html.includes('2026-10-13 場'));assert.ok(html.includes('00:00 換場'));
 });
 test('only voided history is labelled as record-only; ordinary settlements have no technical preservation label',()=>{

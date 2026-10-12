@@ -53,6 +53,8 @@ test('category API derives recipient authority from the session and uses one sel
   assert.equal(r.status,200);assert.equal(r.body.rows.length,1);assert.equal(r.body.total,76);assert.equal(r.body.page,1);assert.equal(r.body.snapshotAt,'2026-10-11T00:00:00Z');
   assert.equal(f.rpcs().length,1);assert.equal(f.rpcs()[0].body.snapshot_at,'2026-10-11T00:00:00Z');assert.equal(f.rpcs()[0].body.snapshot_id,id(99));assert.equal(r.body.snapshotId,id(99));
   assert.doesNotMatch(JSON.stringify(r.body),/server_secret|do not return|recipient|actor_context/);
+  assert.equal(r.body.rows[0].section,role==='player'?'center':'admin');
+  assert.equal(rules.canonicalNoticeLink(r.body.rows[0]).section,role==='player'?'center':'admin');
   assert.equal(f.calls.some(c=>/snapshot|entities|chat_messages|board_posts|notice_preferences/.test(c.path)),false);
  }
 });

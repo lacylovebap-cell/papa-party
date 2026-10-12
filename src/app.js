@@ -1,34 +1,34 @@
-import {accountingDay,accountingRollover} from './accounting.js?v=10.13-WEB.2';
-import {installPageJumps} from './ui-page-jumps.js?v=10.13-WEB.2';
-import {createWebAppInstall} from './web-app-install.js?v=10.13-WEB.2';
-import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.13-WEB.2';
-import {webApiFailure} from './web-api-errors.js?v=10.13-WEB.2';
-import {canonicalNoticeLink} from './notification-rules.js?v=10.13-WEB.2';
-import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.13-WEB.2';
-import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.13-WEB.2';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.13-WEB.2';
-import {fateCategories,drawSong} from './fate.js?v=10.13-WEB.2';
-import {createBoard} from './board.js?v=10.13-WEB.2';
-import {createChat} from './chat.js?v=10.13-WEB.2';
-import {requestSourceLabel} from './request-source.js?v=10.13-WEB.2';
-import {normalizeHome,themePalette} from './home-settings.js?v=10.13-WEB.2';
-import {openHomeEditor} from './home-editor.js?v=10.13-WEB.2';
-import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.13-WEB.2';
-import {createNotifications} from './notifications.js?v=10.13-WEB.2';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.13-WEB.2';
-import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.13-WEB.2';
-import {createPlayerManager} from './player-manager.js?v=10.13-WEB.2';
-import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.13-WEB.2';
-import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.13-WEB.2';
-import {createSongFavorites} from './song-favorites.js?v=10.13-WEB.2';
-import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.13-WEB.2';
-import {listenedSongs} from './listening-history.js?v=10.13-WEB.2';
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.13-WEB.2';
-import {createWebDeviceLogin} from './web-device-login.js?v=10.13-WEB.2';
-import {roomStorageKey} from './communication-context.js?v=10.13-WEB.2';
-import {createWebSpaceEntry} from './web-space-entry.js?v=10.13-WEB.2';
-import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.13-WEB.2';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.13-WEB.2';
+import {accountingDay,accountingRollover} from './accounting.js?v=10.13-WEB.3';
+import {installPageJumps} from './ui-page-jumps.js?v=10.13-WEB.3';
+import {createWebAppInstall} from './web-app-install.js?v=10.13-WEB.3';
+import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.13-WEB.3';
+import {webApiFailure} from './web-api-errors.js?v=10.13-WEB.3';
+import {canonicalNoticeLink} from './notification-rules.js?v=10.13-WEB.3';
+import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.13-WEB.3';
+import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.13-WEB.3';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.13-WEB.3';
+import {fateCategories,drawSong} from './fate.js?v=10.13-WEB.3';
+import {createBoard} from './board.js?v=10.13-WEB.3';
+import {createChat} from './chat.js?v=10.13-WEB.3';
+import {requestSourceLabel} from './request-source.js?v=10.13-WEB.3';
+import {normalizeHome,themePalette} from './home-settings.js?v=10.13-WEB.3';
+import {openHomeEditor} from './home-editor.js?v=10.13-WEB.3';
+import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.13-WEB.3';
+import {createNotifications} from './notifications.js?v=10.13-WEB.3';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.13-WEB.3';
+import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.13-WEB.3';
+import {createPlayerManager} from './player-manager.js?v=10.13-WEB.3';
+import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.13-WEB.3';
+import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.13-WEB.3';
+import {createSongFavorites} from './song-favorites.js?v=10.13-WEB.3';
+import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.13-WEB.3';
+import {listenedSongs} from './listening-history.js?v=10.13-WEB.3';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.13-WEB.3';
+import {createWebDeviceLogin} from './web-device-login.js?v=10.13-WEB.3';
+import {roomStorageKey} from './communication-context.js?v=10.13-WEB.3';
+import {createWebSpaceEntry} from './web-space-entry.js?v=10.13-WEB.3';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.13-WEB.3';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.13-WEB.3';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let appInstallMessage='';
 const appInstall=createWebAppInstall({onChange:syncAppInstall});
@@ -355,7 +355,7 @@ function switchStreamer(slug){if(slug===streamerSlug)return;location.href=stream
 document.addEventListener('change',e=>{if(e.target.id==='header-streamer')switchStreamer(e.target.value);if(e.target.id==='fate-category'){fateCategory=e.target.value;fateSeen=[];fateId=null;$('#fate-result').innerHTML=fateResultHtml();}});
 async function go(next){if(entryPending){if(next==='admin'&&!admin){await adminLogin();return;}await openSpaceEntry();return;}if(next==='admin'&&admin?.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(location.href);u.hash='admin';location.href=streamerDestination(u.href,admin.streamerSlug,{role:admin.role,managedSlug:admin.streamerSlug});return;}signatures={};route=next;location.hash=next;filters={q:'',tags:[],language:''};pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);if(next==='admin'&&!admin){route='home';await adminLogin();return;}if(next==='center'&&!session){route='home';await loginDialog();return;}await refresh(true);if(next==='common-book')await loadCommonBook(0);if(pendingCommonRequest&&session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}}
 const notifications=createNotifications({messageCenterV2:true,api:b=>api({...b,management:!!admin,streamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug}),apiUrl:API,apiKey:PUBLISHABLE_KEY,context:()=>({accountId:(admin||session)?.accountId,streamerId:state.currentStreamer?.id,selectedStreamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug,selectedStreamerName:state.currentStreamer?.display_name,spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',deviceSessionId:(admin||session)?.sessionId,demo:demo||entryPending||!!(draft&&isAdmin()),role:admin?(admin.role||'super_admin'):'player',recipient:admin?(isSuperAdmin()?'__super__':'__admin__'):session?.playerId,streamer:admin?(isSuperAdmin()?'__global__':admin.streamerSlug):streamerSlug,streamerName:admin&&isSuperAdmin()?'全部主播':state.currentStreamer?.display_name}),toast,onOpenCategory:category=>category==='message'?chat.open():board.open(),onNavigate:navigateNotice,onUpdate:notices=>{if(notices.some(notice=>notice.type==='message'))chat.refresh().catch(()=>{});if(notices.some(notice=>['live','saved','cancel','ready','accepted','completed','credit','status','wish'].includes(notice.type)))syncRecovery.invalidate('notification');}});
-const chat=createChat({api,context:()=>({spaceId:(isAdmin()?admin?.spaceId:session?.spaceId)||state.currentStreamer?.spaceId||'space-001',manager:isAdmin(),role:isAdmin()?admin?.role:'player',playerId:session?.playerId,streamer:streamerSlug,streamerId:state.currentStreamer?.id,streamerName:hostName(),demo:demo||entryPending||!!draft}),toast,onRead:()=>notifications.refresh().catch(()=>{}),realtimeAvailable:()=>notifications.realtimeAvailable()});
+const chat=createChat({api,context:()=>({spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',manager:!!admin,role:admin?.role||'player',accountId:(admin||session)?.accountId,deviceSessionId:(admin||session)?.sessionId,playerId:session?.playerId,streamer:streamerSlug,streamerId:state.currentStreamer?.id,streamerName:hostName(),demo:demo||entryPending||!!draft}),toast,onRead:()=>notifications.refresh().catch(()=>{}),realtimeAvailable:()=>notifications.realtimeAvailable()});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-chat]'))chat.open().catch(e=>toast(e.message));});
 const board=createBoard({api,context:()=>({spaceId:(isAdmin()?admin?.spaceId:session?.spaceId)||state.currentStreamer?.spaceId||'space-001',manager:isAdmin(),role:isAdmin()?admin?.role:'player',playerId:session?.playerId,streamer:streamerSlug,streamerId:state.currentStreamer?.id,streamerName:hostName(),demo:demo||entryPending||!!draft}),toast});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-board]'))board.open().catch(e=>toast(e.message));});
@@ -365,7 +365,7 @@ function songRows(rows){return rows.map((s,i)=>{const c=crownFor(state,s.songId,
 function hour(){const current=state.hourBucket===hourKey(clock()),grant=(me()?.quotaRights||[]).find(x=>x.streamer_id===state.currentStreamer?.id),quota=isAdmin()?savedQuota(state,clock()):current?(state.hourlyPersonal||{used:state.hourlyUsed||0,reserved:state.hourlyReserved||0,extraQuota:0,personalUsed:0,extraRemaining:0,commonRemaining:Math.max(0,state.settings.hourlyLimit-(state.hourlyUsed||0)-(state.hourlyReserved||0))}):{used:0,reserved:0,extraQuota:grant?.extra_quota||0,personalUsed:0,extraRemaining:grant?.extra_quota||0,commonRemaining:Number(state.settings.hourlyLimit)},available=quota.commonRemaining+quota.extraRemaining,limit=Number(state.settings.hourlyLimit)+quota.extraQuota,occupied=quota.used+quota.reserved+quota.personalUsed,remaining=Math.ceil((3600000-(Date.now()+offset)%3600000)/60000);return '<small>🕒 本小時提歌額度</small><strong>'+occupied+' / '+limit+(!available?' <span class="quota-full">提滿了</span>':'')+'</strong><small>還可使用 '+available+' 首額度'+(quota.extraQuota?'（共用 '+quota.commonRemaining+' ＋ 專屬 '+quota.extraRemaining+'）':'；待唱保留 '+quota.reserved+' 首')+'</small><small>距離下一次提歌重置還有 '+remaining+' 分鐘</small>';}
 function currentAccounting(){if(state.summary&&(state.summary.day===accountingDay(clock(),accountingRollover(state))||demo&&!state.summary.day))return state.summary;return demo||draft&&isAdmin()?stats(state,clock()):null;}
 function statsHtml(s){if(!s)return blank('帳務摘要尚未確認');return `<p class="accounting-line">收到新歌 ${s.received} 首 ｜ 存歌 ${s.stored} 首 ｜ 已唱 ${s.sung} 首</p>`;}
-function homeAccounting(s){const hour=accountingRollover(state);return '<div class="home-accounting">'+statsHtml(s)+'<small>'+accountingDay(clock(),hour)+' 場 · 每天 '+String(hour).padStart(2,'0')+':00 換場</small></div>';}
+function homeAccounting(s){const hour=accountingRollover(state);return '<section class="card home-accounting">'+(s?'<div class="stats">'+[['收到新歌',s.received],['存歌',s.stored],['已唱',s.sung]].map(([label,value])=>'<div class="stat">'+label+'<b>'+h(value)+' 首</b></div>').join('')+'</div>':blank('帳務摘要尚未確認'))+'<small>'+accountingDay(clock(),hour)+' 場 · 每天 '+String(hour).padStart(2,'0')+':00 換場</small></section>';}
 function crownsHtml(rows,adminMode=false){return `<div class="crown-grid">${rows.map(c=>{const remaining=c.expiresAt?(timeValue(c.expiresAt)-Date.now()-offset)/86400000:Infinity,status=!c.activatedAt?'⏳ 待確認':!isActive(c,clock())?'🕒 已過期':remaining<=7?'⚠️ 即將到期':!c.expiresAt?'♾️ 永久':'👑 生效中';return `<div class="crown"><h3>${h(song(c.songId)?.title||c.title||'歌曲待核對')} 👑</h3><p>${h(c.tier)} · ${h(c.ownerName||playerName(c.playerId))}</p>${adminMode||c.activatedAt?`<p>${h(status)}${c.expiresAt?' · '+time(c.expiresAt):''}</p>`:''}<p>其他玩家現點 ${money(c.price)}／首<br><span>＋雙費 ${money(state.settings.liveDouble??500)} 探鑽</span></p>${adminMode?button('編輯／生效','editCrown',c.id)+button('時間','recordTime',c.id,'tiny','data-table="crowns"'):button('👑 點冠歌','requestCrown',c.id,'tiny primary')}</div>`;}).join('')||blank('還沒有冠歌，王冠等你戴 ♡')}</div>`;}
 function currentCards(){return state.cards.filter(c=>timeValue(c.startsAt)<=Date.now()+offset&&(!c.expiresAt||timeValue(c.expiresAt)>Date.now()+offset));}
 function photoHtml(c){return `<div class="photo"><img src="${h(c.thumbnail||c.url)}" alt="${h(c.description||'照片卡片')}" loading="lazy"><p>${h(c.description)}</p><small>${time(c.startsAt)} ～ ${c.expiresAt?time(c.expiresAt):'永久'}</small></div>`;}

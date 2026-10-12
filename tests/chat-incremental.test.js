@@ -7,6 +7,44 @@ import {chatAccess,chatCursor,cleanChatMessage} from '../src/chat-policy.js';
 import {createChat} from '../src/chat.js';
 
 const row=seq=>({id:'m'+seq,seq,sender_side:'player',body:'message '+seq,created_at:'2026-10-01T00:00:00Z'});
+
+test('an authenticated manager on home can open private chat without a separate player login',()=>{
+ const line=fs.readFileSync('src/app.js','utf8').split(/\r?\n/).find(s=>s.startsWith('const chat=createChat('));
+ const ctx=vm.createContext({admin:{role:'streamer_admin',spaceId:'space-001',accountId:'manager-account',sessionId:'manager-device'},session:null,state:{currentStreamer:{id:'papa'}},streamerSlug:'papa',hostName:()=> '怕怕',demo:false,entryPending:false,draft:null,isAdmin:()=>false,api(){},toast(){},notifications:{refresh:async()=>{},realtimeAvailable:()=>false},createChat:options=>({context:options.context})});
+ vm.runInContext(line+';this.chatContext=chat.context()',ctx);
+ assert.equal(ctx.chatContext.manager,true);assert.equal(ctx.chatContext.role,'streamer_admin');assert.equal(ctx.chatContext.accountId,'manager-account');assert.equal(ctx.chatContext.playerId,undefined);
+});
+
+test('compose closes textarea and preserves Chinese content and retry identity with a visible send button',async()=>{
+ const body='你好 🥰\n<tag> & 私訊',service=server();let attempts=0;
+ const ui=frontend(async b=>{
+  if(b.op==='chatSend'){if(++attempts===1)throw Error('offline');service.state.rows.push({...row(1),id:'00000000-0000-4000-8000-000000000001',body:b.body});return {id:service.state.rows[0].id,seq:1};}
+  return service.api(b);
+ });
+ try{
+  await ui.chat.open();
+  assert.match(ui.dialog.innerHTML,/<textarea\b[^>]*><\/textarea><\/label>/);
+  assert.match(ui.dialog.innerHTML,/<button class="primary" type="submit">送出訊息<\/button>/);
+  assert.equal((await ui.send(body)).body,body,'failure keeps the draft');
+  assert.equal((await ui.send(body)).body,'','success clears the draft');
+  const sends=ui.calls.filter(c=>c.op==='chatSend');assert.equal(sends[0].clientId,sends[1].clientId);assert.equal(sends[1].body,body);
+  assert.deepEqual(ui.toasts,['訊息已送出']);assert.match(ui.box.innerHTML,/你好 🥰\n&lt;tag&gt; &amp; 私訊/);
+ }finally{ui.restore();}
+});
+
+test('Enter submits once, Shift Enter keeps newlines, and Chinese composition never sends',async()=>{
+ const service=server(),ui=frontend(service.api);
+ try{
+  await ui.chat.open();let submits=0,prevented=0;
+  const form={requestSubmit(){submits++;}},target={closest:()=>({closest:()=>form})};
+  const key=extra=>ui.keydown({key:'Enter',target,preventDefault(){prevented++;},...extra});
+  key({shiftKey:true});key({isComposing:true});key({keyCode:229});key({key:'a'});assert.equal(submits,0);assert.equal(prevented,0);
+  key({});assert.equal(submits,1);assert.equal(prevented,1);
+  key({repeat:true});assert.equal(submits,1);assert.equal(prevented,2);
+  ui.state.accountId='changed';key({});assert.equal(submits,1,'stale session cannot send');
+ }finally{ui.restore();}
+});
+
 function backend(){
  const paths=[];
  const context=vm.createContext({chatAccess,chatCursor,cleanChatMessage,scopeState:(s,id)=>({currentStreamer:s.streamers.find(r=>r.id===id)}),api:async path=>{
@@ -47,16 +85,17 @@ test('initial and older chat pages retain newest-first database pagination and c
 });
 
 function frontend(api,realtimeAvailable=()=>false){
- const original={document:globalThis.document,setInterval:globalThis.setInterval};
+ const original={document:globalThis.document,setInterval:globalThis.setInterval,FormData:globalThis.FormData};
  const events={},listeners={},timers=[],nodes={title:{textContent:''},error:{textContent:''},older:{hidden:true}};
  const box={innerHTML:'',scrollTop:0,clientHeight:100,get scrollHeight(){return (this.innerHTML.match(/data-chat-seq=/g)||[]).length*20;}};
  const dialog={open:false,_html:'',addEventListener(type,callback){events[type]=callback;},showModal(){this.open=true;},close(){this.open=false;events.close?.();},set innerHTML(value){this._html=value;box.innerHTML='';nodes.error.textContent='';},get innerHTML(){return this._html;},querySelector(selector){return ({'h2':nodes.title,'[data-chat-messages]':box,'[data-chat-error]':nodes.error,'[data-chat="older"]':nodes.older})[selector];}};
  const state={manager:false,playerId:'P1',streamer:'papa',streamerName:'怕怕',demo:false};
  globalThis.document={hidden:false,body:{append(){}},createElement(){return dialog;},addEventListener(type,callback){listeners[type]=callback;}};
  globalThis.setInterval=(callback,ms)=>{timers.push({callback,ms});return timers.length;};
- const calls=[],read=[];
- const chat=createChat({api:async b=>{calls.push({...b,room:state.streamer});return api(b);},context:()=>state,toast(){},onRead(){read.push(true);},realtimeAvailable});
- return {chat,state,dialog,box,nodes,calls,read,timers,listeners,seqs:()=>[...box.innerHTML.matchAll(/data-chat-seq="(\d+)"/g)].map(m=>Number(m[1])),async older(){await events.click({target:{closest:()=>({dataset:{chat:'older'}})}});},restore(){for(const [key,value]of Object.entries(original)){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}}};
+ const calls=[],read=[],toasts=[];
+ globalThis.FormData=class{constructor(form){this.form=form;}get(name){return this.form[name];}};
+ const chat=createChat({api:async b=>{calls.push({...b,room:state.streamer});return api(b);},context:()=>state,toast(message){toasts.push(message);},onRead(){read.push(true);},realtimeAvailable});
+ return {chat,state,dialog,box,nodes,calls,read,timers,listeners,toasts,keydown:e=>events.keydown(e),async click(action,extra={}){await events.click({target:{closest:()=>({dataset:{chat:action,...extra}})}});},async send(body){const button={disabled:false},form={body,hasAttribute:a=>a==='data-chat-compose',querySelector:()=>button,reset(){this.body='';}};await events.submit({preventDefault(){},target:form});return form;},seqs:()=>[...box.innerHTML.matchAll(/data-chat-seq="(\d+)"/g)].map(m=>Number(m[1])),async older(){await events.click({target:{closest:()=>({dataset:{chat:'older'}})}});},restore(){for(const [key,value]of Object.entries(original)){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}}};
 }
 
 function server(){
