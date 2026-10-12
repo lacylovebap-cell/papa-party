@@ -191,3 +191,23 @@ test('new category RPCs and internal helpers are service-role-only',async t=>{
  for(const {signature}of functions){const rights=(await h.q("select has_function_privilege('anon',$1,'execute') a,has_function_privilege('authenticated',$1,'execute') b,has_function_privilege('service_role',$1,'execute') c",[signature]))[0];assert.deepEqual(rights,{a:false,b:false,c:true});}
  await h.db.exec('set role authenticated');await assert.rejects(h.counts(),/permission denied/);await h.db.exec('reset role');
 });
+
+const displayMigration=fs.readFileSync(new URL('../supabase/migrations/202610120007_message_center_preferences.sql',import.meta.url),'utf8');
+test('scoped display preferences preserve legacy delivery preferences and formal notices, and isolate Account, Room, Space and role',async t=>{
+ const f=await fixture(t),notices=await f.q('select * from papa_notifications order by id'),legacy=await f.q('select * from papa_notice_preferences order by streamer_id,recipient');
+ await f.db.exec(displayMigration);assert.deepEqual(await f.q('select * from papa_notifications order by id'),notices);assert.deepEqual(await f.q('select * from papa_notice_preferences order by streamer_id,recipient'),legacy);
+ const settings=(actor=player,space='space-001',room='papa',mode='room',value=null)=>f.rpc('papa_notice_center_preferences_set',[space,room,actor,mode,value]);
+ const before=await f.counts(),nativeBefore=await f.counts(native,'space-002','other'),otherBefore=await f.counts(player,'space-001','michelle');
+ const snapshot=await f.page('message');
+ const hidden={types:{message:{center:false,badge:false}}};await settings(player,'space-001','papa','room',hidden);
+ const after=await f.counts();assert.equal(after.unreadByCategory.message,0);assert.equal(after.badgeUnreadByCategory.message,0);assert.equal(after.unreadByCategory.system,before.unreadByCategory.system);
+ assert.deepEqual(await f.counts(native,'space-002','other'),nativeBefore);assert.deepEqual(await f.counts(player,'space-001','michelle'),otherBefore);
+ assert.equal((await settings(host)).settings.types.message.center,true);assert.equal((await settings(player)).settings.types.message.center,false);
+ await assert.rejects(f.rpc('papa_notice_category_page',['space-001','papa',player,'message',0,'room',snapshot.snapshotAt,snapshot.snapshotId]),/NOTICE_SNAPSHOT_INVALID/);
+ await settings(president,'space-001','papa','space',hidden);assert.equal((await settings(president,'space-001','michelle','space')).settings.types.message.center,false);assert.equal((await settings(president,'space-002','other','space')).settings.types.message.center,true);assert.equal((await settings(president,'space-001','papa','room')).settings.types.message.center,true);
+ const saved=await f.q('select * from papa_notice_center_preferences order by account_id,space_id');
+ for(const value of [{types:{unknown:{center:true,badge:true}}},{types:{message:{center:'yes',badge:true}}},{types:{message:{center:true,badge:true,push:true}}},{muteAll:true,types:{}},[],{types:[]}])await assert.rejects(settings(player,'space-001','papa','room',value),/NOTICE_CENTER_SETTINGS_INVALID/);
+ await assert.rejects(settings({...player,account_id:id(104)}),/ACTOR|MEMBER|PLAYER/);await assert.rejects(settings(player,'space-002','other'),/ACTOR|MEMBER|PLAYER|SCOPE/);
+ assert.deepEqual(await f.q('select * from papa_notice_center_preferences order by account_id,space_id'),saved);assert.deepEqual(await f.q('select * from papa_notifications order by id'),notices);assert.deepEqual(await f.q('select * from papa_notice_preferences order by streamer_id,recipient'),legacy);
+ for(const role of ['anon','authenticated']){await f.db.exec('set role '+role);await assert.rejects(settings(),/permission denied/);await f.db.exec('reset role');}
+});

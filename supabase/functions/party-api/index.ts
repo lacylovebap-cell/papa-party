@@ -5,7 +5,7 @@ import {applyRoomImport} from '../../../src/room-import.js';
 import {createRoomDraft,validateRoomDraft,replayRoomDraft} from '../../../src/room-draft.js';
 // No browser access to tables or VAPID secrets. All recipient keys come from actor().
 import webpush from 'npm:web-push@3.6.7';
-import {cleanNoticePrefs,noticeChannels,validPushSubscription,canonicalNoticeLink,webNoticePath} from '../../../src/notification-rules.js';
+import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,validPushSubscription,canonicalNoticeLink,webNoticePath} from '../../../src/notification-rules.js';
 
 async function noticeKeys(){
  let rows=await api('/rest/v1/papa_notice_config?id=eq.vapid');
@@ -16,7 +16,7 @@ async function notificationOperation(b:any,who:any,s:any){
  if(!who)throw Error('請先登入');
  const source=scopeState(s,b.streamer||'papa').currentStreamer,sourceRoom=source.id,{room,recipient}=noticeIdentity(who,sourceRoom);
  if(!recipient)throw Error('請先登入');
- if(['messageCenter','messageCenterCounts','messageCenterRead'].includes(b.op))return messageCenterOperation(b,who,source);
+ if(['messageCenter','messageCenterCounts','messageCenterRead','messageCenterPreferences'].includes(b.op))return messageCenterOperation(b,who,source);
  if(b.op==='noticeTarget')return noticeTarget(b,who,source);
  const filter='streamer_id=eq.'+encodeURIComponent(room)+'&recipient=eq.'+encodeURIComponent(recipient),noticeFilter=(room==='__global__'?'':('streamer_id=eq.'+encodeURIComponent(room)+'&'))+'recipient=eq.'+encodeURIComponent(recipient);
  if(b.op==='notifications'){
@@ -288,8 +288,16 @@ async function messageCenterOperation(b:any,who:any,room:any){
  const checkScope=(value:any)=>{
   if(value?.version!==1||value.scope?.spaceId!==expectedScope.spaceId||value.scope?.streamerId!==expectedScope.streamerId||value.scope?.mode!==expectedScope.mode)throw Error('通知空間資料不正確');
  };
+ if(b.op==='messageCenterPreferences'){
+  const settings=b.settings??null;
+  if(settings!==null&&(!settings||typeof settings!=='object'||Array.isArray(settings)||Object.keys(settings).some(k=>k!=='types')||!settings.types||typeof settings.types!=='object'||Array.isArray(settings.types)||Object.entries(settings.types).some(([type,value]:any)=>!Object.hasOwn(NOTICE_TYPES,type)||!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(k=>!['center','badge'].includes(k))||typeof value.center!=='boolean'||typeof value.badge!=='boolean')))throw Error('訊息顯示設定不正確');
+  const result=await api('/rest/v1/rpc/papa_notice_center_preferences_set',{...common,display_settings:settings});checkScope(result);
+  if(!result.settings?.types||typeof result.settings.types!=='object'||Array.isArray(result.settings.types))throw Error('訊息顯示設定未確認');
+  const types=Object.fromEntries(Object.keys(NOTICE_TYPES).map(type=>{const value=result.settings.types[type];if(typeof value?.center!=='boolean'||typeof value?.badge!=='boolean')throw Error('訊息顯示設定未確認');return [type,{center:value.center,badge:value.badge}];}));
+  return {version:1,scope:expectedScope,settings:{types}};
+ }
  const category=b.category;
- if(b.op!=='messageCenterCounts'&&!['system','message','board'].includes(category))throw Error('通知分類不正確');
+ if(!['messageCenterCounts','messageCenterPreferences'].includes(b.op)&&!['system','message','board'].includes(category))throw Error('通知分類不正確');
  if(b.op==='messageCenter'){
   const page=b.page??0,snapshotAt=b.snapshotAt??null,snapshotId=b.snapshotId??null;
   if(!Number.isSafeInteger(page)||page<0||page>100000||snapshotAt!==null&&(typeof snapshotAt!=='string'||snapshotAt.length>40||!/^\d{4}-\d{2}-\d{2}T/.test(snapshotAt)||!Number.isFinite(Date.parse(snapshotAt))))throw Error('通知分頁資料不正確');
@@ -397,7 +405,7 @@ function managerPasswordError(result:any,kind:string){
  if(!result?.ok)throw Error(messages[result?.reason]||'密碼設定未完成，請重新登入後再試');
 }
 
-Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();if(b.op==='releaseInfo')return respond({version:'10.12-WEB.4',messageCenterV2:false,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();if(b.op==='releaseInfo')return respond({version:'10.12-WEB.5',messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));
  if(b.op==='entryLegacyRooms'){
   const rooms=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:'space-001'});
@@ -671,7 +679,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  if(b.op==='pushWorker'){const [config]=await api('/rest/v1/papa_notice_config?id=eq.worker');if(!b.secret||await hash(b.secret)!==await hash(config?.value?.secret||''))throw Error('驗證失敗');await deliverPush();return respond({ok:true});}
  if(CATALOG_OPS.has(b.op))return respond(await catalogOperation(b,who));
  if(['boardRooms','boardDirectory','boardBlocks','boardUnblock','boardBlock','boardList','boardCreate','boardChange'].includes(b.op))return respond(await boardOperation(b,who,await loadCommunicationState(isSuper(who)?null:who?.spaceId||'space-001',b.streamer||'papa')));
- if(['messageCenter','messageCenterCounts','messageCenterRead','noticeSound','notifications','noticeTest','noticeRead','noticePreferences','noticeTarget','pushKey','pushSubscribe','pushUnsubscribe','chatInbox','chatMessages','chatSend','chatRead'].includes(b.op)){
+ if(['messageCenter','messageCenterCounts','messageCenterRead','messageCenterPreferences','noticeSound','notifications','noticeTest','noticeRead','noticePreferences','noticeTarget','pushKey','pushSubscribe','pushUnsubscribe','chatInbox','chatMessages','chatSend','chatRead'].includes(b.op)){
   const comm=await loadCommunicationState(isSuper(who)?null:who?.spaceId||'space-001',b.streamer||'papa');
   if(who?.role==='streamer_admin')requireRoom(who,scopeState(comm,b.streamer||'papa').currentStreamer.id);
   if(['chatInbox','chatMessages','chatSend','chatRead'].includes(b.op))return respond(await chatOperation(b,who,comm));

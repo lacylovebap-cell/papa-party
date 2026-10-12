@@ -12,9 +12,9 @@ import * as board from '../src/board-policy.js';
 
 const code=stripTypeScriptTypes(fs.readFileSync(new URL('../supabase/functions/party-api/index.ts',import.meta.url),'utf8').replace(/^import .*;\r?\n/gm,''));
 const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
-test('deployment version probe is public, performs no database reads and labels unfinished V2/native features honestly',async()=>{
+test('deployment version probe is public, performs no database reads and labels completed center and unfinished transport/native features honestly',async()=>{
  const f=fixture({expired:true}),r=await f.invoke({op:'releaseInfo',token:'invalid'});
- assert.equal(r.status,200);assert.deepEqual(r.body,{version:JSON.parse(fs.readFileSync(new URL('../release.json',import.meta.url),'utf8')).version,messageCenterV2:false,scopedRealtimeV2:false,nativeApps:false});
+ assert.equal(r.status,200);assert.deepEqual(r.body,{version:JSON.parse(fs.readFileSync(new URL('../release.json',import.meta.url),'utf8')).version,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});
  assert.equal(f.calls.length,0);
 });
 function fixture(options={}){
@@ -36,6 +36,7 @@ function fixture(options={}){
   if(path.endsWith('/papa_notice_category_page'))return Response.json({version:1,scope,category:body.category_filter,page:body.page_number,pageSize:50,total:76,snapshotAt:'2026-10-11T00:00:00Z',snapshotId:body.snapshot_id||id(99),hasMore:true,
    rows:[{id:id(1),space_id:'space-001',streamer_id:'papa',streamer_name:'怕怕',recipient,type:body.category_filter==='message'?'message':body.category_filter==='board'?'comment':'completed',level:2,body:'Selected own notice',entity_id:id(2),created_at:'2026-10-10T00:00:00Z',read_at:null,server_secret:'do not return'}],...options.result});
   if(path.endsWith('/papa_notice_category_counts'))return Response.json({version:1,scope,totalsByCategory:{system:76,message:5,board:2},unreadByCategory:{system:1,message:2,board:1},unreadByType:{completed:1,message:2,comment:1},badgeUnreadByCategory:{system:1,message:0,board:1},server_secret:'do not return',...options.result});
+  if(path.endsWith('/papa_notice_center_preferences_set'))return Response.json({version:1,scope,settings:{types:Object.fromEntries(Object.keys(rules.NOTICE_TYPES).map(type=>[type,{center:body.display_settings?.types?.[type]?.center??true,badge:body.display_settings?.types?.[type]?.badge??true}]))},server_secret:'do not return',...options.result});
   if(path.endsWith('/papa_notice_category_read'))return Response.json({version:1,scope,category:body.category_filter,marked:body.notice_ids?.length??8,...options.result});
   throw Error('Unexpected endpoint '+path);
  };
@@ -106,4 +107,14 @@ test('expired, unknown or foreign snapshots return one safe read-restart code, n
  assert.match(r.body.error,/第一頁/);assert.equal(f.rpcs().length,1);assert.equal('notCommitted'in r.body,false);
  const temporary=fixture({error:{code:'P0001',message:'NOTICE_SNAPSHOT_INVALID'},errorStatus:500});
  assert.equal((await temporary.invoke()).body.code,undefined,'a server failure cannot masquerade as a definite stale snapshot');
+});
+
+test('display settings are selected-scope only, bound to actual authority and cannot change delivery/audio/private settings',async()=>{
+ for(const role of ['player','streamer_admin','super_admin']){
+  const f=fixture({role}),settings={types:{message:{center:false,badge:true}}},result=await f.invoke({op:'messageCenterPreferences',settings,scopeMode:role==='super_admin'?'space':'room',recipient:'P2',actor_context:{account_id:id(999)}});
+  assert.equal(result.status,200);assert.deepEqual(result.body.settings.types.message,{center:false,badge:true});assert.doesNotMatch(JSON.stringify(result.body),/server_secret|do not return/);
+  const writes=f.calls.filter(c=>c.path.endsWith('/papa_notice_center_preferences_set'));assert.equal(writes.length,1);assert.deepEqual(writes[0].body.display_settings,settings);assert.equal(writes[0].body.actor_context.account_id,id(10));assert.equal(f.calls.some(c=>c.path.includes('/papa_notice_preferences?')),false);
+ }
+ for(const settings of [{muteAll:true,types:{}},{types:{message:{center:true,badge:true,push:true}}},{types:{unknown:{center:true,badge:true}}},{types:{message:{center:'yes',badge:true}}},[]]){const f=fixture(),r=await f.invoke({op:'messageCenterPreferences',settings});assert.equal(r.status,400);assert.equal(f.calls.some(c=>c.path.endsWith('/papa_notice_center_preferences_set')),false);}
+ const forged=fixture({result:{scope:{spaceId:'foreign',streamerId:'papa',mode:'room'}}});assert.equal((await forged.invoke({op:'messageCenterPreferences'})).status,400);
 });

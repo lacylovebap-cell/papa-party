@@ -1,6 +1,6 @@
-import {TABLES,scopeState,mutate,captureMutationIds,replayMutationIds,timeValue,stamp} from './core.js?v=10.12-WEB.4';
-import {applyRoomImport} from './room-import.js?v=10.12-WEB.4';
-import {scopedOperationalAction,scopedRoomMutationAction} from './state-patch.js?v=10.12-WEB.4';
+import {TABLES,scopeState,mutate,captureMutationIds,replayMutationIds,timeValue,stamp} from './core.js?v=10.12-WEB.5';
+import {applyRoomImport} from './room-import.js?v=10.12-WEB.5';
+import {scopedOperationalAction,scopedRoomMutationAction} from './state-patch.js?v=10.12-WEB.5';
 
 const MAX_DRAFT_ACTIONS=200,MAX_DRAFT_IDS=2000,MAX_DRAFT_BYTES=6*1024*1024;
 const draftObject=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
