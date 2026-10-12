@@ -2,7 +2,7 @@
 export function noticeTargetMatchesRoom(target,{spaceId,roomId,streamerSlug}){
  return !!target&&target.streamerSlug===streamerSlug&&(!target.spaceId||target.spaceId===spaceId)&&(!target.streamerId||target.streamerId===roomId);
 }
-export function planNotificationLanding(target,{kind,queue=[],ledger=[],wishes=[],playerId,management=false,roomId,currentPool,ledgerPool=()=>currentPool,timeValue=Date.parse,historyOrder='newest',pageSize=10}){
+export function planNotificationLanding(target,{kind,queue=[],ledger=[],wishes=[],playerId,management=false,roomId,currentPool,ledgerPool=()=>currentPool,timeValue=Date.parse,historyOrder='newest',currentOrder='newest',pageSize=10}){
  const visible=row=>(!row.streamer_id||row.streamer_id===roomId)&&(management||!!playerId&&row.playerId===playerId);
  if(kind==='queue'){
   const rows=queue.filter(visible),row=rows.find(item=>item.id===target.entityId);
@@ -10,6 +10,7 @@ export function planNotificationLanding(target,{kind,queue=[],ledger=[],wishes=[
   const history=!['waiting','pending'].includes(row.status);
   const shown=rows.filter(item=>(!['waiting','pending'].includes(item.status))===history);
   if(history)shown.sort((a,b)=>(historyOrder==='oldest'?1:-1)*(timeValue(a.effective_at||a.completedAt||a.at)-timeValue(b.effective_at||b.completedAt||b.at)));
+  else if(!management)shown.sort((a,b)=>(currentOrder==='oldest'?1:-1)*(timeValue(a.at)-timeValue(b.at)));
   return {kind,found:true,id:row.id,history,pageKey:history?'queue-history':'queue',page:Math.floor(shown.indexOf(row)/pageSize)+1};
  }
  if(kind==='credit'){

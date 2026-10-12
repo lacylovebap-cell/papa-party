@@ -70,6 +70,7 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
 .compact-sort{display:inline-flex!important;align-items:center;justify-content:flex-end;gap:2px;white-space:nowrap;margin:0!important}
 .compact-sort button{padding:3px 5px!important;border:0!important;background:transparent!important;box-shadow:none!important;font-size:11px!important;min-height:28px;color:var(--muted)}
 .compact-sort button.active{color:var(--home-accent,#b997dc)!important;text-decoration:underline;text-underline-offset:4px;font-weight:700}
+.player-record-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:20px}.player-record-heading h3{margin:0;min-width:0}.player-record-heading .compact-sort{margin-left:auto!important}
 .pagination{justify-content:center;align-items:center;gap:6px!important}
 .pagination>label:not(.page-jump):has([data-catalog-size]){flex:1 0 100%;display:flex;justify-content:center;align-items:center;gap:6px;margin:4px 0 0}
 .pagination [data-catalog-size]{width:66px;margin:0;padding:5px;font-size:11px}

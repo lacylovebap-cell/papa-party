@@ -6,13 +6,13 @@ import {requestSourceLabel} from '../src/request-source.js';
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const queueRows=app.split(/\r?\n/).find(line=>line.startsWith('function queueRows('));
 const h=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function render(rows,{manager=false,playerId='mine',songs=[],history=false}={}){
- const original=structuredClone(rows),context=vm.createContext({listSorts:{queueHistory:'newest'},timeValue:value=>Date.parse(value)||0,
+function render(rows,{manager=false,playerId='mine',songs=[],history=false,currentSort='newest',historySort='newest',showSort=true,sortCurrent=!manager}={}){
+ const original=structuredClone(rows),context=vm.createContext({listSorts:{queueCurrent:currentSort,queueHistory:historySort},timeValue:value=>Date.parse(value)||0,
   paginate:rows=>({rows,nav:''}),queueConfirmed:()=>true,queuePrepared:()=>true,queuePreparation:()=> '已準備好',clock:()=>'',
   song:id=>songs.find(song=>song.songId===id),h,requestSourceLabel,selectedQueue:new Set(),session:{playerId},playerName:()=> '我的名字',
   statusName:{completed:'🎤 已完成',cancelled:'已取消'},time:value=>h(value),venuePolicyHistoryVenue:()=>false,venueName:()=>'',venuePolicyConsumedPool:()=>'',
   sortControl:()=>'',button:(label,action,id='',classes='')=>`<button class="${classes}" data-act="${action}" data-id="${h(id)}">${label}</button>`});
- vm.runInContext(queueRows,context);const result=context.queueRows(rows,manager,true,history);assert.deepEqual(rows,original);return result;
+ vm.runInContext(queueRows,context);const result=context.queueRows(rows,manager,true,history,showSort,sortCurrent);assert.deepEqual(rows,original);return result;
 }
 const record={id:'q',playerId:'mine',songId:'s',title:'歷史 <歌名>',artist:'',kind:'live',status:'waiting',at:'2026-10-01T00:00:00Z'};
 
@@ -42,4 +42,19 @@ test('manager records retain checkbox, primary completion and separate expandabl
  assert.match(html,/queue-primary.*完成演唱/s);assert.match(html,/<details class="queue-more"><summary>更多<\/summary><div class="queue-more-content">/);
  for(const action of ['editQueue','stage','recordTime','move'])assert.match(html,new RegExp('data-act="'+action+'"'));
  assert.doesNotMatch(html,/cancelOwn/);
+});
+
+test('player current and history sorts are independent, and current sorting uses request time',()=>{
+ const rows=[{...record,id:'old',title:'較早點歌',at:'2026-10-01T00:00:00Z',effective_at:'2026-10-12T00:00:00Z'},
+  {...record,id:'new',title:'較晚點歌',at:'2026-10-11T00:00:00Z',effective_at:'2026-10-02T00:00:00Z'}];
+ const newest=render(rows,{historySort:'oldest'});assert.ok(newest.indexOf('較晚點歌')<newest.indexOf('較早點歌'));
+ const oldest=render(rows,{currentSort:'oldest',historySort:'newest'});assert.ok(oldest.indexOf('較早點歌')<oldest.indexOf('較晚點歌'));
+ const completed=rows.map(row=>({...row,status:'completed'}));
+ const history=render(completed,{history:true,currentSort:'oldest'});assert.ok(history.indexOf('較早點歌')<history.indexOf('較晚點歌'));
+});
+
+test('manager waiting order stays manual while the selected player profile can sort its current operations',()=>{
+ const rows=[{...record,title:'手動第一首',at:'2026-10-01T00:00:00Z'},{...record,id:'second',title:'手動第二首',at:'2026-10-11T00:00:00Z'}];
+ const manual=render(rows,{manager:true});assert.ok(manual.indexOf('手動第一首')<manual.indexOf('手動第二首'));
+ const profile=render(rows,{manager:true,showSort:false,sortCurrent:true});assert.ok(profile.indexOf('手動第二首')<profile.indexOf('手動第一首'));
 });

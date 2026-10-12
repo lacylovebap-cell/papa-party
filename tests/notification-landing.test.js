@@ -22,6 +22,15 @@ test('queue target chooses the actual current or sorted history page without alt
  assert.deepEqual(planNotificationLanding({...target,entityId:'q1'},{...context,queue:rows}),{kind:'queue',found:true,id:'q1',history:false,pageKey:'queue',page:1});
  assert.deepEqual(rows,before);
 });
+
+test('current notice lands on the page matching the player sort and preserves the manager manual order',()=>{
+ const rows=Array.from({length:25},(_,index)=>({id:'c'+index,playerId:'player1',streamer_id:'room1',status:'waiting',at:new Date(2026,0,index+1).toISOString()}));
+ const notice={...target,entityId:'c0'},before=structuredClone(rows);
+ assert.equal(planNotificationLanding(notice,{...context,queue:rows}).page,3);
+ assert.equal(planNotificationLanding(notice,{...context,queue:rows,currentOrder:'oldest'}).page,1);
+ assert.equal(planNotificationLanding(notice,{...context,queue:rows,management:true,currentOrder:'newest'}).page,1);
+ assert.deepEqual(rows,before);
+});
 test('player target cannot locate another player or room and missing rows use a finite first page',()=>{
  const rows=queues();rows[15].playerId='other';assert.equal(planNotificationLanding(target,{...context,queue:rows}).found,false);
  rows[15].playerId='player1';rows[15].streamer_id='room2';assert.equal(planNotificationLanding(target,{...context,queue:rows,management:true}).found,false);
