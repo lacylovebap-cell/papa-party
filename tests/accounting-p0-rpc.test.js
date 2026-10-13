@@ -16,7 +16,7 @@ test('real atomic RPC, deferred linkage, stale-device replay, rollback and selec
  for(const r of stateEntries(state))await q('insert into papa_v2_entities values($1,$2,$3)',[r.kind,r.id,r.data]);
  await q('update papa_v2_revision set revision=$1',[state.revision]);
  await db.exec('alter table papa_notifications add column space_id text;');
- for(const file of ['202610070001_space_foundation.sql','202610070011_room_operational_commit.sql','202610120002_message_center_categories.sql','202610120007_message_center_preferences.sql','202610120008_accounting_integrity.sql','202610130001_accounting_show_boundary.sql','202610130002_accounting_minimal_linkage.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
+ for(const file of ['202610070001_space_foundation.sql','202610070011_room_operational_commit.sql','202610120002_message_center_categories.sql','202610120007_message_center_preferences.sql','202610120008_accounting_integrity.sql','202610130001_accounting_show_boundary.sql','202610130002_accounting_minimal_linkage.sql','202610130003_legacy_return_reversal.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
  const commit=async(before,after,notices=[])=>{const patch=stateChanges(before,after,{preserveOrder:true});return (await q('select papa_room_operational_commit($1,$2,$3,$4,$5,$6) rev',[before.revision,patch.changes,patch.removed,ctx,notices,'papa']))[0].rev;};
  const run=async(type,data,time=at)=>{const next=mutate(state,{streamer:'papa',type,data},actor,time);next.revision=await commit(state,next);state=next;};
  const summary=async(day='2026-10-12')=>(await q('select papa_accounting_summary($1,$2,$3) value',['space-001','papa',day]))[0].value;
@@ -124,6 +124,62 @@ test('real atomic RPC, deferred linkage, stale-device replay, rollback and selec
   await audit('queue','unknown-source','allocate',null,{playerId:person,allocation_id:'unknown-group'},ambiguous);
   await audit('ledger','ambiguous-deleted','ledger',oldReceipt,null,'2026-10-12T13:10:00Z');
   assert.equal((await read()).received,6,'ambiguous legacy batches must not guess a withdrawn source');
+ });
+ await t.test('Audit-proven orphan returns reverse once without changing real receipts, completed songs or show totals',async()=>{
+  const room='legacy-repair-room',person='repair-player',group='repair-old-group',deleted='repair-deleted-source',correctionAt='2026-10-13T09:00:00Z';
+  await q("insert into papa_space_streamers(streamer_id,space_id) values($1,'space-001')",[room]);
+  const row=async(kind,id,data)=>q("insert into papa_v2_entities(kind,id,data,space_id) values($1,$2,$3,'space-001')",[kind,id,{id,...data,playerId:person,streamer_id:room,at,acceptedAt:at}]);
+  await row('ledger','repair-current-receipt',{amount:2,allocation_id:'repair-current-group'});
+  await row('ledger','repair-extra-two',{amount:2});await row('ledger','repair-real-three',{amount:3,receipt_quantity:3,accounting_kind:'receipt'});
+  await row('queue','repair-canonical',{kind:'live',status:'completed',allocation_id:'repair-current-group',creditCost:1,completedAt:at});
+  for(const id of ['repair-a','repair-b']){
+   await row('queue',id,{kind:'live',status:'stored',allocation_id:group,creditCost:1});
+   await row('ledger','return-'+id,{amount:1,queueId:id,conversion:true,excludeStats:true,allocation_id:group,allocationSettlement:'return',storage_pool:'shengma'});
+   await row('queue','performed-'+id,{kind:'saved',status:'completed',creditCost:1,completedAt:at});
+   await row('ledger','consumed-'+id,{amount:-1,queueId:'performed-'+id,storage_pool:'shengma'});
+  }
+  await row('queue','repair-old-completed',{kind:'live',status:'completed',allocation_id:group,creditCost:1,completedAt:at,performance_duplicate_of:'repair-canonical'});
+  const root={id:deleted,playerId:person,streamer_id:room,amount:0,at};
+  const audit=async(kind,id,action,before,after,created)=>q('insert into papa_events(streamer_id,entity_kind,entity_id,action,before_data,after_data,created_at) values($1,$2,$3,$4,$5,$6,$7)',[room,kind,id,action,before,after,created]);
+  const allocatedAt='2026-10-12T11:30:00Z';
+  await audit('ledger',deleted,'allocate',{...root,amount:3},root,allocatedAt);
+  for(const id of ['repair-a','repair-b']){
+   await audit('queue',id,'allocate',null,{id,playerId:person,streamer_id:room,allocation_id:group,creditCost:1},allocatedAt);
+   const data=(await q("select data from papa_v2_entities where kind='ledger' and id=$1",['return-'+id]))[0].data;
+   await audit('ledger','return-'+id,'queue:store',null,data,'2026-10-12T12:02:00Z');
+  }
+  await audit('ledger',deleted,'ledger',root,null,'2026-10-12T12:26:00Z');
+  const read=async()=>(await q("select papa_accounting_summary('space-001',$1,'2026-10-12') value",[room]))[0].value;
+  let sums=await read();assert.deepEqual([sums.received,sums.stored,sums.sung,sums.saved],[8,5,3,7]);
+  const queueFacts=await q("select id,data from papa_v2_entities where kind='queue' and data->>'streamer_id'=$1 order by id",[room]);
+  const receipt=(await q("select data from papa_v2_entities where kind='ledger' and id='repair-real-three'"))[0].data;
+  const oldAudit=await q('select id,before_data,after_data from papa_events order by id');
+  const changes=[];
+  for(const id of ['repair-a','repair-b']){
+   const sourceId='return-'+id,source=(await q("select data from papa_v2_entities where kind='ledger' and id=$1",[sourceId]))[0].data,reversalId=crypto.randomUUID();
+   changes.push({kind:'ledger',id:sourceId,data:{...source,voided_at:correctionAt,reversal_id:reversalId,void_source_transaction_id:deleted}});
+   changes.push({kind:'ledger',id:reversalId,data:{id:reversalId,playerId:person,streamer_id:room,amount:-1,storage_pool:'shengma',at:correctionAt,accounting_kind:'reversal',conversion:true,excludeStats:true,reversal_of:sourceId,reversal_source_transaction_id:deleted,allocation_id:group,queueId:id}});
+  }
+  const revision=(await q('select revision from papa_v2_revision where id=1'))[0].revision;
+  const send=patch=>q("select papa_room_operational_commit($1,$2,'[]'::jsonb,$3,'[]'::jsonb,$4)",[revision,patch,{role:'super_admin',space_id:'space-001',streamer_id:room,action:'ledger:correctLegacyReturn'},room]);
+  let snap=await snapshot();const wrong=structuredClone(changes);wrong[0].data.void_source_transaction_id='missing-proof';
+  await assert.rejects(send(wrong),/REVERSAL_INVALID/);assert.deepEqual(await snapshot(),snap);
+  const foreign=structuredClone(changes);foreign[1].data.storage_pool='radio';await assert.rejects(send(foreign),/REVERSAL_INVALID/);assert.deepEqual(await snapshot(),snap);
+  const wrongAmount=structuredClone(changes);wrongAmount[1].data.amount=-2;await assert.rejects(send(wrongAmount),/VOID_INVALID|REVERSAL_INVALID/);assert.deepEqual(await snapshot(),snap);
+  await audit('ledger','ambiguous-repair-root','allocate',{...root,amount:3},root,allocatedAt);snap=await snapshot();
+  await assert.rejects(send(changes),/REVERSAL_INVALID/);assert.deepEqual(await snapshot(),snap);
+  await q("delete from papa_events where entity_id='ambiguous-repair-root'");
+  await audit('queue','repair-a','queue:complete',null,{id:'repair-a',playerId:person,streamer_id:room,status:'completed'},'2026-10-12T12:05:00Z');snap=await snapshot();
+  await assert.rejects(send(changes),/REVERSAL_INVALID/);assert.deepEqual(await snapshot(),snap,'an actually performed return cannot be reversed as unperformed');
+  await q("delete from papa_events where entity_id='repair-a' and action='queue:complete'");
+  const noticesBefore=await q('select * from papa_notifications order by id');
+  const outcomes=await Promise.allSettled([send(changes),send(changes)]);assert.equal(outcomes.filter(r=>r.status==='fulfilled').length,1);assert.match(outcomes.find(r=>r.status==='rejected').reason.message,/VERSION_CONFLICT/);
+  sums=await read();assert.deepEqual([sums.received,sums.stored,sums.sung,sums.saved],[8,5,3,5]);
+  assert.deepEqual(await q("select id,data from papa_v2_entities where kind='queue' and data->>'streamer_id'=$1 order by id",[room]),queueFacts);
+  assert.deepEqual((await q("select data from papa_v2_entities where kind='ledger' and id='repair-real-three'"))[0].data,receipt);
+  assert.deepEqual(await q('select * from papa_notifications order by id'),noticesBefore);
+  const retained=await q('select id,before_data,after_data from papa_events where id=any($1) order by id',[oldAudit.map(e=>e.id)]);assert.deepEqual(retained,oldAudit);
+  const returns=await q("select data from papa_v2_entities where kind='ledger' and id in ('return-repair-a','return-repair-b')");assert.equal(returns.length,2);assert.ok(returns.every(r=>r.data.amount===1&&r.data.voided_at&&r.data.reversal_id));
  });
  await t.test('rollover configuration belongs to the Space; other Spaces do not inherit 19:00',async()=>{
   await q("insert into papa_spaces(id,slug,display_name) values('isolated-space','isolated-space','isolated')");
