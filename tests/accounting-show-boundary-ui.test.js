@@ -21,13 +21,12 @@ test('today UI rejects a previous-show aggregate only at Taipei 19:00 without re
  assert.equal(context.currentAccounting().saved,2);
 });
 
-test('home keeps three cards while queue keeps plain text and both use the selected Space summary',()=>{
+test('home and queue share the same centered plain text without lifetime balances',()=>{
  const code=app.split(/\r?\n/).filter(line=>line.startsWith('function statsHtml(')||line.startsWith('function homeAccounting(')).join('\n');
  const ctx=vm.createContext({state:{summary:{rolloverHour:19}},accountingDay,accountingRollover,h:String,blank:()=>'',clock:()=> '2026-10-12T16:00:00Z'});
  vm.runInContext(code,ctx);let html=ctx.homeAccounting({received:5,stored:2,sung:5,saved:379});
- assert.match(html,/<section class="card home-accounting">/);
- assert.equal((html.match(/class="stat"/g)||[]).length,3);
- assert.match(html,/收到新歌<b>5 首<\/b>.*存歌<b>2 首<\/b>.*已唱<b>5 首<\/b>/);
+ assert.match(html,/收到新歌 5 首 ｜ 存歌 2 首 ｜ 已唱 5 首/);
+ assert.doesNotMatch(html,/class="stat"|class="card /);
  const queue=ctx.statsHtml({received:5,stored:2,sung:5,saved:379});
  assert.match(queue,/收到新歌 5 首 ｜ 存歌 2 首 ｜ 已唱 5 首/);assert.doesNotMatch(queue,/class="stat"/);
  assert.ok(!html.includes('379'));assert.ok(html.includes('19:00 換場'));
