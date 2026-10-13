@@ -125,7 +125,7 @@ dialog .dialog-head button{flex:0 0 auto;min-width:34px;min-height:34px}
 .notice-dialog[open]:has(#notice-center-settings){display:flex;flex-direction:column;height:min(800px,calc(100dvh - 24px));max-height:calc(100dvh - 24px);width:min(720px,calc(100vw - 24px));overflow:hidden}.notice-dialog .notice-settings-body:has(>#notice-center-settings){display:flex;min-height:0;flex:1;overflow:hidden;padding:0}#notice-center-settings{display:flex;flex-direction:column;min-height:0;flex:1;min-width:0}#notice-center-settings>.notice-settings-fields{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px 16px}#notice-center-settings>.notice-settings-footer{flex-shrink:0;padding:10px 16px;border-top:1px solid var(--line)}#notice-center-settings .notice-settings-footer>#notice-error:empty{display:none}
 
 .accounting-line{text-align:center;margin:10px 0;line-height:1.8;font-weight:600;overflow-wrap:anywhere}.home-accounting{text-align:center;align-self:center;padding:12px 0}.home-accounting small{display:block;font-size:12px;line-height:1.7}
-.home-bottom-pair .home-accounting,.custom-home>.home-module-recap{grid-column:1/-1}
+.home-bottom-pair .home-accounting{grid-column:auto}
 
 .home-module-wishes>.card p,.home-bottom-pair>.card:has([data-act="wish"]) p{margin-top:28px;font-size:14px;line-height:1.8}
 @media(max-width:420px){.home-module-wishes>.card p,.home-bottom-pair>.card:has([data-act="wish"]) p{font-size:13px}}
@@ -135,3 +135,38 @@ dialog .dialog-head button{flex:0 0 auto;min-width:34px;min-height:34px}
 /* One always-visible message entry reuses the same scoped badge/controller. */
 .header-notice{flex:none;min-width:0}.notice-bell{position:relative;width:38px;height:38px;padding:6px;font-size:18px;display:inline-flex;align-items:center;justify-content:center}.notice-bell .notice-count{position:absolute;top:-5px;right:-5px;font-size:10px;line-height:16px;min-width:16px;padding:0 3px}
 @media(max-width:650px){.header-inner{grid-template-columns:92px minmax(0,1fr) auto auto!important}.header-notice{grid-column:3;grid-row:1}.header-menu{grid-column:4!important}.notice-bell{width:34px;height:34px;font-size:17px}}
+
+/* Shared list boundary: sorting sits immediately above the first row, right. */
+.list-sort-rail{display:flex;justify-content:flex-end;align-items:center;width:100%;min-height:32px;margin:8px 0 2px;padding:0 4px}
+.list-sort-rail .compact-sort{margin-left:auto!important}
+.catalog-family .catalog-variant-row{display:grid!important;grid-template-columns:22px minmax(0,1fr);align-items:start;gap:6px 10px;padding:8px 0!important}
+.catalog-variant-row>.catalog-check{grid-column:1;margin:4px 0}
+.catalog-variant-row>.info{grid-column:2;min-width:0}
+.catalog-family .catalog-variant-row>.relation-actions{grid-column:1/-1;display:flex!important;flex-direction:row!important;justify-content:flex-start!important;flex-wrap:wrap!important;max-width:none!important;width:100%;gap:5px!important}
+.catalog-variant-row .relation-actions button{padding:5px 7px!important;font-size:11px!important;min-height:30px}
+.header-tools{display:flex;align-items:center;gap:8px;min-width:0;flex:1;justify-content:flex-end}
+.header-tools>.header-streamer{flex:none}.header-tools>.header-menu{min-width:0}
+.header-tools .header-notice{grid-column:auto;grid-row:auto}
+.login-status:empty{display:none}
+.home-bottom-pair{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center}
+.home-accounting{padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:0}
+.home-accounting-values{display:grid;gap:7px;width:min(100%,180px)}
+.home-accounting-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--panel,#211a2c);border:1px solid var(--line);border-radius:10px;padding:9px 12px;text-align:center;white-space:nowrap;font-size:13px;line-height:1.4}
+.home-accounting-item strong{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}.home-accounting-item strong span{font-size:13px;font-weight:500}
+.home-accounting>small{font-size:12px;line-height:1.7;text-align:center}
+.home-bottom-pair .home-module{min-width:0}.home-bottom-pair .home-module-wishes>.card{height:auto;text-align:center}
+.allocation-launch-row{margin:20px 0 4px}.allocation-launch{background:#302e35!important;color:#e6e3e9!important;border-color:#625d6d!important;font-size:15px!important;padding:10px 18px!important;min-height:42px}
+.admin-more-tabs>summary{position:relative}.menu-pending-dot{display:inline-block;width:7px;height:7px;margin-left:4px;background:#ed718e;border-radius:50%;vertical-align:top}.menu-pending-dot[hidden]{display:none!important}
+.player-small-stats{gap:10px!important;justify-content:center!important;margin:18px 0!important}
+.player-small-stats .stat{flex:0 1 auto!important;min-width:0;padding:9px 12px!important;border:1px solid var(--line);border-radius:10px;background:var(--panel,#211a2c)!important;font-size:13px!important;gap:7px}
+.player-small-stats .stat b{font-size:16px!important;font-weight:650}
+@media(max-width:650px){
+ .header-inner{grid-template-columns:92px minmax(0,1fr)!important;align-items:center!important}
+ .header-tools{grid-column:2!important;grid-row:1;gap:5px}.header-tools>.header-menu{grid-column:auto!important;flex:none;margin-left:0}.header-tools>.header-notice{flex:none}
+ .header-tools>.header-streamer{flex:1;justify-content:flex-end}.header-streamer>span{display:none}.header-streamer select{width:100%;max-width:110px;margin:0;padding:7px 4px;font-size:12px}
+ .login-status:not(:empty){grid-column:1/-1;grid-row:2;justify-self:end;max-width:100%}
+ .home-accounting-item{padding:8px 9px;font-size:12px}.home-accounting-item strong{font-size:17px}
+}
+@media(max-width:380px){.home-accounting{padding:8px 3px}.home-accounting-item{padding:7px 6px;gap:5px}.home-accounting>small{font-size:11px}.player-small-stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important}.player-small-stats .stat{justify-content:center;padding:8px!important}}
+
+.dialog-actions>.allocation-launch-row{margin:0 auto 0 0;display:flex;align-items:center;gap:6px}

@@ -1,4 +1,21 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import {stripTypeScriptTypes} from 'node:module';import {execFileSync} from 'node:child_process';
+test('history page totals stay scoped, expire without polling, reject malformed counts and require a manager',async()=>{
+ execFileSync(process.execPath,['build-edge.mjs']);let now=0,handler;const calls=[];
+ class ClockDate extends Date{static now(){return now;}}
+ const source=fs.readFileSync('deploy-function.txt','utf8').replace(/^import webpush .*;\r?\n/m,'const webpush={};');
+ const context=vm.createContext({URL,crypto,structuredClone,TextEncoder,console,Date:ClockDate,Response,Deno:{env:{get:()=>''},serve:h=>handler=h}});
+ vm.runInContext(stripTypeScriptTypes(source),context);
+ context.countRpc=async(path,body)=>{calls.push({path,body});return 520;};
+ vm.runInContext('api=countRpc;',context);
+ const read=(room='papa',global=false)=>vm.runInContext(`eventTotal({spaceId:'space-001',id:'${room}'},${global})`,context);
+ assert.equal(await read(),520);assert.equal(await read(),520);assert.equal(calls.length,1);
+ await read('other');await read('papa',true);assert.equal(calls.length,3);
+ now=60001;await read();assert.equal(calls.length,4);
+ assert.ok(calls.every(c=>c.path==='/rest/v1/rpc/papa_event_total'));
+ context.countRpc=async()=>null;vm.runInContext('api=countRpc;',context);await assert.rejects(read('invalid'),/頁數尚未確認/);
+ vm.runInContext("actor=async()=>({role:'player',playerId:'P1',spaceId:'space-001'});catalogRoom=async()=>{throw Error('Unauthorized lookup');};",context);
+ const r=await handler({method:'POST',json:async()=>({op:'events',streamer:'papa',token:'fixture'})});assert.equal(r.status,400);assert.match((await r.json()).error,/登入管理/);
+});
 test('complete edge bundle compiles, preserves URL validators and isolates chat before database access',async()=>{
  execFileSync(process.execPath,['build-edge.mjs'],{cwd:new URL('../',import.meta.url)});
  const source=fs.readFileSync(new URL('../deploy-function.txt',import.meta.url),'utf8').replace(/^import webpush .*;\r?\n/m,'const webpush={};');

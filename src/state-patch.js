@@ -1,4 +1,4 @@
-import {TABLES} from './core.js?v=10.14-WEB.1';
+import {TABLES} from './core.js?v=10.14-WEB.2';
 const stateRecordId=(kind,data)=>String(kind==='players'?data.playerId:kind==='songs'?data.songId:data.id);
 const operational=new Set(['request','queue','queueBulkDelete','cancelOwn','replaceOwn','onBehalf','streamerDraw','ledger','allocate','allocateStored','wish','wishAdmin']);
 export function scopedOperationalAction(action){return !!action&&!(action.type==='wishAdmin'&&action.data?.addSong)&&(operational.has(action.type)||action.type==='recordTime'&&['queue','ledger','wishes'].includes(action.data?.table));}

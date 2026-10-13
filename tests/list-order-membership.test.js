@@ -226,3 +226,15 @@ test('018 retains the selective lyric/source GIN search and evaluates grouped re
  const response=await f.songs({room:'papa',space:'space-001',query:'uniqueindexneedle',limit:10});
  assert.deepEqual(response.songIds,['index-fixture-1234']);safe(response);
 });
+
+
+test('six category projections link public, relation and shared searches without changing IDs, links or balances',async t=>{
+ const f=await fixture(t);const before=await f.stable();await f.db.exec(migration('202610140004_catalog_version_categories.sql'));assert.deepEqual(await f.stable(),before);
+ for(const [kind,label,expected] of [['原唱','', 'original'],['original','原唱','original'],['cover','翻唱','cover'],['remix','DJ版','dj'],['cover','LIVE','live'],['remix','混音名稱','remix'],['未知','', 'other'],['duet','合唱版','other']])assert.equal(await f.rpc('papa_catalog_version_category',[kind,label]),expected);
+ const dj=await f.search({kind:'dj'});assert.ok(dj.rows.length>0);assert.ok(dj.rows.every(x=>x.versionLabel==='DJ版'));
+ const family=await f.familyPage({kind:'dj'});assert.ok(family.rows.length>0);
+ const pub=await f.publicPage({kind:'dj'});assert.ok(pub.rows.length>0);assert.equal(JSON.stringify(pub).includes('private lyric body'),false);
+ assert.deepEqual(await f.stable(),before);
+ assert.equal(typeof await f.rpc('papa_event_total',['papa',false]),'number');
+ assert.equal((await f.q("select has_function_privilege('anon','papa_event_total(text,boolean)','execute') allowed"))[0].allowed,false);
+});
