@@ -24,7 +24,7 @@ const noticeCallback=noticeLine.slice(noticeLine.indexOf('onUpdate:')+'onUpdate:
 const deferred=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};};
 const tick=()=>new Promise(setImmediate);
 function harness(){
- const calls=[],renders=[],adoptions=[],storage=[],timers=new Map(),notices=[],chats=[];
+ const calls=[],renders=[],adoptions=[],storage=[],timers=new Map(),notices=[],chats=[],achievementReads=[];
  const ui={dialogOpen:false,editing:false,form:{query:'愛情',note:'尚未送出',selected:['song-1']}};let timerId=0;
  let ctx;
  ctx=vm.createContext({supportsOperationReceipt,sendReceiptedOperation,crypto,AbortSignal,URL,JSON,Date,structuredClone,queueMicrotask,webApiFailure,
@@ -39,13 +39,13 @@ function harness(){
   get:()=>null,actor:()=>({role:'player'}),clock:()=>new Date(),publicView:()=>({revision:10}),timeValue:value=>Date.parse(value),
   render:()=>{renders.push(ctx.state.revision);ui.form.query='';ui.form.note='';ui.form.selected=[];},invalidateCatalogTabs(){},
   notifications:{localChange(){},refresh:async()=>{notices.push('refresh');}},
-  chat:{refresh:async()=>{chats.push('refresh');}},
+  chat:{refresh:async()=>{chats.push('refresh');}},achievementPanel:{load:async force=>achievementReads.push(force)},
   fetch:(_url,options)=>{const request=deferred();calls.push({body:JSON.parse(options.body),...request});return request.promise;}
  });
  vm.runInContext(['api','syncReadIdentity','syncCanRender','updateLiveSyncStatus','readLatestState','refresh','dispatch'].map(declaration).join('\n')+'\n'+lines.slice(syncDeclarationStart,syncEnd).join('\n')+'\nglobalThis.appSync=syncRecovery;globalThis.noticeCallback='+noticeCallback+';',ctx);
  const run=code=>vm.runInContext(code,ctx);
  const respond=(index,data,status=200)=>calls[index].resolve({status,ok:status>=200&&status<300,json:async()=>data});
- return {ctx,calls,renders,adoptions,storage,timers,notices,chats,ui,run,respond,sync:ctx.appSync,
+ return {ctx,calls,renders,adoptions,storage,timers,notices,chats,achievementReads,ui,run,respond,sync:ctx.appSync,
   refresh:force=>run('refresh('+Boolean(force)+')'),dispatch:()=>run("dispatch('request',{songId:'song-1',kind:'saved'})")};
 }
 
@@ -120,7 +120,7 @@ test('an uncertain transport write failure never schedules a mutation replay or 
 
 test('fresh notice routing reads only the affected business area and still updates state while a dialog is open',async()=>{
  const h=harness();h.ui.dialogOpen=true;h.ui.editing=true;
- h.run("noticeCallback([{type:'achievement'},{type:'comment'},{type:'announcement'},{type:'system'}])");await tick();assert.equal(h.calls.length,0);assert.equal(h.chats.length,0);
+ h.run("noticeCallback([{type:'achievement'},{type:'comment'},{type:'announcement'},{type:'system'}])");await tick();assert.equal(h.calls.length,0);assert.equal(h.chats.length,0);assert.deepEqual(h.achievementReads,[true]);
  h.run("noticeCallback([{type:'message'}])");await tick();assert.equal(h.chats.length,1);assert.equal(h.calls.length,0,'private messages do not fetch the whole business view');
  const original=JSON.stringify(h.ui.form);h.run("noticeCallback([{type:'ready'},{type:'completed'},{type:'credit'}])");await tick();assert.equal(h.calls.length,1);assert.equal(h.calls[0].body.op,'read');assert.equal(h.chats.length,1);
  h.respond(0,{state:{revision:11,queue:[{id:'fresh-queue'}]},signatures:{queue:'fresh-queue-signature'}});await tick();assert.equal(h.ctx.state.revision,11);assert.equal(h.ctx.state.queue[0].id,'fresh-queue');assert.equal(JSON.stringify(h.ui.form),original);assert.equal(h.renders.length,0);assert.equal(h.sync.snapshot().renderPending,true);

@@ -35,7 +35,7 @@ function harness(){
   button:(label,action)=>'<button data-act="'+action+'">'+label+'</button>',header(){},applyHomeTheme(){},prepareNoticeLanding:()=>null,renderNoticeLanding(){},
   nativePlayerView:{open:false},playerArchiveView:{open:false},
   renderHome:()=>view('home'),renderAdmin:()=>view('admin'),renderCenter:()=>view('center'),renderBook:()=>view('book'),renderGallery:()=>view('gallery'),renderCommonBook:()=>view('common'),
-  loadVisibleFavoriteFlags(){},loadFavorites(){},loadListeningOverview(){},loadPlayerManagement(){},
+  loadVisibleFavoriteFlags(){},loadFavorites(){},loadListeningOverview(){},achievementPanel:{load:async()=>{}},activityPage:{load:async()=>{}},loadPlayerManagement(){},
   managerSessionExpired:response=>response.status===401,discardManagerSession(){},acceptSessionIdentity(){},put(){},get:()=>null,
   publicView:source=>({revision:source.revision,songs:[{songId:'local'}]}),actor:()=>({role:'manager'}),clock:()=>new Date(),timeValue:value=>Date.parse(value),
   fetch:(_url,options)=>{const request=deferred();calls.push({body:JSON.parse(options.body),...request});return request.promise;}

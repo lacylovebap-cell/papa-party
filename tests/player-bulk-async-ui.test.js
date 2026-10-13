@@ -46,7 +46,7 @@ function ui(){
 test('favorite batch latches before dispatch and cannot retry an uncertain commit in the same form',async()=>{
  const u=ui(),write=deferred();u.setWrite(()=>write.promise);const form=await u.favorite(),pending=form.onsubmit(event(form));
  assert.equal(u.calls.filter(body=>body.op==='requestsBatch').length,1);
- await form.onsubmit(event(form));assert.match(form.error.textContent,/已送出|待播/);
+ await form.onsubmit(event(form));assert.equal(form.submit.disabled,true);assert.equal(u.calls.filter(body=>body.op==='requestsBatch').length,1);
  write.reject(Error('Network interrupted'));await pending;
  assert.match(form.error.textContent,/結果不明.*勿重複送出.*關閉並重新開啟/);assert.equal(u.closed,0);assert.equal(u.refreshes,0);
  await form.onsubmit(event(form));assert.equal(u.calls.filter(body=>body.op==='requestsBatch').length,1);

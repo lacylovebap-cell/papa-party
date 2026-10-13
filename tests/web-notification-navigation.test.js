@@ -41,7 +41,7 @@ function harness(overrides={}){
   requestAnimationFrame:callback=>effects.frames.push(callback),modal:(...args)=>effects.modals.push(args),playerName:id=>'player '+id,venueName:pool=>pool,time:value=>String(value??''),
   clock:()=> '2026-10-12T00:00:00Z',song:id=>context.state.songs.find(row=>row.songId===id),me:()=>context.state.players.find(row=>row.playerId===context.session?.playerId),card:(_title,body)=>'<section>'+body+'</section>',blank:()=>'<p>沒有資料</p>',selectedQueue:new Set(),
   chat:{open:async()=>{effects.chat++;}},board:{open:async()=>{effects.board++;}},
-  applyHomeTheme(){},header(){},loadVisibleFavoriteFlags(){},loadFavorites(){},loadListeningOverview(){},loadPlayerManagement(){},
+  applyHomeTheme(){},header(){},loadVisibleFavoriteFlags(){},loadFavorites(){},loadListeningOverview(){},achievementPanel:{load:async()=>{}},activityPage:{load:async()=>{}},loadPlayerManagement(){},
   ...Object.fromEntries(['Admin','Center','Home','CommonBook','Book','Gallery'].map(view=>['render'+view,function(){effects.banners=[];effects.views.push({view,route:context.route,tab:context.tab,subtab:context.subtab});}])),
   ...overrides
  });

@@ -64,7 +64,7 @@ function edge(source=fixture(),{grantError}={}){
   return {revision:server.revision,rows,extraQuotas:structuredClone(caps),extraQuotaRights:rights};
  }
  context.mockApi=async(path,body,method)=>{
-  if(path.includes('papa_accounting_summary'))return {day:body.requested_day,timezone:'Asia/Taipei',scope:{spaceId:body.requested_space,roomId:body.requested_room},received:0,sung:0,saved:0,reserved:0,available:0,revision:7};
+  if(path.includes('papa_accounting_summary'))return {day:body.requested_day||'2026-10-13',timezone:'Asia/Taipei',rolloverHour:19,stored:0,scope:{spaceId:body.requested_space,roomId:body.requested_room},received:0,sung:0,saved:0,reserved:0,available:0,revision:7};
   calls.push({path,body:plain(body),method});
   if(path.endsWith('/papa_verified_session_actor')){
    const actor=sessions.get(body.session_hash),room=body.requested_room&&server.streamers.find(r=>r.id===body.requested_room||r.slug===body.requested_room);
@@ -77,6 +77,7 @@ function edge(source=fixture(),{grantError}={}){
   if(path.endsWith('/papa_president_full_backup'))return {...snapshot(false,null),architecture:{formatVersion:1}};
   if(path.endsWith('/papa_v2_snapshot'))return snapshot(false,null);
   if(path.endsWith('/papa_v2_quota_snapshot')||path.endsWith('/papa_v2_read_snapshot'))throw Error('scoped quota read fell back to a legacy snapshot');
+  if(path.endsWith('/papa_catalog_song_metadata_conditional'))return {spaceId:'space-001',roomId:body.room_id,signature:'a'.repeat(64),unchanged:false,rows:[]};
   if(path.endsWith('/papa_catalog_song_metadata_in_space'))return [];
   if(path.endsWith('/papa_manage_player_extra_quota')){
    if(grantError)throw Error(grantError);
@@ -125,7 +126,7 @@ test('one quota-aware snapshot binds player reads to their own identity and incl
  assert.equal(result.data.state.players[0].quotaRights.some(right=>right.extra_quota===99),false,'identical player ID never joins rights from another Space');
  assert.equal('extraQuotas' in result.data.state,false,'other privileged participant caps only support server accounting');
  assert.equal('extraQuotaRights' in result.data.state,false,'private allowance metadata is exposed only through the authenticated player projection');
- assert.deepEqual(rpc(h,'papa_catalog_song_metadata_in_space').map(call=>call.body),[{room_id:'papa'}]);assert.equal(rpc(h,'papa_v2_snapshot').length,0);h.checkSource();
+ assert.deepEqual(rpc(h,'papa_catalog_song_metadata_conditional').map(call=>call.body),[{room_id:'papa',known_signature:null}]);assert.equal(rpc(h,'papa_v2_snapshot').length,0);h.checkSource();
  const manager=edge();await manager.request({op:'read',streamer:'papa',profilePlayerId:'P2'},tokens.manager);
  assert.equal(rpc(manager,'papa_v2_scoped_read_snapshot_with_quota')[0].body.quota_player,'P2');
  const guest=edge();await guest.request({op:'read',streamer:'papa',profilePlayerId:'P2'},'');

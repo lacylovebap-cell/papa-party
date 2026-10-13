@@ -16,7 +16,11 @@ test('receipt and existing accounting commit are atomic, replay-safe, scoped and
  for(const r of stateEntries(state))await q('insert into papa_v2_entities values($1,$2,$3)',[r.kind,r.id,r.data]);
  await q('update papa_v2_revision set revision=$1',[state.revision]);await db.exec('alter table papa_notifications add column space_id text;');
  for(const f of ['202610070001_space_foundation.sql','202610070011_room_operational_commit.sql','202610120002_message_center_categories.sql','202610120007_message_center_preferences.sql','202610120008_accounting_integrity.sql','202610130001_accounting_show_boundary.sql','202610130002_accounting_minimal_linkage.sql','202610130003_legacy_return_reversal.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+f,'utf8'));
- const snapshot=async()=>({rows:await q('select kind,id,data from papa_v2_entities order by kind,id'),events:await q('select id from papa_events order by id'),revision:await q('select revision from papa_v2_revision'),receipts:await q('select * from papa_operation_receipts order by created_at')});
+ await db.exec(fs.readFileSync('supabase/migrations/202610070004_audit_actor_snapshots.sql','utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/202609240002_failed_request_event.sql','utf8'));
+ const profiles=fs.readFileSync('supabase/migrations/202610070013_space_player_profiles.sql','utf8');await db.exec(profiles.slice(0,profiles.indexOf('-- Directory projection'))+'commit;');
+ await db.exec(fs.readFileSync('supabase/migrations/202610140001_achievements.sql','utf8'));
+ const snapshot=async()=>({rows:await q('select kind,id,data from papa_v2_entities order by kind,id'),events:await q('select id from papa_events order by id'),revision:await q('select revision from papa_v2_revision'),receipts:await q('select * from papa_operation_receipts order by created_at'),awards:await q('select * from papa_achievement_awards order by code,period'),draws:await q('select * from papa_achievement_draws order by queue_id'),requestDraws:await q('select * from papa_achievement_request_draws order by queue_id')});
  const original=await q("select pg_get_functiondef('papa_room_operational_commit(bigint,jsonb,jsonb,jsonb,jsonb,text)'::regprocedure) definition");
  const rowsBefore=await q('select kind,id,data from papa_v2_entities order by kind,id');
  await db.exec(fs.readFileSync('supabase/migrations/202610130005_operation_receipts.sql','utf8'));
@@ -49,6 +53,7 @@ test('receipt and existing accounting commit are atomic, replay-safe, scoped and
  }
  const summary=(await q("select papa_accounting_summary('space-001','papa','2026-10-13') result"))[0].result;
  assert.equal(summary.received,3);assert.equal(summary.stored,2);assert.equal(summary.sung,1);
+ assert.equal((await q('select count(*)::int n from papa_achievement_draws'))[0].n,1,'only the real completion, never retries or archive, draws');
  for(const role of ['anon','authenticated','service_role']){
   await db.exec('set role '+role);await assert.rejects(q('select * from papa_operation_receipts'),/permission denied/);
   if(role!=='service_role')await assert.rejects(lookup(op),/permission denied/);

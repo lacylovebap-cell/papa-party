@@ -43,7 +43,10 @@ input,textarea,select{background:#100e15;color:#eeeaf3;border-color:#3a3145}inpu
 
 /* Per-streamer themes keep dark surfaces and readable text for every accent. */
 :root[data-home-theme]{--blue:var(--home-accent);--line:var(--home-line);background:var(--home-background)}
-[data-home-theme] body{background:radial-gradient(ellipse at 75% 0%,var(--home-glow),transparent 45%),var(--home-background)}
+[data-home-theme] body{background:radial-gradient(ellipse at 75% 0%,var(--home-glow),transparent 45%),var(--home-background);color:var(--home-text)}
+[data-home-theme] .card,[data-home-theme] .medal-row{color:var(--home-panelText)}
+[data-home-theme] button.primary{color:var(--home-buttonText)}
+[data-home-theme] .hero-placeholder{border-color:var(--home-secondary)}
 [data-home-theme] header{background:var(--home-background);border-color:var(--home-line)}
 [data-home-theme] .card,[data-home-theme] .crown,[data-home-theme] dialog{background:var(--home-panel);border-color:var(--home-line)}
 [data-home-theme] button.primary,[data-home-theme] button.active{background:var(--home-button);border-color:var(--home-accent);color:#fff}
@@ -127,6 +130,8 @@ dialog .dialog-head button{flex:0 0 auto;min-width:34px;min-height:34px}
 .home-module-wishes>.card p,.home-bottom-pair>.card:has([data-act="wish"]) p{margin-top:28px;font-size:14px;line-height:1.8}
 @media(max-width:420px){.home-module-wishes>.card p,.home-bottom-pair>.card:has([data-act="wish"]) p{font-size:13px}}
 
+.medal-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}.medal-row{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.medal-row>div{display:flex;align-items:center;justify-content:space-between;gap:10px}.medal-row strong{font-size:16px}.medal-row p{font-size:14px;line-height:1.7;margin:10px 0}.medal-row small{display:block;line-height:1.7}.medal-row label{margin-top:12px;display:grid;gap:6px}.medal-row select{width:100%}
+.photo-media-button{display:block;width:100%;padding:0;border:0;background:transparent;box-shadow:none}.photo video,.card-full-media{display:block;width:100%;max-height:70vh;object-fit:contain}.photo video{max-height:380px}.photo small{display:block;overflow-wrap:anywhere}
 /* One always-visible message entry reuses the same scoped badge/controller. */
 .header-notice{flex:none;min-width:0}.notice-bell{position:relative;width:38px;height:38px;padding:6px;font-size:18px;display:inline-flex;align-items:center;justify-content:center}.notice-bell .notice-count{position:absolute;top:-5px;right:-5px;font-size:10px;line-height:16px;min-width:16px;padding:0 3px}
 @media(max-width:650px){.header-inner{grid-template-columns:92px minmax(0,1fr) auto auto!important}.header-notice{grid-column:3;grid-row:1}.header-menu{grid-column:4!important}.notice-bell{width:34px;height:34px;font-size:17px}}

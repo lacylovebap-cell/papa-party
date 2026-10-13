@@ -52,7 +52,7 @@ function edge({actors={},bound,bindError,expired=[]}={}){
   return {revision:server.revision,rows,extraQuotas:structuredClone(server.extraQuotas),extraQuotaRights:{}};
  }
  context.mockApi=async(path,body)=>{
-  if(path.includes('papa_accounting_summary'))return {day:body.requested_day,timezone:'Asia/Taipei',scope:{spaceId:body.requested_space,roomId:body.requested_room},received:0,sung:0,saved:0,reserved:0,available:0,revision:7};
+  if(path.includes('papa_accounting_summary'))return {day:body.requested_day||'2026-10-13',timezone:'Asia/Taipei',rolloverHour:19,stored:0,scope:{spaceId:body.requested_space,roomId:body.requested_room},received:0,sung:0,saved:0,reserved:0,available:0,revision:7};
   calls.push({path,body:plain(body)});
   if(path.endsWith('/papa_verified_session_actor')){
    const session=sessions.get(body.session_hash),actor=session?.actor;
@@ -73,6 +73,7 @@ function edge({actors={},bound,bindError,expired=[]}={}){
    {id:'space-001',slug:'original',name:'Original',streamerCount:2,streamerId:'papa',streamerSlug:'papa',streamerName:'怕怕'},
    {id:'space-002',slug:'native',name:'Native',streamerCount:1,streamerId:'native',streamerSlug:'native',streamerName:'Native'}]};
   if(path.endsWith('/papa_v2_scoped_read_snapshot_with_quota')||path.endsWith('/papa_v2_scoped_read_snapshot_in_space')||path.endsWith('/papa_v2_room_write_snapshot_with_quota'))return snapshot();
+  if(path.endsWith('/papa_catalog_song_metadata_conditional'))return {spaceId:'space-001',roomId:body.room_id,signature:'a'.repeat(64),unchanged:false,rows:[]};
   if(path.endsWith('/papa_catalog_song_metadata_in_space'))return [];
   if(path.endsWith('/papa_president_full_backup'))return {...snapshot(false),architecture:{formatVersion:1}};
   if(path.endsWith('/papa_manage_player_extra_quota')){

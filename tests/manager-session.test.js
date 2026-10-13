@@ -1,3 +1,4 @@
+import {supportsOperationReceipt,sendReceiptedOperation} from '../src/operation-recovery.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -13,7 +14,7 @@ const verifiedAccount='00000000-0000-4000-8000-000000000001';
 function client({legacy=true,response={error:'登入已到期，請重新登入'},status=400,networkError=false}={}){
  const saved={'papa-v2-draft-papa':'private','papa-v2-draft-other':'private','papa-v2-player':'keep'};
  const storage={...saved};Object.defineProperty(storage,'removeItem',{enumerable:false,value:key=>delete storage[key]});
- const ctx=vm.createContext({URL,Date,JSON,Error,queueMicrotask,createWebSyncRecovery,webApiFailure,createWebDeviceLogin:()=>null,localStorage:storage,location:{href:'https://party.example.test/?streamer=papa&spaceId=space-001#admin',hash:'admin'},navigator:{onLine:true},document:{hidden:false,activeElement:null,querySelector:()=>null,querySelectorAll:()=>[{close(){}}]},fetch:async()=>{if(networkError)throw Error('network offline');return {ok:status===200,status,json:async()=>response};}});
+ const ctx=vm.createContext({supportsOperationReceipt,sendReceiptedOperation,crypto,AbortSignal,URL,Date,JSON,Error,queueMicrotask,createWebSyncRecovery,webApiFailure,createWebDeviceLogin:()=>null,localStorage:storage,location:{href:'https://party.example.test/?streamer=papa&spaceId=space-001#admin',hash:'admin'},navigator:{onLine:true},document:{hidden:false,activeElement:null,querySelector:()=>null,querySelectorAll:()=>[{close(){}}]},fetch:async()=>{if(networkError)throw Error('network offline');return {ok:status===200,status,json:async()=>response};}});
  vm.runInContext(`
   var deviceLogin=null,admin={token:'admin:old',legacy:${legacy},accessUntil:0,refreshToken:'old-refresh'},session={token:'player:keep'},draft={state:{private:true}},full={private:true},signatures={private:'old'},selectedPlayer='P1',state={streamers:[{id:'papa',slug:'papa'}],currentStreamer:{id:'papa'},players:[{password:'private'}]},route='admin',demo=false,offset=0,streamerSlug='papa',API='test',PUBLISHABLE_KEY='public',writes={};
   var node={innerHTML:''},entryPending=false,busy=false,lastFullRefreshAt=0;

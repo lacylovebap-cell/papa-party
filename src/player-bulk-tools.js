@@ -1,5 +1,5 @@
-import {mutate} from './core.js?v=10.13-WEB.3';
-import {REQUEST_SOURCES} from './request-source.js?v=10.13-WEB.3';
+import {mutate} from './core.js?v=10.14-WEB.1';
+import {REQUEST_SOURCES} from './request-source.js?v=10.14-WEB.1';
 
 export function validateRequestBatch(rows){
  if(!Array.isArray(rows)||!rows.length||rows.length>50)throw Error('一次請選 1 到 50 首歌曲');

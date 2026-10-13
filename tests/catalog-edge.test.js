@@ -27,6 +27,7 @@ function edge(allowRead=false){
   if(path.includes('papa_streamer_directory'))return meta.data.streamers;
   if(path.includes('papa_v2_revision?'))return [{revision:7}];
   if(path.includes('papa_v2_scoped_read_snapshot'))return {revision:7,rows:[{kind:'meta',id:'1',data:{schemaVersion:3,...meta.data}},{kind:'settings',id:'1',data:{}}]};
+  if(path.endsWith('/papa_catalog_song_metadata_conditional'))return {spaceId:'space-001',roomId:body.room_id,signature:'a'.repeat(64),unchanged:false,rows:[]};
   if(path.includes('papa_catalog_song_metadata'))return [];
   if(path.includes('papa_song_search_room'))return {songIds:['local-song'],total:1,hasMore:false};
   if(path.includes('papa_catalog_search'))return {rows:[{id:'variant-id',title:'公開歌名',artist:'歌手'}],total:1,hasMore:false};

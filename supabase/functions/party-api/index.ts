@@ -1,4 +1,5 @@
 import {accountingDay} from '../../../src/accounting.js';
+import {validCardUpload} from '../../../src/card-media.js';
 import {applyPlayerRequestBatch,validateRequestBatch,applyOwnQueueBatch,validateOwnQueueBatch} from '../../../src/player-bulk-tools.js';
 import {isSuper,isManager,coreActor,requireRoom,authorizeManagerOperation,managementView,noticeIdentity,validNoticeAudio,prepareManagerAction} from '../../../src/access-policy.js';
 import {stateChanges,scopedOperationalAction,scopedRoomMutationAction} from '../../../src/state-patch.js';
@@ -491,7 +492,42 @@ function managerPasswordError(result:any,kind:string){
  if(!result?.ok)throw Error(messages[result?.reason]||'密碼設定未完成，請重新登入後再試');
 }
 
-Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.13-WEB.4',operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+const activityLast=new Map<string,{at:number,page:string,visible:boolean}>();
+function observeActivity(b:any,who:any){
+ if(who?.role!=='player'||!who.accountId||typeof b.activityVisible!=='boolean'||!['home','book','common-book','center','gallery'].includes(b.activityPage))return;
+ const key=JSON.stringify([who.accountId,who.deviceSessionId||who.sessionId||b.token,who.spaceId,b.streamer||'papa']),now=Date.now(),previous=activityLast.get(key);
+ if(previous&&now-previous.at<120000&&previous.page===b.activityPage&&previous.visible===b.activityVisible)return;
+ activityLast.delete(key);activityLast.set(key,{at:now,page:b.activityPage,visible:b.activityVisible});while(activityLast.size>128)activityLast.delete(activityLast.keys().next().value);
+ const work=(async()=>{try{const actorKey=await hash(String(who.deviceSessionId||who.sessionId||b.token));await api('/rest/v1/rpc/papa_activity_record',{requested_space:who.spaceId||'space-001',requested_room:b.streamer||'papa',requested_actor_key:actorKey,page_name:b.activityPage,is_visible:b.activityVisible,actor_context:{role:who.role,account_id:who.accountId,space_id:who.spaceId||'space-001',player_id:who.playerId}});}catch{ /* Observational failure must not reject/replay a business operation. */ }})();
+ if(typeof EdgeRuntime!=='undefined'&&EdgeRuntime.waitUntil)EdgeRuntime.waitUntil(work);
+}
+Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.14-WEB.1',achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+ activityRequest={body:b,who};
+ if(b.op==='activityPage'){if(!isSuper(who)||!who.accountId)throw Error('只有 PA Party總裁可查看活動');const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';if(b.spaceId!==undefined&&b.spaceId!==space||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000)throw Error('活動頁碼或範圍不正確');const result=await api('/rest/v1/rpc/papa_activity_page',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space},page_number:b.page??0});if(result?.version!==1||result.spaceId!==space||result.page!==(b.page??0)||result.pageSize!==50||!Array.isArray(result.rows)||result.rows.length>50)throw Error('活動資料尚未確認');return respond({...result,rows:result.rows.map((r:any)=>({player_id:r.player_id,streamer_id:r.streamer_id,page:r.page,last_seen:r.last_seen,online:r.online}))});}
+ if(b.op==='uploadVideo'){
+  if(!isManager(who))throw Error('只有管理員能上傳');await managerRoom(who,b.streamer||'papa');
+  if(typeof b.video!=='string'||b.video.length>Math.ceil(20*1024*1024/3)*4||!['video/mp4','video/webm'].includes(b.mime))throw Error('影片僅支援 MP4／WebM，最多 20 MB');
+  const binary=Uint8Array.from(atob(b.video),c=>c.charCodeAt(0));if(!validCardUpload(binary,b.mime))throw Error('影片格式或大小不正確');
+  const path=crypto.randomUUID()+(b.mime==='video/mp4'?'.mp4':'.webm'),r=await fetch(SB_URL+'/storage/v1/object/papa-card-media/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':b.mime},body:binary});
+  if(!r.ok)throw Error('影片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-card-media/'+path});
+ }
+ if(['achievements','achievementVisibility'].includes(b.op)){
+  if(!who?.accountId)throw Error('請重新登入');
+  const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';
+  if(b.spaceId!==undefined&&b.spaceId!==space)throw Error('勳章空間不正確');
+  const common={requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space,player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamerId:null}};
+  if(b.op==='achievementVisibility'){
+   if(!isManager(who)||typeof b.code!=='string'||!/^[a-z0-9_]{1,40}$/.test(b.code)||!['public','condition_hidden','hidden','after_award'].includes(b.visibility))throw Error('勳章顯示設定不正確');
+   const result=await api('/rest/v1/rpc/papa_achievement_visibility_set',{...common,requested_code:b.code,requested_visibility:b.visibility});
+   if(result?.ok!==true)throw Error('勳章設定尚未確認');return respond({ok:true});
+  }
+  const player=who.role==='player'?who.playerId:b.playerId;
+  if(typeof player!=='string'||player.length<1||player.length>200||who.role==='player'&&b.playerId!==undefined&&b.playerId!==player)throw Error('勳章玩家不正確');
+  const result=await api('/rest/v1/rpc/papa_achievement_page',{...common,requested_player:player});
+  if(result?.version!==1||result.scope?.spaceId!==space||result.scope?.streamerId!==room.id||result.scope?.playerId!==player||!Array.isArray(result.rows)||result.rows.length>100)throw Error('勳章資料尚未確認');
+  const rows=result.rows.map((r:any)=>({code:r.code,name:r.name,condition:r.condition,lifetime:r.lifetime,visibility:r.visibility,qualified:r.qualified,acquiredAt:r.acquiredAt,recorded:r.recorded}));
+  return respond({version:1,scope:{spaceId:space,streamerId:room.id,playerId:player},rows});
+ }
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));
  if(b.op==='entryLegacyRooms'){
   const rooms=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:'space-001'});

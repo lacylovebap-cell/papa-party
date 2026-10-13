@@ -115,7 +115,7 @@ test('silent token refresh keeps the same verified choice; replacing permitted d
 
 test('normal app rendering closes an unauthorized setup form before rendering another page',async()=>{
  const u=harness();await u.run("openNativePlayerProvision('space-native')");
- Object.assign(u.context,{playerArchiveView:{open:false},applyHomeTheme:()=>{},isAdmin:()=>false,renderHome:()=>{},loadVisibleFavoriteFlags:()=>{},loadFavorites:()=>{},loadListeningOverview:()=>{},route:'home',session:null,admin:null});
+ Object.assign(u.context,{playerArchiveView:{open:false},applyHomeTheme:()=>{},isAdmin:()=>false,renderHome:()=>{},loadVisibleFavoriteFlags:()=>{},loadFavorites:()=>{},loadListeningOverview:()=>{},achievementPanel:{load:async()=>{}},activityPage:{load:async()=>{}},route:'home',session:null,admin:null});
  vm.runInContext(line('function render(){'),u.context);u.run('render()');assert.equal(u.dialog.open,false);assert.equal(u.context.nativePlayerProvisioner.state().rows.length,0);assert.equal(u.calls.length,1);
 });
 

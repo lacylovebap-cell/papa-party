@@ -8,3 +8,10 @@ test('invalid theme and image URLs are rejected without changing state',()=>{con
 test('reset clears only home customization and supplied text is bounded',()=>{let s=run(empty(),'settings',{home:{...normalizeHome(),message:'a'.repeat(500)}});assert.equal(s.streamerSettings.papa.home.message.length,240);const old=s.streamerSettings.papa;s=run(s,'settings',{home:null});assert.deepEqual(s.streamerSettings.papa,{...old,home:null});});
 test('public waiting count comes from full room without exposing other player requests',()=>{let s=run(empty(),'player',{name:'玩家一',balance:2});s=run(s,'song',{title:'歌曲',artist:'歌手'});s=run(s,'request',{songId:s.songs[0].songId,kind:'saved'},'papa',{role:'player',playerId:s.players[0].playerId});const v=publicView(s,null);assert.equal(v.waitingCount,1);assert.equal(v.queue.length,0);});
 test('extreme accent colors still generate bounded dark button and surface colors',()=>{for(const color of ['#ffffff','#000000','#ff0000','#00ff00','#0000ff']){const p=themePalette(color);for(const v of Object.values(p))assert.match(v,/^#[a-f0-9]{6}$/);assert.ok(Math.max(...p.button.match(/[a-f0-9]{2}/g).map(x=>parseInt(x,16)))<=115);}});
+test('optional theme colors preserve automatic defaults, validate CSS input and give light surfaces readable text',()=>{
+ const automatic=themePalette('#a886cc'),custom=themePalette('#a886cc',{panel:'#ffffff',button:'#ffff00',secondary:'#336699'});
+ assert.equal(custom.panel,'#ffffff');assert.equal(custom.panelText,'#1a1421');assert.equal(custom.buttonText,'#1a1421');assert.equal(custom.background,automatic.background);
+ assert.deepEqual(normalizeHome().themeColors,{});
+ for(const themeColors of [{panel:'red;display:none'},{unknown:'#ffffff'},[],null])assert.throws(()=>validateHome({...normalizeHome(),themeColors}));
+ const value=validateHome({...normalizeHome(),themeColors:{panel:'#ffffff'}});assert.equal(value.themeColors.panel,'#ffffff');
+});
