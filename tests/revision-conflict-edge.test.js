@@ -43,7 +43,7 @@ function fixture(outcome='success'){
    if(outcome==='projectionConflict')return new Response(JSON.stringify({code:'PT409',message:'VERSION_CONFLICT'}),{status:409});
    return new Response('[]');
   }
-  if(path.endsWith('/papa_accounting_summary')){const b=JSON.parse(options.body);return new Response(JSON.stringify({day:b.requested_day,timezone:'Asia/Taipei',scope:{spaceId:b.requested_space,roomId:b.requested_room},...core.stats(core.scopeState(state),new Date().toISOString()),revision:state.revision}));}
+  if(path.endsWith('/papa_accounting_summary')){const b=JSON.parse(options.body);return new Response(JSON.stringify({day:b.requested_day||accountingDay(new Date().toISOString(),19),rolloverHour:19,timezone:'Asia/Taipei',scope:{spaceId:b.requested_space,roomId:b.requested_room},...core.stats(core.scopeState(state),new Date().toISOString()),revision:state.revision}));}
   throw Error('Unexpected fixture endpoint');
  };
  const context=vm.createContext({accountingDay,...core,...access,...patch,...rules,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
@@ -79,7 +79,7 @@ test('downstream typed conflict cannot erase evidence that the business commit a
  const result=await f.invoke();assert.equal(result.body.error,conflictText);assert.equal(result.body.outcome,'unknown');assert.equal('notCommitted'in result.body,false);assert.equal(f.writes(),1);
 });
 test('valid mutation keeps its original successful response and exactly one credit deduction',async()=>{
- const f=fixture(),result=await f.invoke();assert.equal(result.status,200);assert.equal(result.body.state.revision,8);assert.equal(f.writes(),1);
+ const f=fixture(),result=await f.invoke();assert.equal(result.status,200,JSON.stringify(result.body));assert.equal(result.body.state.revision,8);assert.equal(f.writes(),1);
  assert.equal(f.state.ledger.filter(row=>row.amount===-1).length,1);
  const repeated=await f.invoke();assert.equal(repeated.body.notCommitted,true);assert.equal(f.writes(),1);
 });
