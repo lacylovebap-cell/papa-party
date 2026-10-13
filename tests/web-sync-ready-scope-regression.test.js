@@ -1,3 +1,4 @@
+import {supportsOperationReceipt,sendReceiptedOperation} from '../src/operation-recovery.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -24,7 +25,7 @@ function harness(){
  const calls=[],renders=[],events=new Map(),app={innerHTML:'existing view'},ui={dialogOpen:false,editing:false,note:'尚未送出',query:'愛情',selection:['song-1']};
  let ctx;
  const view=name=>{app.innerHTML='business-'+name;renders.push(name);};
- ctx=vm.createContext({URL,JSON,Date,queueMicrotask,createWebSyncRecovery,webApiFailure,
+ ctx=vm.createContext({supportsOperationReceipt,sendReceiptedOperation,crypto,AbortSignal,URL,JSON,Date,queueMicrotask,createWebSyncRecovery,webApiFailure,
   state:{revision:10,songs:[{songId:'existing'}]},full:{revision:10},session:{playerId:'P1',token:'token-1',sessionId:'device-1',role:'player',spaceId:'space-001'},
   admin:null,draft:null,demo:false,entryPending:false,busy:false,route:'home',tab:'queue',selectedPlayer:null,streamerSlug:'papa',
   signatures:{songs:'old-signature'},lastFullRefreshAt:Date.now(),offset:0,API:'https://api.example.test',PUBLISHABLE_KEY:'fixture',

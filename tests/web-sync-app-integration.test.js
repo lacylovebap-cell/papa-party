@@ -1,3 +1,4 @@
+import {supportsOperationReceipt,sendReceiptedOperation} from '../src/operation-recovery.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -26,7 +27,7 @@ function harness(){
  const calls=[],renders=[],adoptions=[],storage=[],timers=new Map(),notices=[],chats=[];
  const ui={dialogOpen:false,editing:false,form:{query:'愛情',note:'尚未送出',selected:['song-1']}};let timerId=0;
  let ctx;
- ctx=vm.createContext({URL,JSON,Date,structuredClone,queueMicrotask,webApiFailure,
+ ctx=vm.createContext({supportsOperationReceipt,sendReceiptedOperation,crypto,AbortSignal,URL,JSON,Date,structuredClone,queueMicrotask,webApiFailure,
   createWebSyncRecovery:options=>createWebSyncRecovery({...options,schedule:(callback,delay)=>{const id=++timerId;timers.set(id,{callback,delay});return id;},cancel:id=>timers.delete(id)}),
   state:{revision:10,currentStreamer:{id:'server-room-id',spaceId:'space-001'},songs:[{songId:'original'}]},full:null,
   session:{playerId:'P1',token:'player-token-one',sessionId:'device-one',role:'player',spaceId:'space-001'},admin:null,draft:null,demo:false,entryPending:false,busy:false,route:'home',selectedPlayer:null,
@@ -110,8 +111,11 @@ test('a read resolving during a busy mutation is discarded and resumes once the 
 });
 
 test('an uncertain transport write failure never schedules a mutation replay or a misleading revision retry',async()=>{
- const h=harness(),write=h.dispatch(),rejected=assert.rejects(write,/transport interrupted/);await tick();h.calls[0].reject(Error('transport interrupted'));await rejected;await tick();
- assert.equal(h.calls.length,1);assert.equal(h.timers.size,0);assert.equal(h.sync.snapshot().pending,false);assert.equal(h.ctx.state.revision,10);
+ const h=harness();h.ui.dialogOpen=true;h.ui.editing=true;
+ const write=h.dispatch(),rejected=assert.rejects(write,/結果尚未確認/);await tick();h.calls[0].reject(Error('transport interrupted'));await tick();
+ assert.equal(h.calls[1].body.op,'operationReceipt');h.respond(1,{committed:false});await rejected;await tick();
+ assert.equal(h.calls.length,3);assert.equal(h.calls[2].body.op,'read');h.respond(2,{state:{revision:10},signatures:{songs:'original-signature'}});await tick();
+ assert.equal(h.calls.filter(c=>c.body.op==='mutate').length,1);assert.equal(h.timers.size,0);assert.equal(h.sync.snapshot().pending,false);assert.equal(h.ctx.state.revision,10);assert.equal(h.ui.form.note,'尚未送出');
 });
 
 test('fresh notice routing reads only the affected business area and still updates state while a dialog is open',async()=>{

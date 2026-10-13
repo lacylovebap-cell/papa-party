@@ -114,7 +114,7 @@ const headers={apikey:KEY,Authorization:`Bearer ${KEY}`,'Content-Type':'applicat
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'content-type,authorization,apikey','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const hash=async(s:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 const revisionConflictMessage='資料剛更新了，請重新整理後再試一次';
-const revisionConflictCommits=new Set(['papa_v2_commit','papa_release_b_commit','papa_room_operational_commit','papa_room_admin_commit','papa_room_admin_commit_with_player_bindings','papa_streamer_registry_commit','papa_manage_player_extra_quota','papa_player_archive','papa_players_archive']);
+const revisionConflictCommits=new Set(['papa_v2_commit','papa_release_b_commit','papa_room_operational_commit','papa_room_operational_commit_receipted','papa_room_admin_commit','papa_room_admin_commit_with_player_bindings','papa_streamer_registry_commit','papa_manage_player_extra_quota','papa_player_archive','papa_players_archive']);
 function revisionConflictError(){return Object.assign(Error(revisionConflictMessage),{code:'VERSION_CONFLICT',notCommitted:true});}
 // Only a known atomic write RPC's actual SQL rejection proves that write was
 // rolled back. A failed fetch/5xx or a later projection cannot provide proof.
@@ -125,8 +125,8 @@ function rejectedRevisionConflict(path:string,status:number,detail:any){
 function unknownOperationOutcome(error:any){return Object.assign(error instanceof Error?error:Error('資料讀取失敗'),{notCommitted:false,outcome:'unknown'});}
 function operationErrorResponse(error:any){
  if(error?.code==='NOTICE_SNAPSHOT_INVALID')return {error:error.message,code:'NOTICE_SNAPSHOT_INVALID'};
- const definite=error?.code==='VERSION_CONFLICT'&&error.notCommitted===true&&error.outcome!=='unknown';
- return {error:error?.message||'操作失敗',...(definite?{code:'VERSION_CONFLICT',notCommitted:true}:{outcome:'unknown'})};
+ const definite=error?.notCommitted===true&&error.outcome!=='unknown';
+ return {error:error?.message||'操作失敗',...(definite?{...(error?.code==='VERSION_CONFLICT'?{code:'VERSION_CONFLICT'}:{}),notCommitted:true}:{outcome:'unknown'})};
 }
 function missingRoomSyncHead(path:string,status:number,detail:any){
  return path==='/rest/v1/rpc/papa_room_sync_head'&&status===404&&detail?.code==='PGRST202'
@@ -185,7 +185,7 @@ function missingConditionalCatalogMetadata(path:string,status:number,detail:any)
 async function api(path:string,body?:unknown,method?:string){
  let r:any,text:string;try{r=await fetch(SB_URL+path,{method:method||(body?'POST':'GET'),headers,body:body?JSON.stringify(body):undefined});text=await r.text();}catch(error){throw unknownOperationOutcome(error);}
  if(!r.ok){
-  const messages:any={DEVICE_SWITCH_SPACE_INVALID:'找不到可使用的空間',DEVICE_SWITCH_ROOM_INVALID:'此登入不適用選擇的主播',DEVICE_SWITCH_MEMBERSHIP_REQUIRED:'你沒有此空間的使用權限',DEVICE_SWITCH_PROFILE_REQUIRED:'此空間的玩家資料尚未建立',DEVICE_SWITCH_IDENTITY_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INSTALLATION_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INVALID:'裝置資訊不正確',ACCOUNT_DISABLED:'登入已到期，請重新登入',MEMBERSHIP_REQUIRED:'登入已到期，請重新登入',MEMBERSHIP_SUSPENDED:'登入已到期，請重新登入',SESSION_ACCOUNT_MISMATCH:'登入已到期，請重新登入',DEVICE_IDENTITY_MISMATCH:'登入已到期，請重新登入',BOARD_MODERATED:'此留言由管理者隱藏，請聯絡管理者恢復',BOARD_RATE_LIMIT:'留言送得太快，請稍候三秒再試',BOARD_RETRY_CHANGED:'重試內容不同，請重新開啟留言板',CHAT_RATE_LIMIT:'訊息送得太快，請稍候再送',CHAT_REQUEST_REUSED:'訊息重試內容不同，請重新開啟私訊',PLAYER_ARCHIVE_PENDING_QUEUE:'此玩家仍有待播歌曲，請先完成或取消後再封存',PLAYER_ARCHIVE_TARGET_INVALID:'找不到此空間的玩家',PLAYER_ARCHIVE_ACTOR_INVALID:'只有 PA Party總裁可以封存或恢復玩家',VERSION_CONFLICT:'資料剛更新了，請重新整理後再試一次',CATALOG_SELECTION_STALE:'共同資料剛更新，請重新選取後再操作',CATALOG_SOURCE_STALE:'原歌曲剛更新，請重新選取後再審核',CATALOG_CANDIDATE_STALE:'候選歌曲剛更新，請重新選取後再審核',CATALOG_TEMPLATE_MISSING:'這個模板已停用或不存在，請重新選擇',CATALOG_ALREADY_LINKED:'歌曲已建立共同關聯，請重新整理',CATALOG_AMBIGUOUS_TARGET:'存在多筆同版本共同歌曲，請選擇既有目標後再連結',CATALOG_BATCH_DIFFERENT_VERSIONS:'所選歌曲屬於不同版本，請分批處理'};
+  const messages:any={DEVICE_SWITCH_SPACE_INVALID:'找不到可使用的空間',DEVICE_SWITCH_ROOM_INVALID:'此登入不適用選擇的主播',DEVICE_SWITCH_MEMBERSHIP_REQUIRED:'你沒有此空間的使用權限',DEVICE_SWITCH_PROFILE_REQUIRED:'此空間的玩家資料尚未建立',DEVICE_SWITCH_IDENTITY_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INSTALLATION_INVALID:'裝置登入已到期，請重新登入',DEVICE_SWITCH_INVALID:'裝置資訊不正確',ACCOUNT_DISABLED:'登入已到期，請重新登入',MEMBERSHIP_REQUIRED:'登入已到期，請重新登入',MEMBERSHIP_SUSPENDED:'登入已到期，請重新登入',SESSION_ACCOUNT_MISMATCH:'登入已到期，請重新登入',DEVICE_IDENTITY_MISMATCH:'登入已到期，請重新登入',BOARD_MODERATED:'此留言由管理者隱藏，請聯絡管理者恢復',BOARD_RATE_LIMIT:'留言送得太快，請稍候三秒再試',BOARD_RETRY_CHANGED:'重試內容不同，請重新開啟留言板',CHAT_RATE_LIMIT:'訊息送得太快，請稍候再送',CHAT_REQUEST_REUSED:'訊息重試內容不同，請重新開啟私訊',PLAYER_ARCHIVE_PENDING_QUEUE:'此玩家仍有待播歌曲，請先完成或取消後再封存',PLAYER_ARCHIVE_TARGET_INVALID:'找不到此空間的玩家',PLAYER_ARCHIVE_ACTOR_INVALID:'只有 PA Party總裁可以封存或恢復玩家',VERSION_CONFLICT:'資料剛更新了，請重新整理後再試一次',OPERATION_RECEIPT_REUSED:'這筆送出內容已變更，請關閉後重新開啟',OPERATION_RECEIPT_INPUT_INVALID:'送出識別碼不正確',CATALOG_SELECTION_STALE:'共同資料剛更新，請重新選取後再操作',CATALOG_SOURCE_STALE:'原歌曲剛更新，請重新選取後再審核',CATALOG_CANDIDATE_STALE:'候選歌曲剛更新，請重新選取後再審核',CATALOG_TEMPLATE_MISSING:'這個模板已停用或不存在，請重新選擇',CATALOG_ALREADY_LINKED:'歌曲已建立共同關聯，請重新整理',CATALOG_AMBIGUOUS_TARGET:'存在多筆同版本共同歌曲，請選擇既有目標後再連結',CATALOG_BATCH_DIFFERENT_VERSIONS:'所選歌曲屬於不同版本，請分批處理'};
   Object.assign(messages,{LISTENING_HISTORY_SCOPE_INVALID:'找不到主播的常聽歌單',LISTENING_HISTORY_ACTOR_INVALID:'無法查看其他玩家的常聽歌單',LISTENING_HISTORY_PLAYER_INVALID:'找不到此玩家',LISTENING_HISTORY_PAGE_INVALID:'常聽歌單分頁資料不正確',SONG_FAVORITES_SCOPE_INVALID:'找不到可收藏的主播空間',SONG_FAVORITES_ACTOR_INVALID:'登入已到期，請重新登入',SONG_FAVORITES_SONG_INVALID:'歌曲已隱藏或更新，請重新選擇',SONG_FAVORITES_INPUT_INVALID:'收藏資料不正確',SONG_FAVORITES_PAGE_INVALID:'收藏分頁資料不正確',NEW_PRACTICE_SCOPE_INVALID:'找不到主播的新練歌曲',NEW_PRACTICE_PAGE_INVALID:'新練歌曲分頁資料不正確',STREAMER_REGISTRY_DUPLICATE:'主播網址已使用',STREAMER_REGISTRY_ACTOR_INVALID:'總裁登入已到期，請重新登入',
    STREAMER_REGISTRY_SCOPE_INVALID:'請切換到該主播空間再編輯',STREAMER_REGISTRY_ROOM_INVALID:'找不到主播',
    STREAMER_REGISTRY_SPACE_INVALID:'找不到可使用的空間',STREAMER_REGISTRY_DESCRIPTOR_INVALID:'主播資料格式錯誤'});
@@ -256,6 +256,26 @@ async function managerRoom(who:any,requestedRoom:string){
 }
 // Private exports are explicit. Ordinary views and draft sources omit lyric bodies.
 function leanSongView(view:any){return {...view,songs:view.songs.map(({lyrics,lyricNotes,privateNote,privateNotes,lyricHistory,lyricsHistory,...song}:any)=>song)};}
+function operationIntent(value:any):any{
+ if(Array.isArray(value))return value.map(operationIntent);
+ if(value&&typeof value==='object')return Object.fromEntries(Object.keys(value).sort().map(key=>[key,operationIntent(value[key])]));
+ return value;
+}
+async function operationProof(b:any,who:any,room:any,intent:any){
+ if(typeof b.operationId!=='string'||!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(b.operationId))throw Error('送出識別碼不正確');
+ if(!who)throw Error('請先登入');requireRoom(who,room.id);
+ const space=room.spaceId||'space-001';
+ if(space!=='space-001'||!isSuper(who)&&space!==(who.spaceId||'space-001'))throw Error('找不到主播');
+ const actorKey=await hash(JSON.stringify([who.accountId||await hash(b.token),who.role,who.playerId||null,who.streamer_id||null]));
+ return {operation_id:b.operationId,actor_key:actorKey,
+  request_hash:await hash(JSON.stringify(operationIntent({version:1,intent}))),quota_player:who.playerId||null};
+}
+async function lookupOperation(proof:any,room:any){
+ const result=await api('/rest/v1/rpc/papa_operation_receipt',{requested_room:room.id,requested_space:room.spaceId||'space-001',requested_actor:proof.actor_key,requested_operation:proof.operation_id});
+ if(!result||typeof result.committed!=='boolean'||result.committed&&(!Number.isSafeInteger(result.revision)||result.revision<0||typeof result.requestHash!=='string'||!/^[a-f0-9]{64}$/.test(result.requestHash)))throw Error('送出結果尚未確認');
+ if(result.committed&&result.requestHash!==proof.request_hash)throw Error('這筆送出內容已變更，請關閉後重新開啟');
+ return result;
+}
 async function commit(before:any,after:any,context:any={}){
  const scoped=!!(context.roomScoped||context.roomWriteScoped),native=scoped&&context.space_id&&context.space_id!=='space-001';
  // Core's legacy platform settings alias points to papa. Native room writes
@@ -267,8 +287,15 @@ async function commit(before:any,after:any,context:any={}){
   const {password,...data}=row.data;return {...row,data};
  }):patch.changes;
  const provision=native&&Array.isArray(context.player_bindings)&&context.player_bindings.length>0;
- const {player_bindings,...actorContext}=context;
- after.revision=await api('/rest/v1/rpc/'+(provision?'papa_room_admin_commit_with_player_bindings':context.roomScoped?'papa_room_operational_commit':context.roomWriteScoped?'papa_room_admin_commit':'papa_release_b_commit'),{expected:before.revision,changes,removed:patch.removed,actor_context:actorContext,notices,...(scoped?{requested_room:context.streamer_id}:{}),...(provision?{player_bindings:player_bindings}:{})});
+ const {player_bindings,receipt,...actorContext}=context;
+ const receipted=!!(context.roomScoped&&receipt);
+ if(receipted&&receipt.attempt)receipt.attempt.started=true;
+ const result=await api('/rest/v1/rpc/'+(receipted?'papa_room_operational_commit_receipted':provision?'papa_room_admin_commit_with_player_bindings':context.roomScoped?'papa_room_operational_commit':context.roomWriteScoped?'papa_room_admin_commit':'papa_release_b_commit'),{expected:before.revision,changes,removed:patch.removed,actor_context:actorContext,notices,...(scoped?{requested_room:context.streamer_id}:{}),...(provision?{player_bindings:player_bindings}:{}),...(receipted?{operation_id:receipt.operation_id,actor_key:receipt.actor_key,request_hash:receipt.request_hash}:{})});
+ if(receipted){
+  if(!result||!Number.isSafeInteger(result.revision)||result.revision<0||typeof result.duplicate!=='boolean')throw unknownOperationOutcome(Error('送出結果尚未確認'));
+  if(result.duplicate)return load(true,context.streamer_id,context.space_id,null,receipt.quota_player||context.player_id||null);
+  after.revision=result.revision;
+ }else after.revision=result;
  schedulePush(context.streamer_id,[...new Set(notices.map((n:any)=>n.recipient))]);return after;
 }
 async function actor(token:string,requestedRoom:string|null=null){
@@ -464,7 +491,7 @@ function managerPasswordError(result:any,kind:string){
  if(!result?.ok)throw Error(messages[result?.reason]||'密碼設定未完成，請重新登入後再試');
 }
 
-Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();if(b.op==='releaseInfo')return respond({version:'10.13-EDGE.1',conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.13-WEB.4',operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));
  if(b.op==='entryLegacyRooms'){
   const rooms=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:'space-001'});
@@ -633,6 +660,13 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   const q=b.q??'',tags=b.tags??[];if(typeof q!=='string'||q.length>100||!Array.isArray(tags)||tags.length>20||tags.some((t:any)=>typeof t!=='string'||!t||t.length>50)||b.random!==undefined&&typeof b.random!=='boolean')throw Error('歌曲篩選不正確');
   return respond(await api('/rest/v1/rpc/papa_player_song_choices',{requested_space:room.spaceId||'space-001',requested_room:room.id,actor_context:context,query_text:q.trim(),tags,page_limit:b.random?1:Math.min(limit,20),page_offset:b.random?0:page*Math.min(limit,20),random_choice:b.random===true}));
  }
+ if(b.op==='operationReceipt'){
+  if(!who)throw Error('請先登入');
+  if(!b.intent||!(['requestsBatch','ownQueueBatch'].includes(b.intent.op)&&Array.isArray(b.intent.rows)||b.intent.op==='mutate'&&scopedOperationalAction(b.intent.action)))throw Error('送出結果範圍不正確');
+  if(who.role==='player'&&(b.intent.op==='mutate'&&!['request','wish','cancelOwn','replaceOwn'].includes(b.intent.action.type)))throw Error('請先登入管理');
+  const room=await catalogRoom(who,b.streamer||'papa',true),proof=await operationProof(b,who,room,b.intent),result=await lookupOperation(proof,room);
+  return respond({committed:result.committed,...(result.committed?{revision:result.revision}:{})});
+ }
  if(b.op==='ownQueueQuote'){
   if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');
   validateOwnQueueBatch([{...b.choice,operation:'replace'}]);
@@ -648,10 +682,12 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   for(const job of b.jobs){let commitStarted=false;try{
    const room=await catalogRoom(who,job.streamer,true);if((room.spaceId||'space-001')!=='space-001'||(room.spaceId||'space-001')!==(who.spaceId||'space-001'))throw Error('主播不屬於目前空間');
    if(resolvedRooms.has(room.id))throw Error('同一批不能重複指定同一位主播');resolvedRooms.add(room.id);
+   const receipt=b.operationId?await operationProof(b,who,room,{op:b.op,rows:job.rows}):null;
+   if(receipt){receipt.attempt=operationAttempt;const existing=await lookupOperation(receipt,room);if(existing.committed){results.push({streamer:job.streamer,ok:true,count:job.rows.length,revision:existing.revision});continue;}}
    const source=await load(true,room.id,room.spaceId||'space-001',null,who.playerId);
    if(!checkedRevision){if(source.revision!==b.revision)throw revisionConflictError();checkedRevision=true;}
    const next=applyOwnQueueBatch(source,job.rows,coreActor(who),t,room.id);
-   commitStarted=true;const committed=await commit(source,next,{role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',actor_streamer_id:null,streamer_id:room.id,roomScoped:true,action:'ownQueueBatch'});
+   commitStarted=true;const committed=await commit(source,next,{role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',actor_streamer_id:null,streamer_id:room.id,roomScoped:true,receipt,action:'ownQueueBatch'});
    results.push({streamer:job.streamer,ok:true,count:job.rows.length,revision:committed.revision});
   }catch(error){const unknown=commitStarted&&error.rpcRejected!==true;results.push({streamer:job.streamer,ok:false,...(unknown?{unknown:true}:{}),error:unknown?'結果待確認，請先查看待播，避免重複送出':error.message||'操作失敗'});}}
   return respond({results});
@@ -664,10 +700,12 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   for(const job of b.jobs){let commitStarted=false;try{
    const room=await catalogRoom(who,job.streamer);if((room.spaceId||'space-001')!==(who.spaceId||'space-001'))throw Error('主播不屬於目前空間');
    if(resolvedRooms.has(room.id))throw Error('同一批不能重複指定同一位主播');resolvedRooms.add(room.id);
+   const receipt=b.operationId?await operationProof(b,who,room,{op:b.op,rows:job.rows}):null;
+   if(receipt){receipt.attempt=operationAttempt;const existing=await lookupOperation(receipt,room);if(existing.committed){results.push({streamer:job.streamer,ok:true,count:job.rows.length,revision:existing.revision});continue;}}
    const source=await load(true,room.id,room.spaceId||'space-001',null,who.playerId);
    if(!checkedRevision){if(source.revision!==b.revision)throw revisionConflictError();checkedRevision=true;}
    const next=applyPlayerRequestBatch(source,job.rows,coreActor(who),t,room.id);
-   commitStarted=true;const committed=await commit(source,next,{role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',actor_streamer_id:null,streamer_id:room.id,roomScoped:true,action:'requestBatch'});
+   commitStarted=true;const committed=await commit(source,next,{role:'player',account_id:who.accountId,player_id:who.playerId,space_id:room.spaceId||'space-001',actor_streamer_id:null,streamer_id:room.id,roomScoped:true,receipt,action:'requestBatch'});
    results.push({streamer:job.streamer,ok:true,count:job.rows.length,revision:committed.revision});
   }catch(error){const unknown=commitStarted&&error.rpcRejected!==true;results.push({streamer:job.streamer,ok:false,...(unknown?{unknown:true}:{}),error:unknown?'結果待確認，請先查看待播，避免重複送出':error.message||'點歌失敗'});}}
   return respond({results});
@@ -784,6 +822,8 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
  if(b.op==='failedRequest'){if(who?.role!=='player')throw new Error('請先登入玩家');const room=scopeState(s,b.streamer||'papa'),p=room.players.find((p:any)=>p.playerId===who.playerId);if(!room.currentStreamer.active||!p)throw new Error('找不到玩家');if(p.archived)return respond({counted:false});const quote=quoteSong(room,b.songId,b,who.playerId,t),full=!canRequestSaved(room,t,quote.creditCost,who.playerId);if(!full)return respond({counted:false});try{venuePolicySavedSnapshot(room,who.playerId,quote.creditCost);}catch{return respond({counted:false});}const counted=await api('/rest/v1/rpc/papa_record_failed_request',{room_id:room.currentStreamer.id,player_id:who.playerId,song_id:b.songId,bucket:hourKey(t)});schedulePush(room.currentStreamer.id,['__admin__',who.playerId]);return respond({counted});}if(b.op==='login'){if(who?.playerId)throw new Error('請先登出再登入');const p=s.players.find((p:any)=>p.playerId===b.playerId);if(!p||String(p.password||'')!==String(b.password||''))throw new Error('玩家密碼不正確');const token='player:'+crypto.randomUUID()+crypto.randomUUID(),sessionHash=await hash(token);await api('/rest/v1/papa_v2_sessions',{token_hash:sessionHash,player_id:p.playerId,login_id:p.ids.includes(b.loginId)?b.loginId:'',expires_at:new Date(Date.now()+30*86400000).toISOString()});const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});if(identity?.role!=='player'||identity?.spaceId!=='space-001')throw new Error('玩家登入身分尚未完成設定');return respond({token});}
  if(b.op==='search'){return respond({players:b.query?.trim()?playerSearch(s,b.query,true).slice(0,20).map((p:any)=>({playerId:p.playerId,name:p.name,ids:p.ids,hasPassword:!!p.password})):[]});}
  const project=async(value:any)=>{try{const base=leanSongView(managementView(publicView(value,coreActor(who),t,b.streamer||'papa'),who)),rows=b.op==='read'?await readCatalogMetadata(base.currentStreamer,!Number.isSafeInteger(b.revision)||b.revision<0):await api('/rest/v1/rpc/papa_catalog_song_metadata_in_space',{room_id:base.currentStreamer.id}),view={...catalogMetadataView(base,rows,isManager(who)),summary:await accountingSummary(base.currentStreamer,null)},signatures:any={},delta:any={};for(const [key,v] of Object.entries(view)){signatures[key]=await hash(JSON.stringify(v));if(b.signatures?.[key]!==signatures[key])delta[key]=v;}return {state:delta,signatures,now:t,ready:value.schemaVersion>=3,...(who?.accountId?{sessionIdentity:sessionIdentity(who)}:{})};}catch(error){throw unknownOperationOutcome(error);}};
+ const receipt=roomScoped&&b.operationId?await operationProof(b,who,scopeState(s,b.streamer||'papa').currentStreamer,{op:'mutate',action:b.action}):null;
+ if(receipt){receipt.attempt=operationAttempt;receipt.quota_player=quotaPlayer;if(b.revision!==s.revision){const existing=await lookupOperation(receipt,scopeState(s,b.streamer||'papa').currentStreamer);if(existing.committed)return respond(await project(s));}}
  if(b.op==='mutate'&&b.action?.type==='extraQuota'){
   if(!isManager(who))throw Error('請先登入管理');
   if(b.revision!==s.revision)throw revisionConflictError();
@@ -824,7 +864,7 @@ Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response(null,{heade
   account_id:who?.accountId||null,space_id:targetSpace,player_bindings:b.playerBindings||[],
   actor_streamer_id:who?.role==='streamer_admin'?who.streamer_id:null,
   streamer_id:scopeState(s,b.streamer||'papa').currentStreamer.id,
-  roomScoped,roomWriteScoped,action:b.op==='mutate'?b.action?.type+(b.action?.data?.operation?':'+b.action.data.operation:''):b.op})));
- }catch(e){return respond(operationErrorResponse(e),400);}});
+  roomScoped,roomWriteScoped,receipt,action:b.op==='mutate'?b.action?.type+(b.action?.data?.operation?':'+b.action.data.operation:''):b.op})));
+ }catch(e){if(receiptedRequest&&!operationAttempt.started)e=Object.assign(e,{notCommitted:true,outcome:undefined});return respond(operationErrorResponse(e),400);}});
 
 function checkedListSort(value:any){if(value===undefined)return 'default';if(!['default','newest','oldest'].includes(value))throw Error('排序不正確');return value;}

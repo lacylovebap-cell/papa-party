@@ -40,3 +40,11 @@ test('actual refresh invalidates the center when selected host or Account change
  const f=fixture(t,'super_admin');await f.click('open');assert.equal(f.dialog.open,true);f.c.selectedStreamer='michelle';f.c.streamerId='michelle';f.c.selectedStreamerName='咪醬';await f.notices.refresh();assert.equal(f.dialog.open,false);
  await f.click('open');assert.match(f.dialog.innerHTML,/咪醬/);f.c.accountId='replacement';await f.notices.refresh();assert.equal(f.dialog.open,false);
 });
+
+
+test('compact header bell uses the same scoped category badge without another read, subscription or audio button',async t=>{
+ const f=fixture(t);await f.notices.refresh();const before=f.calls.length;
+ const html=f.notices.button(true);assert.match(html,/class="notice-bell"/);assert.match(html,/aria-label="訊息中心，1 則未讀"/);
+ assert.match(html,/data-notice="open"/);assert.match(html,/notice-count">1</);assert.doesNotMatch(html,/enableAudio/);
+ assert.equal(f.calls.length,before);assert.equal(f.timers.length,1);
+});
