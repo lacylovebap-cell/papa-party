@@ -148,7 +148,8 @@ function createCatalogMetadataCache(transport:any,options:any={}){
   while(entries.size>=maxEntries||bytes+size>maxBytes)remove(entries.keys().next().value);
   entries.set(key,{signature,serialized,bytes:size,at:now()});bytes+=size;
  };
- return {async read(room:any,force=false){
+ const pending=new Map<string,Promise<any[]>>();
+ async function readFresh(room:any,force=false){
   const spaceId=room.spaceId||'space-001',roomId=room.id,key=JSON.stringify([spaceId,roomId]);
   if(typeof roomId!=='string'||!roomId||typeof spaceId!=='string'||!spaceId)throw Error('Invalid catalog metadata scope');
   const full=()=>transport('/rest/v1/rpc/papa_catalog_song_metadata_in_space',{room_id:roomId});
@@ -172,6 +173,16 @@ function createCatalogMetadataCache(transport:any,options:any={}){
   if(!Array.isArray(result.rows))throw Error('Invalid catalog metadata rows');
   remember(key,result.signature,result.rows);
   return result.rows;
+ }
+ return {async read(room:any,force=false){
+  // Only coalesce simultaneous public metadata reads in the same Space/room.
+  // Forced post-write reads always start fresh. No accounting or auth is cached.
+  if(force)return readFresh(room,true);
+  const key=JSON.stringify([room.spaceId||'space-001',room.id]);
+  let request=pending.get(key);
+  if(!request){request=readFresh(room);pending.set(key,request);}
+  try{return JSON.parse(JSON.stringify(await request));}
+  finally{if(pending.get(key)===request)pending.delete(key);}
  },snapshot:()=>({entries:entries.size,bytes})};
 }
 let catalogMetadataReadCache:any;
@@ -282,7 +293,7 @@ async function commit(before:any,after:any,context:any={}){
  // Core's legacy platform settings alias points to papa. Native room writes
  // retain their own settings; credentials belong to Account, not this profile.
  if(native)after.settings=after.streamerSettings?.[context.streamer_id]||before.settings;
- const patch=stateChanges(before,after,{preserveOrder:scoped}),notices=deriveNotices(before,after,context);
+ const patch=stateChanges(before,after,{preserveOrder:true}),notices=deriveNotices(before,after,context);
  const changes=native?patch.changes.map((row:any)=>{
   if(row.kind!=='players'||row.data?.password!=='')return row;
   const {password,...data}=row.data;return {...row,data};
@@ -503,7 +514,7 @@ function observeActivity(b:any,who:any){
 }
 const eventTotals=new Map();
 async function eventTotal(room:any,global:boolean){const key=JSON.stringify([room.spaceId,room.id,global]),cached=eventTotals.get(key);if(cached&&Date.now()-cached.at<60000)return cached.total;const total=await api('/rest/v1/rpc/papa_event_total',{room_id:room.id,include_global:global});if(typeof total!=='number'||!Number.isSafeInteger(total)||total<0)throw Error('操作歷史頁數尚未確認');if(eventTotals.size>=128)eventTotals.delete(eventTotals.keys().next().value);eventTotals.set(key,{at:Date.now(),total});return total;}
-Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.14-WEB.4',achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.14-WEB.5',achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  activityRequest={body:b,who};
  if(b.op==='activityPage'){if(!isSuper(who)||!who.accountId)throw Error('只有 PA Party總裁可查看活動');const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';if(b.spaceId!==undefined&&b.spaceId!==space||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000)throw Error('活動頁碼或範圍不正確');const result=await api('/rest/v1/rpc/papa_activity_page',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space},page_number:b.page??0});if(result?.version!==1||result.spaceId!==space||result.page!==(b.page??0)||result.pageSize!==50||!Array.isArray(result.rows)||result.rows.length>50)throw Error('活動資料尚未確認');return respond({...result,rows:result.rows.map((r:any)=>({player_id:r.player_id,streamer_id:r.streamer_id,page:r.page,last_seen:r.last_seen,online:r.online}))});}
  if(b.op==='uploadVideo'){

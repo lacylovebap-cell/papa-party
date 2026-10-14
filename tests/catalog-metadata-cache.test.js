@@ -37,6 +37,21 @@ test('unchanged catalog reuses rows only after database confirmation; returned r
  assert.ok(f.calls.every(c=>c.path.endsWith('/papa_catalog_song_metadata_conditional')));
 });
 
+test('simultaneous metadata reads share one scoped request and independent row objects',async()=>{
+ const f=fixture();const results=await Promise.all(Array.from({length:20},()=>f.cache.read(room)));
+ assert.equal(f.calls.length,1);results[0][0].title='changed';assert.equal(results[1][0].title,'歌曲');
+ await Promise.all([f.cache.read(room),f.cache.read({...room,id:'room-b'}),f.cache.read(room,true)]);
+ assert.equal(f.calls.length,4,'other rooms and forced reads are independent');
+ await f.cache.read(room);assert.equal(f.calls.length,5,'later reads still verify with database');
+});
+
+test('failed coalesced reads release pending request and may be retried',async()=>{
+ let calls=0;const cache=factory(async()=>{calls++;throw Error('unavailable');});
+ const outcomes=await Promise.allSettled([cache.read(room),cache.read(room)]);
+ assert.equal(calls,1);assert.ok(outcomes.every(r=>r.status==='rejected'));
+ await assert.rejects(cache.read(room));assert.equal(calls,2);
+});
+
 test('song, shared metadata, lyric availability and candidate changes replace cached rows without trusting diagnostic heads',async()=>{
  const f=fixture();await f.cache.read(room);
  for(const changed of [{title:'new title'},{artist:'new artist'},{hasLyrics:false},{lyricsMode:'copy'},{catalogStatus:'linked'}]){

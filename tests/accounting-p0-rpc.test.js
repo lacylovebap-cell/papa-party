@@ -17,6 +17,7 @@ test('real atomic RPC, deferred linkage, stale-device replay, rollback and selec
  await q('update papa_v2_revision set revision=$1',[state.revision]);
  await db.exec('alter table papa_notifications add column space_id text;');
  for(const file of ['202610070001_space_foundation.sql','202610070011_room_operational_commit.sql','202610120002_message_center_categories.sql','202610120007_message_center_preferences.sql','202610120008_accounting_integrity.sql','202610130001_accounting_show_boundary.sql','202610130002_accounting_minimal_linkage.sql','202610130003_legacy_return_reversal.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/202610140009_capacity_noop_commit.sql','utf8'));
  const commit=async(before,after,notices=[])=>{const patch=stateChanges(before,after,{preserveOrder:true});return (await q('select papa_room_operational_commit($1,$2,$3,$4,$5,$6) rev',[before.revision,patch.changes,patch.removed,ctx,notices,'papa']))[0].rev;};
  const run=async(type,data,time=at)=>{const next=mutate(state,{streamer:'papa',type,data},actor,time);next.revision=await commit(state,next);state=next;};
  const summary=async(day='2026-10-12')=>(await q('select papa_accounting_summary($1,$2,$3) value',['space-001','papa',day]))[0].value;

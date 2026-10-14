@@ -1,4 +1,4 @@
-import {TABLES} from './core.js?v=10.14-WEB.3';
+import {TABLES} from './core.js?v=10.14-WEB.5';
 const stateRecordId=(kind,data)=>String(kind==='players'?data.playerId:kind==='songs'?data.songId:data.id);
 const operational=new Set(['request','queue','queueBulkDelete','cancelOwn','replaceOwn','onBehalf','streamerDraw','ledger','allocate','allocateStored','wish','wishAdmin']);
 export function scopedOperationalAction(action){return !!action&&!(action.type==='wishAdmin'&&action.data?.addSong)&&(operational.has(action.type)||action.type==='recordTime'&&['queue','ledger','wishes'].includes(action.data?.table));}
@@ -21,8 +21,14 @@ function orderedEntries(before,after){
  }
  return [...rows,...stateMetaEntries(after)];
 }
-export function stateChanges(before,after,{preserveOrder=false}={}){
+// Compare the JSON that will actually be sent, independent of object key order.
+// Arrays remain ordered; null, absent values and numeric/string types stay distinct.
+function canonicalJSON(value){
+ return JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)
+  ?Object.fromEntries(Object.keys(item).sort().map(key=>[key,item[key]])):item);
+}
+export function stateChanges(before,after,{preserveOrder=true}={}){
  const previous=preserveOrder?orderedEntries(before,before):stateEntries(before),next=preserveOrder?orderedEntries(before,after):stateEntries(after);
  const old=new Map(previous.map(row=>[row.kind+':'+row.id,row])),keys=new Set(next.map(row=>row.kind+':'+row.id));
- return {changes:next.filter(row=>JSON.stringify(old.get(row.kind+':'+row.id)?.data)!==JSON.stringify(row.data)),removed:previous.filter(row=>!keys.has(row.kind+':'+row.id)).map(({kind,id})=>({kind,id}))};
+ return {changes:next.filter(row=>canonicalJSON(old.get(row.kind+':'+row.id)?.data)!==canonicalJSON(row.data)),removed:previous.filter(row=>!keys.has(row.kind+':'+row.id)).map(({kind,id})=>({kind,id}))};
 }

@@ -45,3 +45,32 @@ test('the lean operational path never handles song/private/profile/settings writ
  assert.equal(scopedOperationalAction({type:'wishAdmin',data:{status:'已學會',addSong:true}}),false);
  assert.equal(scopedOperationalAction({type:'wishAdmin',data:{status:'已學會',addSong:false}}),true);
 });
+
+test('default patches do not renumber 696 unrelated songs when another room adds or deletes one',()=>{
+ const before=empty();before.songs=Array.from({length:696},(_,i)=>({songId:'s'+i,streamer_id:'other',title:'Song '+i,_order:1000+i*3}));
+ before.songs.unshift({songId:'selected',streamer_id:'papa',title:'Selected',_order:4});
+ const after=structuredClone(before);after.songs.shift();after.songs.push({songId:'new',streamer_id:'papa',title:'New'});
+ const patch=stateChanges(before,after);
+ assert.deepEqual(patch.removed,[{kind:'songs',id:'selected'}]);
+ assert.deepEqual(patch.changes.map(r=>r.id),['new']);
+ assert.equal(patch.changes[0].data._order,3086);
+});
+
+test('JSON key order and omitted undefined are no-ops; array order, values, null and types are not',()=>{
+ const before=empty();before.players=[{playerId:'p',name:'Player',ids:['a','b'],extra:{a:1,b:2}}];
+ const after=structuredClone(before);after.players=[{extra:{b:2,a:1},ids:['a','b'],name:'Player',playerId:'p',unused:undefined}];
+ assert.equal(stateChanges(before,after).changes.length,0);
+ for(const change of [p=>p.ids.reverse(),p=>p.extra.a='1',p=>p.unused=null,p=>p.name='Changed']){
+  const next=structuredClone(after);change(next.players[0]);assert.equal(stateChanges(before,next).changes.length,1);
+ }
+});
+
+test('saving an unchanged song later does not touch its time or manufacture an Audit patch',()=>{
+ const before=mutate(empty(),{type:'song',data:{title:'Song',artist:'Artist',lyrics:'Preserve lyrics',tags:['甜歌']}},{role:'admin'},'2026-10-14T01:00:00Z');
+ const song=before.songs[0];
+ const after=mutate(before,{type:'song',data:{...song}},{role:'admin'},'2026-10-14T02:00:00Z');
+ assert.equal(after.songs[0].updated_at,song.updated_at);
+ assert.equal(stateChanges(before,after).changes.length,0);
+ const edited=mutate(before,{type:'song',data:{...song,lyrics:'Actually changed'}},{role:'admin'},'2026-10-14T02:00:00Z');
+ assert.equal(stateChanges(before,edited).changes.filter(r=>r.kind==='songs').length,1);
+});

@@ -1,4 +1,4 @@
-import {MESSAGE_CATEGORIES} from './message-center.js?v=10.14-WEB.3';
+import {MESSAGE_CATEGORIES} from './message-center.js?v=10.14-WEB.5';
 const h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const count=n=>n>99?'99+':String(n||0);
 export function messageCenterHtml(v,{scopeLabel,canUseSpace=false,canNavigate=false,canOpenCategory=false}){

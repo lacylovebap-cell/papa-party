@@ -1,0 +1,36 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {PGlite} from '@electric-sql/pglite';
+const read=name=>fs.readFileSync('supabase/migrations/'+name,'utf8');
+
+test('same-value UPSERT keeps physical tuple and Audit; real changes, revision locks and rollback survive',async t=>{
+ const db=new PGlite();t.after(()=>db.close());
+ const q=async(sql,args=[])=>(await db.query(sql,args)).rows;
+ await db.exec('create role anon;create role authenticated;create role service_role;');
+ const base=read('202609170001_party_v2.sql');await db.exec(base.slice(0,base.indexOf('insert into storage.buckets')));
+ await db.exec(read('202609240001_release_a.sql'));
+ await db.exec(read('202610140009_capacity_noop_commit.sql'));
+ const commit=async(rev,changes,removed=[])=>q('select papa_v2_commit($1,$2,$3) revision',[rev,changes,removed]);
+ const row={kind:'songs',id:'s1',data:{songId:'s1',streamer_id:'papa',title:'Song',tags:['a','b']}};
+ await commit(0,[row]);
+ const snapshot=async()=>({entities:await q('select ctid::text,kind,id,data from papa_v2_entities order by kind,id'),audit:await q('select * from papa_events order by id')});
+ const before=await snapshot();
+ for(let rev=1;rev<=20;rev++)await commit(rev,[{...row,data:{tags:['a','b'],title:'Song',streamer_id:'papa',songId:'s1'}}]);
+ assert.deepEqual(await snapshot(),before,'no new tuple or Audit even when object keys reorder');
+ assert.equal((await q('select revision from papa_v2_revision'))[0].revision,21);
+ await assert.rejects(commit(0,[row]),/VERSION_CONFLICT/);
+ assert.deepEqual(await snapshot(),before);
+ const changed={...row,data:{...row.data,title:'Changed'}};
+ await commit(21,[changed]);let state=await snapshot();
+ assert.equal(state.audit.length,2);assert.equal(state.audit[1].before_data.title,'Song');assert.equal(state.audit[1].after_data.title,'Changed');
+ await assert.rejects(commit(22,[row,{kind:'invalid',id:'bad',data:{}}]),/check constraint/);
+ assert.deepEqual(await snapshot(),state,'error rolls back entity, Audit and revision');
+ assert.equal((await q('select revision from papa_v2_revision'))[0].revision,22);
+ await commit(22,[],[{kind:'songs',id:'s1'}]);state=await snapshot();
+ assert.equal(state.entities.length,0);assert.equal(state.audit.length,3);assert.equal(state.audit[2].before_data.title,'Changed');
+ assert.equal((await q("select has_function_privilege('anon','papa_v2_commit(bigint,jsonb,jsonb)','execute') allowed"))[0].allowed,false);
+ const preserved=await snapshot();
+ await db.exec(fs.readFileSync('ops/capacity-noop-rollback-20261014.sql','utf8'));
+ assert.deepEqual(await snapshot(),preserved,'schema-only rollback preserves every Audit and entity');
+});
