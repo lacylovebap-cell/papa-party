@@ -1,4 +1,4 @@
-import {scopedOperationalAction} from './state-patch.js?v=10.14-WEB.2';
+import {scopedOperationalAction} from './state-patch.js?v=10.14-WEB.3';
 
 export const supportsOperationReceipt=body=>body?.op==='mutate'&&scopedOperationalAction(body.action)
  ||['requestsBatch','ownQueueBatch'].includes(body?.op);

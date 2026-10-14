@@ -1,4 +1,4 @@
-import {previewImport,applyImport,scopeState} from './core.js?v=10.14-WEB.2';
+import {previewImport,applyImport,scopeState} from './core.js?v=10.14-WEB.3';
 
 const MAX_ROWS=2000;
 const CHOICES=new Set(['add','update','skip']);

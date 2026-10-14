@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createAchievementPanel,achievementPanelHtml} from '../src/achievements-view.js';
+import {createAchievementPanel,achievementPanelHtml,achievementDetailsHtml} from '../src/achievements-view.js';
 const context=()=>({active:true,key:'player:P1:room',revision:1,manager:false,playerId:'P1',spaceId:'space-001',room:'papa'});
 const response=c=>({version:1,scope:{spaceId:c.spaceId,streamerId:c.room,playerId:c.playerId},rows:[{code:'sung50',name:'50首兵郎',qualified:true,condition:'50',acquiredAt:null}]});
 test('one bounded demand read is shared and cached; actor/Space changes discard old responses',async()=>{
@@ -16,5 +16,11 @@ test('read scope mismatch fails closed and readonly player cannot set visibility
 });
 test('display escapes stored labels, shows unknown historical acquisition time and never exposes hidden condition data',()=>{
  const html=achievementPanelHtml([{name:'<img src=x onerror=alert(1)>',code:'sung50',qualified:true,condition:null,acquiredAt:null,lifetime:'permanent',visibility:'condition_hidden'}]);
- assert.doesNotMatch(html,/<img/);assert.match(html,/&lt;img/);assert.match(html,/取得时间|取得時間尚無紀錄/);assert.match(html,/取得條件暫不公開/);assert.doesNotMatch(html,/data-achievement-code/);
+ assert.doesNotMatch(html,/<img/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/取得時間尚無紀錄/);const detail=achievementDetailsHtml({name:'test',code:'sung50',qualified:true,visibility:'condition_hidden'});assert.match(detail,/取得時間尚無紀錄/);assert.match(detail,/取得條件暫不公開/);assert.doesNotMatch(html,/data-achievement-code/);
+});
+
+test('locked secrets cannot leak via atlas or detail; filters do not alter award rules',()=>{
+ const rows=[{code:'chosen',name:'secret-name',condition:'secret-condition',visibility:'after_award',qualified:false},{code:'sung50',name:'50首兵郎',visibility:'public',qualified:true}];
+ for(const html of [achievementPanelHtml(rows),achievementDetailsHtml(rows[0])]){assert.doesNotMatch(html,/secret-name|secret-condition/);assert.match(html,/神秘勳章/);}
+ const filtered=achievementPanelHtml(rows,{category:'performance',status:'earned'});assert.match(filtered,/50首兵郎/);assert.doesNotMatch(filtered,/神秘勳章/);assert.match(filtered,/data-medal-detail="1"/);
 });

@@ -9,6 +9,8 @@ function fixture(role='player',options={}){
  const tasks=[];const fetch=async(url,request)=>{const path=new URL(url).pathname,b=typeof request.body==='string'?JSON.parse(request.body):request.body||null;calls.push({path,b});
   if(path.endsWith('/papa_verified_session_actor'))return Response.json(options.expired?null:actor);
   if(path.endsWith('/papa_streamer_directory')||path.endsWith('/papa_streamer_directory_in_space'))return Response.json([{id:'papa',slug:'papa',active:true,spaceId:'space-001'},{id:'other',slug:'other',active:true,spaceId:'space-001'}]);
+  if(path.endsWith('/papa_song_favorite_audience'))return Response.json({counts:{S1:0}});
+  if(path.endsWith('/papa_achievement_collection'))return Response.json({version:1,rows:[],total:0,page:0});
   if(path.startsWith('/storage/v1/object/papa-card-media/'))return Response.json({ok:true});
   assert.equal(b.actor_context.role,role);assert.equal(b.actor_context.account_id,actor.accountId);
   if(path.endsWith('/papa_activity_record'))return Response.json({ok:true});
@@ -40,4 +42,10 @@ test('cross-room/Space, expired session and player visibility writes reject befo
  for(const [role,b,o] of [['player',{spaceId:'space-002'},{}],['streamer_admin',{streamer:'other'},{}],['player',{}, {expired:true}],['player',{op:'achievementVisibility',code:'sung50',visibility:'hidden'},{}]]){const f=fixture(role,o);assert.equal((await f.invoke(b)).status,400);assert.equal(f.calls.some(c=>c.path.includes('/papa_achievement_')),false);}
  const f=fixture('streamer_admin');assert.equal((await f.invoke({op:'achievementVisibility',code:'sung50',visibility:'after_award'})).status,200);
  const m=fixture('super_admin',{result:{scope:{spaceId:'foreign',streamerId:'papa',playerId:'P1'}}});assert.equal((await m.invoke()).status,400);
+});
+
+test('favorite audience is manager-only and cross-room actors cannot request names; collection rejects malformed inputs',async()=>{
+ for(const [role,b] of [['player',{op:'favoriteAudience',songIds:['S1']}],['streamer_admin',{op:'favoriteAudience',songIds:['S1'],streamer:'other'}],['streamer_admin',{op:'favoriteAudience',songIds:Array(51).fill('S1')}],['player',{op:'achievementCollection',view:'gallery',playerKey:'account-uuid'}],['player',{op:'achievementCollection',view:'global',page:-1}]]){const f=fixture(role);assert.equal((await f.invoke(b)).status,400);assert.equal(f.calls.some(c=>/papa_song_favorite_audience|papa_achievement_collection/.test(c.path)),false);}
+ const f=fixture('streamer_admin');assert.equal((await f.invoke({op:'favoriteAudience',songIds:['S1']})).status,200);const request=f.calls.find(c=>c.path.endsWith('/papa_song_favorite_audience'));assert.equal(request.b.requested_room,'papa');assert.equal(request.b.actor_context.actor_streamer_id,'papa');
+ const p=fixture();assert.equal((await p.invoke({op:'achievementCollection',view:'global'})).status,200);
 });

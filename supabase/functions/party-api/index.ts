@@ -370,7 +370,7 @@ async function messageCenterOperation(b:any,who:any,room:any){
   ||scopeMode==='space'&&!isSuper(who))throw Error('通知空間資料不正確');
  const common={requested_space:spaceId,requested_room:room.id,scope_mode:scopeMode,
   actor_context:{role:who.role,account_id:who.accountId,space_id:spaceId,
-   player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamerId:null}};
+   player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamer_id:null}};
  const expectedScope={spaceId,streamerId:scopeMode==='room'?room.id:null,mode:scopeMode};
  const checkScope=(value:any)=>{
   if(value?.version!==1||value.scope?.spaceId!==expectedScope.spaceId||value.scope?.streamerId!==expectedScope.streamerId||value.scope?.mode!==expectedScope.mode)throw Error('通知空間資料不正確');
@@ -503,7 +503,7 @@ function observeActivity(b:any,who:any){
 }
 const eventTotals=new Map();
 async function eventTotal(room:any,global:boolean){const key=JSON.stringify([room.spaceId,room.id,global]),cached=eventTotals.get(key);if(cached&&Date.now()-cached.at<60000)return cached.total;const total=await api('/rest/v1/rpc/papa_event_total',{room_id:room.id,include_global:global});if(typeof total!=='number'||!Number.isSafeInteger(total)||total<0)throw Error('操作歷史頁數尚未確認');if(eventTotals.size>=128)eventTotals.delete(eventTotals.keys().next().value);eventTotals.set(key,{at:Date.now(),total});return total;}
-Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.14-WEB.2',achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.14-WEB.3',achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  activityRequest={body:b,who};
  if(b.op==='activityPage'){if(!isSuper(who)||!who.accountId)throw Error('只有 PA Party總裁可查看活動');const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';if(b.spaceId!==undefined&&b.spaceId!==space||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000)throw Error('活動頁碼或範圍不正確');const result=await api('/rest/v1/rpc/papa_activity_page',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space},page_number:b.page??0});if(result?.version!==1||result.spaceId!==space||result.page!==(b.page??0)||result.pageSize!==50||!Array.isArray(result.rows)||result.rows.length>50)throw Error('活動資料尚未確認');return respond({...result,rows:result.rows.map((r:any)=>({player_id:r.player_id,streamer_id:r.streamer_id,page:r.page,last_seen:r.last_seen,online:r.online}))});}
  if(b.op==='uploadVideo'){
@@ -513,11 +513,16 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   const path=crypto.randomUUID()+(b.mime==='video/mp4'?'.mp4':'.webm'),r=await fetch(SB_URL+'/storage/v1/object/papa-card-media/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':b.mime},body:binary});
   if(!r.ok)throw Error('影片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-card-media/'+path});
  }
+ if(b.op==='achievementCollection'){
+  if(!who?.accountId)throw Error('請重新登入');const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';
+  if(!['room','global','rooms','gallery','mine'].includes(b.view)||typeof(b.query??'')!=='string'||(b.query??'').length>100||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000||b.playerKey!==undefined&&!/^[a-f0-9]{32}$/.test(b.playerKey)||b.room!==undefined&&(typeof b.room!=='string'||b.room.length>200))throw Error('勳章查詢不正確');
+  return respond(await api('/rest/v1/rpc/papa_achievement_collection',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space,player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamer_id:null},view_mode:b.view,query_text:b.query??'',page_number:b.page??0,public_player:b.playerKey??null,target_room:b.room??null}));
+ }
  if(['achievements','achievementVisibility'].includes(b.op)){
   if(!who?.accountId)throw Error('請重新登入');
   const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';
   if(b.spaceId!==undefined&&b.spaceId!==space)throw Error('勳章空間不正確');
-  const common={requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space,player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamerId:null}};
+  const common={requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space,player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamer_id:null}};
   if(b.op==='achievementVisibility'){
    if(!isManager(who)||typeof b.code!=='string'||!/^[a-z0-9_]{1,40}$/.test(b.code)||!['public','condition_hidden','hidden','after_award'].includes(b.visibility))throw Error('勳章顯示設定不正確');
    const result=await api('/rest/v1/rpc/papa_achievement_visibility_set',{...common,requested_code:b.code,requested_visibility:b.visibility});
@@ -668,6 +673,12 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   managerPasswordError(result,kind);return respond({ok:true,signOut:true});
  }
  if(b.op==='upload'){if(!isManager(who))throw new Error('只有管理員能上傳');await managerRoom(who,b.streamer||'papa');const binary=Uint8Array.from(atob(b.image),c=>c.charCodeAt(0));if(binary.length>3145728||b.mime!=='image/webp')throw new Error('請使用壓縮後圖片');const path=crypto.randomUUID()+'.webp',r=await fetch(SB_URL+'/storage/v1/object/papa-photos/'+path,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'image/webp'},body:binary});if(!r.ok)throw new Error('圖片上傳失敗');return respond({url:SB_URL+'/storage/v1/object/public/papa-photos/'+path});}
+ if(b.op==='favoriteAudience'){
+  if(!isManager(who)||!who.accountId)throw Error('請先登入管理');
+  const room=await catalogRoom(who,b.streamer||'papa',true),space=room.spaceId||'space-001';
+  if(!Array.isArray(b.songIds)||!b.songIds.length||b.songIds.length>50||b.songIds.some((id:any)=>typeof id!=='string'||!id||id.length>200)||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000||b.songId!==undefined&&(typeof b.songId!=='string'||!b.songIds.includes(b.songId)))throw Error('收藏名單資料不正確');
+  return respond(await api('/rest/v1/rpc/papa_song_favorite_audience',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space,actor_streamer_id:who.role==='streamer_admin'?who.streamer_id:null},song_ids:b.songIds,requested_song:b.songId??null,page_number:b.page??0}));
+ }
  if(['favoritesPage','favoriteSet','favoriteFlags','favoritesSetBatch'].includes(b.op)){
   if(b.token&&!who)throw Error('登入已到期，請重新登入');
   if(who?.role!=='player'||!who.playerId||!who.accountId)throw Error('請先登入玩家');

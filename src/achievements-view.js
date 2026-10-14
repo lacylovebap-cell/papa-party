@@ -1,8 +1,23 @@
 const h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const modes={public:'公開',condition_hidden:'隱藏條件',hidden:'完全隱藏',after_award:'取得後公開'};
 const lifetimes={show:'本場',permanent:'永久',holding:'持有期間',rolling:'最近 3 日',rolling30:'最近 30 日','24h':'24 小時'};
-export function achievementPanelHtml(rows,{manager=false}={}){
- return '<div class="medal-list">'+rows.map(row=>'<article class="medal-row"><div><strong>'+h(row.name)+'</strong><span class="tag">'+(row.qualified?'已獲得':'未獲得')+'</span></div><p>'+h(row.condition||'取得條件暫不公開')+'</p><small>'+h(lifetimes[row.lifetime]||'')+' · '+(row.acquiredAt?'取得：'+h(new Date(row.acquiredAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei'})):row.qualified?'符合條件；取得時間尚無紀錄':'尚未取得')+'</small>'+(manager?'<label>顯示方式<select data-achievement-code="'+h(row.code)+'">'+Object.entries(modes).map(([k,n])=>'<option value="'+k+'" '+(row.visibility===k?'selected':'')+'>'+n+'</option>').join('')+'</select></label>':'')+'</article>').join('')+'</div>';
+const categories={request:'點歌',stock:'存歌',saved:'提歌',performance:'演唱',hidden:'隱藏'};
+export function achievementCategory(row){
+ if(['hidden','after_award'].includes(row.visibility))return 'hidden';
+ if(row.code?.startsWith('stock'))return 'stock';
+ if(/^(saved|failure|after_failure)/.test(row.code||''))return 'saved';
+ if(/^(sung|first_mic|repeat_show|seventh)/.test(row.code||''))return 'performance';
+ return 'request';
+}
+const icons={request:'🎵',stock:'💾',saved:'🎤',performance:'🏅',hidden:'✨'};
+function concealed(row,manager){return !manager&&!row.qualified&&['hidden','after_award'].includes(row.visibility);}
+export function achievementDetailsHtml(row,{manager=false}={}){
+ const secret=concealed(row,manager),category=secret?'hidden':achievementCategory(row);
+ return '<div class="medal-details"><span class="medal-icon" aria-hidden="true">'+(secret?'🔒':icons[category])+'</span><h3>'+h(secret?'神秘勳章':row.name)+'</h3><p>'+h(secret||!manager&&row.visibility==='condition_hidden'?'取得條件暫不公開':row.condition||'取得條件暫不公開')+'</p><dl><dt>類型</dt><dd>'+categories[category]+'</dd><dt>有效期限</dt><dd>'+h(secret?'解鎖後公開':lifetimes[row.lifetime]||'依勳章規則')+'</dd><dt>狀態</dt><dd>'+(row.currentActive!==undefined?(row.currentActive?'曾取得 · 目前有效':'曾取得 · 目前未生效'):row.qualified?'已獲得':'未獲得')+'</dd></dl>'+(!secret?'<small>'+(row.acquiredAt?'取得：'+h(new Date(row.acquiredAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei'})):row.qualified?'符合條件；取得時間尚無紀錄':'尚未取得')+'</small>':'')+'</div>';
+}
+export function achievementPanelHtml(rows,{manager=false,category='all',status='all'}={}){
+ const shown=rows.map((row,index)=>({row,index})).filter(({row})=>(category==='all'||achievementCategory(row)===category)&&(status==='all'||(status==='earned')===row.qualified));
+ return '<div class="medal-heading"><h3>勳章圖鑑</h3><span>已解鎖 '+rows.filter(row=>row.qualified).length+' / '+rows.length+'</span></div><div class="medal-filters"><label>類型<select data-medal-filter="category">'+Object.entries({all:'全部',...categories}).map(([key,label])=>'<option value="'+key+'" '+(category===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label><label>狀態<select data-medal-filter="status">'+Object.entries({all:'全部狀態',earned:'已獲得',locked:'未獲得'}).map(([key,label])=>'<option value="'+key+'" '+(status===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label></div><div class="medal-list">'+shown.map(({row,index})=>{const secret=concealed(row,manager);return '<article class="medal-row '+(row.qualified?'medal-earned':'medal-locked')+'"><button type="button" class="medal-help" data-medal-detail="'+index+'" aria-label="'+h(secret?'神秘勳章':row.name)+'說明">!</button><span class="medal-icon" aria-hidden="true">'+(secret?'🔒':icons[achievementCategory(row)])+'</span><strong>'+h(secret?'神秘勳章':row.name)+'</strong><small>'+(row.qualified?'已獲得':'未獲得')+'</small>'+(manager?'<label>顯示方式<select data-achievement-code="'+h(row.code)+'">'+Object.entries(modes).map(([key,name])=>'<option value="'+key+'" '+(row.visibility===key?'selected':'')+'>'+name+'</option>').join('')+'</select></label>':'')+'</article>';}).join('')+'</div>'+(shown.length?'':'<p class="subtle">沒有符合篩選的勳章</p>');
 }
 export function createAchievementPanel({api,context,render}){
  let generation=0,cache=null,pending=null;
