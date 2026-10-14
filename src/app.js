@@ -1,38 +1,38 @@
-import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.14-WEB.5';
-import {accountingDay,accountingRollover} from './accounting.js?v=10.14-WEB.5';
-import {installPageJumps} from './ui-page-jumps.js?v=10.14-WEB.5';
-import {createWebAppInstall} from './web-app-install.js?v=10.14-WEB.5';
-import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.14-WEB.5';
-import {webApiFailure} from './web-api-errors.js?v=10.14-WEB.5';
-import {canonicalNoticeLink} from './notification-rules.js?v=10.14-WEB.5';
-import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.14-WEB.5';
-import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.14-WEB.5';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.14-WEB.5';
-import {fateCategories,drawSong} from './fate.js?v=10.14-WEB.5';
-import {createBoard} from './board.js?v=10.14-WEB.5';
-import {createChat} from './chat.js?v=10.14-WEB.5';
-import {requestSourceLabel} from './request-source.js?v=10.14-WEB.5';
-import {normalizeHome,themePalette} from './home-settings.js?v=10.14-WEB.5';
-import {openHomeEditor} from './home-editor.js?v=10.14-WEB.5';
-import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.14-WEB.5';
-import {createNotifications} from './notifications.js?v=10.14-WEB.5';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.14-WEB.5';
-import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.14-WEB.5';
-import {createPlayerManager} from './player-manager.js?v=10.14-WEB.5';
-import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.14-WEB.5';
-import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.14-WEB.5';
-import {createSongFavorites} from './song-favorites.js?v=10.14-WEB.5';
-import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.14-WEB.5';
-import {listenedSongs} from './listening-history.js?v=10.14-WEB.5';
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.14-WEB.5';
-import {createWebDeviceLogin} from './web-device-login.js?v=10.14-WEB.5';
-import {roomStorageKey} from './communication-context.js?v=10.14-WEB.5';
-import {createWebSpaceEntry} from './web-space-entry.js?v=10.14-WEB.5';
-import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.14-WEB.5';
-import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.14-WEB.5';
-import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.14-WEB.5';
-import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.14-WEB.5';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.14-WEB.5';
+import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.14-WEB.6';
+import {accountingDay,accountingRollover} from './accounting.js?v=10.14-WEB.6';
+import {installPageJumps} from './ui-page-jumps.js?v=10.14-WEB.6';
+import {createWebAppInstall} from './web-app-install.js?v=10.14-WEB.6';
+import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.14-WEB.6';
+import {webApiFailure} from './web-api-errors.js?v=10.14-WEB.6';
+import {canonicalNoticeLink} from './notification-rules.js?v=10.14-WEB.6';
+import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.14-WEB.6';
+import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.14-WEB.6';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.14-WEB.6';
+import {fateCategories,drawSong} from './fate.js?v=10.14-WEB.6';
+import {createBoard} from './board.js?v=10.14-WEB.6';
+import {createChat} from './chat.js?v=10.14-WEB.6';
+import {requestSourceLabel} from './request-source.js?v=10.14-WEB.6';
+import {normalizeHome,themePalette} from './home-settings.js?v=10.14-WEB.6';
+import {openHomeEditor} from './home-editor.js?v=10.14-WEB.6';
+import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.14-WEB.6';
+import {createNotifications} from './notifications.js?v=10.14-WEB.6';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.14-WEB.6';
+import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.14-WEB.6';
+import {createPlayerManager} from './player-manager.js?v=10.14-WEB.6';
+import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.14-WEB.6';
+import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.14-WEB.6';
+import {createSongFavorites} from './song-favorites.js?v=10.14-WEB.6';
+import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.14-WEB.6';
+import {listenedSongs} from './listening-history.js?v=10.14-WEB.6';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.14-WEB.6';
+import {createWebDeviceLogin} from './web-device-login.js?v=10.14-WEB.6';
+import {roomStorageKey} from './communication-context.js?v=10.14-WEB.6';
+import {createWebSpaceEntry} from './web-space-entry.js?v=10.14-WEB.6';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.14-WEB.6';
+import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.14-WEB.6';
+import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.14-WEB.6';
+import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.14-WEB.6';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.14-WEB.6';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let appInstallMessage='';
 const appInstall=createWebAppInstall({onChange:syncAppInstall});
@@ -380,7 +380,29 @@ function homeAccounting(s){if(!s)return blank('帳務摘要尚未確認');const 
 function crownsHtml(rows,adminMode=false){return `<div class="crown-grid">${rows.map(c=>{const remaining=c.expiresAt?(timeValue(c.expiresAt)-Date.now()-offset)/86400000:Infinity,status=!c.activatedAt?'⏳ 待確認':!isActive(c,clock())?'🕒 已過期':remaining<=7?'⚠️ 即將到期':!c.expiresAt?'♾️ 永久':'👑 生效中';return `<div class="crown"><h3>${h(song(c.songId)?.title||c.title||'歌曲待核對')} 👑</h3><p>${h(c.tier)} · ${h(c.ownerName||playerName(c.playerId))}</p>${adminMode||c.activatedAt?`<p>${h(status)}${c.expiresAt?' · '+time(c.expiresAt):''}</p>`:''}<p>其他玩家現點 ${money(c.price)}／首<br><span>＋雙費 ${money(state.settings.liveDouble??500)} 探鑽</span></p>${adminMode?button('編輯／生效','editCrown',c.id)+button('時間','recordTime',c.id,'tiny','data-table="crowns"'):button('👑 點冠歌','requestCrown',c.id,'tiny primary')}</div>`;}).join('')||blank('還沒有冠歌，王冠等你戴 ♡')}</div>`;}
 function currentCards(){return state.cards.filter(c=>timeValue(c.startsAt)<=Date.now()+offset&&(!c.expiresAt||timeValue(c.expiresAt)>Date.now()+offset));}
 function photoHtml(c){const fields=cardDisplay(c),image='<img src="'+h(c.thumbnail||c.url)+'" alt="'+h(c.description||'卡片')+'" loading="lazy">',media=c.mediaType==='video'?'<video controls playsinline preload="none" src="'+h(c.url)+'"></video>':'<button type="button" class="photo-media-button" data-act="cardMedia" data-id="'+h(c.id)+'" aria-label="放大查看卡片">'+image+'</button>';return '<div class="photo">'+media+(c.mediaType==='video'?button('放大觀看','cardMedia',c.id,'tiny'):'')+(fields.description?'<p>'+h(c.description)+'</p>':'')+(fields.player?'<small>'+h(c.playerName||playerName(c.playerId))+'</small>':'')+(fields.time?'<small>'+time(c.startsAt)+' ～ '+(c.expiresAt?time(c.expiresAt):'永久')+'</small>':'')+(fields.id?'<small>ID：'+h(c.id)+'</small>':'')+'</div>';}
-function photoCarousel(){const rows=orderedCards(currentCards());if(!rows.length)return blank('照片還在路上，先想像一下 ♡');photoIndex=(photoIndex+rows.length)%rows.length;return photoHtml(rows[photoIndex])+`<div class="photo-controls">${button('←','photoPrev')}<small>${photoIndex+1} / ${rows.length}</small>${button('→','photoNext')}</div>`;}
+function photoCarousel(){const rows=orderedCards(currentCards());if(!rows.length)return blank('照片還在路上，先想像一下 ♡');photoIndex=(photoIndex+rows.length)%rows.length;return photoHtml(rows[photoIndex]).replace('class="photo"','class="photo" data-carousel-card="'+h(rows[photoIndex].id)+'"')+`<div class="photo-controls">${button('←','photoPrev')}<small>${photoIndex+1} / ${rows.length}</small>${button('→','photoNext')}</div>`;}
+let photoCarouselTimer=null,photoCarouselKey=null;
+const photoCarouselVideos=new Set();
+function homeCardVideo(video){return video.tagName==='VIDEO'&&!!(video.closest('#photo-carousel')||video.dataset.homeCardVideo&&video.closest('#dialog')?.open);}
+function syncPhotoCarousel(restart=false){
+ for(const video of photoCarouselVideos)if(!video.isConnected||!homeCardVideo(video)){
+  photoCarouselVideos.delete(video);delete video.dataset.cardPlaying;video.pause();
+ }
+ const node=$('#photo-carousel'),photo=node?.querySelector('.photo'),video=node?.querySelector('video'),key=photo?.dataset.carouselCard;
+ // Also check native playback state before a queued play event is delivered.
+ if(video&&!video.paused&&!video.ended&&!video.error){photoCarouselVideos.add(video);video.dataset.cardPlaying='1';}
+ const enabled=route==='home'&&photo&&!document.hidden&&!photoCarouselVideos.size;
+ if(!enabled||restart||photoCarouselKey!==key){clearTimeout(photoCarouselTimer);photoCarouselTimer=null;}
+ photoCarouselKey=key;
+ if(!enabled||photoCarouselTimer!==null)return;
+ const timer=setTimeout(()=>{
+  if(photoCarouselTimer!==timer)return;photoCarouselTimer=null;
+  const currentNode=$('#photo-carousel'),current=currentNode?.querySelector('video');
+  if(route!=='home'||document.hidden||!currentNode||photoCarouselVideos.size||current&&!current.paused&&!current.ended&&!current.error){syncPhotoCarousel();return;}
+  photoIndex++;currentNode.innerHTML=photoCarousel();syncPhotoCarousel(true);
+ },video?11000:8000);
+ photoCarouselTimer=timer;
+}
 function fateResultHtml(){const chosen=state.songs.find(s=>s.songId===fateId);if(!chosen||fateCategory.startsWith('tag:')&&!newPracticeSongTags(chosen).includes(fateCategory.slice(4)))return '<small>讓命運幫你選一首 ♡</small>';return `<small>✨ 命運選中了</small><b>${h(chosen.title)}${crownFor(state,fateId,clock())?' 👑':''}</b><small>${h(chosen.artist)}</small>${chosen.murmur?`<p>💬 ${h(chosen.murmur)}</p>`:''}<div class="actions" style="justify-content:center">${button('🎤 提歌','request',fateId,'tiny','data-kind="saved" data-self="true"')}${button('🎁 現點','request',fateId,'tiny','data-kind="live" data-self="true"')}${button('🎲 這命我不要','fate')}</div>`;}
 const newPracticeView={mode:'current',q:'',selected:new Set(),open:false,management:false,page:0,rows:[],total:0,loading:false,error:'',generation:0,scope:null,selectionScope:null,cache:new Map(),pending:null};
 function newPracticeIdentity(){return JSON.stringify([state.currentStreamer?.spaceId||'space-001',state.currentStreamer?.id||streamerSlug,streamerSlug,newPracticeView.management,newPracticeView.management?[admin?.accountId,admin?.role,admin?.spaceId,admin?.streamer_id,admin?.device]:[session?.accountId,session?.role,session?.spaceId,session?.playerId,session?.device],!!demo,!!draft]);}
@@ -465,7 +487,7 @@ function renderHome(){
  const fate=card('🎲 今天聽什麼？','<div class="fate-toolbar"><select id="fate-category" aria-label="命運分類">'+[['all','完全交給命運'],...fateCategories(state.settings,state.songs).map(t=>['tag:'+t,t])].map(([v,label])=>'<option value="'+h(v)+'" '+(v===fateCategory?'selected':'')+'>'+h(label)+'</option>').join('')+'</select>'+button('🎲','fate','','tiny dice-button','aria-label="抽一首" title="抽一首"')+'</div><div id="fate-result" class="fate">'+fateResultHtml()+'</div>');
  const credits=card('💾 我的存歌',p?'<div class="stat">'+h(p.name)+' 在本主播的存歌<b>'+storedBalanceHtml(p.playerId)+'</b></div><p class="muted">所有綁定 ID 共用；完成演唱才扣。</p>'+'<small>'+venueName(venuePolicySettings(state.settings).current_space)+'待唱保留 '+reservedCredits(state,p.playerId)+' 首'+(venuePolicySettings(state.settings).current_space==='radio'?'；電台不足時整首使用聲瑪存歌。':'')+'</small>'+button('查看完整記錄','myLedger','','primary'):blank('登入後，幫你打開存歌袋 ♡')+button('玩家登入','login'));
  const ranking=card('🏆 '+(venuePolicySettings(state.settings).radio_enabled?venueName(venuePolicySettings(state.settings).current_space):'')+'存歌排行榜','<small>匿名 Top 5</small>'+ (rank.filter(x=>x.rank<=5).map(x=>'<div class="song"><div class="info">第 '+x.rank+' 名</div><b>'+x.amount+' 首</b></div>').join('')||blank())+'<div class="notice">'+(p?mine?'你的排名：第 '+mine.rank+' 名　存歌：'+mine.amount+' 首':'測試玩家不列入排行':'請登入查看自己的名次')+'</div>');
- const cards=card('🖼️ 卡片牆','<div id="photo-carousel">'+photoCarousel()+'</div>',false,button('全部卡片','gallery'));
+ const cards=card('🖼️ 展示牆','<div id="photo-carousel">'+photoCarousel()+'</div>',false,button('全部卡片','gallery'));
  const recommendations=card('為你推薦','<p class="subtle">'+(p&&state.queue.some(q=>q.playerId===p.playerId&&q.status==='completed'&&!q.selfProvided)?'依你親自點過的歌手與標籤推薦':'還沒有聆聽偏好，先隨機選幾首 ♡')+'</p>'+songRows(reco));
  if(state.settings.home){const modules={hero:banner,search,fresh,fate,credits,popular:card('🔥 熱門點歌',songRows(popular)),recommendations,crowns:card('👑 冠歌',crownsHtml(state.crowns.filter(c=>isActive(c,clock())||c.legacyDisplay)),true,button('如何冠歌？','crownHelp')),ranking,cards,wishes:card('🌟 許願池','<p>希望'+h(hostName())+'可以學會這首</p>'+button('投一個願望','wish','','primary')),recap:homeAccounting(summary),manual:card('📖 說明書','<div class="manual">'+h(hostText(state.settings.manual).replace('提歌扣存歌','完成演唱才扣存歌'))+'</div>',false,button('價格表','prices'))};const paired=home.visible.wishes&&home.visible.recap,pairKey=home.order.find(k=>['wishes','recap'].includes(k));$('#app').innerHTML='<div class="grid custom-home">'+home.order.filter(k=>home.visible[k]&&(!paired||!['wishes','recap'].includes(k)||k===pairKey)).map(k=>paired&&k===pairKey?'<div class="compact-pair home-bottom-pair wide"><div class="home-module home-module-wishes" data-home-module="wishes">'+modules.wishes+'</div><div class="home-module home-module-recap" data-home-module="recap">'+modules.recap+'</div></div>':'<div class="home-module home-module-'+k+(['hero','search','fresh','crowns'].includes(k)?' wide':'')+'" data-home-module="'+k+'">'+modules[k]+'</div>').join('')+'</div>';return;}
  $('#app').innerHTML=banner+'<div class="grid">'+search+fresh+'<div class="compact-pair mini-pair">'+fate+credits+'</div>'+card('🔥 熱門點歌',songRows(popular))+recommendations+card('👑 冠歌',crownsHtml(state.crowns.filter(c=>isActive(c,clock())||c.legacyDisplay)),true,button('如何冠歌？','crownHelp'))+'<div class="home-stack">'+ranking+cards+'</div><div class="compact-pair home-bottom-pair">'+card('🌟 許願池','<p class="muted">希望'+h(hostName())+'可以學會這首<br>需要使用玩家身分投遞</p>'+button('投一個願望','wish','','primary'))+homeAccounting(currentAccounting())+'</div>'+card('📖 說明書','<div class="manual">'+h(hostText(state.settings.manual).replace('提歌扣存歌','完成演唱才扣存歌'))+'</div>',false,button('價格表','prices'))+'</div>';
@@ -618,7 +640,7 @@ function renderAdmin(){if(tab==='dashboard')tab='queue';let body='';
 function editHome(){openHomeEditor({home:state.settings.home,room:state.currentStreamer,modal,dispatch,demo,toast,upload:async file=>(await api({op:'upload',image:await compress(file,1800),mime:'image/webp'})).url});}
 function applyHomeTheme(){const root=document.documentElement;if(!state.settings.home){delete root.dataset.homeTheme;return;}root.dataset.homeTheme='custom';for(const [k,v] of Object.entries(themePalette(state.settings.home.color,state.settings.home.themeColors)))root.style.setProperty('--home-'+k,v);}
 function settingsHtml(){return `<div class="notice ${draft?'warning':''}">${demo?'預覽測試：資料只存在這台裝置':draft?'📝 草稿模式：只存在這台裝置':'☁️ 正式同步模式'}</div><div class="actions">${button('開始草稿測試','draft')}${button('匯出備份','backup')}${draft?button('正式同步','publish','','primary')+button('離開草稿','leaveDraft'):''}</div><hr><h3>首頁外觀與內容</h3><p class="muted">主題色、主圖、卡片顯示與排序、本日狀態欄位</p>${button('自訂首頁','editHome','','primary')}<hr><h3>直播與價格</h3><p class="muted">${h(state.settings.opening)} · 試音 ${money(state.settings.audition)} · 一般現點 ${money(state.settings.livePrice)}＋雙費 ${money(state.settings.liveDouble)}</p>${button('編輯設定與說明書','editSettings')}${button('存歌方案','editPlans')}${button('冠歌卡別價格','editTiers')}${isSuperAdmin()?'<hr><h3>系統工具／資料檢查</h3>'+button(catalogView.scanning?'掃描中…':catalogView.scanComplete?'重新掃描既有歌本':catalogView.scanCursor?'掃描下一批 100 首':'掃描既有歌本候選','catalogScan','','tiny',catalogView.scanning?'disabled':'')+'<p class="muted">已檢查 '+catalogView.scanTotal+' 首'+(catalogView.scanComplete?'，本輪完成':'；每批最多 100 首，只建立待審候選。')+'</p>'+(state.schemaVersion<3?button('讀取舊版資料並核對','migrate'):'')+(state.migrationIssues?.length?'<details class="notice warning"><summary>資料移轉待核對 '+state.migrationIssues.length+' 項</summary>'+state.migrationIssues.map(h).join('<br>')+'</details>':'<small>沒有待核對的舊版資料</small>'):''}`;}
-function render(){const landing=prepareNoticeLanding();if(nativePlayerView.open&&!nativePlayerProvisionContext().active){const form=nativePlayerView.form;closeNativePlayerProvision();if(form&&$('#native-player-form')===form)$('#dialog')?.close();}if(playerArchiveView.open&&(!isSuperAdmin()||playerArchiveIdentity()!==playerArchiveView.identity)){playerArchiveView.open=false;$('#dialog')?.close();}applyHomeTheme();header();if(!isAdmin()&&unavailableReadScope===syncReadIdentity()){$('#app').innerHTML='<section class="card"><h2>歌本整理中 ♡</h2><p>管理員完成資料移轉後就能開始點歌。</p>'+button('管理入口','admin')+'</section>';return;}if(route==='admin'&&admin)renderAdmin();else if(route==='common-book')renderCommonBook();else if(route==='book')renderBook();else if(route==='center'&&session)renderCenter();else if(route==='gallery')renderGallery();else renderHome();if(route==='admin'&&admin&&tab==='players'&&!selectedPlayer)loadPlayerManagement();loadVisibleFavoriteFlags();loadFavoriteAudience();loadFavorites();loadListeningOverview();achievementPanel.load().catch(()=>{});activityPage.load().catch(()=>{});renderNoticeLanding(landing);}
+function render(){const landing=prepareNoticeLanding();if(nativePlayerView.open&&!nativePlayerProvisionContext().active){const form=nativePlayerView.form;closeNativePlayerProvision();if(form&&$('#native-player-form')===form)$('#dialog')?.close();}if(playerArchiveView.open&&(!isSuperAdmin()||playerArchiveIdentity()!==playerArchiveView.identity)){playerArchiveView.open=false;$('#dialog')?.close();}applyHomeTheme();header();if(!isAdmin()&&unavailableReadScope===syncReadIdentity()){$('#app').innerHTML='<section class="card"><h2>歌本整理中 ♡</h2><p>管理員完成資料移轉後就能開始點歌。</p>'+button('管理入口','admin')+'</section>';return;}if(route==='admin'&&admin)renderAdmin();else if(route==='common-book')renderCommonBook();else if(route==='book')renderBook();else if(route==='center'&&session)renderCenter();else if(route==='gallery')renderGallery();else renderHome();if(route==='admin'&&admin&&tab==='players'&&!selectedPlayer)loadPlayerManagement();loadVisibleFavoriteFlags();loadFavoriteAudience();loadFavorites();loadListeningOverview();achievementPanel.load().catch(()=>{});activityPage.load().catch(()=>{});renderNoticeLanding(landing);syncPhotoCarousel();}
 
 function noticeLandingIdentity(){return JSON.stringify([admin?.accountId,admin?.sessionId||admin?.token,admin?.role,admin?.streamerSlug,session?.accountId,session?.sessionId||session?.token,session?.playerId,state.currentStreamer?.spaceId,state.currentStreamer?.id]);}
 function prepareNoticeLanding(){
@@ -763,8 +785,8 @@ case 'myFavorites':subtab='favorites';await go('center');loadFavorites(true);bre
 case 'request':await requestSong(id,b.dataset.kind,b.dataset.self==='true');break;
 case 'requestCrown':{const c=state.crowns.find(c=>c.id===id);if(!c)return;if(!c.songId||!isActive(c,clock())){modal('👑 '+(song(c.songId)?.title||c.title||'冠歌'),'<p>'+h(c.tier)+' · 其他玩家現點 '+money(c.price)+' 探鑽／首＋雙費 '+money(state.settings.liveDouble??500)+' 探鑽</p><div class="notice">這首冠歌的歌曲綁定與生效資料還在核對中，確認後就能從這裡點歌 ♡</div>');}else await requestSong(c.songId,'saved');break;}
 case 'crownHelp':crownHelp();break;case 'prices':prices();break;case 'wish':wish();break;
-case 'photoPrev':photoIndex--;$('#photo-carousel').innerHTML=photoCarousel();break;
-case 'photoNext':photoIndex++;$('#photo-carousel').innerHTML=photoCarousel();break;
+case 'photoPrev':photoIndex--;$('#photo-carousel').innerHTML=photoCarousel();syncPhotoCarousel(true);break;
+case 'photoNext':photoIndex++;$('#photo-carousel').innerHTML=photoCarousel();syncPhotoCarousel(true);break;
 case 'galleryFilter':galleryFilter=id;render();break;
 case 'fate':{const category=$('#fate-category').value;if(category!==fateCategory){fateSeen=[];fateId=null;}fateCategory=category;const result=drawSong(state.songs,category,fateSeen,fateId),chosen=result.song;if(!chosen)return toast('這個標籤暫時沒有歌曲 ♡');fateId=chosen.songId;fateSeen=result.seen;$('#fate-result').innerHTML=fateResultHtml();break;}
 case 'listeningMore':await openListening(id,b.dataset.management==='true');break;case 'listeningPage':{const view=listeningView;view.page+=Number(id);await loadListeningPage(view.playerId,view.management,view.page);break;}case 'listeningRetry':await loadListeningPage(listeningView.playerId,listeningView.management,listeningView.page,20,true);break;case 'listeningOverviewRetry':await loadListeningOverview(true);break;case 'newPractice':await openNewPractice(false);break;case 'newPracticeManage':await openNewPractice(true);break;case 'newPracticePage':await loadNewPractice(newPracticeView.page+Number(id));break;case 'newPracticeRetry':await loadNewPractice(newPracticeView.page,true);break;case 'newPracticeMove':await moveNewPractice(id,b.dataset.target,b.dataset.position);break;case 'proxyDraw':drawForStreamer();break;case 'proxyNewSong':await openProxyNewSong();break;case 'newSong':await editSong();break;case 'songLink':await openSharedBrowse(null,id);break;case 'catalogReportSong':reportCatalogSong(id);break;case 'songVisibilityMode':if(['visible','hidden'].includes(id)&&isAdmin()){songVisibilityFilter=id;selectedSongs.clear();pages.songs=1;roomSearch.generation++;clearTimeout(roomSearch.timer);render();}break;case 'songHide':{const current=song(id);if(current){await dispatch('song',{...current,hidden:!current.hidden,plays:plays(current)});toast(current.hidden?'已恢復顯示':'已隱藏，玩家不會看到這首歌');}break;}case 'songOtherSingers':await showOtherSingers(id);break;case 'status':await dispatch('settings',{status:id});break;case 'venue':await dispatch('settings',{current_space:id});pages.ledger=1;render();break;
@@ -813,7 +835,7 @@ case 'clearFilters':filters={q:'',tags:[],language:''};render();break;
 case 'deleteTag':if(confirm('刪除標籤「'+id+'」並從歌曲移除？'))await dispatch('tag',{tag:id,remove:true});break;
 case 'addTag':modal('新增標籤',field('tag','標籤名稱'),async f=>dispatch('tag',{tag:f.get('tag')}));break;
 case 'editCrown':editCrown(id);break;case 'deleteCrown':if(confirm('刪除冠歌？')){await dispatch('crown',{id,remove:true});$('#dialog').close();}break;
-case 'cardMedia':{const c=state.cards.find(c=>c.id===id);if(c)modal(c.description||'查看卡片',c.mediaType==='video'?'<video class="card-full-media" controls playsinline preload="none" src="'+h(c.url)+'"></video>':'<img class="card-full-media" src="'+h(c.url)+'" alt="'+h(c.description||'卡片')+'">');break;}case 'cardMove':await dispatch('card',{id,operation:'move',direction:Number(b.dataset.direction)});break;case 'editCard':editCard(id);break;case 'deleteCard':if(confirm('刪除這張照片卡片？'))await dispatch('card',{id,remove:true});break;
+case 'cardMedia':{const c=state.cards.find(c=>c.id===id);if(c)modal(c.description||'查看卡片',c.mediaType==='video'?'<video '+(route==='home'&&$('#photo-carousel')?'data-home-card-video="1" ':'')+'class="card-full-media" controls playsinline preload="none" src="'+h(c.url)+'"></video>':'<img class="card-full-media" src="'+h(c.url)+'" alt="'+h(c.description||'卡片')+'">');break;}case 'cardMove':await dispatch('card',{id,operation:'move',direction:Number(b.dataset.direction)});break;case 'editCard':editCard(id);break;case 'deleteCard':if(confirm('刪除這張照片卡片？'))await dispatch('card',{id,remove:true});break;
 case 'editWish':editWish(id);break;case 'editSettings':editSettings();break;case 'editPlans':editPrices('plans');break;case 'editTiers':editPrices('tiers');break;
 case 'import':importDialog(id);break;case 'previewImport':await preview();installImportReportButtons();break;case 'catalogImportReport':reportImportCandidate(Number(id));break;case 'selectAllImportMatches':document.querySelectorAll('[data-import-link]').forEach(x=>x.checked=true);break;case 'applyImport':await executeImport();invalidateCatalogTabs();break;
 case 'backup':backup(draft?.state||full||(await api({op:'backup'})).backup);break;
@@ -851,15 +873,19 @@ let lastHour=hourKey(clock());setInterval(()=>{const nextHour=hourKey(clock());i
 setInterval(()=>{if(entryPending||document.hidden||demo||draft)return;refresh().catch(()=>{});},30000);
 let lastForegroundCheck=0;
 function resumeLiveState(reason){if(document.hidden||navigator.onLine===false){syncRecovery.resume();return;}if(Date.now()-lastForegroundCheck<1000){syncRecovery.resume();return;}lastForegroundCheck=Date.now();syncRecovery.invalidate(reason);}
-document.addEventListener('visibilitychange',()=>resumeLiveState('foreground'));
+document.addEventListener('visibilitychange',()=>{syncPhotoCarousel();resumeLiveState('foreground');});
 window.addEventListener('focus',()=>resumeLiveState('foreground'));
 window.addEventListener('online',()=>resumeLiveState('online'));
 window.addEventListener('offline',()=>syncRecovery.resume());
 document.addEventListener('focusout',()=>queueMicrotask(()=>syncRecovery.flushRender()));
-document.addEventListener('play',e=>{if(e.target.tagName==='VIDEO')e.target.dataset.cardPlaying='1';},true);
-for(const event of ['pause','ended'])document.addEventListener(event,e=>{if(e.target.tagName==='VIDEO'){delete e.target.dataset.cardPlaying;queueMicrotask(()=>syncRecovery.flushRender());}},true);
-document.addEventListener('close',()=>queueMicrotask(()=>{syncRecovery.flushRender();syncRecovery.resume();}),true);
-setInterval(()=>{if(route==='home'&&$('#photo-carousel')&&!document.hidden){photoIndex++;$('#photo-carousel').innerHTML=photoCarousel();}},8000);
+document.addEventListener('play',e=>{if(e.target.tagName==='VIDEO'){e.target.dataset.cardPlaying='1';if(homeCardVideo(e.target)){photoCarouselVideos.add(e.target);syncPhotoCarousel();}}},true);
+for(const event of ['pause','ended'])document.addEventListener(event,e=>{if(e.target.tagName==='VIDEO'){
+ if(event==='ended'||e.target.ended||!photoCarouselVideos.has(e.target)||!homeCardVideo(e.target)){delete e.target.dataset.cardPlaying;photoCarouselVideos.delete(e.target);}
+ syncPhotoCarousel();queueMicrotask(()=>syncRecovery.flushRender());
+}},true);
+for(const event of ['emptied','error'])document.addEventListener(event,e=>{if(homeCardVideo(e.target)||photoCarouselVideos.has(e.target)){delete e.target.dataset.cardPlaying;photoCarouselVideos.delete(e.target);syncPhotoCarousel();queueMicrotask(()=>syncRecovery.flushRender());}},true);
+document.addEventListener('close',()=>queueMicrotask(()=>{syncPhotoCarousel();syncRecovery.flushRender();syncRecovery.resume();}),true);
+syncPhotoCarousel();
 window.addEventListener('hashchange',()=>{const next=location.hash.slice(1)||'home';if(next!==route)go(next).catch(e=>toast(e.message));});
 
 function queueRemovalHint(q){if(q.allocation_model==='reservation-v1')return '這首尚未演唱；取消後釋放已保留的 '+(q.creditCost||1)+' 首存歌，不另外新增退款，原始收歌與取消紀錄保留。';return q.allocation_id?'這首尚未演唱；取消後依原預扣分配回補 '+(q.creditCost||1)+' 首存歌，保留回補與取消紀錄。':q.kind==='saved'?'取消會釋放保留的存歌及提歌額度；完成演唱才扣存歌。':'取消後保留點歌紀錄。';}

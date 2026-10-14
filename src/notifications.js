@@ -1,9 +1,9 @@
-import {messageCenterHtml,messageCenterSettingsHtml} from './message-center-view.js?v=10.14-WEB.5';
-import {createMessageCenter,MESSAGE_CATEGORIES} from './message-center.js?v=10.14-WEB.5';
-import {canReplaceSound,isSuper} from './access-policy.js?v=10.14-WEB.5';
-import {communicationIdentity} from './communication-context.js?v=10.14-WEB.5';
-import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=10.14-WEB.5';
-import {createWebNotificationHealth} from './web-notification-health.js?v=10.14-WEB.5';
+import {messageCenterHtml,messageCenterSettingsHtml} from './message-center-view.js?v=10.14-WEB.6';
+import {createMessageCenter,MESSAGE_CATEGORIES} from './message-center.js?v=10.14-WEB.6';
+import {canReplaceSound,isSuper} from './access-policy.js?v=10.14-WEB.6';
+import {communicationIdentity} from './communication-context.js?v=10.14-WEB.6';
+import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=10.14-WEB.6';
+import {createWebNotificationHealth} from './web-notification-health.js?v=10.14-WEB.6';
 export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpenCategory,apiUrl,apiKey,messageCenterV2=false}){
  const escape=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let key='',contextKey='',rows=[],prefs=cleanNoticePrefs(),counts={},page=0,more=false,topic='',socket,heartbeat,reconnect,lastRealtimeAt=0,loading=false,view='',generation=0,dialogRevision=0,seen=new Set(),primed=false,mutedAudio,playerSoundVersion='',boundDevice='',bindingDevice='',pushActivation=null,pushDeactivation=null,pushPermissionPending=null,pushActionRevision=0,pushWriteTail=Promise.resolve();

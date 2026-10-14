@@ -1,9 +1,9 @@
-import {accountingStats,reservationAllocation} from './accounting.js?v=10.14-WEB.5';
-import {validateHome} from './home-settings.js?v=10.14-WEB.5';
-import {requestSource} from './request-source.js?v=10.14-WEB.5';
-import {newPracticeReorder,newPracticeRanks,NEW_PRACTICE_TAG,isNewPracticeSong,newPracticeSongTags,newPracticeDate,setNewPracticeSong} from './new-practice.js?v=10.14-WEB.5';
-import {venuePolicySettings,venuePolicyRequestVenue,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicyBalance,venuePolicyReservedCredits,venuePolicyAvailableCredits,venuePolicySavedSnapshot} from './venue-policy.js?v=10.14-WEB.5';
-import {cardMediaInput,orderedCards} from './card-media.js?v=10.14-WEB.5';
+import {accountingStats,reservationAllocation} from './accounting.js?v=10.14-WEB.6';
+import {validateHome} from './home-settings.js?v=10.14-WEB.6';
+import {requestSource} from './request-source.js?v=10.14-WEB.6';
+import {newPracticeReorder,newPracticeRanks,NEW_PRACTICE_TAG,isNewPracticeSong,newPracticeSongTags,newPracticeDate,setNewPracticeSong} from './new-practice.js?v=10.14-WEB.6';
+import {venuePolicySettings,venuePolicyRequestVenue,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicyBalance,venuePolicyReservedCredits,venuePolicyAvailableCredits,venuePolicySavedSnapshot} from './venue-policy.js?v=10.14-WEB.6';
+import {cardMediaInput,orderedCards} from './card-media.js?v=10.14-WEB.6';
 export const TABLES=['players','songs','ledger','queue','crowns','cards','wishes'];
 export const TIERS=[{name:'金卡',fee:55599,price:4200,months:1},{name:'鉑金卡',fee:125000,price:9999,months:1},{name:'鑽石卡',fee:375000,price:18188,months:1},{name:'黑卡',fee:500000,price:27999,months:3},{name:'至尊卡',fee:925000,price:55599,months:0}];
 export const DEFAULTS={status:'空閒中',hourlyLimit:2,opening:'19:00～01:00（可能加班）',audition:387,livePrice:2990,liveDouble:500,crownDouble:18188,tiers:TIERS,plans:[{name:'一般 2 首',amount:2,fee:5555,double:990},{name:'一般 3 首',amount:3,fee:7299,double:1399},{name:'一般 6 首',amount:6,fee:13999,double:2799},{name:'🏅 金牌歌單',amount:10,fee:22887,double:4200}],tags:['嗨歌','傷感','甜歌','怪歌','慢歌'],manual:'1. 先登入玩家，再挑首喜歡的歌 ♡\n2. 提歌扣存歌，每小時有上限。\n3. 現點送出後，等{streamer}確認禮物。\n4. 冠歌主人照一般規則；其他玩家依卡別現點。'};
@@ -24,7 +24,7 @@ export const queuePrepared=q=>queueConfirmed(q)&&q.awaitingPreparation!==true;
 export function queuePreparation(q,t=stamp()){if(q.awaitingAcknowledgment)return q.kind==='saved'?'已收到你的提歌囉，正在等待主播回應':'等待主播確認禮物';if(q.awaitingPreparation)return '已確認，等待設定準備時間';if(q.preparationEndsAt){const remaining=Math.max(0,Math.ceil((timeValue(q.preparationEndsAt)-timeValue(t))/60000));return remaining?'準備中 · 約 '+remaining+' 分鐘':'已準備好';}return '已準備好';}
 export function timeValue(x){if(typeof x==='number')return x;if(!x)return NaN; if(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}[ T]\d/.test(x)&&!/(Z|[+-]\d\d:\d\d)$/.test(x)){const m=x.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);return Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]-8,+m[5],+(m[6]||0));}return Date.parse(x);}
 export const hourKey=t=>Math.floor(timeValue(t)/3600000);
-export const queueCrossedHour=(q,at)=>Number.isFinite(timeValue(q.at))&&hourKey(at)>hourKey(q.at);
+export const queueCrossedHour=(q,at)=>Number.isFinite(timeValue(q.quota_original_at||q.at))&&hourKey(at)>hourKey(q.quota_original_at||q.at);
 export const queueUsesQuota=q=>q.kind==='saved'||q.kind==='live'&&q.status==='completed'&&q.quota_carried===true;
 function carryQueueQuota(q,at,carry,t,historyCorrection=false){
  requireThat(typeof carry==='boolean','請選擇是否過檔');
@@ -116,7 +116,7 @@ function editQueue(s,q,p,t,quoteAt){
  if(q.kind==='self'&&p.selfProvided===false)throw Error('主播自帶不能轉為玩家來源');
  if(p.selfProvided!==undefined){requireThat(typeof p.selfProvided==='boolean','自帶設定不正確');q.selfProvided=p.selfProvided;}
  if(p.note!==undefined)q.note=String(p.note).trim().slice(0,1000);
- if(editedTime!==undefined){q.at=at;if(q.recordedAt)q.recordedAt=at;}
+ if(editedTime!==undefined){if(at!==q.at)q.quota_original_at??=q.at;q.at=at;if(q.recordedAt)q.recordedAt=at;}
 }
 export function ownQueueReplacementQuote(s,p,actor,t=stamp()){
  requireThat(actor?.role==='player'&&actor.playerId,'請先登入玩家');
@@ -351,6 +351,7 @@ export function mutate(source,action,actor,t=stamp()){
    const fields={queue:['at','acceptedAt','completedAt','cancelledAt','storedAt','effective_at'],ledger:['at'],crowns:['activatedAt','expiresAt'],cards:['startsAt','expiresAt'],wishes:['at']}[p.table];
    requireThat(p.times&&Object.keys(p.times).length,'請填實際時間');
    const originalTimes=Object.fromEntries(fields.filter(key=>row[key]).map(key=>[key,row[key]]));
+   if(p.table==='queue'&&['pending','waiting'].includes(row.status)&&(Object.hasOwn(p.times,'at')||Object.hasOwn(p.times,'effective_at')))row.quota_original_at??=row.at;
    for(const [key,value] of Object.entries(p.times)){requireThat(fields.includes(key),'不能修改登記時間');requireThat(row[key]||key==='at'||key==='startsAt'||p.table==='queue'&&key==='effective_at','請先完成對應操作');requireThat(value,'實際時間不可留空');row[key]=['expiresAt','startsAt'].includes(key)?stamp(timeValue(value)):validTime(value,t);}
    if(p.note!==undefined)row.note=String(p.note).slice(0,1000);
    if(p.table==='queue'){

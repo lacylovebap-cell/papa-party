@@ -34,6 +34,31 @@ test('ordinary live completion remains exempt until a deliberate cross-hour corr
  assert.equal(quota(s,next).used,0);assert.equal(quota(s,old).used,0);
  s=run(s,'recordTime',{table:'queue',id:s.queue[0].id,times:{effective_at:next}});assert.equal(quota(s,next).used,1);
 });
+
+test('editing pending live time cannot erase its original cross-hour carry decision',()=>{
+ let s=ready('live'),id=s.queue[0].id;
+ s=run(s,'queue',{id,operation:'edit',at:next});
+ assert.equal(Date.parse(s.queue[0].at),Date.parse(next));assert.equal(s.queue[0].quota_original_at,old);
+ assert.equal(queueCrossedHour(s.queue[0],next),true);
+ s=run(s,'queue',{id,operation:'complete',effective_at:next,carryOver:true});
+ assert.equal(quota(s,next).used,1);assert.equal(quota(s,old).used,0);
+ const ledger=structuredClone(s.ledger);
+ s=run(s,'recordTime',{table:'queue',id,times:{effective_at:next}});
+ assert.equal(quota(s,next).used,1);assert.deepEqual(s.ledger,ledger);
+ s=run(s,'recordTime',{table:'queue',id,times:{effective_at:old}});
+ assert.equal(quota(s,next).used,0);assert.equal(s.queue[0].quota_carried,false);
+ assert.deepEqual(s.ledger,ledger);
+});
+
+test('pending time correction preserves the original hour through repeated edits and stays room-scoped',()=>{
+ let s=ready('live'),id=s.queue[0].id;
+ s=run(s,'recordTime',{table:'queue',id,times:{at:next}});
+ s=run(s,'queue',{id,operation:'edit',at:'2026-10-12T13:05:00Z'});
+ assert.equal(s.queue[0].quota_original_at,old);assert.equal(queueCrossedHour(s.queue[0],next),true);
+ const before=structuredClone(s);
+ assert.throws(()=>run(s,'queue',{id,operation:'edit',at:next},admin,next,'foreign'),/主播/);
+ assert.deepEqual(s,before);
+});
 test('carried requests fill common capacity before consuming personal capacity',()=>{
  let s=ready('live');s=run(s,'extraQuota',{player_id:s.players[0].playerId,extra_quota:1,enabled:true});
  s=run(s,'queue',{id:s.queue[0].id,operation:'complete',carryOver:true});
