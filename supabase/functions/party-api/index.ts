@@ -503,7 +503,7 @@ function observeActivity(b:any,who:any){
 }
 const eventTotals=new Map();
 async function eventTotal(room:any,global:boolean){const key=JSON.stringify([room.spaceId,room.id,global]),cached=eventTotals.get(key);if(cached&&Date.now()-cached.at<60000)return cached.total;const total=await api('/rest/v1/rpc/papa_event_total',{room_id:room.id,include_global:global});if(typeof total!=='number'||!Number.isSafeInteger(total)||total<0)throw Error('操作歷史頁數尚未確認');if(eventTotals.size>=128)eventTotals.delete(eventTotals.keys().next().value);eventTotals.set(key,{at:Date.now(),total});return total;}
-Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.14-WEB.3',achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.14-WEB.4',achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  activityRequest={body:b,who};
  if(b.op==='activityPage'){if(!isSuper(who)||!who.accountId)throw Error('只有 PA Party總裁可查看活動');const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';if(b.spaceId!==undefined&&b.spaceId!==space||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000)throw Error('活動頁碼或範圍不正確');const result=await api('/rest/v1/rpc/papa_activity_page',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space},page_number:b.page??0});if(result?.version!==1||result.spaceId!==space||result.page!==(b.page??0)||result.pageSize!==50||!Array.isArray(result.rows)||result.rows.length>50)throw Error('活動資料尚未確認');return respond({...result,rows:result.rows.map((r:any)=>({player_id:r.player_id,streamer_id:r.streamer_id,page:r.page,last_seen:r.last_seen,online:r.online}))});}
  if(b.op==='uploadVideo'){
@@ -518,11 +518,27 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   if(!['room','global','rooms','gallery','mine'].includes(b.view)||typeof(b.query??'')!=='string'||(b.query??'').length>100||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000||b.playerKey!==undefined&&!/^[a-f0-9]{32}$/.test(b.playerKey)||b.room!==undefined&&(typeof b.room!=='string'||b.room.length>200))throw Error('勳章查詢不正確');
   return respond(await api('/rest/v1/rpc/papa_achievement_collection',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space,player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamer_id:null},view_mode:b.view,query_text:b.query??'',page_number:b.page??0,public_player:b.playerKey??null,target_room:b.room??null}));
  }
- if(['achievements','achievementVisibility'].includes(b.op)){
+ if(['achievements','achievementVisibility','achievementPublicSet','achievementManualGrant'].includes(b.op)){
   if(!who?.accountId)throw Error('請重新登入');
   const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';
   if(b.spaceId!==undefined&&b.spaceId!==space)throw Error('勳章空間不正確');
   const common={requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space,player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamer_id:null}};
+  if(b.op==='achievementPublicSet'){
+   if(who.role!=='player'||typeof b.code!=='string'||!/^[a-z0-9_]{1,40}$/.test(b.code)||typeof b.published!=='boolean')throw Error('勳章公開設定不正確');
+   const result=await api('/rest/v1/rpc/papa_achievement_public_set',{...common,requested_code:b.code,requested_enabled:b.published});
+   if(result?.ok!==true||result.published!==b.published)throw Error('勳章公開設定尚未確認');
+   return respond({ok:true,published:result.published});
+  }
+  if(b.op==='achievementManualGrant'){
+   if(!isManager(who)||typeof b.playerId!=='string'||b.playerId.length<1||b.playerId.length>200
+    ||typeof b.code!=='string'||!/^[a-z0-9_]{1,40}$/.test(b.code)
+    ||typeof b.reason!=='string'||b.reason.trim().length<4||b.reason.length>500
+    ||b.showDay!==undefined&&!/^\d{4}-\d{2}-\d{2}$/.test(b.showDay))throw Error('勳章認證資料不正確');
+   const result=await api('/rest/v1/rpc/papa_achievement_manual_grant',{...common,requested_player:b.playerId,requested_code:b.code,
+    requested_reason:b.reason.trim(),requested_show_day:b.showDay??null});
+   if(result?.ok!==true||typeof result.alreadyRecorded!=='boolean')throw Error('勳章認證尚未確認');
+   return respond(result);
+  }
   if(b.op==='achievementVisibility'){
    if(!isManager(who)||typeof b.code!=='string'||!/^[a-z0-9_]{1,40}$/.test(b.code)||!['public','condition_hidden','hidden','after_award'].includes(b.visibility))throw Error('勳章顯示設定不正確');
    const result=await api('/rest/v1/rpc/papa_achievement_visibility_set',{...common,requested_code:b.code,requested_visibility:b.visibility});
@@ -532,7 +548,8 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   if(typeof player!=='string'||player.length<1||player.length>200||who.role==='player'&&b.playerId!==undefined&&b.playerId!==player)throw Error('勳章玩家不正確');
   const result=await api('/rest/v1/rpc/papa_achievement_page',{...common,requested_player:player});
   if(result?.version!==1||result.scope?.spaceId!==space||result.scope?.streamerId!==room.id||result.scope?.playerId!==player||!Array.isArray(result.rows)||result.rows.length>100)throw Error('勳章資料尚未確認');
-  const rows=result.rows.map((r:any)=>({code:r.code,name:r.name,condition:r.condition,lifetime:r.lifetime,visibility:r.visibility,qualified:r.qualified,acquiredAt:r.acquiredAt,recorded:r.recorded}));
+  const publication=who.role==='player'?await api('/rest/v1/rpc/papa_achievement_public_state',common):{};
+  const rows=result.rows.map((r:any)=>({code:r.code,name:r.name,condition:r.condition,lifetime:r.lifetime,visibility:r.visibility,qualified:r.qualified,currentActive:r.currentActive,acquiredAt:r.acquiredAt,recorded:r.recorded,manualVerified:r.manualVerified===true,published:publication?.[r.code]===true}));
   return respond({version:1,scope:{spaceId:space,streamerId:room.id,playerId:player},rows});
  }
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));

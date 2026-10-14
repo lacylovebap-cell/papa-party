@@ -30,6 +30,23 @@ async function fixture(t){
  const page=async(p='P1',actor={role:'player',space_id:'space-001',player_id:'P1'})=>(await q('select papa_achievement_page($1,$2,$3,$4) v',['space-001','papa',p,actor]))[0].v;
  return {db,q,put,queue,event,flags,page,current};
 }
+test('manager historical certification preserves audit, exact date and idempotency without touching balances',async t=>{
+ const f=await fixture(t);await f.db.exec(fs.readFileSync('supabase/migrations/202610140008_achievement_manual_certification.sql','utf8'));
+ const manager={role:'streamer_admin',space_id:'space-001',actor_streamer_id:'papa',account_id:'11111111-1111-4111-8111-111111111111'};
+ const grant=async(code,day=null)=>f.q('select papa_achievement_manual_grant($1,$2,$3,$4,$5,$6,$7) v',['space-001','papa',manager,'P1',code,'核對舊場次紀錄',day]);
+ assert.equal((await grant('sung50'))[0].v.alreadyRecorded,false);
+ assert.equal((await grant('sung50'))[0].v.alreadyRecorded,true);
+ const award=(await f.q("select manual_verified,certification_reason,active from papa_achievement_awards where player_id='P1' and code='sung50'"))[0];
+ assert.equal(award.manual_verified,true);assert.equal(award.active,true);
+ assert.equal((await f.q("select count(*)::int n from papa_events where action='achievement_manual_certified'"))[0].n,1);
+ assert.equal((await f.page()).rows.find(r=>r.code==='sung50').manualVerified,true);
+ await f.event('queue','Q-CANCEL',{...f.queue('Q-CANCEL'),status:'cancelled'});
+ assert.equal((await f.q("select active from papa_achievement_awards where player_id='P1' and code='sung50'"))[0].active,true,'automatic reconciliation cannot revoke manual certification');
+ await assert.rejects(grant('first_mic'),/ACHIEVEMENT_SHOW_DAY_REQUIRED/);
+ const day='2026-10-12';assert.equal((await grant('first_mic',day))[0].v.alreadyRecorded,false);
+ assert.equal((await f.q("select active from papa_achievement_awards where code='first_mic' and period=$1",[day]))[0].active,false);
+ await assert.rejects(f.q('select papa_achievement_manual_grant($1,$2,$3,$4,$5,$6,$7)',['space-001','papa',{role:'player',space_id:'space-001',player_id:'P1'},'P1','sung100','fake',null]),/ACHIEVEMENT_MANAGER_REQUIRED/);
+});
 test('Taipei 19:00 scope, 01–05 night, half-hour and comeback boundaries use valid live requests only',async t=>{
  const f=await fixture(t),asOf='2026-10-14T20:00:00Z',at=(i)=>'2026-10-14T'+String(17+i).padStart(2,'0')+':00:00Z';
  const flags=async()=>(await f.q("select papa_achievement_eligibility('space-001','papa','P1',$1) v",[asOf]))[0].v;

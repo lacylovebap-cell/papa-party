@@ -1,38 +1,38 @@
-import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.14-WEB.3';
-import {accountingDay,accountingRollover} from './accounting.js?v=10.14-WEB.3';
-import {installPageJumps} from './ui-page-jumps.js?v=10.14-WEB.3';
-import {createWebAppInstall} from './web-app-install.js?v=10.14-WEB.3';
-import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.14-WEB.3';
-import {webApiFailure} from './web-api-errors.js?v=10.14-WEB.3';
-import {canonicalNoticeLink} from './notification-rules.js?v=10.14-WEB.3';
-import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.14-WEB.3';
-import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.14-WEB.3';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.14-WEB.3';
-import {fateCategories,drawSong} from './fate.js?v=10.14-WEB.3';
-import {createBoard} from './board.js?v=10.14-WEB.3';
-import {createChat} from './chat.js?v=10.14-WEB.3';
-import {requestSourceLabel} from './request-source.js?v=10.14-WEB.3';
-import {normalizeHome,themePalette} from './home-settings.js?v=10.14-WEB.3';
-import {openHomeEditor} from './home-editor.js?v=10.14-WEB.3';
-import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.14-WEB.3';
-import {createNotifications} from './notifications.js?v=10.14-WEB.3';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.14-WEB.3';
-import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.14-WEB.3';
-import {createPlayerManager} from './player-manager.js?v=10.14-WEB.3';
-import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.14-WEB.3';
-import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.14-WEB.3';
-import {createSongFavorites} from './song-favorites.js?v=10.14-WEB.3';
-import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.14-WEB.3';
-import {listenedSongs} from './listening-history.js?v=10.14-WEB.3';
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.14-WEB.3';
-import {createWebDeviceLogin} from './web-device-login.js?v=10.14-WEB.3';
-import {roomStorageKey} from './communication-context.js?v=10.14-WEB.3';
-import {createWebSpaceEntry} from './web-space-entry.js?v=10.14-WEB.3';
-import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.14-WEB.3';
-import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.14-WEB.3';
-import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.14-WEB.3';
-import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.14-WEB.3';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.14-WEB.3';
+import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.14-WEB.4';
+import {accountingDay,accountingRollover} from './accounting.js?v=10.14-WEB.4';
+import {installPageJumps} from './ui-page-jumps.js?v=10.14-WEB.4';
+import {createWebAppInstall} from './web-app-install.js?v=10.14-WEB.4';
+import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.14-WEB.4';
+import {webApiFailure} from './web-api-errors.js?v=10.14-WEB.4';
+import {canonicalNoticeLink} from './notification-rules.js?v=10.14-WEB.4';
+import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.14-WEB.4';
+import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.14-WEB.4';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.14-WEB.4';
+import {fateCategories,drawSong} from './fate.js?v=10.14-WEB.4';
+import {createBoard} from './board.js?v=10.14-WEB.4';
+import {createChat} from './chat.js?v=10.14-WEB.4';
+import {requestSourceLabel} from './request-source.js?v=10.14-WEB.4';
+import {normalizeHome,themePalette} from './home-settings.js?v=10.14-WEB.4';
+import {openHomeEditor} from './home-editor.js?v=10.14-WEB.4';
+import {streamerName,streamerText,streamerDestination} from './streamer-navigation.js?v=10.14-WEB.4';
+import {createNotifications} from './notifications.js?v=10.14-WEB.4';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.14-WEB.4';
+import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.14-WEB.4';
+import {createPlayerManager} from './player-manager.js?v=10.14-WEB.4';
+import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.14-WEB.4';
+import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.14-WEB.4';
+import {createSongFavorites} from './song-favorites.js?v=10.14-WEB.4';
+import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.14-WEB.4';
+import {listenedSongs} from './listening-history.js?v=10.14-WEB.4';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.14-WEB.4';
+import {createWebDeviceLogin} from './web-device-login.js?v=10.14-WEB.4';
+import {roomStorageKey} from './communication-context.js?v=10.14-WEB.4';
+import {createWebSpaceEntry} from './web-space-entry.js?v=10.14-WEB.4';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.14-WEB.4';
+import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.14-WEB.4';
+import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.14-WEB.4';
+import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.14-WEB.4';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.14-WEB.4';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let appInstallMessage='';
 const appInstall=createWebAppInstall({onChange:syncAppInstall});
@@ -539,7 +539,7 @@ function playerTabs(id,manager=false){const p=state.players.find(x=>x.playerId==
 const activityPage=createActivityPage({api,context:()=>({active:route==='admin'&&isSuperAdmin()&&tab==='activity'&&!demo&&!draft,spaceId:state.currentStreamer?.spaceId||'space-001',key:[admin?.deviceSessionId||admin?.sessionId||(admin?.until?[admin.accountId,admin.until].join(':'):admin?.token),state.currentStreamer?.spaceId,state.currentStreamer?.id].join('|')}),render:value=>{const panel=$('#activity-panel');if(!panel)return;panel.innerHTML=value.loading?blank('讀取活動中…'):value.error?'<p class="error">'+h(value.error)+'</p>'+button('重新讀取','activityRefresh'):activityPageHtml(value,{playerName,roomName:id=>state.streamers.find(r=>r.id===id)?.display_name||'主播'});}});
 document.addEventListener('keydown',e=>{if(e.target.id==='activity-page'&&e.key==='Enter'&&!e.isComposing){e.preventDefault();activityPage.jump(Number(e.target.value)).catch(error=>toast(error.message));}});
 let medalDisplay={rows:[],manager:false},medalFilters={category:"all",status:"all"};
-let medalLastIdentity='',medalPublicSelection=null;let medalMode='mine',medalCollection={rows:[],page:0,total:0},medalQuery='',medalRoom='',medalOther=false,medalCollectionGeneration=0,medalCollectionCache=new Map(),medalCollectionPending=new Map();
+let medalLastIdentity='',medalPublicSelection=null;let medalMode='mine',medalCollection={rows:[],page:0,total:0},medalQuery='',medalRoom='',medalOther=false,medalOwnRoomId='',medalCollectionGeneration=0,medalCollectionCache=new Map(),medalCollectionPending=new Map();
 function medalIdentity(){const panel=$('#achievement-panel'),identity=panel?.dataset.management==='true'?admin:session;return [panel?.dataset.player,panel?.dataset.management,identity?.accountId,identity?.token,state.currentStreamer?.id].join('|');}
 function medalNav(){return '<div class="tabs medal-navigation">'+[['mine','我的勳章'],['room','主播榮譽牆'],['global','全主播排行']].map(([key,name])=>button(name,'medalView',key,medalMode===key?'active':'')).join('')+'</div>';}
 function paintMedals(content){const panel=$('#achievement-panel');if(panel)panel.innerHTML=medalNav()+content;}
@@ -566,19 +566,32 @@ async function showMedalPlayer(playerKey,room=null,page=0){
 }
 async function showOwnMedalRoom(room){
  medalMode='mine';medalOther=false;++medalCollectionGeneration;
- if(!room||room===state.currentStreamer?.id){await achievementPanel.load();return;}
- medalOther=true;medalCollection={rows:[],page:0,total:0,mode:'ownRoom'};const identity=medalIdentity();paintMedals(blank('讀取中…'));try{const result=await api({op:'achievements',streamer:room});if(identity!==medalIdentity())return;if(result?.scope?.streamerId!==room||result.scope.playerId!==session?.playerId||!Array.isArray(result.rows))throw Error('勳章範圍尚未確認');medalDisplay={rows:result.rows,manager:false};paintMedals(button('目前主播','medalOwnRoom')+button('其他主播','medalOtherRooms')+'<h3>'+h(state.streamers.find(r=>r.id===room)?.display_name||'所選主播')+'</h3>'+achievementPanelHtml(result.rows,medalFilters));}catch(error){if(identity===medalIdentity())paintMedals('<p class="error">'+h(error.message)+'</p>'+button('返回目前主播','medalOwnRoom'));}
+ if(!room||room===state.currentStreamer?.id){medalOwnRoomId='';await achievementPanel.load();return;}
+ medalOther=true;medalOwnRoomId=room;medalCollection={rows:[],page:0,total:0,mode:'ownRoom'};const identity=medalIdentity();paintMedals(blank('讀取中…'));try{const result=await api({op:'achievements',streamer:room});if(identity!==medalIdentity())return;if(result?.scope?.streamerId!==room||result.scope.playerId!==session?.playerId||!Array.isArray(result.rows))throw Error('勳章範圍尚未確認');medalDisplay={rows:result.rows,manager:false};paintMedals(button('目前主播','medalOwnRoom')+button('其他主播','medalOtherRooms')+'<h3>'+h(state.streamers.find(r=>r.id===room)?.display_name||'所選主播')+'</h3>'+achievementPanelHtml(result.rows,{...medalFilters,publicControl:true}));}catch(error){if(identity===medalIdentity())paintMedals('<p class="error">'+h(error.message)+'</p>'+button('返回目前主播','medalOwnRoom'));}
 }
 document.addEventListener('change',e=>{if(e.target.id==='medal-room'){medalRoom=e.target.value;loadMedalCollection();}});
 document.addEventListener('keydown',e=>{if(!e.isComposing&&e.key==='Enter'&&['medal-search','medal-page','medal-public-page'].includes(e.target.id)){e.preventDefault();if(e.target.id==='medal-public-page'){if(medalPublicSelection)showMedalPlayer(medalPublicSelection.playerKey,null,Math.max(0,Math.min(Number(e.target.max)-1,Math.floor(Number(e.target.value)||1)-1)));}else if(e.target.id==='medal-search'){medalQuery=e.target.value;loadMedalCollection();}else loadMedalCollection(Math.max(0,Math.min(Number(e.target.max)-1,Math.floor(Number(e.target.value)||1)-1)));}});
 const achievementPanel=createAchievementPanel({api,context:()=>{
- const panel=$('#achievement-panel'),manager=panel?.dataset.management==='true',identity=manager?admin:session;const current=medalIdentity();if(panel&&current!==medalLastIdentity){medalLastIdentity=current;medalMode='mine';medalOther=false;medalRoom='';medalQuery='';medalFilters={category:'all',status:'all'};medalCollectionGeneration++;}
+ const panel=$('#achievement-panel'),manager=panel?.dataset.management==='true',identity=manager?admin:session;const current=medalIdentity();if(panel&&current!==medalLastIdentity){medalLastIdentity=current;medalMode='mine';medalOther=false;medalOwnRoomId='';medalRoom='';medalQuery='';medalFilters={category:'all',status:'all'};medalCollectionGeneration++;}
  return {active:!!panel&&!demo&&!draft&&!!identity,manager,playerId:panel?.dataset.player,room:state.currentStreamer?.id,
   spaceId:state.currentStreamer?.spaceId||'space-001',revision:state.revision,day:state.summary?.day,
   key:[identity?.deviceSessionId||identity?.sessionId||(manager&&identity?.until?[identity.accountId,identity.until].join(':'):identity?.token),state.currentStreamer?.spaceId,state.currentStreamer?.id,panel?.dataset.player,manager].join('|')};
-},render:value=>{const panel=$('#achievement-panel');if(!panel)return;if(medalMode!=='mine'||medalOther){if(!medalOther||medalCollection.mode==='mine')loadMedalCollection(medalCollection.page||0);return;}if(value.rows)medalDisplay=value;panel.innerHTML=medalNav()+(value.loading?blank('讀取勳章中…'):value.error?'<p class="error">'+h(value.error)+'</p>'+button('重新讀取','achievementRetry'):(value.manager?'':button('目前主播','medalOwnRoom')+button('其他主播','medalOtherRooms'))+achievementPanelHtml(value.rows,{manager:value.manager,...medalFilters}));}});
+},render:value=>{const panel=$('#achievement-panel');if(!panel)return;if(medalMode!=='mine'||medalOther){if(!medalOther||medalCollection.mode==='mine')loadMedalCollection(medalCollection.page||0);return;}if(value.rows)medalDisplay=value;panel.innerHTML=medalNav()+(value.loading?blank('讀取勳章中…'):value.error?'<p class="error">'+h(value.error)+'</p>'+button('重新讀取','achievementRetry'):(value.manager?button('＋ 手動認證舊勳章','medalManualGrant'):button('目前主播','medalOwnRoom')+button('其他主播','medalOtherRooms'))+achievementPanelHtml(value.rows,{manager:value.manager,publicControl:!value.manager,...medalFilters}));}});
 document.addEventListener('click',e=>{const target=e.target.closest('[data-medal-detail]');if(!target)return;e.preventDefault();e.stopPropagation();const row=medalDisplay.rows[Number(target.dataset.medalDetail)];if(row)modal('勳章說明',achievementDetailsHtml(row,{manager:medalDisplay.manager}));});
-document.addEventListener('change',e=>{const target=e.target.closest('[data-medal-filter]');if(!target)return;medalFilters[target.dataset.medalFilter]=target.value;const panel=$('#achievement-panel');if(panel)paintMedals((medalDisplay.manager?'':button('目前主播','medalOwnRoom')+button('其他主播','medalOtherRooms'))+achievementPanelHtml(medalDisplay.rows,{manager:medalDisplay.manager,...medalFilters}));});
+document.addEventListener('change',e=>{const target=e.target.closest('[data-medal-filter]');if(!target)return;medalFilters[target.dataset.medalFilter]=target.value;const panel=$('#achievement-panel');if(panel)paintMedals((medalDisplay.manager?button('＋ 手動認證舊勳章','medalManualGrant'):button('目前主播','medalOwnRoom')+button('其他主播','medalOtherRooms'))+achievementPanelHtml(medalDisplay.rows,{manager:medalDisplay.manager,publicControl:!medalDisplay.manager,...medalFilters}));});
+document.addEventListener('click',async e=>{const control=e.target.closest('[data-medal-public-code]');if(!control)return;e.preventDefault();if(control.disabled||!session||medalDisplay.manager)return;const code=control.dataset.medalPublicCode,published=control.getAttribute('aria-pressed')!=='true',room=medalOther?medalOwnRoomId:state.currentStreamer?.id;control.disabled=true;try{await api({op:'achievementPublicSet',code,published,streamer:room});medalCollectionCache.clear();if(medalOther)await showOwnMedalRoom(room);else await achievementPanel.load(true);toast(published?'勳章已公開':'勳章已改為僅自己可見');}catch(error){toast(error.message);control.disabled=false;}});
+function openManualMedalGrant(){
+ const player=$('#achievement-panel')?.dataset.player;if(!isAdmin()||!player||!medalDisplay.manager)return;
+ modal('手動認證舊勳章','<p class="subtle">僅為曾達成的成就補認證。認證時間會如實記錄，公開與否仍由玩家選擇。</p><label>勳章<select name="code" required>'+medalDisplay.rows.map(row=>'<option value="'+h(row.code)+'">'+h(row.name)+'</option>').join('')+'</select></label><label>原本達成的場次日期（本場型勳章必填）<input type="date" name="showDay"></label><label>認證原因／依據<textarea name="reason" minlength="4" maxlength="500" required placeholder="例如：核對演唱紀錄"></textarea></label>',async form=>{
+  const code=String(form.get('code')||''),reason=String(form.get('reason')||'').trim(),showDay=String(form.get('showDay')||'');
+  const lifetime=medalDisplay.rows.find(row=>row.code===code)?.lifetime;
+  if(lifetime==='show'&&!showDay)throw Error('本場型勳章請填原本場次日期');
+  if(reason.length<4)throw Error('請填寫至少 4 字的認證依據');
+  const result=await api({op:'achievementManualGrant',playerId:player,code,reason,...(showDay?{showDay}:{})});
+  if(result?.ok!==true)throw Error('勳章認證尚未確認');
+  medalCollectionCache.clear();await achievementPanel.load(true);toast(result.alreadyRecorded?'此勳章已有紀錄，未重複新增':'已留下認證及稽核紀錄');
+ });
+}
 document.addEventListener('change',async e=>{const field=e.target.closest('[data-achievement-code]');if(!field)return;field.disabled=true;try{await achievementPanel.visibility(field.dataset.achievementCode,field.value);}catch(error){toast(error.message);}finally{if(field.isConnected)field.disabled=false;}});
 function renderCenter(){const p=me();$('#app').innerHTML=card('👤 玩家中心',p?playerTabs(p.playerId):blank('請先登入'),true);if(p&&!demo&&!draft&&['overview','queue'].includes(subtab)&&$('#own-queue-panel'))loadOwnQueue().catch(()=>{});}
 function ledgerRows(id,manager){let rows=state.ledger.filter(l=>(!id||l.playerId===id)&&venuePolicyLedgerPool(l)===venuePolicySettings(state.settings).current_space);if(!id&&ledgerQuery){const ids=playerSearch(state,ledgerQuery,true).map(x=>x.playerId);rows=rows.filter(l=>ids.includes(l.playerId));}rows.sort((a,b)=>(timeValue(b.at)||0)-(timeValue(a.at)||0));const p=paginate(rows,'ledger');return `${manager?`<div class="toolbar">${venueSwitch()}${!id?`<input id="ledger-query" value="${h(ledgerQuery)}" placeholder="搜尋玩家名稱、ID、曾用名" aria-label="存歌玩家搜尋">`:''}${button('新增存歌','addLedger',id||'')}</div><small>最近 · 每頁 10 筆</small>`:''}<div id="ledger-results">${p.rows.map(l=>`<div data-ledger-id="${h(l.id)}" class="song admin-row"><div class="info"><b>${manager?h(playerName(l.playerId))+' · ':''}<span class="${l.amount>=0?'positive':'negative'}">${l.amount>=0?'+':''}${l.amount} 首</span></b><small>${time(l.at)} · ${h(l.note)}${l.voided_at?' · 僅保留紀錄':l.reversal_of?' · 關聯回補':l.accounting_adjustment?' · 人工補正':''}${venuePolicySettings(state.settings).radio_enabled?' · '+venueName(venuePolicyLedgerPool(l)):''}</small></div>${manager?`<div class="actions">${(l.allocationSettlement||l.queueId||l.reversal_of||l.voided_at)?'':button('編輯','editLedger',l.id)}${l.amount>0&&!l.queueId&&!l.conversion&&!l.voided_at&&!l.allocation_id&&!l.accounting_adjustment?button('分配','allocate',l.id):''}${l.allocationSettlement||l.queueId||l.reversal_of||l.voided_at?'':button('撤銷','deleteLedger',l.id,'tiny danger')}</div>`:''}</div>`).join('')||blank()}${p.nav}</div>`;}
@@ -743,7 +756,7 @@ case 'admin':admin?await go('admin'):await adminLogin();break;
 case 'changeManagerPassword':changeManagerPassword();break;
 case 'adminLogout':if(admin?.device){if(!deviceLogin)throw Error('請使用原本登入裝置登出');await deviceLogin.logout(admin);}else if(!demo)await api({op:'logout'});admin=null;draft=null;put('admin',null);await go('home');break;
  case 'playersMode':playerManagement.setMode(id);render();break;case 'playersSearch':{const mode=playerManagement.state().mode;playerInputs[mode]=$('#player-query').value;if(localPlayerManagement()){pages['players-'+mode]=1;render();}else{playerManagement.search(playerInputs[mode]);loadPlayerManagement();}break;}case 'playersPage':{const view=playerManagement.state();playerManagement.setPage(Math.max(0,view.page+Number(id)));loadPlayerManagement();break;}case 'playersRetry':loadPlayerManagement(true);break;case 'playerArchives':await openPlayerArchives();break;case 'playerArchivesSearch':archivedPlayers.search($('#player-archive-query').value);await archivedPlayers.load();break;case 'playerArchivesPage':archivedPlayers.setPage(Math.max(0,archivedPlayers.state().page+Number(id)));await archivedPlayers.load();break;case 'playerArchivesRetry':await archivedPlayers.load({force:true});break;case 'playerArchive':await changePlayerArchived(id,true);break;case 'playerRestore':await changePlayerArchived(id,false);break;case 'adminTab':tab=id;put('adminTab',tab);selectedPlayer=null;pages={};adminQuery='';render();break;
-case 'activityRefresh':await activityPage.refresh();break;case 'activityPrevious':await activityPage.previous();break;case 'activityNext':await activityPage.next();break;case 'activityJump':await activityPage.jump(Number($('#activity-page')?.value));break;case 'medalPublicJump':if(medalPublicSelection){const input=$('#medal-public-page');await showMedalPlayer(medalPublicSelection.playerKey,null,Math.max(0,Math.min(Number(input.max)-1,Math.floor(Number(input.value)||1)-1)));}break;case 'medalView':medalMode=id;medalOther=false;medalQuery='';medalCollectionGeneration++;if(id==='mine')await achievementPanel.load();else await loadMedalCollection();break;case 'medalOtherRooms':medalOther=true;await loadMedalCollection();break;case 'medalOwnRoom':await showOwnMedalRoom(id);break;case 'medalSearch':medalQuery=$('#medal-search').value;await loadMedalCollection();break;case 'medalPage':await loadMedalCollection(Number(id));break;case 'medalJump':{const input=$('#medal-page');await loadMedalCollection(Math.max(0,Math.min(Number(input.max)-1,Math.floor(Number(input.value)||1)-1)));break;}case 'medalPlayer':await showMedalPlayer(id,medalMode==='room'?(medalRoom||state.currentStreamer?.id):null);break;case 'medalPublicRoom':await showMedalPlayer(id,b.dataset.room);break;case 'medalPlayerRooms':await showMedalPlayer(id,null,Number(b.dataset.page)||0);break;case 'favoriteAudiencePage':if(favoriteAudienceDialog)await openFavoriteAudience(favoriteAudienceDialog.songId,Number(id));break;case 'favoriteAudienceJump':if(favoriteAudienceDialog){const input=$('#favorite-audience-page');await openFavoriteAudience(favoriteAudienceDialog.songId,Math.max(0,Math.min(Number(input.max)-1,Math.floor(Number(input.value)||1)-1)));}break;case 'achievementRetry':await achievementPanel.load(true);break;case 'subtab':subtab=id;pages={};render();if(subtab==='favorites')loadFavorites(true);break;
+case 'activityRefresh':await activityPage.refresh();break;case 'activityPrevious':await activityPage.previous();break;case 'activityNext':await activityPage.next();break;case 'activityJump':await activityPage.jump(Number($('#activity-page')?.value));break;case 'medalManualGrant':openManualMedalGrant();break;case 'medalPublicJump':if(medalPublicSelection){const input=$('#medal-public-page');await showMedalPlayer(medalPublicSelection.playerKey,null,Math.max(0,Math.min(Number(input.max)-1,Math.floor(Number(input.value)||1)-1)));}break;case 'medalView':medalMode=id;medalOther=false;medalQuery='';medalCollectionGeneration++;if(id==='mine')await achievementPanel.load();else await loadMedalCollection();break;case 'medalOtherRooms':medalOther=true;await loadMedalCollection();break;case 'medalOwnRoom':await showOwnMedalRoom(id);break;case 'medalSearch':medalQuery=$('#medal-search').value;await loadMedalCollection();break;case 'medalPage':await loadMedalCollection(Number(id));break;case 'medalJump':{const input=$('#medal-page');await loadMedalCollection(Math.max(0,Math.min(Number(input.max)-1,Math.floor(Number(input.value)||1)-1)));break;}case 'medalPlayer':await showMedalPlayer(id,medalMode==='room'?(medalRoom||state.currentStreamer?.id):null);break;case 'medalPublicRoom':await showMedalPlayer(id,b.dataset.room);break;case 'medalPlayerRooms':await showMedalPlayer(id,null,Number(b.dataset.page)||0);break;case 'favoriteAudiencePage':if(favoriteAudienceDialog)await openFavoriteAudience(favoriteAudienceDialog.songId,Number(id));break;case 'favoriteAudienceJump':if(favoriteAudienceDialog){const input=$('#favorite-audience-page');await openFavoriteAudience(favoriteAudienceDialog.songId,Math.max(0,Math.min(Number(input.max)-1,Math.floor(Number(input.value)||1)-1)));}break;case 'achievementRetry':await achievementPanel.load(true);break;case 'subtab':subtab=id;pages={};render();if(subtab==='favorites')loadFavorites(true);break;
 case 'jumpPage':jumpPage(document.querySelector('[data-page-key="'+id+'"]'));break;
 case 'page':pages[id]=(pages[id]||1)+Number(b.dataset.step);render();break;
 case 'myFavorites':subtab='favorites';await go('center');loadFavorites(true);break;case 'favoritesPage':{const view=songFavorites.state();songFavorites.setPage(Math.max(0,view.page+Number(id)));loadFavorites();break;}case 'favoritesRetry':loadFavorites(true);break;case 'favoriteSet':await setSongFavorite(id,b.dataset.favorite==='true');break;case 'myLedger':subtab='ledger';await go('center');break;

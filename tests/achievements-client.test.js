@@ -24,3 +24,14 @@ test('locked secrets cannot leak via atlas or detail; filters do not alter award
  for(const html of [achievementPanelHtml(rows),achievementDetailsHtml(rows[0])]){assert.doesNotMatch(html,/secret-name|secret-condition/);assert.match(html,/神秘勳章/);}
  const filtered=achievementPanelHtml(rows,{category:'performance',status:'earned'});assert.match(filtered,/50首兵郎/);assert.doesNotMatch(filtered,/神秘勳章/);assert.match(filtered,/data-medal-detail="1"/);
 });
+test('only the owner atlas offers publication of earned durable or recorded medals',()=>{
+ const rows=[{code:'sung50',name:'50首兵郎',lifetime:'permanent',qualified:true,published:false},
+  {code:'saved10',name:'今日很會提',lifetime:'show',qualified:true,recorded:false},
+  {code:'first_mic',name:'今日第一麥',lifetime:'show',qualified:true,recorded:true,published:true},
+  {code:'locked',name:'未取得',lifetime:'permanent',qualified:false}];
+ const owner=achievementPanelHtml(rows,{publicControl:true});
+ assert.match(owner,/data-medal-public-code="sung50"/);assert.match(owner,/data-medal-public-code="first_mic" aria-pressed="true"/);
+ assert.doesNotMatch(owner,/data-medal-public-code="saved10"|data-medal-public-code="locked"/);
+ assert.doesNotMatch(achievementPanelHtml(rows),/data-medal-public-code/);
+ assert.match(achievementDetailsHtml({...rows[0],manualVerified:true,acquiredAt:'2026-10-14T01:00:00Z'}),/管理員認證/);
+});

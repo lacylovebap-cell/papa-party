@@ -8,9 +8,10 @@ create table papa_account_legacy_players(account_id uuid,legacy_player_id text);
 create table papa_space_player_profiles(space_id text,player_id text,account_id uuid,data jsonb);
 create table papa_spaces(id text,status text,accounting_rollover_hour int);
 create table papa_song_favorites(account_id uuid,space_id text,player_id text,streamer_id text,song_id text,is_favorite boolean,updated_at timestamptz default now());
-create table papa_achievement_catalog(code text,name text,condition_text text,lifetime text,default_visibility text);
+create table papa_achievement_catalog(code text primary key,name text,condition_text text,lifetime text,default_visibility text);
 create table papa_achievement_visibility(space_id text,streamer_id text,code text,visibility text);
 create table papa_achievement_awards(space_id text,streamer_id text,player_id text,code text,period text,active boolean,acquired_at timestamptz default now());
+create table papa_events(id bigint generated always as identity,streamer_id text,entity_kind text,entity_id text,action text,actor_role text,actor_account_id uuid,actor_player_id text,space_id text,before_data jsonb,after_data jsonb);
 create function papa_event_total(text,boolean) returns bigint language sql as $$select 1::bigint$$;
 create function papa_notice_category_scope(s text,r text,a jsonb,m text) returns jsonb language plpgsql as $$begin
 if a->>'space_id' is distinct from s or a->>'role' not in ('player','streamer_admin','super_admin') or a->>'role'='streamer_admin' and a->>'actor_streamer_id' is distinct from r then raise exception 'FORBIDDEN';end if;
@@ -18,6 +19,7 @@ return jsonb_build_object('recipient',case a->>'role' when 'player' then a->>'pl
 create function papa_streamer_directory() returns jsonb language sql as $$select '[{"id":"papa","spaceId":"space-001","display_name":"Pa","active":true},{"id":"other","spaceId":"space-001","display_name":"Other","active":true},{"id":"closed","spaceId":"space-001","active":false}]'::jsonb$$;
 create function papa_streamer_directory_in_space(text) returns jsonb language sql as $$select papa_streamer_directory()$$;
 create function papa_achievement_eligibility(text,text,text) returns jsonb language sql as $$select '{"sung50":true}'::jsonb$$;
+create function papa_achievement_player_valid(s text,p text,a boolean) returns boolean language sql as $$select exists(select 1 from papa_v2_entities where kind='players' and id=p and coalesce(data->'test','false')<>'true'::jsonb)$$;
 insert into papa_spaces values('space-001','active',19);
 insert into papa_accounts values('00000000-0000-0000-0000-000000000001',null),('00000000-0000-0000-0000-000000000002',null);
 insert into papa_space_memberships select id,'space-001','player','active' from papa_accounts;
@@ -26,7 +28,7 @@ insert into papa_v2_entities values('players','P1','{"name":"Alice","password":"
 insert into papa_achievement_catalog values('sung50','50首兵郎','50首','permanent','public'),('secret','Secret','never disclose','permanent','hidden'),('mystery','Mystery','hidden condition','show','condition_hidden');
 insert into papa_achievement_awards(space_id,streamer_id,player_id,code,period,active) values('space-001','papa','P1','sung50','lifetime',true),('space-001','other','P1','sung50','lifetime',true),('space-001','papa','P1','mystery','2026-10-12',false),('space-001','papa','P1','mystery','2026-10-13',false),('space-001','papa','P1','secret','lifetime',true),('space-001','closed','P1','sung50','lifetime',true),('space-001','papa','P2','sung50','lifetime',true);
 insert into papa_song_favorites(account_id,space_id,player_id,streamer_id,song_id,is_favorite) values('00000000-0000-0000-0000-000000000001','space-001','P1','papa','S1',true),('00000000-0000-0000-0000-000000000002','space-001','P2','papa','S1',false),('00000000-0000-0000-0000-000000000001','space-001','P1','other','S2',true);
-`);for(const file of ['202610140005_favorite_audience.sql','202610140006_achievement_collection.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
+`);for(const file of ['202610140005_favorite_audience.sql','202610140006_achievement_collection.sql','202610140007_achievement_public_choices.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
 const rpc=async(name,args)=>(await db.query('select '+name+'('+args.map((_,i)=>'$'+(i+1)).join(',')+') result',args)).rows[0].result;
 const actor={role:'streamer_admin',space_id:'space-001',actor_streamer_id:'papa',account_id:'00000000-0000-0000-0000-000000000001'};return {db,rpc,actor};}
 test('favorite counts and names use active favorites, Room permission, canonical account and selected fields',async t=>{const {db,rpc,actor}=await fixture(t);const args=['space-001','papa',actor,['S1']];assert.deepEqual(await rpc('papa_song_favorite_audience',args),{counts:{S1:1}});const list=await rpc('papa_song_favorite_audience',[...args,'S1',0]);assert.deepEqual(list.rows,[{name:'Alice'}]);assert.equal(list.total,1);assert.doesNotMatch(JSON.stringify(list),/password|account_id|player_id/);
@@ -34,11 +36,32 @@ await assert.rejects(rpc('papa_song_favorite_audience',['space-001','other',acto
 await assert.rejects(rpc('papa_song_favorite_audience',['space-001','papa',{...actor,role:'player',player_id:'P1'},['S1']]),/FORBIDDEN/);
 await db.exec('update papa_song_favorites set is_favorite=false');assert.deepEqual(await rpc('papa_song_favorite_audience',args),{counts:{S1:0}});
 });
-test('public rankings deduplicate periods, separate Rooms, preserve historical awards and never expose hidden awards or private profiles',async t=>{const {db,rpc,actor}=await fixture(t);const args=['space-001','papa',actor];const rank=await rpc('papa_achievement_collection',[...args,'global','',0]);assert.equal(rank.total,2);assert.equal(rank.rows[0].total,3);assert.equal(rank.rows[0].name,'Alice');assert.doesNotMatch(JSON.stringify(rank),/Secret|never disclose|private-|account_id/);
+test('public rankings require player opt-in, deduplicate periods and keep historical awards private by default',async t=>{const {db,rpc,actor}=await fixture(t);const args=['space-001','papa',actor];assert.equal((await rpc('papa_achievement_collection',[...args,'global','',0])).total,0);
+const player=(id,account)=>({role:'player',space_id:'space-001',player_id:id,account_id:account});
+const alice=player('P1','00000000-0000-0000-0000-000000000001'),bob=player('P2','00000000-0000-0000-0000-000000000002');
+for(const [room,who,code] of [['papa',alice,'sung50'],['papa',alice,'mystery'],['other',alice,'sung50'],['papa',bob,'sung50']])
+ assert.equal((await rpc('papa_achievement_public_set',['space-001',room,who,code,true])).ok,true);
+await assert.rejects(rpc('papa_achievement_public_set',['space-001','papa',alice,'secret',true]),/ACHIEVEMENT_PUBLIC_INVALID/);
+const rank=await rpc('papa_achievement_collection',[...args,'global','',0]);assert.equal(rank.total,2);assert.equal(rank.rows[0].total,3);assert.equal(rank.rows[0].name,'Alice');assert.doesNotMatch(JSON.stringify(rank),/Secret|never disclose|private-|account_id/);
 const room=await rpc('papa_achievement_collection',[...args,'room','',0]);assert.equal(room.rows[0].total,2);
 const search=await rpc('papa_achievement_collection',[...args,'global','Bob',0]);assert.equal(search.rows.length,1);assert.equal(search.rows[0].rank,2);
 const gallery=await rpc('papa_achievement_collection',[...args,'gallery','',0,rank.rows[0].player_key,'papa']);assert.equal(gallery.rows.length,2);assert.equal(gallery.rows.find(r=>r.code==='mystery').condition,null);assert.equal(gallery.rows.find(r=>r.code==='mystery').currentActive,false);assert.equal(gallery.rows.find(r=>r.code==='sung50').currentActive,true);
 const mine=await rpc('papa_achievement_collection',[...args,'mine','',0]);assert.equal(mine.rows.length,1);assert.equal(mine.rows[0].streamer_id,'other');assert.equal(mine.rows[0].total,1);
 const acl=(await db.query("select has_function_privilege('anon','papa_achievement_collection(text,text,jsonb,text,text,int,text,text)','execute') allowed,has_function_privilege('service_role','papa_achievement_public_rows()','execute') raw")).rows[0];assert.deepEqual(acl,{allowed:false,raw:false});
 assert.equal((await db.query('select count(*)::int n from papa_achievement_awards')).rows[0].n,7);
+assert.equal((await rpc('papa_achievement_public_set',['space-001','papa',alice,'sung50',false])).published,false);
+assert.equal((await rpc('papa_achievement_collection',[...args,'room','',0])).rows.find(r=>r.name==='Alice').total,1);
+});
+test('a verified older permanent qualification can be published without creating a fictitious award date',async t=>{
+ const {db,rpc,actor}=await fixture(t),bob={role:'player',space_id:'space-001',player_id:'P2',account_id:'00000000-0000-0000-0000-000000000002'};
+ await db.exec("delete from papa_achievement_awards where player_id='P2'");
+ assert.equal((await rpc('papa_achievement_public_set',['space-001','papa',bob,'sung50',true])).published,true);
+ const rank=await rpc('papa_achievement_collection',['space-001','papa',actor,'room','',0]);
+ assert.equal(rank.rows[0].total,1);
+ const key=rank.rows[0].player_key,gallery=await rpc('papa_achievement_collection',['space-001','papa',actor,'gallery','',0,key,'papa']);
+ assert.equal(gallery.rows[0].acquiredAt,null);
+ assert.equal((await db.query("select count(*)::int n from papa_achievement_awards where player_id='P2'")).rows[0].n,0);
+ await db.exec("create or replace function papa_achievement_eligibility(text,text,text) returns jsonb language sql as $$select '{}'::jsonb$$");
+ await db.exec("insert into papa_events(streamer_id,entity_kind,entity_id,action,actor_role,actor_player_id,space_id,after_data) values('papa','queue','Q1','queue','player','P2','space-001','{\"playerId\":\"P2\"}')");
+ assert.equal((await rpc('papa_achievement_collection',['space-001','papa',actor,'room','',0])).total,0);
 });
