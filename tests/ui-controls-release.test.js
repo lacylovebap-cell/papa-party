@@ -19,17 +19,18 @@ const button=(label,act,id='',classes='',extra='')=>'<button data-act="'+act+'" 
 const run=(ctx,code)=>vm.runInContext(code,ctx);
 function membershipView(extra={}){return {membership:'missing',membershipViews:new Map(),generation:0,page:3,selected:new Set(),selectedRows:new Map(),items:[],total:81,hasMore:true,loaded:true,loading:false,...extra};}
 
-test('version facets include actual DJ labels and display each selected original or DJ option once',()=>{
+test('released version filter has one canonical option per kind and maps legacy labels without duplicate facets',()=>{
  const ctx=vm.createContext({h});load(ctx,['versionOptions']);
  ctx.facets={versionKinds:['original','dj','cover','live'],versionLabels:['原版','DJ版','DJ加速版','DJ加速版']};
  for(const kind of ['original','dj']){
   ctx.view={versionKind:kind,versionLabel:''};const html=run(ctx,'versionOptions(facets,view)');
   assert.equal((html.match(/>原版<\/option>/g)||[]).length,1);
   assert.equal((html.match(/>DJ版<\/option>/g)||[]).length,1);
-  assert.equal((html.match(/>DJ加速版<\/option>/g)||[]).length,1);
+  assert.equal((html.match(/>DJ加速版<\/option>/g)||[]).length,0);
   assert.match(html,new RegExp('value="kind:'+kind+'" selected'));
  }
- ctx.view={versionKind:'',versionLabel:'DJ加速版'};assert.match(run(ctx,'versionOptions(facets,view)'),/value="label:DJ加速版" selected/);
+ ctx.view={versionKind:'',versionLabel:'DJ加速版'};assert.match(run(ctx,'versionOptions(facets,view)'),/value="kind:other" selected/);
+ ctx.view={versionKind:'',versionLabel:'原唱版'};assert.match(run(ctx,'versionOptions(facets,view)'),/value="kind:original" selected/);
 });
 
 test('membership tabs keep independent page and typed selection maps for both catalog controllers',()=>{

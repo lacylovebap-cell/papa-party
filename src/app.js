@@ -1,39 +1,39 @@
-import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.15-WEB.7';
-import {accountingDay,accountingRollover} from './accounting.js?v=10.15-WEB.7';
-import {installPageJumps} from './ui-page-jumps.js?v=10.15-WEB.7';
-import {createWebAppInstall} from './web-app-install.js?v=10.15-WEB.7';
-import {refreshView,rememberView} from './view-refresh.js?v=10.15-WEB.7';
-import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.15-WEB.7';
-import {webApiFailure} from './web-api-errors.js?v=10.15-WEB.7';
-import {canonicalNoticeLink} from './notification-rules.js?v=10.15-WEB.7';
-import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.15-WEB.7';
-import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.15-WEB.7';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.15-WEB.7';
-import {fateCategories,drawSong} from './fate.js?v=10.15-WEB.7';
-import {createBoard} from './board.js?v=10.15-WEB.7';
-import {createChat} from './chat.js?v=10.15-WEB.7';
-import {requestSourceLabel} from './request-source.js?v=10.15-WEB.7';
-import {normalizeHome,themePalette} from './home-settings.js?v=10.15-WEB.7';
-import {openHomeEditor} from './home-editor.js?v=10.15-WEB.7';
-import {streamerName,streamerText,streamerDestination,pageLocation,pageDestination} from './streamer-navigation.js?v=10.15-WEB.7';
-import {createNotifications} from './notifications.js?v=10.15-WEB.7';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.15-WEB.7';
-import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.15-WEB.7';
-import {createPlayerManager} from './player-manager.js?v=10.15-WEB.7';
-import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.15-WEB.7';
-import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.15-WEB.7';
-import {createSongFavorites} from './song-favorites.js?v=10.15-WEB.7';
-import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.15-WEB.7';
-import {listenedSongs} from './listening-history.js?v=10.15-WEB.7';
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.15-WEB.7';
-import {createWebDeviceLogin} from './web-device-login.js?v=10.15-WEB.7';
-import {roomStorageKey} from './communication-context.js?v=10.15-WEB.7';
-import {createWebSpaceEntry} from './web-space-entry.js?v=10.15-WEB.7';
-import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.15-WEB.7';
-import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.15-WEB.7';
-import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.15-WEB.7';
-import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.15-WEB.7';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.15-WEB.7';
+import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.16-WEB.1';
+import {accountingDay,accountingRollover} from './accounting.js?v=10.16-WEB.1';
+import {installPageJumps} from './ui-page-jumps.js?v=10.16-WEB.1';
+import {createWebAppInstall} from './web-app-install.js?v=10.16-WEB.1';
+import {refreshView,rememberView} from './view-refresh.js?v=10.16-WEB.1';
+import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.16-WEB.1';
+import {webApiFailure} from './web-api-errors.js?v=10.16-WEB.1';
+import {canonicalNoticeLink} from './notification-rules.js?v=10.16-WEB.1';
+import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.16-WEB.1';
+import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.16-WEB.1';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.16-WEB.1';
+import {fateCategories,drawSong} from './fate.js?v=10.16-WEB.1';
+import {createBoard} from './board.js?v=10.16-WEB.1';
+import {createChat} from './chat.js?v=10.16-WEB.1';
+import {requestSourceLabel} from './request-source.js?v=10.16-WEB.1';
+import {normalizeHome,themePalette} from './home-settings.js?v=10.16-WEB.1';
+import {openHomeEditor} from './home-editor.js?v=10.16-WEB.1';
+import {streamerName,streamerText,streamerDestination,pageLocation,pageDestination} from './streamer-navigation.js?v=10.16-WEB.1';
+import {createNotifications} from './notifications.js?v=10.16-WEB.1';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.16-WEB.1';
+import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.16-WEB.1';
+import {createPlayerManager} from './player-manager.js?v=10.16-WEB.1';
+import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.16-WEB.1';
+import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.16-WEB.1';
+import {createSongFavorites} from './song-favorites.js?v=10.16-WEB.1';
+import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.16-WEB.1';
+import {listenedSongs} from './listening-history.js?v=10.16-WEB.1';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.16-WEB.1';
+import {createWebDeviceLogin} from './web-device-login.js?v=10.16-WEB.1';
+import {roomStorageKey} from './communication-context.js?v=10.16-WEB.1';
+import {createWebSpaceEntry} from './web-space-entry.js?v=10.16-WEB.1';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.16-WEB.1';
+import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.16-WEB.1';
+import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.16-WEB.1';
+import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.16-WEB.1';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.16-WEB.1';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let appInstallMessage='';
 const appInstall=createWebAppInstall({onChange:syncAppInstall});
@@ -568,13 +568,13 @@ document.addEventListener('keydown',e=>{if(e.target.id==='activity-page'&&e.key=
 let medalDisplay={rows:[],manager:false},medalFilters={category:"all",status:"all"};
 let medalLastIdentity='',medalPublicSelection=null;let medalMode='mine',medalCollection={rows:[],page:0,total:0},medalQuery='',medalRoom='',medalOther=false,medalOwnRoomId='',medalCollectionGeneration=0,medalCollectionCache=new Map(),medalCollectionPending=new Map();
 function medalIdentity(){const panel=$('#achievement-panel'),identity=panel?.dataset.management==='true'?admin:session;return [panel?.dataset.player,panel?.dataset.management,identity?.accountId,identity?.token,state.currentStreamer?.id].join('|');}
-function medalNav(){return '<div class="tabs medal-navigation">'+[['mine','我的勳章'],['room','主播榮譽牆'],['global','全主播排行']].map(([key,name])=>button(name,'medalView',key,medalMode===key?'active':'')).join('')+'</div>';}
+function medalNav(){return '<div class="tabs medal-navigation">'+[['mine','我的勳章'],['room','主播勳章榜'],['global','全站勳章榜'],['songs_room','主播歌曲榜'],['songs_global','全站歌曲榜']].map(([key,name])=>button(name,'medalView',key,medalMode===key?'active':'')).join('')+'</div>';}
 function paintMedals(content){const panel=$('#achievement-panel');if(panel)panel.innerHTML=medalNav()+content;}
 function medalPager(total,page,action){const max=Math.max(1,Math.ceil(total/20));return '<div class="pagination">'+button('上一頁',action,page-1,'',page===0?'disabled':'')+'<span>共 '+max+' 頁 · '+total+' 筆</span><input id="medal-page" type="number" min="1" max="'+max+'" value="'+(page+1)+'" aria-label="勳章列表頁碼">'+button('跳頁','medalJump')+button('下一頁',action,page+1,'',page+1>=max?'disabled':'')+'</div>';}
 function paintMedalCollection(){
- if(medalMode==='mine'){paintMedals(button('目前主播','medalOwnRoom','','!')+button('其他主播','medalOtherRooms')+'<p class="subtle">各主播獨立累積；以下數量為已記錄的勳章。</p>'+medalCollection.rows.map(r=>button(h(r.name)+' · '+r.total+' 枚','medalOwnRoom',r.streamer_id)).join('')+medalPager(medalCollection.total,medalCollection.page,'medalPage'));return;}
+ if(medalMode==='mine'){paintMedals(button('目前主播','medalOwnRoom','','!')+button('其他主播','medalOtherRooms')+'<p class="subtle">全站勳章跨主播累積，主播勳章各自累積；以下為目前持有數量。</p>'+medalCollection.rows.map(r=>button(h(r.name)+' · '+r.total+' 枚','medalOwnRoom',r.streamer_id)).join('')+medalPager(medalCollection.total,medalCollection.page,'medalPage'));return;}
  const rooms=(state.streamers||[]).filter(r=>r.active!==false&&(r.spaceId||'space-001')===(state.currentStreamer?.spaceId||'space-001'));
- paintMedals('<div class="medal-filters">'+(medalMode==='room'?'<label>主播<select id="medal-room">'+rooms.map(r=>'<option value="'+h(r.id)+'" '+((medalRoom||state.currentStreamer?.id)===r.id?'selected':'')+'>'+h(r.display_name)+'</option>').join('')+'</select></label>':'')+'<input id="medal-search" type="search" maxlength="100" value="'+h(medalQuery)+'" placeholder="搜尋玩家暱稱">'+button('搜尋','medalSearch')+'</div><p class="subtle">依曾取得且可公開的勳章排名，同一主播的同名勳章只計一次。</p>'+medalCollection.rows.map(r=>'<div class="song"><span>'+r.rank+'</span><div class="info"><b>'+h(r.name)+'</b><small>'+h((r.preview||[]).join(' · '))+'</small></div>'+button(r.total+' 枚 · 查看','medalPlayer',r.player_key)+'</div>').join('')+(medalCollection.rows.length?'':blank('尚無符合的公開勳章紀錄'))+medalPager(medalCollection.total,medalCollection.page,'medalPage'));
+ paintMedals('<div class="medal-filters">'+(['room','songs_room'].includes(medalMode)?'<label>主播<select id="medal-room">'+rooms.map(r=>'<option value="'+h(r.id)+'" '+((medalRoom||state.currentStreamer?.id)===r.id?'selected':'')+'>'+h(r.display_name)+'</option>').join('')+'</select></label>':'')+'<input id="medal-search" type="search" maxlength="100" value="'+h(medalQuery)+'" placeholder="搜尋名稱">'+button('搜尋','medalSearch')+'</div><p class="subtle">'+(medalMode.startsWith('songs_')?'全部歷史完成演唱次數；排除骰子與自帶，同名不同歌手分開。':'依目前持有的不同勳章數排名；未公開者也計入數量，同枚續期不重複加分。')+'</p>'+medalCollection.rows.map(r=>'<div class="song"><span>'+r.rank+'</span><div class="info"><b>'+h(r.name)+'</b><small>'+h(medalMode.startsWith('songs_')?r.artist:(r.preview||[]).join(' · '))+'</small></div>'+(medalMode.startsWith('songs_')?'<span>'+r.total+' 次</span>':button(r.total+' 枚 · 查看','medalPlayer',r.player_key))+'</div>').join('')+(medalCollection.rows.length?'':blank('尚無符合的排行榜紀錄'))+medalPager(medalCollection.total,medalCollection.page,'medalPage'));
 }
 async function loadMedalCollection(page=0){
  const identity=medalIdentity(),generation=++medalCollectionGeneration,request={op:'achievementCollection',view:medalMode==='mine'?'mine':medalMode,query:medalQuery,page,room:medalRoom||state.currentStreamer?.id},key=identity+'|'+JSON.stringify(request);paintMedals(blank('讀取中…'));

@@ -1,3 +1,4 @@
+import {roomBadgeChanges} from '../supabase/functions/party-api/badge-state.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -42,7 +43,7 @@ function fixture(){
 }
 function edge(source=fixture(),{grantError}={}){
  const original=structuredClone(source),calls=[],pushes=[],failed=new Set();let server=structuredClone(source),handler;
- const context=vm.createContext({URL,crypto,structuredClone,TextEncoder,console,Date:FixedDate,Response,webpush:{},
+ const context=vm.createContext({roomBadgeChanges,URL,crypto,structuredClone,TextEncoder,console,Date:FixedDate,Response,webpush:{},
   Deno:{env:{get:key=>key==='SUPABASE_URL'?'https://example.test':'fixture-only'},serve:value=>handler=value},
   EdgeRuntime:{waitUntil:()=>{}},fetch:()=>{throw Error('unexpected network');}});
  vm.runInContext(stripTypeScriptTypes(bundle),context);

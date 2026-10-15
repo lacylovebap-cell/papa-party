@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {createWebSyncRecovery} from '../src/web-sync-recovery.js';
 import {webApiFailure} from '../src/web-api-errors.js';
+import {refreshView} from '../src/view-refresh.js';
 
 // Exercise the application's real API/read/apply/dispatch wiring, rather than
 // a copy of it. Only transport, rendering and the surrounding browser are fake.
@@ -27,7 +28,8 @@ function harness(){
  const calls=[],renders=[],adoptions=[],storage=[],timers=new Map(),notices=[],chats=[],achievementReads=[];
  const ui={dialogOpen:false,editing:false,form:{query:'愛情',note:'尚未送出',selected:['song-1']}};let timerId=0;
  let ctx;
- ctx=vm.createContext({supportsOperationReceipt,sendReceiptedOperation,crypto,AbortSignal,URL,JSON,Date,structuredClone,queueMicrotask,webApiFailure,
+ ctx=vm.createContext({supportsOperationReceipt,sendReceiptedOperation,crypto,AbortSignal,URL,JSON,Date,structuredClone,queueMicrotask,webApiFailure,refreshView,
+  window:{scrollX:0,scrollY:0,scrollTo(){}},pageViewKey:()=>ctx.route,
   createWebSyncRecovery:options=>createWebSyncRecovery({...options,schedule:(callback,delay)=>{const id=++timerId;timers.set(id,{callback,delay});return id;},cancel:id=>timers.delete(id)}),
   state:{revision:10,currentStreamer:{id:'server-room-id',spaceId:'space-001'},songs:[{songId:'original'}]},full:null,
   session:{playerId:'P1',token:'player-token-one',sessionId:'device-one',role:'player',spaceId:'space-001'},admin:null,draft:null,demo:false,entryPending:false,busy:false,route:'home',selectedPlayer:null,

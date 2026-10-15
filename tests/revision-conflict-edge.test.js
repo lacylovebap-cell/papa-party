@@ -1,3 +1,4 @@
+import {roomBadgeChanges} from '../supabase/functions/party-api/badge-state.js';
 import {accountingDay} from '../src/accounting.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -46,7 +47,7 @@ function fixture(outcome='success'){
   if(path.endsWith('/papa_accounting_summary')){const b=JSON.parse(options.body);return new Response(JSON.stringify({day:b.requested_day||accountingDay(new Date().toISOString(),19),rolloverHour:19,timezone:'Asia/Taipei',scope:{spaceId:b.requested_space,roomId:b.requested_room},...core.stats(core.scopeState(state),new Date().toISOString()),revision:state.revision}));}
   throw Error('Unexpected fixture endpoint');
  };
- const context=vm.createContext({accountingDay,...core,...access,...patch,...rules,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
+ const context=vm.createContext({roomBadgeChanges,accountingDay,...core,...access,...patch,...rules,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
   Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://db.example':'fixture-key'},serve:fn=>handler=fn},EdgeRuntime:{waitUntil(){}},
   CATALOG_OPS:new Set(),catalogMetadataView:view=>view,fixtureState:state,fixtureWho:who});
  vm.runInContext(code,context);

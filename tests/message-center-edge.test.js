@@ -14,7 +14,7 @@ const code=stripTypeScriptTypes(fs.readFileSync(new URL('../supabase/functions/p
 const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
 test('deployment version probe is public, performs no database reads and labels completed center and unfinished transport/native features honestly',async()=>{
  const f=fixture({expired:true}),r=await f.invoke({op:'releaseInfo',token:'invalid'});
- assert.equal(r.status,200);assert.deepEqual(r.body,{version:JSON.parse(fs.readFileSync(new URL('../release.json',import.meta.url),'utf8')).backendVersion||JSON.parse(fs.readFileSync(new URL('../release.json',import.meta.url),'utf8')).version,messageCenterV2:true,achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,scopedRealtimeV2:false,nativeApps:false});
+ assert.equal(r.status,200);assert.deepEqual(r.body,{version:JSON.parse(fs.readFileSync(new URL('../release.json',import.meta.url),'utf8')).backendVersion||JSON.parse(fs.readFileSync(new URL('../release.json',import.meta.url),'utf8')).version,badgeRules:2,messageCenterV2:true,achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,scopedRealtimeV2:false,nativeApps:false});
  assert.equal(f.calls.length,0);
 });
 function fixture(options={}){

@@ -1,3 +1,4 @@
+import {roomBadgeChanges} from '../supabase/functions/party-api/badge-state.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -37,7 +38,7 @@ function edge(outcome='success'){
   if(outcome==='body')return {ok:true,text:async()=>{throw Error('Lost response body');}};
   return new Response(JSON.stringify(state.revision));
  };
- const context=vm.createContext({Response,JSON,structuredClone,fetch,SB_URL:'https://example.test',headers:{},stateChanges,deriveNotices,coreActor,applyPlayerRequestBatch,validateRequestBatch,
+ const context=vm.createContext({roomBadgeChanges,Response,JSON,structuredClone,fetch,SB_URL:'https://example.test',headers:{},stateChanges,deriveNotices,coreActor,applyPlayerRequestBatch,validateRequestBatch,
   respond:value=>value,schedulePush:()=>{},catalogRoom:async(actor,slug)=>{if(!['papa','papa-alias'].includes(slug))throw Error('找不到主播');return {id:'papa',slug:'papa',spaceId:'space-001',active:true};},
   load:async(...args)=>{reads.push(args);return structuredClone(state);},
  });

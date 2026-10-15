@@ -5,6 +5,7 @@ import {isSuper,isManager,coreActor,requireRoom,authorizeManagerOperation,manage
 import {stateChanges,scopedOperationalAction,scopedRoomMutationAction} from '../../../src/state-patch.js';
 import {applyRoomImport} from '../../../src/room-import.js';
 import {createRoomDraft,validateRoomDraft,replayRoomDraft} from '../../../src/room-draft.js';
+import {roomBadgeChanges} from './badge-state.js';
 // No browser access to tables or VAPID secrets. All recipient keys come from actor().
 import webpush from 'npm:web-push@3.6.7';
 import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,validPushSubscription,canonicalNoticeLink,webNoticePath} from '../../../src/notification-rules.js';
@@ -300,6 +301,18 @@ async function commit(before:any,after:any,context:any={}){
  }):patch.changes;
  const provision=native&&Array.isArray(context.player_bindings)&&context.player_bindings.length>0;
  const {player_bindings,receipt,...actorContext}=context;
+ // Evaluate only a real business delta, reusing the verified room snapshot.
+ // Do not issue another history read or attach private history to the payload.
+ const badgeRooms=new Set([...changes,...patch.removed].filter((row:any)=>['queue','ledger'].includes(row.kind))
+  .map((row:any)=>row.data?.streamer_id||before[row.kind]?.find((old:any)=>old.id===row.id)?.streamer_id).filter(Boolean));
+ if(badgeRooms.size&&context.action!=='migrate'&&context.action!=='import'){
+  const evaluatedAt=new Date().toISOString(),byRoom:any={};
+  for(const roomId of badgeRooms){
+   const spaceId=after.streamers?.find((row:any)=>row.id===roomId)?.spaceId||context.space_id||'space-001';
+   byRoom[roomId as string]=roomBadgeChanges(before,after,{spaceId,roomId,asOf:evaluatedAt});
+  }
+  actorContext.badgeRuleVersion=2;actorContext.badgeChangesByRoom=byRoom;
+ }
  const receipted=!!(context.roomScoped&&receipt);
  if(receipted&&receipt.attempt)receipt.attempt.started=true;
  const result=await api('/rest/v1/rpc/'+(receipted?'papa_room_operational_commit_receipted':provision?'papa_room_admin_commit_with_player_bindings':context.roomScoped?'papa_room_operational_commit':context.roomWriteScoped?'papa_room_admin_commit':'papa_release_b_commit'),{expected:before.revision,changes,removed:patch.removed,actor_context:actorContext,notices,...(scoped?{requested_room:context.streamer_id}:{}),...(provision?{player_bindings:player_bindings}:{}),...(receipted?{operation_id:receipt.operation_id,actor_key:receipt.actor_key,request_hash:receipt.request_hash}:{})});
@@ -514,7 +527,7 @@ function observeActivity(b:any,who:any){
 }
 const eventTotals=new Map();
 async function eventTotal(room:any,global:boolean){const key=JSON.stringify([room.spaceId,room.id,global]),cached=eventTotals.get(key);if(cached&&Date.now()-cached.at<60000)return cached.total;const total=await api('/rest/v1/rpc/papa_event_total',{room_id:room.id,include_global:global});if(typeof total!=='number'||!Number.isSafeInteger(total)||total<0)throw Error('操作歷史頁數尚未確認');if(eventTotals.size>=128)eventTotals.delete(eventTotals.keys().next().value);eventTotals.set(key,{at:Date.now(),total});return total;}
-Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.14-WEB.6',achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.16-WEB.1',badgeRules:2,achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  activityRequest={body:b,who};
  if(b.op==='activityPage'){if(!isSuper(who)||!who.accountId)throw Error('只有 PA Party總裁可查看活動');const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';if(b.spaceId!==undefined&&b.spaceId!==space||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000)throw Error('活動頁碼或範圍不正確');const result=await api('/rest/v1/rpc/papa_activity_page',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space},page_number:b.page??0});if(result?.version!==1||result.spaceId!==space||result.page!==(b.page??0)||result.pageSize!==50||!Array.isArray(result.rows)||result.rows.length>50)throw Error('活動資料尚未確認');return respond({...result,rows:result.rows.map((r:any)=>({player_id:r.player_id,streamer_id:r.streamer_id,page:r.page,last_seen:r.last_seen,online:r.online}))});}
  if(b.op==='uploadVideo'){
@@ -526,7 +539,7 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
  }
  if(b.op==='achievementCollection'){
   if(!who?.accountId)throw Error('請重新登入');const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';
-  if(!['room','global','rooms','gallery','mine'].includes(b.view)||typeof(b.query??'')!=='string'||(b.query??'').length>100||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000||b.playerKey!==undefined&&!/^[a-f0-9]{32}$/.test(b.playerKey)||b.room!==undefined&&(typeof b.room!=='string'||b.room.length>200))throw Error('勳章查詢不正確');
+  if(!['room','global','songs_room','songs_global','rooms','gallery','mine'].includes(b.view)||typeof(b.query??'')!=='string'||(b.query??'').length>100||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000||b.playerKey!==undefined&&!/^[a-f0-9]{32}$/.test(b.playerKey)||b.room!==undefined&&(typeof b.room!=='string'||b.room.length>200))throw Error('勳章查詢不正確');
   return respond(await api('/rest/v1/rpc/papa_achievement_collection',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space,player_id:who.role==='player'?who.playerId:null,actor_streamer_id:who.role==='streamer_admin'?who.streamer_id:null},view_mode:b.view,query_text:b.query??'',page_number:b.page??0,public_player:b.playerKey??null,target_room:b.room??null}));
  }
  if(['achievements','achievementVisibility','achievementPublicSet','achievementManualGrant'].includes(b.op)){
@@ -560,7 +573,7 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   const result=await api('/rest/v1/rpc/papa_achievement_page',{...common,requested_player:player});
   if(result?.version!==1||result.scope?.spaceId!==space||result.scope?.streamerId!==room.id||result.scope?.playerId!==player||!Array.isArray(result.rows)||result.rows.length>100)throw Error('勳章資料尚未確認');
   const publication=who.role==='player'?await api('/rest/v1/rpc/papa_achievement_public_state',common):{};
-  const rows=result.rows.map((r:any)=>({code:r.code,name:r.name,condition:r.condition,lifetime:r.lifetime,visibility:r.visibility,qualified:r.qualified,currentActive:r.currentActive,acquiredAt:r.acquiredAt,recorded:r.recorded,manualVerified:r.manualVerified===true,published:publication?.[r.code]===true}));
+  const rows=result.rows.map((r:any)=>({code:r.code,badgeId:r.badgeId,emoji:r.emoji,scope:r.scope,retired:r.retired,name:r.name,condition:r.condition,lifetime:r.lifetime,visibility:r.visibility,qualified:r.qualified,currentActive:r.currentActive,acquiredAt:r.acquiredAt,expiresAt:r.expiresAt,recorded:r.recorded,manualVerified:r.manualVerified===true,published:publication?.[r.code]===true}));
   return respond({version:1,scope:{spaceId:space,streamerId:room.id,playerId:player},rows});
  }
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));

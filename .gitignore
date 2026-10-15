@@ -10,3 +10,4 @@ qa-*.mjs
 notification-audio-test.html
 deploy-*.html
 /supabase/.temp/
+/.badge-replay/

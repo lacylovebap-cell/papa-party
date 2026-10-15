@@ -1,3 +1,4 @@
+import {roomBadgeChanges} from '../supabase/functions/party-api/badge-state.js';
 import * as bulk from '../src/player-bulk-tools.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -52,7 +53,7 @@ function fixture(outcome='success'){
    scope:{spaceId:b.requested_space,roomId:b.requested_room},day:accountingDay(new Date().toISOString(),19),rolloverHour:19,timezone:'Asia/Taipei',revision:state.revision});
   throw Error('Unexpected fixture endpoint '+path);
  };
- const context=vm.createContext({accountingDay,...core,...access,...patch,...rules,...bulk,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
+ const context=vm.createContext({roomBadgeChanges,accountingDay,...core,...access,...patch,...rules,...bulk,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
   Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://db.example':'fixture-key'},serve:fn=>handler=fn},EdgeRuntime:{waitUntil(){}},
   CATALOG_OPS:new Set(),catalogMetadataView:view=>view,fixtureState:state});
  vm.runInContext(roomCode+'\n'+code,context);
