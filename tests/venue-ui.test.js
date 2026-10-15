@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import {balance,reservedCredits,queueConfirmed,queuePrepared,queuePreparation} from '../src/core.js';
+import {empty,mutate,balance,reservedCredits,queueConfirmed,queuePrepared,queuePreparation} from '../src/core.js';
 import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from '../src/venue-policy.js';
 
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8').split(/\r?\n/);
 const take=prefix=>{const value=source.find(line=>line.startsWith(prefix));assert.ok(value,prefix);return value;};
-const functions=['function sortControl(','const venueName=','function venueSelector(','function venueSwitch(','function storedBalanceHtml(','function ledgerRows(','function queueRows(','function updateProxyCredits(','async function requestSong('].map(take).join('\n');
+const functions=['function sortControl(','const venueName=','function venueSelector(','function venueSwitch(','function storedBalanceHtml(','function ledgerRows(','function queueRows(','function updateProxyCredits(','async function requestSong(','function editVenue(','function settingsHtml('].map(take).join('\n');
 const at='2026-10-09T12:30:00Z';
 function harness(settings={}){
  const state={settings:{hourlyLimit:2,...settings},players:[{playerId:'p',name:'玩家'}],songs:[{songId:'s',title:'原本的歌曲',artist:'歌手',creditCost:2}],crowns:[],ledger:[],queue:[]};
@@ -27,6 +27,23 @@ test('disabled radio leaves the existing controls absent and legacy credits usab
  const u=harness();u.state.ledger.push({playerId:'p',amount:5});
  assert.equal(u.run('venueSwitch()'),'');assert.equal(u.run('venueSelector()'),'');assert.equal(u.run("storedBalanceHtml('p')"),'5 首');
  await u.run("requestSong('s','saved')");assert.match(u.modals[0].title,/確認提歌/);
+});
+
+test('radio has a visible settings entry and dedicated enable/current-venue form that persists through Core',async()=>{
+ const u=harness(),enabled={checked:false,addEventListener(_name,handler){this.change=handler;}},current={disabled:false};
+ Object.assign(u.ctx,{draft:null,demo:false,button:u.ctx.button,nativeSelect:u.ctx.select,check:(_name,label)=>label,area:()=>'',isSuperAdmin:()=>false,
+  $:selector=>selector.includes('radio_enabled')?enabled:current});
+ assert.match(u.run('settingsHtml()'),/電台設定/);assert.match(u.run('settingsHtml()'),/data-act="editVenue"/);
+ u.run('editVenue()');assert.equal(current.disabled,true);assert.match(u.modals[0].html,/目前場域/);
+ enabled.checked=true;enabled.change();assert.equal(current.disabled,false);
+ const checked={has:()=>true,get:()=> 'radio'};await u.modals[0].submit(checked);
+ assert.deepEqual(u.sent[0],{type:'settings',data:{radio_enabled:true,current_space:'radio'}});
+ const saved=mutate(empty(),u.sent[0],{role:'admin'},at);
+ assert.equal(saved.settings.radio_enabled,true);assert.equal(saved.settings.current_space,'radio');
+ await u.modals[0].submit({has:()=>false,get:()=> 'radio'});
+ assert.deepEqual(u.sent[1],{type:'settings',data:{radio_enabled:false,current_space:'shengma'}});
+ const disabled=mutate(saved,u.sent[1],{role:'admin'},at);
+ assert.equal(disabled.settings.radio_enabled,false);assert.equal(disabled.settings.current_space,'shengma');
 });
 
 test('enabled controls keep venue distinct from live work status and show both existing pools',()=>{

@@ -1,4 +1,4 @@
-import {newPracticeSongTags} from './new-practice.js?v=10.14-WEB.6';
+import {newPracticeSongTags} from './new-practice.js?v=10.15-WEB.7';
 
 // The catalog and the songs share one tag vocabulary; there is no separate draw category list.
 export function fateCategories(settings,songs){

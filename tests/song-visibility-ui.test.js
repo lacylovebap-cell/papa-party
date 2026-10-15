@@ -90,7 +90,7 @@ test('blank manager lists send visibility and catalog status before requesting o
  }});
  h.context.songVisibilityFilter='hidden';h.context.songCatalogStatusFilter='linked';h.context.filters.language='日語';
  await h.run("loadRoomSongSearch('songs','',[],0)");
- assert.deepEqual(h.calls[0],{op:'songSearchRoom',q:'',tags:[],sort:'default',limit:20,offset:0,language:'日語',visibility:'hidden',catalogStatus:'linked'});
+ assert.deepEqual(h.calls[0],{op:'songSearchRoom',q:'',tags:[],tagMatch:'all',sort:'default',limit:20,offset:0,language:'日語',visibility:'hidden',catalogStatus:'linked'});
  let page=h.run('adminSongPage()');
  assert.equal(page.loading,false);assert.equal(page.rows.length,20);
  assert.deepEqual(plain(page.rows.map(row=>row.songId)),songs.slice(0,20).map(row=>row.songId));
@@ -106,7 +106,7 @@ test('public book and home requests cannot carry manager visibility or catalog s
  h.context.songVisibilityFilter='hidden';h.context.songCatalogStatusFilter='pending';h.context.filters.q='歌';h.context.filters.language='日語';
  await h.run("loadRoomSongSearch('book','歌',[],0)");
  h.context.route='home';await h.run("loadRoomSongSearch('home','歌',[],0)");
- assert.deepEqual(h.calls,[{op:'songSearchRoom',q:'歌',tags:[],sort:'default',limit:20,offset:0,language:'日語'},{op:'songSearchRoom',q:'歌',tags:[],sort:'default',limit:5,offset:0}]);
+ assert.deepEqual(h.calls,[{op:'songSearchRoom',q:'歌',tags:[],tagMatch:'all',sort:'default',limit:20,offset:0,language:'日語'},{op:'songSearchRoom',q:'歌',tags:[],tagMatch:'all',sort:'default',limit:5,offset:0}]);
  h.context.filters.q='';h.context.route='book';
  await h.run("loadRoomSongSearch('book','',[],0)");
  assert.equal(h.run('bookSearchResult()'),null);assert.equal(h.calls.length,2);assert.equal(h.timers.length,0);

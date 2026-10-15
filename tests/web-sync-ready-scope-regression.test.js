@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {createWebSyncRecovery} from '../src/web-sync-recovery.js';
 import {webApiFailure} from '../src/web-api-errors.js';
+import {refreshView,rememberView} from '../src/view-refresh.js';
 
 // Use the real read/apply/render wiring, including the readiness gate. The
 // rendered business views and browser transport are the only substitutes.
@@ -22,25 +23,25 @@ const tick=()=>new Promise(setImmediate);
 const deferred=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};};
 
 function harness(){
- const calls=[],renders=[],events=new Map(),app={innerHTML:'existing view'},ui={dialogOpen:false,editing:false,note:'尚未送出',query:'愛情',selection:['song-1']};
+ const calls=[],renders=[],events=new Map(),app={innerHTML:'existing view',dataset:{}},ui={dialogOpen:false,editing:false,note:'尚未送出',query:'愛情',selection:['song-1']};
  let ctx;
  const view=name=>{app.innerHTML='business-'+name;renders.push(name);};
- ctx=vm.createContext({supportsOperationReceipt,sendReceiptedOperation,crypto,AbortSignal,URL,JSON,Date,queueMicrotask,createWebSyncRecovery,webApiFailure,
+ ctx=vm.createContext({supportsOperationReceipt,sendReceiptedOperation,crypto,AbortSignal,URL,JSON,Date,queueMicrotask,createWebSyncRecovery,webApiFailure,refreshView,rememberView,
   state:{revision:10,songs:[{songId:'existing'}]},full:{revision:10},session:{playerId:'P1',token:'token-1',sessionId:'device-1',role:'player',spaceId:'space-001'},
-  admin:null,draft:null,demo:false,entryPending:false,busy:false,route:'home',tab:'queue',selectedPlayer:null,streamerSlug:'papa',
+  admin:null,draft:null,demo:false,entryPending:false,busy:false,route:'home',tab:'queue',subtab:'overview',queueHistory:false,selectedPlayer:null,streamerSlug:'papa',
   signatures:{songs:'old-signature'},lastFullRefreshAt:Date.now(),offset:0,API:'https://api.example.test',PUBLISHABLE_KEY:'fixture',
   location:{href:'https://party.example.test/?streamer=papa&spaceId=space-001#home'},navigator:{onLine:true},
-  document:{hidden:false,querySelector:selector=>selector==='dialog[open]'&&ui.dialogOpen?{}:null,get activeElement(){return {matches:()=>ui.editing};},addEventListener:(name,callback)=>events.set(name,callback)},
+  window:{scrollX:0,scrollY:0,scrollTo(){}},document:{hidden:false,querySelector:selector=>selector==='#app'?app:selector==='dialog[open]'&&ui.dialogOpen?{}:null,querySelectorAll:()=>[],get activeElement(){return {matches:()=>ui.editing};},addEventListener:(name,callback)=>events.set(name,callback)},
   $:selector=>selector==='#app'?app:null,isAdmin:()=>Boolean(ctx.admin&&ctx.route==='admin'),isSuperAdmin:()=>ctx.admin?.role==='super_admin',
   button:(label,action)=>'<button data-act="'+action+'">'+label+'</button>',header(){},applyHomeTheme(){},prepareNoticeLanding:()=>null,renderNoticeLanding(){},
   nativePlayerView:{open:false},playerArchiveView:{open:false},
   renderHome:()=>view('home'),renderAdmin:()=>view('admin'),renderCenter:()=>view('center'),renderBook:()=>view('book'),renderGallery:()=>view('gallery'),renderCommonBook:()=>view('common'),
-  loadVisibleFavoriteFlags(){},loadFavorites(){},loadListeningOverview(){},achievementPanel:{load:async()=>{}},activityPage:{load:async()=>{}},loadPlayerManagement(){},
+  loadVisibleFavoriteFlags(){},loadFavoriteAudience(){},loadFavorites(){},loadListeningOverview(){},achievementPanel:{load:async()=>{}},medalManagement:{load:async()=>{}},activityPage:{load:async()=>{}},loadPlayerManagement(){},syncPhotoCarousel(){},
   managerSessionExpired:response=>response.status===401,discardManagerSession(){},acceptSessionIdentity(){},put(){},get:()=>null,
   publicView:source=>({revision:source.revision,songs:[{songId:'local'}]}),actor:()=>({role:'manager'}),clock:()=>new Date(),timeValue:value=>Date.parse(value),
   fetch:(_url,options)=>{const request=deferred();calls.push({body:JSON.parse(options.body),...request});return request.promise;}
  });
- vm.runInContext(['api','syncReadIdentity','syncCanRender','updateLiveSyncStatus','readLatestState','render','refresh'].map(declaration).join('\n')+'\n'+lines.slice(readyStart,refreshStart).join('\n')+'\n'+lifecycle+'\nglobalThis.appSync=syncRecovery;',ctx);
+ vm.runInContext(['api','syncReadIdentity','pageViewKey','syncCanRender','updateLiveSyncStatus','readLatestState','render','refresh'].map(declaration).join('\n')+'\n'+lines.slice(readyStart,refreshStart).join('\n')+'\n'+lifecycle+'\nglobalThis.appSync=syncRecovery;',ctx);
  const run=code=>vm.runInContext(code,ctx);
  const respond=(index,data)=>calls[index].resolve({status:200,ok:true,json:async()=>data});
  return {ctx,calls,renders,events,app,ui,run,respond,sync:ctx.appSync,refresh:force=>run('refresh('+Boolean(force)+')')};

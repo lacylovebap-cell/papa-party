@@ -100,7 +100,7 @@ test('room lyric search is debounced by caller, bounded, room-scoped and cached 
   isAdmin:()=>false,api:async body=>{calls.push(body);return {songIds:['a'],total:21,hasMore:body.offset===0};},song:id=>songs.find(s=>s.songId===id),renderSongResults:()=>{},button:()=>'',songRows:()=>'',matchesSong:()=>false,$:()=>null});
  vm.runInContext(segment('function roomSearchKey(','function songToolbar('),context);
  await vm.runInContext("loadRoomSongSearch('book','夜',[],0)",context);
- assert.deepEqual(JSON.parse(JSON.stringify(calls[0])),{op:'songSearchRoom',q:'夜',tags:[],sort:'default',limit:20,offset:0});
+ assert.deepEqual(JSON.parse(JSON.stringify(calls[0])),{op:'songSearchRoom',q:'夜',tags:[],tagMatch:'all',sort:'default',limit:20,offset:0});
  assert.deepEqual([...roomSearch.book.songIds],['a']);
  await vm.runInContext("loadRoomSongSearch('book','夜',[],0)",context);
  assert.equal(calls.length,1,'short-term repeat should reuse metadata-only IDs');
