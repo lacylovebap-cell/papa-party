@@ -1,6 +1,6 @@
-import {emptyBoardFeed,boardFeedCursor,mergeBoardFeed} from './board-feed.js?v=10.16-WEB.3';
-import {communicationIdentity} from './communication-context.js?v=10.16-WEB.3';
-import {communicationTarget} from './communication-target.js?v=10.16-WEB.3';
+import {emptyBoardFeed,boardFeedCursor,mergeBoardFeed} from './board-feed.js?v=10.16-WEB.4';
+import {communicationIdentity} from './communication-context.js?v=10.16-WEB.4';
+import {communicationTarget} from './communication-target.js?v=10.16-WEB.4';
 export function createBoard({api,context,toast}){
  const h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const labels={public:'所有人可見',include:'指定對象可見',exclude:'排除指定對象',streamers:'只給主播看'};

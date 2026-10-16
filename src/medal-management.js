@@ -1,4 +1,4 @@
-import {achievementPanelHtml,achievementDetailsHtml} from './achievements-view.js?v=10.16-WEB.3';
+import {achievementPanelHtml,achievementDetailsHtml} from './achievements-view.js?v=10.16-WEB.4';
 const h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const modes={public:'公開',condition_hidden:'隱藏條件',hidden:'完全隱藏',after_award:'取得後公開'};
 export function medalManagementPager(kind,total,page){
