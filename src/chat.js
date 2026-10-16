@@ -1,5 +1,5 @@
-import {communicationIdentity} from './communication-context.js?v=10.16-WEB.4';
-import {communicationTarget} from './communication-target.js?v=10.16-WEB.4';
+import {communicationIdentity} from './communication-context.js?v=10.16-WEB.5';
+import {communicationTarget} from './communication-target.js?v=10.16-WEB.5';
 export function createChat({api,context,toast,onRead,realtimeAvailable=()=>false}){
  const h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const dialog=document.createElement('dialog');dialog.id='chat-dialog';dialog.className='chat-dialog';document.body.append(dialog);

@@ -80,3 +80,16 @@ test('historical certification time is validated and sent alongside verified man
  const r=g.calls.find(c=>c.path.endsWith('/papa_achievement_manual_grant'));assert.equal(r.b.actor_context.role,'super_admin');assert.equal(r.b.actor_context.certification_at,at);
  for(const certificationAt of ['not a date','2099-01-01T00:00:00Z',5]){const f=fixture('streamer_admin');assert.equal((await f.invoke({op:'achievementManualGrant',playerId:'P1',code:'sung50',reason:'舊紀錄核對',certificationAt})).status,400);assert.equal(f.calls.some(c=>c.path.endsWith('/papa_achievement_manual_grant')),false);}
 });
+
+test('president room-detail queries use only validated subject and canonical room; streamers cannot expand or forge role',async()=>{
+ const key='a'.repeat(32),president=fixture('super_admin');
+ assert.equal((await president.invoke({op:'achievementManagement',view:'recipientRooms',streamer:'other',code:'sung50',playerKey:key,actor_context:{role:'streamer_admin',management_subject:'fake'}})).status,200);
+ const request=president.calls.find(c=>c.path.endsWith('/papa_achievement_management'));
+ assert.equal(request.b.requested_room,'other');assert.equal(request.b.requested_space,'space-001');assert.equal(request.b.actor_context.management_subject,key);assert.equal(request.b.actor_context.role,'super_admin');
+ for(const [role,playerKey] of [['streamer_admin',key],['player',key],['super_admin','account:uuid'],['super_admin',null]]){
+  const f=fixture(role);assert.equal((await f.invoke({op:'achievementManagement',view:'recipientRooms',code:'sung50',playerKey,actor_context:{role:'super_admin'}})).status,400);
+  assert.equal(f.calls.some(c=>c.path.endsWith('/papa_achievement_management')),false);
+ }
+ const host=fixture('streamer_admin');assert.equal((await host.invoke({op:'achievementManualGrantBatch',playerIds:['account:22222222-2222-4222-8222-222222222222'],code:'sung50',reason:'核對以前達成',streamer:'other',role:'super_admin'})).status,400);
+ assert.equal(host.calls.some(c=>c.path.endsWith('/papa_achievement_manual_grant_batch')),false);
+});

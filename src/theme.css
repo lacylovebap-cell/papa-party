@@ -183,3 +183,7 @@ dialog .dialog-head button{flex:0 0 auto;min-width:34px;min-height:34px}
 .medal-list-search{display:flex;gap:8px;margin:10px 0}.medal-list-search input{min-width:0;flex:1}.medal-recipient{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.medal-recipient>div{min-width:0}.medal-recipient strong,.medal-recipient small{display:block;overflow-wrap:anywhere}.medal-recipient small{color:var(--muted);font-size:12px;line-height:1.6}.medal-recipient input{width:auto;flex-shrink:0}.medal-grant{margin-top:22px}.medal-grant textarea{min-height:72px}.medal-grant>label{display:grid;gap:6px;margin:12px 0}.medal-grant>button{max-width:100%;white-space:normal}
 
 .medal-progress{font-variant-numeric:tabular-nums;line-height:1.35;overflow-wrap:anywhere;color:var(--muted)}
+
+.medal-selection{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.75rem 0}.medal-selection small{flex-basis:100%}.medal-room-record{padding:.65rem .4rem;border-left:2px solid var(--line);margin-top:.4rem}.medal-room-record small{display:block;margin-top:.3rem}[data-medal-grant-status]{white-space:pre-line;overflow-wrap:anywhere}.medal-recipient>div{min-width:0;flex:1}.medal-recipient [data-medal-expand]{margin-top:.5rem}[data-medal-rooms] .pagination{flex-wrap:wrap;font-size:.8rem}[data-medal-rooms] .pagination input{max-width:4rem}
+
+.medal-management-target{flex-wrap:wrap;overflow:visible}.medal-management-target label{display:grid;flex:1;min-width:125px}.medal-management-target select{width:100%;min-width:0;max-width:100%}
