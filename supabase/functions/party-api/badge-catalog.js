@@ -179,7 +179,7 @@ export const BADGE_CATALOG=Object.freeze([
     "retired": false,
     "lifetime": "permanent",
     "visibility": "public",
-    "condition": "實際使用骰子功能點歌或提歌，完成演唱累積20次；系統自帶及手選自帶不算。",
+    "condition": "實際使用玩家端骰子點歌或提歌，完成演唱累積20次；主播代骰、主播自骰及自帶不算。",
     "sourceRow": 19
   },
   {
@@ -192,7 +192,7 @@ export const BADGE_CATALOG=Object.freeze([
     "retired": false,
     "lifetime": "permanent",
     "visibility": "public",
-    "condition": "3天內骰子點同名歌至少4次，4次也必須在這3天內全部完成演唱。",
+    "condition": "3天內玩家端骰子點同名歌至少4次，4次也必須在這3天內全部完成演唱；主播代骰、主播自骰及自帶不算。",
     "sourceRow": 20
   },
   {
@@ -283,7 +283,7 @@ export const BADGE_CATALOG=Object.freeze([
     "retired": false,
     "lifetime": "7d",
     "visibility": "public",
-    "condition": "實際骰子點到同主播所有玩家從未點過的同名歌並唱完；曾點但未唱完仍不符合，自帶排除。",
+    "condition": "玩家端實際骰子點到同主播所有玩家從未點過的同名歌並唱完；曾點但未唱完仍不符合，主播代骰、主播自骰及自帶排除。",
     "sourceRow": 27
   },
   {
@@ -699,7 +699,7 @@ export const BADGE_CATALOG=Object.freeze([
     "retired": false,
     "lifetime": "24h",
     "visibility": "condition_hidden",
-    "condition": "本次骰子或自帶選歌前，本人普通現點或提歌已唱完次數最多且至少10次的同名歌，並列第一均符合；本次骰子或自帶唱完才取得。",
+    "condition": "本次玩家端骰子選歌前，本人普通現點或提歌已唱完次數最多且至少10次的同名歌，並列第一均符合；本次玩家骰子唱完才取得，主播代骰、主播自骰及自帶不算。",
     "sourceRow": 59
   },
   {
@@ -712,7 +712,7 @@ export const BADGE_CATALOG=Object.freeze([
     "retired": false,
     "lifetime": "30d",
     "visibility": "condition_hidden",
-    "condition": "只看本人骰子或自帶順序，連續3次整段共有至少一位歌手且唱完；普通點歌不影響。",
+    "condition": "只看本人玩家端骰子順序，連續3次整段共有至少一位歌手且唱完；普通點歌不影響，主播代骰、主播自骰及自帶不算。",
     "sourceRow": 60
   },
   {

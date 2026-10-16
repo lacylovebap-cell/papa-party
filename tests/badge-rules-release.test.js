@@ -84,9 +84,15 @@ test('cold badges use same streamer prior completion, not uncompleted requests, 
  assert.equal(get([{...first,room:'other'},current],'P11',{asOf:current.completedAt}),undefined);
 });
 test('P22 permits actual dice only and any prior request disqualifies even if uncompleted',()=>{
- const row=song('dice',{source:'draw'});assert.ok(get([row],'P22'));
- assert.equal(get([{...row,source:'self'}],'P22'),undefined);
+ const row=song('dice',{source:'draw'});
+ for(const source of ['draw','cross_draw'])for(const kind of ['live','saved'])assert.ok(get([{...row,source,kind}],'P22'),source+' '+kind);
+ for(const source of ['manual','self','cross_self','proxy_draw','streamer_draw'])assert.equal(get([{...row,source}],'P22'),undefined,source+' must not qualify');
+ assert.equal(get([{...row,kind:'self'}],'P22'),undefined);
+ assert.equal(get([{...row,player:null,source:'streamer_draw',kind:'self'}],'P22'),undefined);
+ assert.equal(get([{...row,completedAt:null}],'P22'),undefined);
+ assert.equal(get([{...row,completedAt:time('18')}],'P22'),undefined);
  assert.equal(get([song('old',{player:'b',requestAt:time()-60000,completedAt:null}),row],'P22'),undefined);
+ assert.ok(get([song('old',{player:'b',room:'space-002/other',requestAt:time()-60000,completedAt:null}),row],'P22'));
 });
 test('P16 request dates count only when completed; absent calendar days break streak',()=>{
  const rows=Array.from({length:7},(_,i)=>song(String(i),{kind:'saved',requestAt:time(String(8+i).padStart(2,'0'),'23:50'),completedAt:time(String(9+i).padStart(2,'0'),'00:10')}));
@@ -104,7 +110,7 @@ test('P18 takes corrected hour slot, allows completion after 01, and does not cr
  rows[0].slotAt=time('15','19:30');assert.ok(get(rows,'P18',{asOf}));
 });
 test('H03 requires one performer common to whole sequence, ordinary requests do not interrupt',()=>{
- const rows=[song('a',{source:'draw',performers:['甲','乙']}),song('b',{source:'self',performers:['乙','丙']}),song('c',{source:'draw',performers:['丙']})];
+ const rows=[song('a',{source:'draw',performers:['甲','乙']}),song('b',{source:'cross_draw',performers:['乙','丙']}),song('c',{source:'draw',performers:['丙']})];
  assert.equal(get(rows,'H03'),undefined);rows[2].performers=['乙','丙'];
  assert.ok(get([...rows,song('manual',{requestAt:time()+1,performers:['丁']})],'H03'));
 });
@@ -178,4 +184,15 @@ test('missing historical title does not erase generic completed-song counts or c
  const rows=Array.from({length:100},(_,i)=>song('unknown'+i,{title:null,requestAt:time()+i*60000,completedAt:time()+i*60000+30000}));
  assert.ok(get(rows,'C02'));
  for(const id of ['P19','P20','H05','C04','P13','P34','P32'])assert.equal(get(rows,id),undefined,id);
+});
+
+test('all five dice-dependent medals require player draws and reject manager proxy, streamer, ordinary self and wrong kind',()=>{
+ const at=time(),old=Array.from({length:10},(_,i)=>song('history'+i,{requestAt:at-86400000+i*60000,completedAt:at-86400000+i*60000+30000}));
+ for(const source of ['draw','cross_draw','proxy_draw','streamer_draw','self','cross_self','manual']){
+  const rows=Array.from({length:20},(_,i)=>song('draw'+i,{source,selfProvided:true,performers:['歌手'],requestAt:at+i*60000,completedAt:at+i*60000+30000}));
+  const approved=['draw','cross_draw'].includes(source);
+  for(const id of ['P14','P15','H03'])assert.equal(!!get(rows,id,{asOf:at+2*HOUR}),approved,source+' '+id);
+  assert.equal(!!get([...old,...rows],'H02',{asOf:at+2*HOUR}),approved,source+' H02');
+  if(approved)for(const id of ['P14','P15','P22','H02','H03'])assert.equal(get(rows.map(r=>({...r,kind:'self'})),id,{asOf:at+2*HOUR}),undefined,'wrong kind '+id);
+ }
 });

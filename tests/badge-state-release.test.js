@@ -46,3 +46,18 @@ test('voided receipt and its reversal still cancel correctly in authoritative st
  const result=badgeFactsFromState(s,spaceId,room);
  assert.equal(result.balance.get('P1'),50);assert.equal(result.facts.length,1);
 });
+
+test('P22 live room changes accept only player-side dice and preserve the technical selfProvided marker without treating ordinary self as dice',()=>{
+ const before=state([]);
+ for(const source of ['draw','cross_draw','proxy_draw','streamer_draw','manual','self','cross_self']){
+  const after=state([q('dice',{source,selfProvided:source!=='manual'})]);
+  const changes=roomBadgeChanges(before,after,{spaceId,roomId:room,asOf:at});
+  assert.equal(changes.some(r=>r.id==='P22'&&r.active),['draw','cross_draw'].includes(source),source);
+ }
+ const noPlayer=state([q('streamer',{source:'streamer_draw',kind:'self',playerId:null,selfProvided:true})]);
+ assert.equal(roomBadgeChanges(before,noPlayer,{spaceId,roomId:room,asOf:at}).some(r=>r.id==='P22'),false);
+ const waiting=state([q('player',{source:'draw',selfProvided:true,status:'waiting',completedAt:null})]);
+ assert.equal(roomBadgeChanges(before,waiting,{spaceId,roomId:room,asOf:at}).some(r=>r.id==='P22'),false);
+ const after=state([q('player',{source:'draw',selfProvided:true})]);
+ assert.equal(roomBadgeChanges(after,after,{spaceId,roomId:room,asOf:at}).some(r=>r.id==='P22'),false);
+});

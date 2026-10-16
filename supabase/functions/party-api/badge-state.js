@@ -76,7 +76,10 @@ export function roomBadgeChanges(before,after,{spaceId,roomId,asOf}){
   for(const key of new Set([...a.keys(),...b.keys()])){
    const prior=a.get(key),row=b.get(key);
    if(JSON.stringify(prior)===JSON.stringify(row))continue;
-   changes.push({...row||prior,playerId:player,active:row?.active===true});
+   const award=row||prior,fact=newFacts.get(award.eventKey)||oldFacts.get(award.eventKey);
+   const evidence=fact?.queueId?{queueId:fact.queueId,eventKey:fact.eventKey,title:fact.title||'',artist:fact.artist||'',source:fact.source,
+    kind:fact.kind,requestAt:fact.requestAt,completedAt:fact.completedAt}:null;
+   changes.push({...award,playerId:player,active:row?.active===true,...(evidence?{evidence}:{})});
   }
  }
  const oldStock=new Map(stockBadgeCandidates(before,spaceId,roomId,asOf).map(row=>[row.playerId+'|'+row.id,row]));

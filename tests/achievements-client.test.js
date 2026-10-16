@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createAchievementPanel,achievementPanelHtml,achievementDetailsHtml} from '../src/achievements-view.js';
+import {createAchievementPanel,achievementPanelHtml,achievementDetailsHtml,achievementHoldingState} from '../src/achievements-view.js';
 const context=()=>({active:true,key:'player:P1:room',revision:1,manager:false,playerId:'P1',spaceId:'space-001',room:'papa'});
 const response=c=>({version:1,scope:{spaceId:c.spaceId,streamerId:c.room,playerId:c.playerId},rows:[{code:'sung50',name:'50首兵郎',qualified:true,condition:'50',acquiredAt:null}]});
 test('one bounded demand read is shared and cached; actor/Space changes discard old responses',async()=>{
@@ -32,4 +32,13 @@ test('only management catalog exposes policies; global and H/L remain locked',()
  assert.equal((html.match(/data-achievement-code=/g)||[]).length,1);assert.match(html,/data-achievement-code="sung50"/);
  assert.doesNotMatch(achievementDetailsHtml({...rows[2],visibility:'condition_hidden',condition:'SECRET'}),/SECRET/);
  assert.match(achievementDetailsHtml({...rows[2],visibility:'condition_hidden',condition:'SECRET'},{manager:true}),/SECRET/);
+});
+
+test('permanent inactive awards never say expired; revoked history is retained but not counted as earned',()=>{
+ const row={code:'after_failure',name:'這次有我',lifetime:'permanent',qualified:false,recorded:true,currentActive:false,expiresAt:null,visibility:'public'};
+ assert.equal(achievementHoldingState(row),'判定未生效（非到期）');assert.doesNotMatch(achievementDetailsHtml(row),/已到期|已過期/);
+ assert.equal(achievementHoldingState({...row,lifetime:'7d',expiresAt:'2020-01-01'}),'已到期');assert.equal(achievementHoldingState({...row,lifetime:'holding'}),'目前未符合持有條件');
+ const revoked={...row,revoked:true,revocationReason:'來源核對不符合'};assert.equal(achievementHoldingState(revoked),'已摘除');
+ const html=achievementPanelHtml([revoked]);assert.match(html,/已解鎖 0 \/ 1/);assert.match(html,/已摘除/);assert.match(html,/medal-locked/);assert.doesNotMatch(achievementPanelHtml([revoked],{status:'earned'}),/data-medal-detail=/);
+ assert.match(achievementDetailsHtml(revoked),/來源核對不符合/);
 });

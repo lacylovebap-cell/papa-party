@@ -10,8 +10,11 @@ const showEnd=show=>(show+1)*DAY-TAIPEI+19*HOUR;
 const dayEnd=day=>(day+1)*DAY-TAIPEI;
 const hour=value=>Math.floor((ms(value)+TAIPEI)/HOUR)%24;
 const ordinary=f=>f.source==='manual';
-const dice=f=>['draw','cross_draw','proxy_draw','streamer_draw'].includes(f.source);
-const random=f=>dice(f)||['self','cross_self'].includes(f.source);
+// Every dice-dependent badge requires an actual player-side draw. A manager
+// selecting a player on their behalf is still a proxy draw, never player dice.
+// Player dice carry selfProvided=true for billing; source + kind are authoritative.
+const dice=f=>['live','saved'].includes(f.kind)&&['draw','cross_draw'].includes(f.source);
+const random=dice;
 const valid=f=>f.valid!==false&&!f.test&&!f.voided&&!f.duplicateOf&&f.player;
 const byRequest=(a,b)=>a.requestAt-b.requestAt||String(a.eventKey).localeCompare(String(b.eventKey));
 const byComplete=(a,b)=>a.completedAt-b.completedAt||byRequest(a,b);

@@ -29,3 +29,11 @@ test('batch provenance survives core and rejects unsupported fields before commi
  assert.equal(next.queue[0].source,'cross_draw');assert.equal(next.queue[0].selfProvided,true);assert.equal(s.queue.length,0);
  assert.throws(()=>validateRequestBatch([{songId:s.songs[0].songId,kind:'saved',source:'unknown'}]),/不正確/);
 });
+
+test('server core normalizes manager draw and cross-draw to proxy, while genuine player dice remain player-side',()=>{
+ const s=fixture(),playerId=s.players[0].playerId,songId=s.songs[0].songId;
+ for(const source of ['draw','cross_draw']){
+  const manager=run(s,'onBehalf',{playerId,songId,kind:'saved',source,giftConfirmed:true});assert.equal(manager.queue.at(-1).source,'proxy_draw');
+  const player=run(s,'request',{songId,kind:'saved',source},{role:'player',playerId});assert.equal(player.queue.at(-1).source,source);
+ }
+});

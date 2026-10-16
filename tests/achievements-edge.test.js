@@ -20,6 +20,7 @@ function fixture(role='player',options={}){
   if(path.endsWith('/papa_achievement_public_set'))return Response.json({ok:true,published:b.requested_enabled});
   if(path.endsWith('/papa_achievement_management'))return Response.json({version:1,scope:{spaceId:b.requested_space,streamerId:b.requested_room},rows:[],total:0,page:0});
   if(path.endsWith('/papa_achievement_manual_grant_batch'))return Response.json({ok:true,granted:b.requested_players.length,alreadyRecorded:0});
+  if(path.endsWith('/papa_achievement_revoke'))return Response.json({ok:true,alreadyRevoked:false});
   if(path.endsWith('/papa_achievement_manual_grant'))return Response.json({ok:true,alreadyRecorded:false});
   if(path.endsWith('/papa_achievement_visibility_set'))return Response.json({ok:true});throw Error('Unexpected '+path);
  };
@@ -92,4 +93,17 @@ test('president room-detail queries use only validated subject and canonical roo
  }
  const host=fixture('streamer_admin');assert.equal((await host.invoke({op:'achievementManualGrantBatch',playerIds:['account:22222222-2222-4222-8222-222222222222'],code:'sung50',reason:'核對以前達成',streamer:'other',role:'super_admin'})).status,400);
  assert.equal(host.calls.some(c=>c.path.endsWith('/papa_achievement_manual_grant_batch')),false);
+});
+
+test('evidence uses verified manager scope and validated opaque keys; players and malformed keys never reach SQL',async()=>{
+ const playerKey='a'.repeat(32),evidenceKey='b'.repeat(32),f=fixture('streamer_admin');
+ assert.equal((await f.invoke({op:'achievementManagement',view:'evidence',code:'cleaner',playerKey,evidenceKey,actor_context:{role:'super_admin',management_subject:'fake'}})).status,200);
+ const request=f.calls.find(x=>x.path.endsWith('/papa_achievement_management'));assert.equal(request.b.actor_context.management_subject,playerKey);assert.equal(request.b.actor_context.management_evidence,evidenceKey);assert.equal(request.b.actor_context.role,'streamer_admin');
+ for(const [role,key,proof] of [['player',playerKey,evidenceKey],['streamer_admin','player-id',evidenceKey],['super_admin',playerKey,'not-proof']]){const g=fixture(role);assert.equal((await g.invoke({op:'achievementManagement',view:'evidence',code:'cleaner',playerKey:key,evidenceKey:proof})).status,400);assert.equal(g.calls.some(x=>x.path.endsWith('/papa_achievement_management')),false);}
+});
+
+test('revocation validates the verified actor, canonical room, exact opaque acquisition and reason',async()=>{
+ const payload={op:'achievementRevoke',code:'cleaner',awardKey:'a'.repeat(32),reason:'主播代骰不符合',actor_context:{role:'super_admin'}};
+ const f=fixture('streamer_admin');assert.equal((await f.invoke(payload)).status,200);const r=f.calls.find(c=>c.path.endsWith('/papa_achievement_revoke'));assert.equal(r.b.actor_context.role,'streamer_admin');assert.equal(r.b.actor_context.actor_streamer_id,'papa');assert.equal(r.b.requested_award,payload.awardKey);
+ for(const [role,extra] of [['player',{}],['streamer_admin',{streamer:'other'}],['super_admin',{awardKey:'raw-player-id'}],['super_admin',{reason:'短'}]]){const g=fixture(role);assert.equal((await g.invoke({...payload,...extra})).status,400);assert.equal(g.calls.some(c=>c.path.endsWith('/papa_achievement_revoke')),false);}
 });

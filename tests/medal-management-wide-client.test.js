@@ -34,7 +34,7 @@ function fixture({superUser=true,override=null}={}){
 test('president recipients expand lazily and cache details; streamer UI never offers cross-room control',async()=>{
  const f=fixture();await f.controller.load();await f.open();assert.equal(f.calls.filter(x=>x.view==='recipientRooms').length,0);
  const key='a'.repeat(32),panel=element();panel.hidden=true;f.elements['[data-medal-rooms="'+key+'"]']=panel;
- await f.fire('click',{medalExpand:key});assert.equal(f.calls.filter(x=>x.view==='recipientRooms').length,1);assert.match(panel.innerHTML,/怕怕/);assert.match(panel.innerHTML,/咪醬/);assert.match(panel.innerHTML,/已過期或目前未生效/);
+ await f.fire('click',{medalExpand:key});assert.equal(f.calls.filter(x=>x.view==='recipientRooms').length,1);assert.match(panel.innerHTML,/怕怕/);assert.match(panel.innerHTML,/咪醬/);assert.match(panel.innerHTML,/判定未生效/);
  await f.fire('click',{medalExpand:key});await f.fire('click',{medalExpand:key});assert.equal(f.calls.filter(x=>x.view==='recipientRooms').length,1,'reopening cached detail should not query');
  const host=fixture({superUser:false});await host.controller.load();assert.doesNotMatch(host.elements['#medal-management'].innerHTML,/data-medal-target/);
  await host.fire('change',{},['data-medal-target-room'],'1');assert.equal(host.calls.length,1);
@@ -66,4 +66,29 @@ test('late lists cannot survive a scope switch; selected-player grants remain bo
  assert.doesNotMatch(f.elements['[data-medal-list-panel="candidates"]'].innerHTML,/private old list/);
  f.controller.openPlayer(row,{id:'P1',name:'selected player'});await f.fire('click',{},['data-medal-grant']);await f.fire('click',{},['data-medal-grant']);
  const grant=f.calls.find(x=>x.op==='achievementManualGrant');assert.equal(grant.streamer,'papa');assert.equal(grant.spaceId,'space-001');assert.equal(grant.playerId,'P1');
+});
+
+test('evidence is loaded only on expansion, cached and scoped; late detail cannot cross a streamer switch',async()=>{
+ let resolve;const f=fixture({superUser:false,override:b=>b.view==='evidence'?new Promise(r=>resolve=r):null});
+ await f.controller.load();await f.open();assert.equal(f.calls.some(x=>x.view==='evidence'),false);assert.match(f.elements['[data-medal-list-panel="recipients"]'].innerHTML,/查看判定細項/);
+ const token='a'.repeat(32)+':all',panel=element();panel.hidden=true;f.elements['[data-medal-evidence-panel="'+token+'"]']=panel;
+ await f.fire('click',{medalEvidence:token});assert.equal(f.calls.filter(x=>x.view==='evidence').length,1);
+ resolve({version:1,scope:{spaceId:'space-001',streamerId:'papa'},rows:[{name:'歌單清道夫',evidenceType:'unavailable',songs:[]}],total:1,page:0});await tick();
+ assert.match(panel.innerHTML,/不推測/);await f.fire('click',{medalEvidence:token});await f.fire('click',{medalEvidence:token});assert.equal(f.calls.filter(x=>x.view==='evidence').length,1);
+ f.setContext({room:'other'});await f.controller.load();assert.equal(f.elements['#dialog'].open,false);
+});
+
+test('revoke requires inspected acquisition, reason and second confirmation; changed reason resets confirmation and retry never doubles it',async()=>{
+ let revoked=false;const awardKey='c'.repeat(32),f=fixture({superUser:false,override:b=>{
+  if(b.op==='achievementRevoke'){revoked=true;return {ok:true,alreadyRevoked:false};}
+  if(b.view==='evidence')return {version:1,scope:{spaceId:'space-001',streamerId:'papa'},total:1,page:0,rows:[{awardKey,name:'歌單清道夫',playerName:'玩家甲',streamerName:'怕怕',acquiredAt:'2026-10-15T12:00:00Z',revokedAt:revoked?'2026-10-16T12:00:00Z':null,evidenceType:'candidate',songs:[]}]};
+ }});
+ await f.controller.load();await f.open();const token='a'.repeat(32)+':all';f.elements['[data-medal-evidence-panel="'+token+'"]']=element();f.elements['[data-medal-evidence-panel="'+token+'"]'].hidden=true;
+ await f.fire('click',{medalEvidence:token});const button=element(),status=element(),reason={value:'短'};
+ f.elements['[data-medal-revoke="'+awardKey+'"]']=button;f.elements['[data-medal-revoke-status="'+awardKey+'"]']=status;f.elements['[data-medal-revoke-reason="'+awardKey+'"]']=reason;
+ await f.fire('click',{medalRevoke:awardKey});assert.match(status.textContent,/4～500/);
+ reason.value='核對主播代骰來源';await f.fire('click',{medalRevoke:awardKey});for(const value of ['玩家甲','怕怕','歌單清道夫','核對主播代骰來源'])assert.ok(status.textContent.includes(value));assert.equal(f.calls.some(x=>x.op==='achievementRevoke'),false);
+ reason.value='重新核對主播代骰';await f.fire('click',{medalRevoke:awardKey});assert.equal(f.calls.some(x=>x.op==='achievementRevoke'),false);
+ await f.fire('click',{medalRevoke:awardKey});assert.equal(f.calls.filter(x=>x.op==='achievementRevoke').length,1);assert.equal(f.calls.find(x=>x.op==='achievementRevoke').streamer,'papa');assert.match(f.elements['[data-medal-evidence-panel="'+token+'"]'].innerHTML,/已摘除/);
+ await f.fire('click',{medalRevoke:awardKey});assert.equal(f.calls.filter(x=>x.op==='achievementRevoke').length,1);
 });
