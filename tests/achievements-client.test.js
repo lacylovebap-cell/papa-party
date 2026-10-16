@@ -21,17 +21,15 @@ test('display escapes stored labels, shows unknown historical acquisition time a
 
 test('locked secrets cannot leak via atlas or detail; filters do not alter award rules',()=>{
  const rows=[{code:'chosen',name:'secret-name',condition:'secret-condition',visibility:'after_award',qualified:false},{code:'sung50',name:'50首兵郎',visibility:'public',qualified:true}];
- for(const html of [achievementPanelHtml(rows),achievementDetailsHtml(rows[0])]){assert.doesNotMatch(html,/secret-name|secret-condition/);assert.match(html,/神秘勳章/);}
- const filtered=achievementPanelHtml(rows,{category:'performance',status:'earned'});assert.match(filtered,/50首兵郎/);assert.doesNotMatch(filtered,/神秘勳章/);assert.match(filtered,/data-medal-detail="1"/);
+ for(const html of [achievementPanelHtml(rows),achievementDetailsHtml(rows[0])]){assert.doesNotMatch(html,/secret-name|secret-condition/);assert.match(html,/？？？/);}
+ const filtered=achievementPanelHtml(rows,{category:'performance',status:'earned'});assert.match(filtered,/50首兵郎/);assert.doesNotMatch(filtered,/？？？/);assert.match(filtered,/data-medal-detail="1"/);
 });
-test('only the owner atlas offers publication of earned durable or recorded medals',()=>{
- const rows=[{code:'sung50',name:'50首兵郎',lifetime:'permanent',qualified:true,published:false},
-  {code:'saved10',name:'今日很會提',lifetime:'show',qualified:true,recorded:false},
-  {code:'first_mic',name:'今日第一麥',lifetime:'show',qualified:true,recorded:true,published:true},
-  {code:'locked',name:'未取得',lifetime:'permanent',qualified:false}];
- const owner=achievementPanelHtml(rows,{publicControl:true});
- assert.match(owner,/data-medal-public-code="sung50"/);assert.match(owner,/data-medal-public-code="first_mic" aria-pressed="true"/);
- assert.doesNotMatch(owner,/data-medal-public-code="saved10"|data-medal-public-code="locked"/);
- assert.doesNotMatch(achievementPanelHtml(rows),/data-medal-public-code/);
- assert.match(achievementDetailsHtml({...rows[0],manualVerified:true,acquiredAt:'2026-10-14T01:00:00Z'}),/管理員認證/);
+
+test('only management catalog exposes policies; global and H/L remain locked',()=>{
+ const rows=[{code:'sung50',name:'A',scope:'streamer',badgeId:'C01',emoji:'🌟',qualified:true},{code:'global',name:'G',scope:'global',badgeId:'P19',qualified:true},{code:'hidden',name:'H',scope:'streamer',badgeId:'H01',qualified:true},{code:'random',name:'L',scope:'streamer',badgeId:'L01',qualified:true}];
+ for(const opts of [{publicControl:true},{manager:true}])assert.doesNotMatch(achievementPanelHtml(rows,opts),/data-achievement-code|data-medal-public-code/);
+ const html=achievementPanelHtml(rows,{manager:true,managementCatalog:true});
+ assert.equal((html.match(/data-achievement-code=/g)||[]).length,1);assert.match(html,/data-achievement-code="sung50"/);
+ assert.doesNotMatch(achievementDetailsHtml({...rows[2],visibility:'condition_hidden',condition:'SECRET'}),/SECRET/);
+ assert.match(achievementDetailsHtml({...rows[2],visibility:'condition_hidden',condition:'SECRET'},{manager:true}),/SECRET/);
 });

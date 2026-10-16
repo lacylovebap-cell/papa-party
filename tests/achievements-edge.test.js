@@ -18,6 +18,8 @@ function fixture(role='player',options={}){
   if(path.endsWith('/papa_achievement_page'))return Response.json({version:1,scope:{spaceId:'space-001',streamerId:'papa',playerId:b.requested_player},rows:[{code:'sung50',name:'50首兵郎',qualified:true,acquiredAt:null,secret:'private'}],...options.result});
   if(path.endsWith('/papa_achievement_public_state'))return Response.json({});
   if(path.endsWith('/papa_achievement_public_set'))return Response.json({ok:true,published:b.requested_enabled});
+  if(path.endsWith('/papa_achievement_management'))return Response.json({version:1,scope:{spaceId:b.requested_space,streamerId:b.requested_room},rows:[],total:0,page:0});
+  if(path.endsWith('/papa_achievement_manual_grant_batch'))return Response.json({ok:true,granted:b.requested_players.length,alreadyRecorded:0});
   if(path.endsWith('/papa_achievement_manual_grant'))return Response.json({ok:true,alreadyRecorded:false});
   if(path.endsWith('/papa_achievement_visibility_set'))return Response.json({ok:true});throw Error('Unexpected '+path);
  };
@@ -52,12 +54,22 @@ test('favorite audience is manager-only and cross-room actors cannot request nam
  const f=fixture('streamer_admin');assert.equal((await f.invoke({op:'favoriteAudience',songIds:['S1']})).status,200);const request=f.calls.find(c=>c.path.endsWith('/papa_song_favorite_audience'));assert.equal(request.b.requested_room,'papa');assert.equal(request.b.actor_context.actor_streamer_id,'papa');
  const p=fixture();assert.equal((await p.invoke({op:'achievementCollection',view:'global'})).status,200);
 });
-test('players alone set their public medals; managers alone certify historical awards',async()=>{
+test('obsolete player publication is rejected; managers alone certify historical awards',async()=>{
  const p=fixture(),published=await p.invoke({op:'achievementPublicSet',code:'sung50',published:true});
- assert.equal(published.status,200);assert.equal(published.body.published,true);
- assert.equal(p.calls.find(c=>c.path.endsWith('/papa_achievement_public_set')).b.actor_context.player_id,'P1');
+ assert.equal(published.status,400);
+ assert.equal(p.calls.some(c=>c.path.endsWith('/papa_achievement_public_set')),false);
  assert.equal((await fixture('streamer_admin').invoke({op:'achievementPublicSet',code:'sung50',published:true})).status,400);
  assert.equal((await fixture().invoke({op:'achievementManualGrant',playerId:'P1',code:'sung50',reason:'舊紀錄核對'})).status,400);
  const manager=fixture('streamer_admin'),grant=await manager.invoke({op:'achievementManualGrant',playerId:'P1',code:'sung50',reason:'舊紀錄核對'});
  assert.equal(grant.status,200);assert.equal(manager.calls.find(c=>c.path.endsWith('/papa_achievement_manual_grant')).b.requested_player,'P1');
+});
+
+test('manager catalog and batch routes reject player, foreign room, duplicate targets and keep verified actor',async()=>{
+ for(const payload of [{op:'achievementManagement',view:'catalog'},{op:'achievementManualGrantBatch',code:'sung100',playerIds:['P1'],reason:'歷史達成紀錄'}]){
+  const p=fixture();assert.equal((await p.invoke(payload)).status,400);
+  const foreign=fixture('streamer_admin');assert.equal((await foreign.invoke({...payload,streamer:'other'})).status,400);
+  const m=fixture('streamer_admin');assert.equal((await m.invoke(payload)).status,200);
+  const r=m.calls.find(c=>/papa_achievement_management|papa_achievement_manual_grant_batch/.test(c.path));assert.equal(r.b.requested_room,'papa');assert.equal(r.b.actor_context.actor_streamer_id,'papa');
+ }
+ assert.equal((await fixture('streamer_admin').invoke({op:'achievementManualGrantBatch',code:'sung100',playerIds:['P1','P1'],reason:'歷史達成紀錄'})).status,400);
 });

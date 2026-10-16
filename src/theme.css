@@ -179,5 +179,5 @@ dialog .dialog-head button{flex:0 0 auto;min-width:34px;min-height:34px}
 @media(min-width:950px){.medal-list{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(min-width:1200px){.medal-list{grid-template-columns:repeat(6,minmax(0,1fr))}}
 
-.medal-filters{scrollbar-width:none}.medal-filters::-webkit-scrollbar{display:none}
-.medal-row .medal-public{font-size:11px;line-height:1.3;min-height:28px;padding:4px 7px;margin-top:1px;white-space:nowrap}.medal-public[aria-pressed="true"]{border-color:#ad84d1;color:#efdeff}.medal-public-note{font-size:12px;line-height:1.5;color:var(--muted);margin:0 0 10px}
+.medal-filters{scrollbar-width:none}.medal-filters::-webkit-scrollbar{display:none}.medal-list{grid-auto-rows:1fr}
+.medal-list-search{display:flex;gap:8px;margin:10px 0}.medal-list-search input{min-width:0;flex:1}.medal-recipient{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.medal-recipient>div{min-width:0}.medal-recipient strong,.medal-recipient small{display:block;overflow-wrap:anywhere}.medal-recipient small{color:var(--muted);font-size:12px;line-height:1.6}.medal-recipient input{width:auto;flex-shrink:0}.medal-grant{margin-top:22px}.medal-grant textarea{min-height:72px}.medal-grant>label{display:grid;gap:6px;margin:12px 0}.medal-grant>button{max-width:100%;white-space:normal}
