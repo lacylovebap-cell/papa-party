@@ -560,20 +560,22 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
     return respond(result);
    }
    if(b.op==='achievementManualGrantBatch'){
+    if(b.certificationAt!==undefined&&(typeof b.certificationAt!=='string'||!Number.isFinite(Date.parse(b.certificationAt))||Date.parse(b.certificationAt)>Date.now()))throw Error('原達成時間不正確');
     if(!isManager(who)||!Array.isArray(b.playerIds)||b.playerIds.length<1||b.playerIds.length>50
      ||new Set(b.playerIds).size!==b.playerIds.length||b.playerIds.some((p:any)=>typeof p!=='string'||p.length<1||p.length>200)
      ||typeof b.code!=='string'||!/^[a-z0-9_]{1,40}$/.test(b.code)||typeof b.reason!=='string'||b.reason.trim().length<4||b.reason.length>500
      ||b.showDay!==undefined&&!/^\d{4}-\d{2}-\d{2}$/.test(b.showDay))throw Error('批量勳章授予資料不正確');
-    const result=await api('/rest/v1/rpc/papa_achievement_manual_grant_batch',{...common,requested_players:b.playerIds,requested_code:b.code,requested_reason:b.reason.trim(),requested_show_day:b.showDay??null});
+    const result=await api('/rest/v1/rpc/papa_achievement_manual_grant_batch',{...common,actor_context:{...common.actor_context,certification_at:b.certificationAt??null},requested_players:b.playerIds,requested_code:b.code,requested_reason:b.reason.trim(),requested_show_day:b.showDay??null});
     if(result?.ok!==true||!Number.isInteger(result.granted)||!Number.isInteger(result.alreadyRecorded)||result.granted<0||result.alreadyRecorded<0||result.granted+result.alreadyRecorded!==b.playerIds.length)throw Error('批量授予結果尚未確認');
     return respond(result);
    }
   if(b.op==='achievementManualGrant'){
+   if(b.certificationAt!==undefined&&(typeof b.certificationAt!=='string'||!Number.isFinite(Date.parse(b.certificationAt))||Date.parse(b.certificationAt)>Date.now()))throw Error('原達成時間不正確');
    if(!isManager(who)||typeof b.playerId!=='string'||b.playerId.length<1||b.playerId.length>200
     ||typeof b.code!=='string'||!/^[a-z0-9_]{1,40}$/.test(b.code)
     ||typeof b.reason!=='string'||b.reason.trim().length<4||b.reason.length>500
     ||b.showDay!==undefined&&!/^\d{4}-\d{2}-\d{2}$/.test(b.showDay))throw Error('勳章認證資料不正確');
-   const result=await api('/rest/v1/rpc/papa_achievement_manual_grant',{...common,requested_player:b.playerId,requested_code:b.code,
+   const result=await api('/rest/v1/rpc/papa_achievement_manual_grant',{...common,actor_context:{...common.actor_context,certification_at:b.certificationAt??null},requested_player:b.playerId,requested_code:b.code,
     requested_reason:b.reason.trim(),requested_show_day:b.showDay??null});
    if(result?.ok!==true||typeof result.alreadyRecorded!=='boolean')throw Error('勳章認證尚未確認');
    return respond(result);
@@ -587,7 +589,7 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   if(typeof player!=='string'||player.length<1||player.length>200||who.role==='player'&&b.playerId!==undefined&&b.playerId!==player)throw Error('勳章玩家不正確');
   const result=await api('/rest/v1/rpc/papa_achievement_page',{...common,requested_player:player});
   if(result?.version!==1||result.scope?.spaceId!==space||result.scope?.streamerId!==room.id||result.scope?.playerId!==player||!Array.isArray(result.rows)||result.rows.length>100)throw Error('勳章資料尚未確認');
-  const rows=result.rows.map((r:any)=>({code:r.code,badgeId:r.badgeId,emoji:r.emoji,scope:r.scope,retired:r.retired,name:r.name,condition:r.condition,lifetime:r.lifetime,visibility:r.visibility,qualified:r.qualified,currentActive:r.currentActive,acquiredAt:r.acquiredAt,expiresAt:r.expiresAt,recorded:r.recorded,manualVerified:r.manualVerified===true}));
+  const rows=result.rows.map((r:any)=>({code:r.code,badgeId:r.badgeId,emoji:r.emoji,scope:r.scope,retired:r.retired,name:r.name,condition:r.condition,lifetime:r.lifetime,visibility:r.visibility,qualified:r.qualified,currentActive:r.currentActive,acquiredAt:r.acquiredAt,expiresAt:r.expiresAt,recorded:r.recorded,manualVerified:r.manualVerified===true,manualAllowed:r.manualAllowed===true,progress:r.progress}));
   return respond({version:1,scope:{spaceId:space,streamerId:room.id,playerId:player},rows,totalDefinitions:result.totalDefinitions,unlocked:result.unlocked});
  }
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));

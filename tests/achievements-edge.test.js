@@ -73,3 +73,10 @@ test('manager catalog and batch routes reject player, foreign room, duplicate ta
  }
  assert.equal((await fixture('streamer_admin').invoke({op:'achievementManualGrantBatch',code:'sung100',playerIds:['P1','P1'],reason:'歷史達成紀錄'})).status,400);
 });
+
+test('historical certification time is validated and sent alongside verified manager identity',async()=>{
+ const g=fixture('super_admin');const at='2020-01-01T12:00:00.000Z';
+ assert.equal((await g.invoke({op:'achievementManualGrant',playerId:'P1',code:'sung50',reason:'舊紀錄核對',certificationAt:at,actor_context:{role:'player'}})).status,200);
+ const r=g.calls.find(c=>c.path.endsWith('/papa_achievement_manual_grant'));assert.equal(r.b.actor_context.role,'super_admin');assert.equal(r.b.actor_context.certification_at,at);
+ for(const certificationAt of ['not a date','2099-01-01T00:00:00Z',5]){const f=fixture('streamer_admin');assert.equal((await f.invoke({op:'achievementManualGrant',playerId:'P1',code:'sung50',reason:'舊紀錄核對',certificationAt})).status,400);assert.equal(f.calls.some(c=>c.path.endsWith('/papa_achievement_manual_grant')),false);}
+});

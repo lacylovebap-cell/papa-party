@@ -6,12 +6,11 @@ export function medalManagementPager(kind,total,page){
  return '<div class="pagination" data-total-pages="'+max+'"><button type="button" data-medal-list="'+kind+'" data-page="'+Math.max(0,page-1)+'" '+(page?'':'disabled')+'>上一頁</button><span>第 '+(page+1)+' / 共 '+max+' 頁 · '+total+' 位</span><input type="number" data-medal-jump="'+kind+'" aria-label="勳章名單頁碼" min="1" max="'+max+'" value="'+(page+1)+'"><button type="button" data-medal-jump-button="'+kind+'">跳頁</button><button type="button" data-medal-list="'+kind+'" data-page="'+(page+1)+'" '+(page+1<max?'':'disabled')+'>下一頁</button></div>';
 }
 export function medalGrantHtml(row,player=null){
- if(row.scope==='global')return '<p class="subtle">全站勳章由系統統一管理，不開放主播授予。</p>';
- if(!['permanent','show'].includes(row.lifetime))return '<p class="subtle">此勳章的手動授予到期規則尚待確認。</p>';
+ if(row.scope==='global'&&row.manualAllowed!==true)return '<p class="subtle">全站勳章由系統統一管理，不開放主播授予。</p>';
  if(player&& (row.qualified||row.recorded))return '<p>此玩家已獲得，無須重複授予。</p>';
  return '<section class="medal-grant"><h3>手動授予勳章</h3>'+(player?'<p>目前玩家：'+h(player.name)+'</p>':'<button type="button" data-medal-list="candidates" data-page="0">選擇玩家</button><div data-medal-list-panel="candidates"></div>')+
   (row.lifetime==='show'?'<label>取得所屬場次<input type="date" data-medal-show-day required></label>':'')+
-  '<label>授予原因／依據<textarea data-medal-grant-reason minlength="4" maxlength="500" placeholder="核對以前達成的紀錄"></textarea></label><button type="button" class="primary" data-medal-grant '+(!player?'disabled':'')+'>'+(player?'授予'+h(player.name)+'此勳章':'授予選取玩家（0 位）')+'</button><p data-medal-grant-status role="status"></p></section>';
+  '<label>原達成時間（台灣時間，選填）<input type="datetime-local" data-medal-certified-at></label><small>補認證以前已達成；有效期限及目前持有條件沿用原規則。不確定時間可留空，記錄本次認證時間。</small><label>授予原因／依據<textarea data-medal-grant-reason minlength="4" maxlength="500" placeholder="核對以前達成的紀錄"></textarea></label><button type="button" class="primary" data-medal-grant '+(!player?'disabled':'')+'>'+(player?'授予'+h(player.name)+'此勳章':'授予選取玩家（0 位）')+'</button><p data-medal-grant-status role="status"></p></section>';
 }
 export function createMedalManagement({api,context,root=document,modal,toast,onChange=()=>{},confirmGrant=null}){
  let rows=[],stamp='',cacheAt=0,generation=0,dialog=null,category='all',scope='all',catalogPending=null;
@@ -63,13 +62,17 @@ export function createMedalManagement({api,context,root=document,modal,toast,onC
   if(!player&&row.scope!=='global')list('recipients');
  }
  async function grant(){
-  const d=dialog;if(!active(d)||d.row.scope==='global'||d.saving||d.player&&(d.row.qualified||d.row.recorded))return;
+  const d=dialog;if(!active(d)||d.row.scope==='global'&&d.row.manualAllowed!==true||d.saving||d.player&&(d.row.qualified||d.row.recorded))return;
   const players=d.player?[d.player.id]:[...d.selected.keys()];
   if(players.length<1||players.length>50)throw Error('請選擇 1～50 位玩家');
   const reason=root.querySelector('[data-medal-grant-reason]')?.value.trim()||'',showDay=root.querySelector('[data-medal-show-day]')?.value;
   if(reason.length<4||reason.length>500)throw Error('請填寫 4～500 字的授予依據');
   if(d.row.lifetime==='show'&&!showDay)throw Error('請填取得所屬場次');
-  const confirmation=JSON.stringify([d.identity,d.row.code,players.slice().sort(),reason,showDay||'']);
+  const atInput=root.querySelector('[data-medal-certified-at]')?.value;
+  const atMs=atInput?Date.parse(atInput+'+08:00'):null;
+  if(atInput&&(!Number.isFinite(atMs)||atMs>Date.now()))throw Error('原達成時間不可填未來或無效時間');
+  const certificationAt=atMs===null?null:new Date(atMs).toISOString();
+  const confirmation=JSON.stringify([d.identity,d.row.code,players.slice().sort(),reason,showDay||'',certificationAt]);
   if(confirmGrant){if(!confirmGrant('確認將「'+d.row.name+'」授予 '+players.length+' 位玩家？'))return;}
   else if(d.confirmation!==confirmation){
    d.confirmation=confirmation;root.querySelector('[data-medal-grant]').textContent='確認授予 '+players.length+' 位玩家';
@@ -78,7 +81,7 @@ export function createMedalManagement({api,context,root=document,modal,toast,onC
   if(!active(d))return;const beforeRevision=context().revision;d.saving=true;const button=root.querySelector('[data-medal-grant]');button.disabled=true;
   try{
    const result=await api({op:d.player?'achievementManualGrant':'achievementManualGrantBatch',
-    ...(d.player?{playerId:d.player.id}:{playerIds:players}),code:d.row.code,reason,...(showDay?{showDay}:{})});
+    ...(d.player?{playerId:d.player.id}:{playerIds:players}),code:d.row.code,reason,...(showDay?{showDay}:{}),...(certificationAt?{certificationAt}:{})});
    if(!active(d))return;if(result?.ok!==true)throw Error('授予結果尚未確認');
    d.confirmation=null;d.selected.clear();root.querySelector('[data-medal-grant-status]').textContent=d.player?(result.alreadyRecorded?'已有紀錄，未重複授予':'已授予此玩家'):'已授予 '+result.granted+' 位；已有紀錄 '+result.alreadyRecorded+' 位';
    if(d.player){d.row={...d.row,qualified:true,recorded:true,manualVerified:!result.alreadyRecorded||d.row.manualVerified,currentActive:d.row.lifetime==='permanent'?true:null};button.textContent='此玩家已獲得';}
