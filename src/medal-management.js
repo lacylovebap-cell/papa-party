@@ -1,5 +1,5 @@
-import {medalEvidenceHtml} from './medal-evidence.js?v=10.16-WEB.6';
-import {achievementPanelHtml,achievementDetailsHtml,achievementHoldingState} from './achievements-view.js?v=10.16-WEB.6';
+import {medalEvidenceHtml} from './medal-evidence.js?v=10.17-WEB.1';
+import {achievementPanelHtml,achievementDetailsHtml,achievementHoldingState} from './achievements-view.js?v=10.17-WEB.1';
 const h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const modes={public:'公開',condition_hidden:'隱藏條件',hidden:'完全隱藏',after_award:'取得後公開'};
 export function medalManagementPager(kind,total,page){

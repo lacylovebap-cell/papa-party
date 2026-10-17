@@ -1,4 +1,4 @@
-import {achievementHoldingState} from './achievements-view.js?v=10.16-WEB.6';
+import {achievementHoldingState} from './achievements-view.js?v=10.17-WEB.1';
 const h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sources={draw:'玩家骰子',cross_draw:'玩家跨主播骰子',proxy_draw:'主播代骰',streamer_draw:'主播自己骰',self:'一般自帶',cross_self:'跨主播自帶',manual:'一般點歌／提歌'};
 const date=x=>x?h(new Date(x).toLocaleString('zh-TW',{timeZone:'Asia/Taipei'})):'無紀錄';
