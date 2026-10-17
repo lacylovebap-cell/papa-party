@@ -9,6 +9,7 @@
 | 項目 | 本批實際成果 | 仍需完成 |
 | --- | --- | --- |
 | 公開主播大廳 | 完成本機 UI、公開主播搜尋／分頁、跨主播共同歌曲探索、語言／演唱者／六種版本篩選、現點／提歌原歌曲入口 | 正式部署與公開資料的上線後小範圍驗證 |
+| 同空間切換主播 | 修正歌本切主播被送回空間選擇／首頁；共同歌本的現點／提歌保留原歌曲到對方歌本 | 前端部署，無須資料庫更新 |
 | 多 Space 操作回執 | 既有 commit wrapper 擴充、native 專用權限重驗 lookup、Edge 條件分派及隔離測試 | 正式 migration 審核；完整 Space 業務入口仍封鎖，不能宣稱全程啟用 |
 | 原生裝置推播註冊 | 沿用既有 registration 表的原子 register／disable、同值免寫、token 輪替、Edge 裝置身分接線及隔離測試 | 正式 migration 審核、原生客戶端、FCM／Windows sender、delivery lease／ack／retry 接線及實機驗收 |
 | Android／Windows App | 已核對可複用登入／通知目標契約與實際工具缺口 | 尚無可編譯 App 工程、安裝檔與簽署；需要選定 host、工具鏈、Firebase 公開設定／受控發送與簽署管道 |
@@ -27,6 +28,16 @@
 - 截圖 `ops/lobby-mobile-fixture-20261017.png` 全部使用假資料。本機 QA 透過同源 fixture、CSP 限制連線，沒有呼叫正式 Supabase。
 
 ## 兩份非破壞性 migration
+
+### 前端跳轉補修（無 migration）
+
+使用者回報怕怕歌本切主播時出現「選擇空間」。根因為原連結只改 streamer，仍攜帶 space／spaceId，重新啟動會進入 requiresSpaceEntry；若只有 spaceId，沒有可解析的 Space slug，就可能走 Home／Last／空間選單。即使同 Space 驗證通過，原 entry 仍會落到首頁，丟失歌本頁。
+
+`src/streamer-navigation.js` 新增 publicStreamerDestination；只有目前與目標主播均來自伺服器回傳目錄、明確屬於公開 space-001、來源主播吻合、同源且一般 app 路徑時，才產生不帶過期 Space／通知／舊操作參數的既有公開主播網址，保留當前歌本等頁面。`src/app.js` 的兩個主播選擇入口與共同歌本統一沿用；共同歌本明確附上這次新選定的 songId／kind。
+
+未知主播、缺少 canonical Space、不同 Space、停用主播、專屬 Space 路徑、偽造 scope 仍走原驗權。requiresSpaceEntry、原生業務 guard、帳本、登入憑證、資料庫與查詢流程皆不變。無額外查詢、輪詢或寫入。
+
+新增 `tests/same-space-streamer-navigation.test.js` 8 項；直接執行實際 app 的 roomDestination／switchStreamer／共同歌本／start 函式重現，驗證重新載入不進選擇頁、雙向保留歌本、歌曲意圖只消費一次與危險／跨 Space 仍驗權。連同現有導航／頁碼／Space／cache 回歸，共 **45 項通過，0 失敗**。未因此重新執行無關帳務與推播 suite。
 
 ### `202610170001_native_operation_receipts.sql`
 
