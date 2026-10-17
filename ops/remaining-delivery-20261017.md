@@ -65,3 +65,9 @@ Edge 僅接受經核實的 `device:` 登入，subject／session 從同一 verifi
 最終針對性測試與建置結果記錄於 `remaining-validation-20261017.json`；測試全部為本機假資料或 PGlite 隔離 DB。僅對本批相關搜尋、頁碼、cache、Edge 權限、回執及裝置推播做回歸，未反覆執行全站 suite。
 
 其他現況與後續順序見 `remaining-platform-audit-20261016.md`、`remaining-native-audit-20261016.md` 及 `native-operation-receipts-20261017.md`。
+
+## 2026-10-18 本機增量
+
+- Footer 已完成本機 commit `7c21e88`，動態版本、手機安全距離與深淺主題驗證通過。三個政策／聯絡頁尚未建立，維持純文字；依使用者指示不部署。見 `footer-20261018.md`。
+- 原生通知新增客戶端註冊薄層及 FCM 單次 transport，23 項新測試連同現有共享契約共 46 項通過。尚未接 App／delivery sender，不改原 Web Push、不啟用原生能力。見 `native-push-adapters-20261018.md`。
+- 本增量沒有執行正式 migration、維護、帳務補正、通知或部署；上表的原生 App／完整 Space／Scoped Realtime／容量回收限制仍存在。
