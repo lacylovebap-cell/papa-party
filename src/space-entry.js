@@ -1,4 +1,4 @@
-import {streamerDestination} from './streamer-navigation.js?v=10.16-WEB.6';
+import {streamerDestination} from './streamer-navigation.js?v=10.17-WEB.1';
 
 const validSlug=value=>typeof value==='string'&&/^[a-z0-9][a-z0-9-]{0,63}$/.test(value);
 export function requiresSpaceEntry(url,mountUrl){

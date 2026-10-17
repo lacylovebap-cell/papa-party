@@ -1,4 +1,4 @@
-import {HOME_MODULES,HERO_FIELDS,normalizeHome,validateHome,THEME_COLORS} from './home-settings.js?v=10.16-WEB.6';
+import {HOME_MODULES,HERO_FIELDS,normalizeHome,validateHome,THEME_COLORS} from './home-settings.js?v=10.17-WEB.1';
 export function openHomeEditor({home,room,modal,dispatch,upload,demo,toast}){
  const h=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const initial=normalizeHome(home),field=(name,label,value,type='text',limit=160)=>`<label>${h(label)}<input name="${name}" type="${type}" value="${h(value)}" maxlength="${limit}"></label>`;

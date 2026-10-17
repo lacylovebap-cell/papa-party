@@ -27,3 +27,17 @@ export function streamerDestination(href,slug,{role,managedSlug,subtab,adminTab}
  if(url.hash==='#admin'&&adminTab)url.searchParams.set('adminTab',adminTab);else{url.searchParams.delete('adminTab');url.searchParams.delete('player');}
  return url.href;
 }
+
+// A room from the current server-projected public directory can use the
+// existing public room route. URL Space hints never establish this scope.
+// Unknown/private Spaces retain the authenticated entry flow unchanged.
+export function publicStreamerDestination(href,slug,{currentRoom,rooms,mountUrl,...navigation}={}){
+ const url=new URL(streamerDestination(href,slug,navigation));
+ for(const key of ['streamerId','entityType','entityId','notificationId','commonRequest','commonKind'])url.searchParams.delete(key);
+ const target=Array.isArray(rooms)?rooms.find(room=>room?.slug===slug):null;
+ if(!currentRoom?.id||!target?.id||target.active===false||currentRoom.spaceId!=='space-001'||target.spaceId!=='space-001'||!mountUrl)return url.href;
+ const mount=new URL(mountUrl),source=new URL(href),base=mount.pathname.replace(/\/$/,'');
+ if(source.origin!==mount.origin||source.searchParams.get('streamer')!==currentRoom.slug||!['/','/index.html','/v2.html','/preview.html'].some(file=>source.pathname===base+file)||source.searchParams.has('spaceId')&&source.searchParams.get('spaceId')!=='space-001')return url.href;
+ url.searchParams.delete('space');url.searchParams.delete('spaceId');
+ return url.href;
+}

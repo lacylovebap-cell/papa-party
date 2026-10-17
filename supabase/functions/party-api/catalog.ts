@@ -1,6 +1,6 @@
 // Catalog endpoints use targeted service-role queries. Never call load() or add
 // catalog/lyrics rows to the generic platform snapshot or ordinary read view.
-const CATALOG_OPS=new Set(['catalogCandidateEdit','catalogLyricSources','catalogLyricAdopt','catalogRooms','catalogSearch','catalogSuggestions','catalogVariantInfo','catalogMergeSame','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom','catalogLinkSong','catalogLinkInfo','catalogFamilySingers','catalogImportMatches','catalogImportLink','catalogIssueReport','catalogIssues','catalogIssueStatus','catalogSongbook']);
+const CATALOG_OPS=new Set(['catalogCandidateEdit','catalogLyricSources','catalogLyricAdopt','catalogRooms','catalogSearch','catalogSuggestions','catalogVariantInfo','catalogMergeSame','catalogScan','catalogReviewList','catalogReview','catalogGovernance','catalogLanguageFilter','catalogLanguageFilterSave','catalogTemplates','catalogTemplateChange','catalogLyrics','catalogLyricSave','catalogLyricChoice','catalogBatchAdd','songSearchRoom','catalogLinkSong','catalogLinkInfo','catalogFamilySingers','catalogImportMatches','catalogImportLink','catalogIssueReport','catalogIssues','catalogIssueStatus','catalogSongbook','publicLobbySongs']);
 const catalogUuid=(v:any)=>typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);
 const catalogPage=(b:any)=>({limit:Math.max(1,Math.min(50,Math.floor(Number(b.limit)||20))),offset:Math.max(0,Math.min(10000,Math.floor(Number(b.offset)||0)))});
 const catalogActor=(who:any)=>who?.accountId?'verified:'+JSON.stringify({account_id:who.accountId,role:who.role,space_id:who.spaceId||null,actor_streamer_id:who.streamer_id||null,player_id:who.playerId||null}):isSuper(who)?'president':who?.role==='streamer_admin'?'streamer:'+who.streamer_id:'player:'+String(who?.playerId||'anonymous');
@@ -36,13 +36,15 @@ async function catalogRoom(who:any,requested:any,allowInactive=false){
 
 async function catalogOperation(b:any,who:any){
  const page=catalogPage(b),op=b.op;
- if(op==='catalogSongbook'){
+ if(op==='catalogSongbook'||op==='publicLobbySongs'){
   const q=String(b.q||'').trim();
   if(q.length>100)return {rows:[],total:0,hasMore:false};
   const language=String(b.language||''),performer=String(b.performerType||''),version=String(b.versionKind||'');
   if([language,performer,version].some(v=>v.length>100))return {rows:[],total:0,hasMore:false};
-  const room=await catalogRoom(who,b.streamer||who?.streamer_id||'papa');
-  return await api('/rest/v1/rpc/papa_catalog_public_page_filtered_v2_in_space',{query_text:q,language_filter:language,performer_filter:performer,version_filter:version,page_limit:Math.min(page.limit,20),page_offset:page.offset,requested_space:room.spaceId||'space-001',sort_order:checkedListSort(b.sort),version_label_filter:checkedVersionLabel(b.versionLabel)});
+  // Discovery covers only the existing public legacy Space. Actor, URL hints
+  // and the chosen streamer cannot turn the lobby into a private Space read.
+  const room=op==='publicLobbySongs'?{spaceId:'space-001'}:await catalogRoom(who,b.streamer||who?.streamer_id||'papa');
+  return await api('/rest/v1/rpc/papa_catalog_public_page_filtered_v2_in_space',{query_text:q,language_filter:language,performer_filter:performer,version_filter:version,page_limit:Math.min(page.limit,op==='publicLobbySongs'?12:20),page_offset:page.offset,requested_space:room.spaceId||'space-001',sort_order:checkedListSort(b.sort),version_label_filter:checkedVersionLabel(b.versionLabel)});
  }
  if(op==='catalogLinkInfo'){
   if(!isManager(who))throw Error('請先登入主播管理');
