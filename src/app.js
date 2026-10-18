@@ -1,40 +1,40 @@
-import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.17-WEB.1';
-import {accountingDay,accountingRollover} from './accounting.js?v=10.17-WEB.1';
-import {installPageJumps} from './ui-page-jumps.js?v=10.17-WEB.1';
-import {createWebAppInstall} from './web-app-install.js?v=10.17-WEB.1';
-import {refreshView,rememberView} from './view-refresh.js?v=10.17-WEB.1';
-import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.17-WEB.1';
-import {webApiFailure} from './web-api-errors.js?v=10.17-WEB.1';
-import {canonicalNoticeLink} from './notification-rules.js?v=10.17-WEB.1';
-import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.17-WEB.1';
-import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.17-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.17-WEB.1';
-import {fateCategories,drawSong} from './fate.js?v=10.17-WEB.1';
-import {createBoard} from './board.js?v=10.17-WEB.1';
-import {createChat} from './chat.js?v=10.17-WEB.1';
-import {requestSourceLabel} from './request-source.js?v=10.17-WEB.1';
-import {normalizeHome,themePalette} from './home-settings.js?v=10.17-WEB.1';
-import {openHomeEditor} from './home-editor.js?v=10.17-WEB.1';
-import {streamerName,streamerText,streamerDestination,publicStreamerDestination,pageLocation,pageDestination} from './streamer-navigation.js?v=10.17-WEB.1';
-import {createNotifications} from './notifications.js?v=10.17-WEB.1';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.17-WEB.1';
-import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.17-WEB.1';
-import {createPlayerManager} from './player-manager.js?v=10.17-WEB.1';
-import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.17-WEB.1';
-import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.17-WEB.1';
-import {createSongFavorites} from './song-favorites.js?v=10.17-WEB.1';
-import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.17-WEB.1';
-import {listenedSongs} from './listening-history.js?v=10.17-WEB.1';
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.17-WEB.1';
-import {createWebDeviceLogin} from './web-device-login.js?v=10.17-WEB.1';
-import {roomStorageKey} from './communication-context.js?v=10.17-WEB.1';
-import {createWebSpaceEntry} from './web-space-entry.js?v=10.17-WEB.1';
-import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.17-WEB.1';
-import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.17-WEB.1';
-import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.17-WEB.1';
-import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.17-WEB.1';
-import {createMedalManagement} from './medal-management.js?v=10.17-WEB.1';
-import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota} from './core.js?v=10.17-WEB.1';
+import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.18-WEB.1';
+import {accountingDay,accountingRollover} from './accounting.js?v=10.18-WEB.1';
+import {installPageJumps} from './ui-page-jumps.js?v=10.18-WEB.1';
+import {createWebAppInstall} from './web-app-install.js?v=10.18-WEB.1';
+import {refreshView,rememberView} from './view-refresh.js?v=10.18-WEB.1';
+import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.18-WEB.1';
+import {webApiFailure} from './web-api-errors.js?v=10.18-WEB.1';
+import {canonicalNoticeLink} from './notification-rules.js?v=10.18-WEB.1';
+import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.18-WEB.1';
+import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.18-WEB.1';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.18-WEB.1';
+import {fateCategories,drawSong} from './fate.js?v=10.18-WEB.1';
+import {createBoard} from './board.js?v=10.18-WEB.1';
+import {createChat} from './chat.js?v=10.18-WEB.1';
+import {requestSourceLabel} from './request-source.js?v=10.18-WEB.1';
+import {normalizeHome,themePalette} from './home-settings.js?v=10.18-WEB.1';
+import {openHomeEditor} from './home-editor.js?v=10.18-WEB.1';
+import {streamerName,streamerText,streamerDestination,publicStreamerDestination,pageLocation,pageDestination} from './streamer-navigation.js?v=10.18-WEB.1';
+import {createNotifications} from './notifications.js?v=10.18-WEB.1';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.18-WEB.1';
+import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.18-WEB.1';
+import {createPlayerManager} from './player-manager.js?v=10.18-WEB.1';
+import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.18-WEB.1';
+import {newPracticeSongs,isNewPracticeSong,newPracticeDate,newPracticeSongTags,NEW_PRACTICE_TAG} from './new-practice.js?v=10.18-WEB.1';
+import {createSongFavorites} from './song-favorites.js?v=10.18-WEB.1';
+import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.18-WEB.1';
+import {listenedSongs} from './listening-history.js?v=10.18-WEB.1';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.18-WEB.1';
+import {createWebDeviceLogin} from './web-device-login.js?v=10.18-WEB.1';
+import {roomStorageKey} from './communication-context.js?v=10.18-WEB.1';
+import {createWebSpaceEntry} from './web-space-entry.js?v=10.18-WEB.1';
+import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.18-WEB.1';
+import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.18-WEB.1';
+import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.18-WEB.1';
+import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.18-WEB.1';
+import {createMedalManagement} from './medal-management.js?v=10.18-WEB.1';
+import {queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,reservedCredits,reservedHour,savedQuota,songSelection} from './core.js?v=10.18-WEB.1';
 const $=s=>document.querySelector(s),h=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let appInstallMessage='';
 const appInstall=createWebAppInstall({onChange:syncAppInstall});
@@ -701,7 +701,7 @@ function changeManagerPassword(){
  });
 }
 function shortSongOptions(item){if(Number(item.creditCost)!==0.5)return '';const mode=item.shortMode||'repeat';return '<p class="notice">此歌較短；唱兩次或搭配兩首，合計扣 1 首。</p><input type="search" data-short-filter placeholder="搜尋可搭配的歌曲">'+nativeSelect('pairSongId','演唱方式',[...(mode!=='pair'?[['','這首唱兩次']]:[]),...(item.pairSongIds||[]).map(id=>song(id)).filter(Boolean).map(x=>[x.songId,'搭配：'+x.title+'－'+x.artist])],'');}
-async function requestSong(id,kind,selfProvided=false){if(!session)return loginDialog();const item=song(id);if(!item)return toast('歌曲已更新');const c=crownFor(state,id,clock()),other=c&&c.playerId!==session.playerId;if(other)kind='live';const cost=Number(item.creditCost)===0.5?1:Number(item.creditCost||1);let insufficient=false;if(kind==='saved')try{venuePolicySavedSnapshot(state,session.playerId,cost);}catch{insufficient=true;}if(insufficient){modal('沒有可提的存歌','<p>目前沒有足夠的存歌可提這首歌。</p><div class="actions">'+button('前往現點','request',id,'primary','data-kind="live"')+'</div>');return;}const liveHelp=button('點歌教學','prices','','tiny');modal(kind==='saved'?'🎤 確認提歌':'🎁 確認現點','<h3>'+h(item.title)+'－'+h(item.artist)+'</h3>'+shortSongOptions(item)+(kind==='saved'?'<p>此歌曲會扣 '+cost+' 首存歌，並占用 '+cost+' 首本小時提歌額度。完成演唱才扣存歌，待唱先保留。</p>':other?'<p>現點費用：'+money(c.price)+' 探鑽；另需雙費：'+money(state.settings.liveDouble??500)+' 探鑽</p>'+check('gift','我已確認禮物價格')+liveHelp:'<p>給歌手 '+money(state.settings.livePrice)+' 探鑽＋雙費 '+money(state.settings.liveDouble)+' 探鑽</p>'+check('gift','我已確認禮物價格')+liveHelp)+field('requestNote','想說的話（選填，最多 30 字）','','text','maxlength="60" autocomplete="off"'),async f=>{const data={songId:id,kind,selfProvided,source:selfProvided?'draw':'manual',pairSongId:f.get('pairSongId')||'',giftConfirmed:f.has('gift'),requestNote:f.get('requestNote')||''};try{await dispatch('request',data);toast(say('success'));}catch(e){if(kind==='saved'){if((e.message.includes('本小時真的滿')||e.message.includes('提歌額度不足'))&&!demo)try{await api({op:'failedRequest',songId:id,pairSongId:data.pairSongId});}catch{}if((e.message.includes('本小時真的滿')||e.message.includes('提歌額度不足'))||e.message.includes('存歌袋空空')||e.message.includes('可用存歌不足'))e.liveSongId=id;}throw e;}});}
+async function requestSong(id,kind,selfProvided=false){if(!session)return loginDialog();const item=song(id);if(!item)return toast('歌曲已更新');const c=crownFor(state,id,clock()),other=c&&c.playerId!==session.playerId;if(other)kind='live';const cost=Number(item.creditCost)===0.5?1:Number(item.creditCost||1);let insufficient=false;if(kind==='saved')try{venuePolicySavedSnapshot(state,session.playerId,cost);}catch{insufficient=true;}if(insufficient){modal('沒有可提的存歌','<p>目前沒有足夠的存歌可提這首歌。</p><div class="actions">'+button('前往現點','request',id,'primary','data-kind="live"')+'</div>');return;}const expectedSong=songSelection(item),pairSelections=new Map((item.pairSongIds||[]).map(id=>song(id)).filter(Boolean).map(row=>[row.songId,songSelection(row)]));const liveHelp=button('點歌教學','prices','','tiny');modal(kind==='saved'?'🎤 確認提歌':'🎁 確認現點','<h3>'+h(item.title)+'－'+h(item.artist)+'</h3>'+shortSongOptions(item)+(kind==='saved'?'<p>此歌曲會扣 '+cost+' 首存歌，並占用 '+cost+' 首本小時提歌額度。完成演唱才扣存歌，待唱先保留。</p>':other?'<p>現點費用：'+money(c.price)+' 探鑽；另需雙費：'+money(state.settings.liveDouble??500)+' 探鑽</p>'+check('gift','我已確認禮物價格')+liveHelp:'<p>給歌手 '+money(state.settings.livePrice)+' 探鑽＋雙費 '+money(state.settings.liveDouble)+' 探鑽</p>'+check('gift','我已確認禮物價格')+liveHelp)+field('requestNote','想說的話（選填，最多 30 字）','','text','maxlength="60" autocomplete="off"'),async f=>{const data={songId:id,expectedSong,...(f.get('pairSongId')?{expectedPair:pairSelections.get(f.get('pairSongId'))}:{}),kind,selfProvided,source:selfProvided?'draw':'manual',pairSongId:f.get('pairSongId')||'',giftConfirmed:f.has('gift'),requestNote:f.get('requestNote')||''};try{await dispatch('request',data);toast(say('success'));}catch(e){if(kind==='saved'){if((e.message.includes('本小時真的滿')||e.message.includes('提歌額度不足'))&&!demo)try{await api({op:'failedRequest',songId:id,expectedSong,...(data.expectedPair?{expectedPair:data.expectedPair}:{}),pairSongId:data.pairSongId});}catch{}if((e.message.includes('本小時真的滿')||e.message.includes('提歌額度不足'))||e.message.includes('存歌袋空空')||e.message.includes('可用存歌不足'))e.liveSongId=id;}throw e;}});}
 
 function crownHelp(){modal('👑 如何冠歌？',`<div class="table-wrap"><table><thead><tr><th>卡別</th><th>辦卡給歌手</th><th>辦卡雙費</th><th>其他玩家現點</th><th>期限</th></tr></thead><tbody>${state.settings.tiers.map(t=>`<tr><td>${h(t.name)}</td><td>${money(t.fee)}</td><td>${money(state.settings.crownDouble)} × 2</td><td>${money(t.price)}／首＋雙費 ${money(state.settings.liveDouble??500)}</td><td>${t.months?t.months+' 個月':'永久'}</td></tr>`).join('')}</tbody></table></div><div class="notice">🎤 給歌手對應數值禮物<br>💰 辦卡雙費：聲瑪樂團 ${money(state.settings.crownDouble)}＋2號位主持 ${money(state.settings.crownDouble)}，兩筆都需要。<br>選歌曲 → 選卡別 → 付辦卡費＋雙費 → 確認後生效 ✨</div><p class="muted">金額皆為探鑽。點歌雙費與一般現點相同，為 ${money(state.settings.liveDouble??500)}；辦卡雙費另計。冠歌主人照一般規則；其他玩家在有效期間內只能依卡別現點。</p>`);}
 function prices(){modal('價格表',`<p>一首:給歌手${state.settings.livePrice}+雙費 ${state.settings.liveDouble}</p><div class="table-wrap"><table><tr><th>方案</th><th>給歌手</th><th>雙費</th></tr>${state.settings.plans.map(p=>`<tr><td>${h(p.name.includes('金牌歌單')?'🏅 金牌歌單('+p.amount+'首)':p.name.replace(/一般/g,'').trim())}</td><td>${money(p.fee)}</td><td>${money(p.double)}</td></tr>`).join('')}</table></div><p class="muted">雙費=給聲瑪樂團＋2號位主持。 以上禮物數值單位皆為探鑽</p>`);}
@@ -1431,13 +1431,13 @@ async function removeSelectedFavorites(){
  const ids=[...selectedFavorites];if(!ids.length||ids.length>50)throw Error('一次請選 1 到 50 首收藏');if(!confirm('移除 '+ids.length+' 首收藏？'))return;const identity=favoritesIdentity(),result=await songFavorites.setBatch(ids,false);if(!result||identity!==favoritesIdentity())return;selectedFavorites.clear();selectedFavoriteRows.clear();await songFavorites.load({force:true});
 }
 async function requestSelectedFavorites(kind){
- if(!session)throw Error('請先登入玩家');const rows=[...selectedFavorites].map(id=>selectedFavoriteRows.get(id)||song(id));if(!rows.length||rows.length>50||rows.some(s=>!s))throw Error('一次請選 1 到 50 首收藏');const identity=favoriteSelectionIdentity;let submitted=false;
+ if(!session)throw Error('請先登入玩家');const rows=[...selectedFavorites].map(id=>selectedFavoriteRows.get(id)||song(id));if(!rows.length||rows.length>50||rows.some(s=>!s))throw Error('一次請選 1 到 50 首收藏');const identity=favoriteSelectionIdentity,selectionNames=new Map([...rows,...rows.flatMap(s=>(s.pairOptions||[]).concat((s.pairSongIds||[]).map(song).filter(Boolean)))].map(s=>[s.songId,songSelection(s)]));let submitted=false;
  modal(kind==='saved'?'批次提歌':'批次現點',rows.map((s,i)=>'<fieldset class="cross-song-row"><legend>'+h(s.title)+' · '+h(s.artist)+'</legend>'+favoritePairOptions(s,i)+'</fieldset>').join('')+(kind==='live'?check('gift','已了解每首現點需等待主播確認禮物'):''),async (f,form)=>{
   if(submitted)throw Error('這批點歌已送出，請先查看待播；需要再次操作時請關閉並重新開啟');
   const active=()=>identity===favoritesIdentity()&&identity===favoriteSelectionIdentity&&(!form||$('#modal-form')===form&&$('#dialog').open);
   if(identity!==favoritesIdentity()||identity!==favoriteSelectionIdentity)throw Error('登入或主播已變更，請重新選取');if(kind==='live'&&!f.has('gift'))throw Error('請確認現點的禮物方式');
   if(!active())return;submitted=true;
-  try{const result=await api({op:'requestsBatch',revision:state.revision,jobs:[{streamer:streamerSlug,rows:rows.map((s,i)=>({songId:s.songId,kind,pairSongId:f.get('favoritePair'+i)||'',giftConfirmed:f.has('gift')}))}]});if(!active())return;const item=result.results?.[0];if(!item?.ok)throw Error(item?.unknown?'結果待確認，請先查看待播，避免重複送出':item?.error||'點歌結果未確認，請先查看待播');selectedFavorites.clear();selectedFavoriteRows.clear();await refresh(true);if(active())toast('已一起送出 '+item.count+' 首'+(kind==='saved'?'提歌':'現點'));
+  try{const result=await api({op:'requestsBatch',revision:state.revision,jobs:[{streamer:streamerSlug,rows:rows.map((s,i)=>({songId:s.songId,expectedSong:selectionNames.get(s.songId),...(f.get('favoritePair'+i)?{expectedPair:selectionNames.get(f.get('favoritePair'+i))}:{}),kind,pairSongId:f.get('favoritePair'+i)||'',giftConfirmed:f.has('gift')}))}]});if(!active())return;const item=result.results?.[0];if(!item?.ok)throw Error(item?.unknown?'結果待確認，請先查看待播，避免重複送出':item?.error||'點歌結果未確認，請先查看待播');selectedFavorites.clear();selectedFavoriteRows.clear();await refresh(true);if(active())toast('已一起送出 '+item.count+' 首'+(kind==='saved'?'提歌':'現點'));
   }catch(error){if(!active())return;throw Error(error.message+'；送出結果不明時請先查看待播，勿重複送出；需要再次操作時請關閉並重新開啟');}
  });
 }
@@ -1471,7 +1471,7 @@ async function openOwnReplacement(id){
  modal('更換自己的待播','<p><b>'+h(row.name)+'</b> · 原歌曲《'+h(row.title)+'》</p><div class="own-replace-search"><input id="own-replace-query" type="search" maxlength="100" placeholder="搜尋此主播的歌名或歌手" aria-label="搜尋換歌曲目">'+button('搜尋','ownReplaceSearch','','tiny')+'</div><div id="own-replace-results"></div><div id="own-replace-chosen"></div><div id="own-replace-quote"></div><p class="muted">保留原點歌編號、時間、來源與操作歷史；換歌後請等主播重新確認。</p>',async f=>{
   if(d.submitted)throw Error('換歌已送出，請先查看最新待播再重新開啟');if(!ownReplacementActive(d)||!d.chosen||!d.quote)throw Error('請選歌並確認最新首數與費用');
   if(row.kind==='live'&&!f.has('giftConfirmed'))throw Error('請確認換歌後的現點禮物價格');
-  const pairSongId=$('#own-replace-pair')?.value||'',jobs=[{streamer:row.slug,rows:[{id:row.id,operation:'replace',songId:d.chosen.songId,pairSongId,giftConfirmed:f.has('giftConfirmed')}]}];d.submitted=true;
+  const pairSongId=$('#own-replace-pair')?.value||'',jobs=[{streamer:row.slug,rows:[{id:row.id,operation:'replace',songId:d.chosen.songId,expectedSong:songSelection(d.chosen),...(pairSongId?{expectedPair:songSelection(d.chosen.pairOptions.find(p=>p.songId===pairSongId))}:{}),pairSongId,giftConfirmed:f.has('giftConfirmed')}]}];d.submitted=true;
   const result=await sendOwnQueueBatch({op:'ownQueueBatch',revision:d.revision,jobs});if(!ownReplacementActive(d))return;
   const results=ownQueue.settle(jobs,result);await refresh(true).catch(()=>{});if(!ownReplacementActive(d))return;await loadOwnQueue();if(!ownReplacementActive(d))return;
   if(!results[0].ok)throw Error(results[0].unknown?'結果待確認，請先查看待播，勿重複送出':results[0].error||'換歌未完成');toast('換歌已送出，等待主播重新確認');
@@ -1494,7 +1494,7 @@ async function chooseOwnReplacement(id){
 }
 async function quoteOwnReplacement(){
  const d=ownReplacement;if(!d||!ownReplacementActive(d)||d.submitted||!d.chosen)return;const generation=++d.generation;d.quote=null;$('#own-replace-quote').innerHTML='<small>核對首數與費用中…</small>';
- try{const result=await api({op:'ownQueueQuote',streamer:d.row.slug,choice:{id:d.row.id,songId:d.chosen.songId,pairSongId:$('#own-replace-pair')?.value||''}});if(!ownReplacementActive(d)||generation!==d.generation)return;
+ try{const result=await api({op:'ownQueueQuote',streamer:d.row.slug,choice:{id:d.row.id,songId:d.chosen.songId,expectedSong:songSelection(d.chosen),...($('#own-replace-pair')?.value?{expectedPair:songSelection(d.chosen.pairOptions.find(p=>p.songId===$('#own-replace-pair').value))}:{}),pairSongId:$('#own-replace-pair')?.value||''}});if(!ownReplacementActive(d)||generation!==d.generation)return;
   const q=result.quote;if(!Number.isSafeInteger(result.revision)||result.revision<0||!q||q.kind!==d.row.kind||q.songId!==d.chosen.songId||![q.creditCost,q.price,q.double].every(n=>Number.isFinite(n)&&n>=0))throw Error('換歌首數或費用未確認');d.quote=q;d.revision=result.revision;
   $('#own-replace-quote').innerHTML='<p>'+q.creditCost+' 首'+(q.kind==='saved'?'存歌（完成演唱時扣除）':' · 現點 '+q.price+'／首＋雙費 '+q.double)+'</p>'+(q.kind==='live'?check('giftConfirmed','我已確認換歌後的現點禮物價格。價格或首數異動時需等主播重新確認。'):'');
  }catch(error){if(ownReplacementActive(d)&&generation===d.generation)$('#own-replace-quote').innerHTML='<p class="error">'+h(error.message)+'</p>';}
@@ -1515,7 +1515,7 @@ async function openCrossRequest(kind){
  const rows=[...crossView.selected.values()];if(!rows.length||rows.length>10)throw Error('一次請選 1 到 10 位主播');if(!['saved','live'].includes(kind)||rows.some(r=>r.status==='paused'))throw Error('暫停點歌的主播無法勾選');crossView.drafts.clear();crossView.submitted=false;const identity=crossIdentity();
  for(const r of rows)crossView.drafts.set(r.streamerId,{room:r,chosen:null,rows:[],tags:[],tagOptions:[],q:'',page:0,total:0,loading:false,generation:0,selfProvided:false,source:'manual',error:''});
  modal(kind==='saved'?'跨主播統一提歌':'跨主播統一現點','<form id="cross-request-form"><label class="check-row"><input type="checkbox" data-cross-all-self>全選自帶（系統自動選歌）</label>'+rows.map(r=>'<section class="cross-song-row" data-cross-row="'+h(r.streamerId)+'"><h3>'+h(r.name)+'</h3><div class="cross-song-controls"><input type="search" maxlength="100" data-cross-query="'+h(r.streamerId)+'" placeholder="搜尋此主播歌本">'+button('搜尋','crossSongSearch',r.streamerId)+button('🎲','crossSongDraw',r.streamerId,'tiny dice-button','aria-label="抽一首"')+'<label><input type="checkbox" data-cross-self="'+h(r.streamerId)+'">自帶</label></div><details><summary>選標籤</summary><div data-cross-tags="'+h(r.streamerId)+'"></div></details><div data-cross-song="'+h(r.streamerId)+'"></div><div class="cross-song-results" data-cross-results="'+h(r.streamerId)+'"></div></section>').join('')+(kind==='live'?check('gift','已了解每位主播的現點需等待確認禮物'):'')+'<p class="muted">每位主播各自驗證存歌、額度與狀態，結果會逐一顯示。</p><p class="error" id="cross-error"></p><div class="actions"><button type="submit" class="primary">送出'+(kind==='saved'?'提歌':'現點')+'</button></div></form><div id="cross-results" aria-live="polite"></div>');
- const form=$('#cross-request-form'),active=()=>identity===crossIdentity()&&$('#cross-request-form')===form&&$('#dialog').open;form.onsubmit=async e=>{e.preventDefault();if(crossView.submitted)return;if(identity!==crossIdentity()){if($('#cross-request-form')===form&&$('#dialog').open)form.querySelector('#cross-error').textContent='登入或空間已變更，請重新開啟';return;}if(!active())return;const data=new FormData(form);try{if(kind==='live'&&!data.has('gift'))throw Error('請確認每位主播的現點禮物方式');const jobs=rows.map(r=>{const d=crossView.drafts.get(r.streamerId);if(!d?.chosen)throw Error('請為 '+r.name+' 選一首歌');return {streamer:r.slug,rows:[{songId:d.chosen.songId,kind,selfProvided:d.selfProvided,source:d.source||'manual',pairSongId:form.querySelector('[data-cross-pair="'+r.streamerId+'"]')?.value||'',giftConfirmed:data.has('gift')}]};});crossView.submitted=true;for(const control of form.querySelectorAll('input,button,select'))control.disabled=true;
+ const form=$('#cross-request-form'),active=()=>identity===crossIdentity()&&$('#cross-request-form')===form&&$('#dialog').open;form.onsubmit=async e=>{e.preventDefault();if(crossView.submitted)return;if(identity!==crossIdentity()){if($('#cross-request-form')===form&&$('#dialog').open)form.querySelector('#cross-error').textContent='登入或空間已變更，請重新開啟';return;}if(!active())return;const data=new FormData(form);try{if(kind==='live'&&!data.has('gift'))throw Error('請確認每位主播的現點禮物方式');const jobs=rows.map(r=>{const d=crossView.drafts.get(r.streamerId);if(!d?.chosen)throw Error('請為 '+r.name+' 選一首歌');return {streamer:r.slug,rows:[{songId:d.chosen.songId,expectedSong:songSelection(d.chosen),...(form.querySelector('[data-cross-pair="'+r.streamerId+'"]')?.value?{expectedPair:songSelection(d.chosen.pairOptions.find(p=>p.songId===form.querySelector('[data-cross-pair="'+r.streamerId+'"]').value))}:{}),kind,selfProvided:d.selfProvided,source:d.source||'manual',pairSongId:form.querySelector('[data-cross-pair="'+r.streamerId+'"]')?.value||'',giftConfirmed:data.has('gift')}]};});crossView.submitted=true;for(const control of form.querySelectorAll('input,button,select'))control.disabled=true;
   const result=await api({op:'requestsBatch',revision:state.revision,jobs});if(!active())return;if(!Array.isArray(result.results)||result.results.length!==jobs.length)throw Error('送出結果未確認，請先查看各主播待播');$('#cross-results').innerHTML=result.results.map(item=>'<p class="notice '+(item.ok?'':'warning')+'"><b>'+h(rows.find(r=>r.slug===item.streamer)?.name||item.streamer)+'</b> · '+h(item.unknown?'結果待確認，請先查看待播，避免重複送出':item.ok?'已送出':item.error||'未送出')+'</p>').join('');await refresh(true);if(active()){await loadCrossSummary(crossView.page,true);if(active()&&!crossView.error)resetConfirmedCrossBatch(result,form);}
  }catch(error){if(active())form.querySelector('#cross-error').textContent=error.message+(crossView.submitted?'；送出結果不明時請先查看待播，勿重複送出。':'');}};
  await Promise.all(rows.map(r=>loadCrossSongs(r.streamerId,false,0)));for(const r of rows){const d=crossView.drafts.get(r.streamerId);if(d&&!d.q&&!d.chosen){d.rows=[];d.total=0;renderCrossSong(r.streamerId);}}

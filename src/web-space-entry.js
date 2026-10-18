@@ -1,4 +1,4 @@
-import {requestedSpace,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.17-WEB.1';
+import {requestedSpace,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.18-WEB.1';
 
 const managers=new Set(['streamer_admin','super_admin']);
 const roles=new Set(['player',...managers]);

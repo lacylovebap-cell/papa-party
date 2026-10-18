@@ -8,8 +8,8 @@ for(const name of ['src/public-lobby.js','src/lobby-entry.js','src/view-refresh.
 for(const folder of ['src','assets'])fs.cpSync(path.join(root,folder),path.join(out,folder),{recursive:true});
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 for(const file of ['index.html','preview.html','v2.html'])fs.writeFileSync(path.join(out,file),html);
-fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'10.17-WEB.1',backendVersion:'10.17-WEB.1',builtAt:new Date().toISOString()}));
-console.log('Build 10.17-WEB.1 complete: static site in dist');
+fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'10.18-WEB.1',backendVersion:'10.18-WEB.1',builtAt:new Date().toISOString()}));
+console.log('Build 10.18-WEB.1 complete: static site in dist');
 
 fs.copyFileSync(path.join(root,'lobby.html'),path.join(out,'lobby.html'));
 for(const file of ['404.html','sw.js','manifest.webmanifest','CNAME'])fs.copyFileSync(path.join(root,file),path.join(out,file));

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
-import {empty,mutate} from '../src/core.js';
+import {empty,mutate,scopeState} from '../src/core.js';
 import {applyPlayerRequestBatch,validateRequestBatch} from '../src/player-bulk-tools.js';
 import {stateChanges} from '../src/state-patch.js';
 import {deriveNotices} from '../src/notification-rules.js';
@@ -18,7 +18,8 @@ function declaration(name){
 const start=source.indexOf(" if(b.op==='requestsBatch'){"),end=source.indexOf(" if(b.op==='listeningHistoryPage'){",start);
 assert.ok(start>=0&&end>start);
 const conflictHelpers=source.slice(source.indexOf('const revisionConflictMessage='),source.indexOf('async function api('));
-const code=stripTypeScriptTypes(conflictHelpers+'\n'+declaration('api')+'\n'+declaration('commit')+'\nasync function request(b,who){const t="2026-10-10T04:30:00Z";'+source.slice(start,end)+'}');
+const selectionHelpers=source.slice(source.indexOf('// Use verified display metadata'),source.indexOf('async function mutateStreamerRegistry('));
+const code=stripTypeScriptTypes(selectionHelpers+'\n'+conflictHelpers+'\n'+declaration('api')+'\n'+declaration('commit')+'\nasync function request(b,who){const t="2026-10-10T04:30:00Z";'+source.slice(start,end)+'}');
 const now='2026-10-10T04:30:00Z',admin={role:'admin'};
 const change=(state,type,data,streamer='papa')=>mutate(state,{type,data,streamer},admin,now);
 
@@ -27,6 +28,8 @@ function edge(outcome='success'){
  state=change(state,'settings',{hourlyLimit:20});state=change(state,'song',{title:'歌曲',artist:'演唱者'});state=change(state,'song',{title:'歌曲二',artist:'演唱者'});state.revision=7;
  const who={role:'player',accountId:'00000000-0000-4000-8000-000000000001',playerId:state.players[0].playerId,loginId:'login-id',spaceId:'space-001'},calls=[],reads=[];
  const fetch=async(url,options)=>{
+  if(url.endsWith('/papa_catalog_request_metadata')){const b=JSON.parse(options.body);return Response.json({version:1,scope:{spaceId:b.requested_space,roomId:b.requested_room},revision:state.revision,songs:state.songs.filter(s=>s.streamer_id===b.requested_room&&b.selected_song_ids.includes(s.songId)).map(s=>({songId:s.songId,title:s.title,artist:s.artist||''}))});}
+
   calls.push({url,body:JSON.parse(options.body)});
   if(outcome==='reject')return new Response(JSON.stringify({code:'40001',message:'VERSION_CONFLICT'}),{status:409});
   if(outcome==='forbidden')return new Response(JSON.stringify({code:'42501',message:'permission denied'}),{status:403});
@@ -38,7 +41,7 @@ function edge(outcome='success'){
   if(outcome==='body')return {ok:true,text:async()=>{throw Error('Lost response body');}};
   return new Response(JSON.stringify(state.revision));
  };
- const context=vm.createContext({roomBadgeChanges,Response,JSON,structuredClone,fetch,SB_URL:'https://example.test',headers:{},stateChanges,deriveNotices,coreActor,applyPlayerRequestBatch,validateRequestBatch,
+ const context=vm.createContext({roomBadgeChanges,Response,JSON,structuredClone,fetch,SB_URL:'https://example.test',headers:{},scopeState,stateChanges,deriveNotices,coreActor,applyPlayerRequestBatch,validateRequestBatch,
   respond:value=>value,schedulePush:()=>{},catalogRoom:async(actor,slug)=>{if(!['papa','papa-alias'].includes(slug))throw Error('找不到主播');return {id:'papa',slug:'papa',spaceId:'space-001',active:true};},
   load:async(...args)=>{reads.push(args);return structuredClone(state);},
  });

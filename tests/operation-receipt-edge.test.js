@@ -49,6 +49,10 @@ function fixture(outcome='success'){
    if(outcome==='projectionLost')return Response.json({code:'XX000',message:'Projection unavailable'},{status:503});
    return Response.json([]);
   }
+  if(path.endsWith('/papa_catalog_request_metadata'))return Response.json({version:1,
+   scope:{spaceId:b.requested_space,roomId:b.requested_room},revision:state.revision,
+   songs:state.songs.filter(s=>s.streamer_id===b.requested_room&&b.selected_song_ids.includes(s.songId))
+    .map(s=>({songId:s.songId,title:s.title,artist:s.artist||''}))});
   if(path.endsWith('/papa_accounting_summary'))return Response.json({...core.stats(core.scopeState(state),at),
    scope:{spaceId:b.requested_space,roomId:b.requested_room},day:accountingDay(new Date().toISOString(),19),rolloverHour:19,timezone:'Asia/Taipei',revision:state.revision});
   throw Error('Unexpected fixture endpoint '+path);

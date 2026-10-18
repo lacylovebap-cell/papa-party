@@ -1,11 +1,11 @@
-import {mutate} from './core.js?v=10.17-WEB.1';
-import {REQUEST_SOURCES} from './request-source.js?v=10.17-WEB.1';
+import {mutate,validSongSelection} from './core.js?v=10.18-WEB.1';
+import {REQUEST_SOURCES} from './request-source.js?v=10.18-WEB.1';
 
 export function validateRequestBatch(rows){
  if(!Array.isArray(rows)||!rows.length||rows.length>50)throw Error('一次請選 1 到 50 首歌曲');
  const ids=new Set();
  return rows.map(row=>{
-  if(!row||typeof row!=='object'||Array.isArray(row)||Object.keys(row).some(k=>!['songId','kind','pairSongId','giftConfirmed','selfProvided','source','requestNote'].includes(k))||typeof row.songId!=='string'||!row.songId||row.songId.length>128||ids.has(row.songId)||!['saved','live'].includes(row.kind)||row.selfProvided!==undefined&&typeof row.selfProvided!=='boolean'||row.source!==undefined&&!REQUEST_SOURCES.has(row.source)||row.giftConfirmed!==undefined&&typeof row.giftConfirmed!=='boolean'||row.pairSongId!==undefined&&(typeof row.pairSongId!=='string'||row.pairSongId.length>128)||row.requestNote!==undefined&&(typeof row.requestNote!=='string'||[...row.requestNote].length>30))throw Error('批次點歌資料不正確');
+  if(!row||typeof row!=='object'||Array.isArray(row)||Object.keys(row).some(k=>!['songId','kind','pairSongId','giftConfirmed','selfProvided','source','requestNote','expectedSong','expectedPair'].includes(k))||typeof row.songId!=='string'||!row.songId||row.songId.length>128||ids.has(row.songId)||!['saved','live'].includes(row.kind)||row.selfProvided!==undefined&&typeof row.selfProvided!=='boolean'||row.source!==undefined&&!REQUEST_SOURCES.has(row.source)||row.giftConfirmed!==undefined&&typeof row.giftConfirmed!=='boolean'||row.pairSongId!==undefined&&(typeof row.pairSongId!=='string'||row.pairSongId.length>128)||row.requestNote!==undefined&&(typeof row.requestNote!=='string'||[...row.requestNote].length>30)||row.expectedSong!==undefined&&!validSongSelection(row.expectedSong)||row.expectedPair!==undefined&&(!row.pairSongId||!validSongSelection(row.expectedPair)))throw Error('批次點歌資料不正確');
   ids.add(row.songId);return {...row};
  });
 }
@@ -23,7 +23,7 @@ export function validateOwnQueueBatch(rows){
  if(!Array.isArray(rows)||!rows.length||rows.length>50)throw Error('一次請選 1 到 50 筆自己的待播');
  const ids=new Set();
  return rows.map(row=>{
-  if(!row||typeof row!=='object'||Array.isArray(row)||Object.keys(row).some(k=>!['id','operation','songId','pairSongId','giftConfirmed'].includes(k))||typeof row.id!=='string'||!row.id||row.id.length>128||ids.has(row.id)||!['cancel','replace'].includes(row.operation)||row.operation==='cancel'&&Object.keys(row).some(k=>!['id','operation'].includes(k))||row.operation==='replace'&&(typeof row.songId!=='string'||!row.songId||row.songId.length>128||row.pairSongId!==undefined&&(typeof row.pairSongId!=='string'||row.pairSongId.length>128)||row.giftConfirmed!==undefined&&typeof row.giftConfirmed!=='boolean'))throw Error('自己的待播操作資料不正確');
+  if(!row||typeof row!=='object'||Array.isArray(row)||Object.keys(row).some(k=>!['id','operation','songId','pairSongId','giftConfirmed','expectedSong','expectedPair'].includes(k))||typeof row.id!=='string'||!row.id||row.id.length>128||ids.has(row.id)||!['cancel','replace'].includes(row.operation)||row.operation==='cancel'&&Object.keys(row).some(k=>!['id','operation'].includes(k))||row.operation==='replace'&&(typeof row.songId!=='string'||!row.songId||row.songId.length>128||row.pairSongId!==undefined&&(typeof row.pairSongId!=='string'||row.pairSongId.length>128)||row.giftConfirmed!==undefined&&typeof row.giftConfirmed!=='boolean'||row.expectedSong!==undefined&&!validSongSelection(row.expectedSong)||row.expectedPair!==undefined&&(!row.pairSongId||!validSongSelection(row.expectedPair))))throw Error('自己的待播操作資料不正確');
   ids.add(row.id);return {...row};
  });
 }

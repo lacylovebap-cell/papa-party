@@ -1,5 +1,5 @@
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.17-WEB.1';
-import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.17-WEB.1';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.18-WEB.1';
+import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.18-WEB.1';
 const $=s=>document.querySelector(s),escape=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let composing=false;const timers={rooms:null,songs:null};
 function optionList(input,rows,selected,defaultLabel){
