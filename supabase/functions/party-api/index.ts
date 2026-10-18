@@ -6,6 +6,7 @@ import {stateChanges,scopedOperationalAction,scopedRoomMutationAction} from '../
 import {applyRoomImport} from '../../../src/room-import.js';
 import {createRoomDraft,validateRoomDraft,replayRoomDraft} from '../../../src/room-draft.js';
 import {roomBadgeChanges} from './badge-state.js';
+import {createLobbyImageReader} from './lobby-images.js';
 // No browser access to tables or VAPID secrets. All recipient keys come from actor().
 import webpush from 'npm:web-push@3.6.7';
 import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,validPushSubscription,canonicalNoticeLink,webNoticePath} from '../../../src/notification-rules.js';
@@ -577,7 +578,7 @@ function observeActivity(b:any,who:any){
 }
 const eventTotals=new Map();
 async function eventTotal(room:any,global:boolean){const key=JSON.stringify([room.spaceId,room.id,global]),cached=eventTotals.get(key);if(cached&&Date.now()-cached.at<60000)return cached.total;const total=await api('/rest/v1/rpc/papa_event_total',{room_id:room.id,include_global:global});if(typeof total!=='number'||!Number.isSafeInteger(total)||total<0)throw Error('操作歷史頁數尚未確認');if(eventTotals.size>=128)eventTotals.delete(eventTotals.keys().next().value);eventTotals.set(key,{at:Date.now(),total});return total;}
-Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.18-WEB.1',publicLobby:1,medalProgress:1,medalManagement:4,medalEvidence:1,cleanerPlayerDice:1,playerDiceOnly:1,medalRevocation:1,badgeRules:2,achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});if(b.op==='publicLobbyRooms')return respond(await publicLobbyRooms(b));if(b.op==='publicLobbySongs')return respond(await catalogOperation(b,null));const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry','nativePushRegister','nativePushDisable'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.19-WEB.1',publicLobby:1,medalProgress:1,medalManagement:4,medalEvidence:1,cleanerPlayerDice:1,playerDiceOnly:1,medalRevocation:1,badgeRules:2,achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});if(b.op==='publicLobbyRooms')return respond(await publicLobbyRooms(b));if(b.op==='publicLobbySongs')return respond(await catalogOperation(b,null));const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['spaces','spaceResolve','spaceEntry','nativePushRegister','nativePushDisable'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  if(['nativePushRegister','nativePushDisable'].includes(b.op))return respond(await nativePushOperation(b,who));
  activityRequest={body:b,who};
  if(b.op==='activityPage'){if(!isSuper(who)||!who.accountId)throw Error('只有 PA Party總裁可查看活動');const room=await catalogRoom(who,b.streamer||'papa'),space=room.spaceId||'space-001';if(b.spaceId!==undefined&&b.spaceId!==space||!Number.isInteger(b.page??0)||(b.page??0)<0||(b.page??0)>100000)throw Error('活動頁碼或範圍不正確');const result=await api('/rest/v1/rpc/papa_activity_page',{requested_space:space,requested_room:room.id,actor_context:{role:who.role,account_id:who.accountId,space_id:space},page_number:b.page??0});if(result?.version!==1||result.spaceId!==space||result.page!==(b.page??0)||result.pageSize!==50||!Array.isArray(result.rows)||result.rows.length>50)throw Error('活動資料尚未確認');return respond({...result,rows:result.rows.map((r:any)=>({player_id:r.player_id,streamer_id:r.streamer_id,page:r.page,last_seen:r.last_seen,online:r.online}))});}
@@ -1039,9 +1040,10 @@ function checkedListSort(value:any){if(value===undefined)return 'default';if(!['
 
 // Only the tiny existing room directory is cached, never business snapshots.
 const publicLobbyDirectory:{at:number,rows:any[]|null,pending:Promise<any[]>|null}={at:0,rows:null,pending:null};
+const publicLobbyImages=createLobbyImageReader({api:(path:string)=>api(path)});
 async function publicLobbyRooms(body:any){
- const page=body.page??0,q=body.q??'';
- if(typeof q!=='string'||q.length>100||!Number.isSafeInteger(page)||page<0||page>500)throw Error('主播搜尋或頁碼不正確');
+ const page=body.page??0,q=body.q??'',limit=body.limit??20;
+ if(typeof q!=='string'||q.length>100||!Number.isSafeInteger(page)||page<0||page>500||!Number.isSafeInteger(limit)||limit<1||limit>20)throw Error('主播搜尋或頁碼不正確');
  const now=Date.now();let rooms=publicLobbyDirectory.rows;
  if(!rooms||now-publicLobbyDirectory.at>=60000){
   if(!publicLobbyDirectory.pending)publicLobbyDirectory.pending=(async()=>{
@@ -1049,11 +1051,11 @@ async function publicLobbyRooms(body:any){
    if(!Array.isArray(source))throw Error('公開主播名單尚未確認');
    const rows=source.filter((r:any)=>r&&r.active===true&&(r.spaceId??'space-001')==='space-001'
     &&typeof r.id==='string'&&r.id&&typeof r.slug==='string'&&/^[a-z0-9][a-z0-9-]{0,63}$/.test(r.slug)&&typeof r.display_name==='string')
-    .map((r:any)=>({id:r.id,slug:r.slug,display_name:r.display_name}));
+    .map((r:any)=>({id:r.id,slug:r.slug,display_name:r.display_name,banner_url:r.banner_url}));
    publicLobbyDirectory.rows=rows;publicLobbyDirectory.at=Date.now();return rows;
   })().finally(()=>{publicLobbyDirectory.pending=null;});
   rooms=await publicLobbyDirectory.pending;
  }
  const query=q.trim().toLocaleLowerCase(),matched=rooms.filter((r:any)=>!query||(r.display_name+' '+r.slug).toLocaleLowerCase().includes(query));
- return {version:1,rows:matched.slice(page*20,page*20+20),total:matched.length,page};
+ return {version:1,rows:await publicLobbyImages(matched.slice(page*limit,page*limit+limit)),total:matched.length,page,pageSize:limit};
 }

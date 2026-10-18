@@ -1,8 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createPublicLobby,installPublicLobbyLifecycle,lobbyQuery,lobbyLocation,lobbyRoomDestination,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from '../src/public-lobby.js';
+import {lobbyImageUrl} from '../src/public-lobby.js';
 const base='https://paparty.app/lobby.html';
 const family={title:'愛你',variants:[{artist:'歌手',versionLabel:'LIVE版',language:'華語',performerType:'團體',streamers:[{slug:'host',name:'主播',songId:'song1'}]}]};
+test('public room backgrounds project safe decorative images without injected markup',()=>{
+ for(const value of ['javascript:alert(1)','data:image/svg+xml,bad','https://user:pass@example.com/private',null])assert.equal(lobbyImageUrl(value),'');
+ const html=lobbyRoomsHtml({rows:[{slug:'host',display_name:'主播',heroImage:'https://example.com/a.png?q="'}],total:1,page:0,pageSize:3},base);
+ assert.match(html,/lobby-room-image/);assert.match(html,/loading="lazy"/);assert.match(html,/alt=""/);assert.doesNotMatch(html,/onerror=/);
+});
+test('room rotation uses small pages and reuses previously loaded page data after cache TTL',async()=>{
+ let time=0;const calls=[];
+ const lobby=createPublicLobby({roomPageSize:3,href:base,now:()=>time,replaceLocation:()=>{},render:()=>{},api:async b=>{calls.push(b);return {rows:b.op==='publicLobbyRooms'?[{id:'r'+b.page,slug:'host',display_name:'主播'}]:[],total:b.op==='publicLobbyRooms'?6:0};}});
+ await lobby.start();assert.equal(calls[0].limit,3);assert.equal(lobby.roomSnapshot().pageSize,3);
+ await lobby.rotateRooms();assert.equal(lobby.state().roomPage,1);assert.equal(calls.length,3);
+ time=120000;await lobby.rotateRooms();await lobby.rotateRooms();assert.equal(calls.length,3,'visual autoplay must not become repeated metadata polling');
+ await lobby.update({roomQ:'主播'});const count=calls.length;await lobby.rotateRooms();assert.equal(calls.length,count,'search interaction pauses automatic page selection');
+ lobby.stop();await lobby.rotateRooms();assert.equal(calls.length,count);
+});
 test('lobby reload preserves filters and independent pages, and drops authority hints',()=>{
  const before={q:'愛你',language:'華語',performerType:'團體',versionKind:'live',sort:'oldest',page:2,roomQ:'主播',roomPage:1};
  const url=lobbyLocation(base+'?token=secret&spaceId=private&adminTab=ledger#admin',before);
@@ -13,7 +28,7 @@ test('lobby reload preserves filters and independent pages, and drops authority 
 test('room and exact song links preserve source IDs without carrying another streamer or login context',()=>{
  for(const kind of ['live','saved']){
   const u=new URL(lobbyRoomDestination(base+'?token=secret&space=other#admin',{slug:'mimi'},'原歌/ID',kind));
-  assert.equal(u.pathname,'/index.html');assert.equal(u.searchParams.get('streamer'),'mimi');assert.equal(u.searchParams.get('commonRequest'),'原歌/ID');assert.equal(u.searchParams.get('commonKind'),kind);assert.equal(u.hash,'#book');
+  assert.equal(u.pathname,'/v2.html');assert.equal(u.searchParams.get('streamer'),'mimi');assert.equal(u.searchParams.get('commonRequest'),'原歌/ID');assert.equal(u.searchParams.get('commonKind'),kind);assert.equal(u.hash,'#book');
   assert.equal(u.searchParams.size,3);
  }
  assert.equal(new URL(lobbyRoomDestination(base,{slug:'host'})).hash,'#home');

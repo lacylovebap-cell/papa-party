@@ -10,7 +10,8 @@ const badgeRead=f=>read('supabase/functions/party-api/'+f).replace(/^import .*;\
 const badgeBundle='const badgeCatalogModule=(()=>{'+badgeRead('badge-catalog.js')+';return {BADGE_CATALOG};})();\n'
  +'const badgeRulesModule=(()=>{const {BADGE_CATALOG}=badgeCatalogModule;'+badgeRead('badge-rules.js')+';return {evaluateBadgeRules,badgeDay,badgeShow};})();\n'
  +'const {roomBadgeChanges}=(()=>{const {evaluateBadgeRules,badgeDay,badgeShow}=badgeRulesModule;'+badgeRead('badge-state.js')+';return {roomBadgeChanges};})();\n';
-const bundled=badgeBundle+code.replace(/^import .*from '\.\/badge-state.js';\r?\n/gm,'');
+const lobbyImages=read('supabase/functions/party-api/lobby-images.js').replace(/^export /gm,'');
+const bundled=badgeBundle+lobbyImages+'\n'+code.replace(/^import .*from '\.\/(?:badge-state|lobby-images).js';\r?\n/gm,'');
 fs.writeFileSync(new URL('deploy-function.txt',root),bundled);
 fs.writeFileSync(new URL('deploy-function.html',root),'<meta charset="utf-8"><pre>'+bundled.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>');
 console.log('Notification edge bundle created');

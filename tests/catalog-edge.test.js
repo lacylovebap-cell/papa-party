@@ -284,17 +284,20 @@ test('public lobby lists only active public rooms, paginates on server and coale
    ...Array.from({length:23},(_,i)=>({id:'r'+i,slug:'host-'+i,active:true,spaceId:'space-001',display_name:'主播'+i,password:'private',settings:{private:'hidden'}})),
    {id:'inactive',slug:'inactive',active:false,display_name:'未公開'},
    {id:'private',slug:'private',active:true,spaceId:'space-private',display_name:'私人空間'}];}
+  if(path.includes('/papa_v2_entities?kind=in.(meta,settings)')){calls.push({path,body});return [];}
   return old(path,body);
  };
  context.testActor={role:'streamer_admin',streamer_id:'not-public',spaceId:'space-private'};
  const [a,b]=await Promise.all([request({op:'publicLobbyRooms',page:0,spaceId:'space-private'}),request({op:'publicLobbyRooms',page:1})]);
  assert.equal(a.status,200);assert.equal(a.data.rows.length,20);assert.equal(a.data.total,23);assert.equal(b.data.rows.length,3);
- assert.equal(calls.length,1);assert.deepEqual({...calls[0].body},{chosen_space:'space-001'});
- assert.deepEqual(Object.keys(a.data.rows[0]).sort(),['display_name','id','slug']);
+ assert.equal(calls.length,3);assert.deepEqual({...calls[0].body},{chosen_space:'space-001'});
+ assert.equal(calls.filter(call=>call.path.endsWith('papa_streamer_directory_in_space')).length,1);
+ assert.deepEqual(Object.keys(a.data.rows[0]).sort(),['display_name','heroImage','id','slug']);
  assert.doesNotMatch(JSON.stringify(a.data),/private|未公開|settings|password/);
- const found=await request({op:'publicLobbyRooms',q:'主播22',page:0});assert.equal(found.data.rows[0].slug,'host-22');assert.equal(calls.length,1);
- for(const bad of [{page:-1},{page:0.5},{page:501},{q:[]},{q:'x'.repeat(101)}])assert.equal((await request({op:'publicLobbyRooms',...bad})).status,400);
- assert.equal(calls.length,1);
+ const found=await request({op:'publicLobbyRooms',q:'主播22',page:0});assert.equal(found.data.rows[0].slug,'host-22');assert.equal(calls.length,4);
+ for(const bad of [{page:-1},{page:0.5},{page:501},{q:[]},{q:'x'.repeat(101)},{limit:0},{limit:21},{limit:1.5},{limit:'3'}])assert.equal((await request({op:'publicLobbyRooms',...bad})).status,400);
+ assert.equal(calls.length,4);
+ const small=await request({op:'publicLobbyRooms',page:2,limit:3});assert.equal(small.status,200);assert.equal(small.data.pageSize,3);assert.equal(small.data.rows.length,3);assert.equal(small.data.rows[0].slug,'host-6');assert.equal(small.data.total,23);
 });
 
 test('public lobby song search reuses the private-lyric-safe RPC in the public Space regardless of caller hints',async()=>{

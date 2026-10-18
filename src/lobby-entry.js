@@ -1,5 +1,6 @@
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.18-WEB.1';
-import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.18-WEB.1';
+import {createLobbyRoomRotation,installLobbyRoomRotation} from './lobby-room-rotation.js?v=10.19-WEB.1';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.19-WEB.1';
+import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.19-WEB.1';
 const $=s=>document.querySelector(s),escape=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let composing=false;const timers={rooms:null,songs:null};
 function optionList(input,rows,selected,defaultLabel){
@@ -7,11 +8,13 @@ function optionList(input,rows,selected,defaultLabel){
  if(selected&&!choices.includes(selected))choices.push(selected);
  input.innerHTML='<option value="">'+defaultLabel+'</option>'+choices.map(x=>'<option value="'+escape(x)+'" '+(x===selected?'selected':'')+'>'+escape(x)+'</option>').join('');
 }
-const lobby=createPublicLobby({href:location.href,replaceLocation:url=>history.replaceState(null,'',url),api:async body=>{
+let roomRotation;
+const lobby=createPublicLobby({roomPageSize:3,href:location.href,replaceLocation:url=>history.replaceState(null,'',url),api:async body=>{
  const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)}),value=await response.json();
  if(!response.ok||value.error)throw Error(value.error||'連線暫時無法使用，請稍後重試');return value;
 },render:(kind,value,q)=>{
  $('#'+kind+'-results').innerHTML=kind==='rooms'?lobbyRoomsHtml(value,location.href):lobbySongsHtml(value,location.href);
+ if(kind==='rooms')roomRotation?.sync();
  if(kind==='songs'){
   optionList($('#lobby-language'),value.filters?.languages,q.language,'全部語言');
   optionList($('#lobby-performer'),value.filters?.performerTypes,q.performerType,'全部類型');
@@ -35,4 +38,6 @@ document.addEventListener('click',e=>{const button=e.target.closest('button');if
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.target.dataset.lobbyJump){e.preventDefault();jump(e.target.dataset.lobbyJump);}});
 installPublicLobbyLifecycle({lobby,cancelSearch:()=>Object.values(timers).forEach(clearTimeout)});
+roomRotation=createLobbyRoomRotation({snapshot:()=>({...lobby.roomSnapshot(),...(lobby.state().roomQ?{total:0}:{})}),advance:()=>lobby.rotateRooms()});
+installLobbyRoomRotation({document,window,region:document.querySelector('[data-lobby-room-section]'),rotation:roomRotation});
 lobby.start();

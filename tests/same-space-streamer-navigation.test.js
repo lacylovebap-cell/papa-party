@@ -14,6 +14,7 @@ const currentRoom=rooms[0],targetSlug=rooms[1].slug;
 const options={currentRoom,rooms,mountUrl:mount};
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8'),lines=source.split(/\r?\n/);
 function declaration(name){
+ if(name==='start')return source.slice(source.indexOf('async function start(){'),source.indexOf('\nlet lastHour=',source.indexOf('async function start(){')));
  const line=lines.find(line=>line.startsWith('function '+name+'(')||line.startsWith('async function '+name+'('));
  assert.ok(line&&line.endsWith('}'),'actual complete application declaration: '+name);return line;
 }
