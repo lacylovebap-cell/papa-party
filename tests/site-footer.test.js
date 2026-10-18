@@ -33,9 +33,9 @@ test('unavailable or malformed release data never shows a guessed, backend or in
  }
 });
 
-test('main, preview and lobby use the same single footer outside the changing app content',()=>{
+test('main, preview, v2 and lobby use the same single footer outside the changing app content',()=>{
  const version=JSON.parse(fs.readFileSync('release.json','utf8')).version;
- for(const page of ['index.html','preview.html','lobby.html']){
+ for(const page of ['index.html','preview.html','v2.html','lobby.html']){
   const html=fs.readFileSync(page,'utf8');
   assert.equal((html.match(/id="site-footer"/g)||[]).length,1,page);
   assert.ok(html.indexOf('id="site-footer"')>html.indexOf('</main>'),page);
