@@ -277,6 +277,35 @@ test('version relation filters are bounded and ordinary streamers cannot query a
  assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
 });
 
+test('public lobby lists only active public rooms, paginates on server and coalesces directory reads',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi;
+ context.mockApi=async(path,body)=>{
+  if(path.endsWith('papa_streamer_directory_in_space')){calls.push({path,body});return [
+   ...Array.from({length:23},(_,i)=>({id:'r'+i,slug:'host-'+i,active:true,spaceId:'space-001',display_name:'主播'+i,password:'private',settings:{private:'hidden'}})),
+   {id:'inactive',slug:'inactive',active:false,display_name:'未公開'},
+   {id:'private',slug:'private',active:true,spaceId:'space-private',display_name:'私人空間'}];}
+  return old(path,body);
+ };
+ context.testActor={role:'streamer_admin',streamer_id:'not-public',spaceId:'space-private'};
+ const [a,b]=await Promise.all([request({op:'publicLobbyRooms',page:0,spaceId:'space-private'}),request({op:'publicLobbyRooms',page:1})]);
+ assert.equal(a.status,200);assert.equal(a.data.rows.length,20);assert.equal(a.data.total,23);assert.equal(b.data.rows.length,3);
+ assert.equal(calls.length,1);assert.deepEqual({...calls[0].body},{chosen_space:'space-001'});
+ assert.deepEqual(Object.keys(a.data.rows[0]).sort(),['display_name','id','slug']);
+ assert.doesNotMatch(JSON.stringify(a.data),/private|未公開|settings|password/);
+ const found=await request({op:'publicLobbyRooms',q:'主播22',page:0});assert.equal(found.data.rows[0].slug,'host-22');assert.equal(calls.length,1);
+ for(const bad of [{page:-1},{page:0.5},{page:501},{q:[]},{q:'x'.repeat(101)}])assert.equal((await request({op:'publicLobbyRooms',...bad})).status,400);
+ assert.equal(calls.length,1);
+});
+
+test('public lobby song search reuses the private-lyric-safe RPC in the public Space regardless of caller hints',async()=>{
+ const {context,calls,request}=edge(),old=context.mockApi;
+ context.mockApi=async(path,body)=>{if(path.endsWith('papa_catalog_public_page_filtered_v2_in_space')){calls.push({path,body});return {rows:[],total:0,filters:{}};}return old(path,body);};
+ context.testActor={role:'super_admin',accountId:'president'};
+ const r=await request({op:'publicLobbySongs',q:'愛你',language:'華語',performerType:'合唱',versionKind:'live',sort:'oldest',offset:24,limit:1000,spaceId:'private',streamer:'private',management:true});
+ assert.equal(r.status,200,JSON.stringify(r.data));assert.equal(calls.length,1);
+ assert.deepEqual({...calls[0].body},{query_text:'愛你',language_filter:'華語',performer_filter:'合唱',version_filter:'live',page_limit:12,page_offset:24,requested_space:'space-001',sort_order:'oldest',version_label_filter:''});
+});
+
 test('public common-book classification uses one bounded RPC and no business snapshot',async()=>{
  const {context,calls,request}=edge(),old=context.mockApi;
  context.mockApi=async(path,body)=>{if(path.endsWith('papa_catalog_public_page_filtered_v2_in_space')){calls.push({path,body});return {rows:[],total:0,filters:{languages:['英語'],performerTypes:['團體'],versionKinds:['cover']}};}return old(path,body);};

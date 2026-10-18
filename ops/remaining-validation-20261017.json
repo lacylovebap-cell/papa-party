@@ -1,0 +1,64 @@
+{
+  "candidateVersion": "10.17-WEB.1",
+  "baselineCommit": "0aa7fd5202e0929f59a3c7c7f1d21ce0e31c1c6e",
+  "validationDate": "2026-10-17",
+  "tests": {
+    "sourceCommit": "64ec9cfa4b39f169201d253f7b10b037183b5a0a",
+    "command": "node --test tests/public-lobby.test.js tests/catalog-edge.test.js tests/list-order-edge-contract.test.js tests/page-location.test.js tests/module-cache.test.js tests/operation-receipt-edge.test.js tests/native-operation-receipt.test.js tests/operation-receipt-rpc.test.js tests/native-push-registration.test.js tests/device-push-contract.test.js tests/web-device-push.test.js tests/native-push-edge.test.js",
+    "passed": 108,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 21909.2398,
+    "database": "isolated PGlite fixtures; no production writes",
+    "truePostgresMultiConnectionConcurrencyVerified": false
+  },
+  "sameSpaceNavigationFollowup": {
+    "command": "node --test tests/same-space-streamer-navigation.test.js tests/streamer-navigation.test.js tests/space-entry-client.test.js tests/page-location.test.js tests/web-space-entry.test.js tests/space-path-fallback.test.js tests/module-cache.test.js",
+    "newTests": 8,
+    "passed": 45,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 561.5417,
+    "realApplicationDestinationAndStartupFunctionsVerified": true,
+    "spaceEntryAuthorizationAndNativeBusinessGuardsUnchanged": true,
+    "databaseMigrationRequired": false,
+    "productionDeployed": false
+  },
+  "builds": {
+    "staticSite": "passed: node build.mjs",
+    "edgeBundle": "passed: node build-edge.mjs",
+    "edgeBundleSyntax": "passed: stripTypeScriptTypes then vm.Script"
+  },
+  "browser": {
+    "source": "localhost fixture with same-origin-only connection CSP",
+    "testedWidths": [320, 390, 1280],
+    "horizontalOverflow": false,
+    "searchSortVersionAndBothJumpPagesSurviveReload": true,
+    "consoleErrors": 0,
+    "screenshot": "ops/lobby-mobile-fixture-20261017.png",
+    "privateDataOrProductionRequestsInBrowserQA": false
+  },
+  "productionReadOnlyCheck": {
+    "manifestStatus": 200,
+    "version": "10.16-WEB.6",
+    "backendVersion": "10.16-WEB.6",
+    "existingPublicCatalogSongbookStatus": 200,
+    "requestedFamilyLimit": 1,
+    "returnedFamilyCount": 1,
+    "responseContractMatchesLobby": true,
+    "savedSongOrPlayerOrAuditText": false
+  },
+  "deployment": {
+    "websiteDeployed": false,
+    "edgeDeployed": false,
+    "productionDatabaseWrites": 0,
+    "productionMigrationsApplied": [],
+    "pendingLocalMigrations": [
+      "202610170001_native_operation_receipts.sql",
+      "202610170002_native_push_registration.sql"
+    ],
+    "nativeBusinessActivationGuardsRetained": true,
+    "nativeAppsCompleted": false,
+    "nativePushSenderEnabled": false
+  }
+}

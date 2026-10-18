@@ -60,7 +60,7 @@ function fixture(outcome='success'){
  context.recordPush=()=>pushes++;
  vm.runInContext('load=async()=>structuredClone(fixtureState);schedulePush=()=>recordPush();',context);
  const invoke=async(body)=>{const response=await handler({method:'POST',json:async()=>({streamer:'papa',token:who.role==='player'?'player:fixture':'streamer:fixture',...body})});return {status:response.status,body:await response.json()};};
- return {state,requests,invoke,expire:()=>expired=true,player:()=>Object.assign(who,{role:'player',playerId:'P1',streamerId:null}),attempts:()=>attempts,writes:()=>writes,pushes:()=>pushes};
+ return {state,requests,invoke,expire:()=>expired=true,player:()=>Object.assign(who,{role:'player',playerId:'P1',streamerId:null}),native:()=>who.spaceId='native-space',attempts:()=>attempts,writes:()=>writes,pushes:()=>pushes};
 }
 
 test('shipping handler replays the same intent from current authoritative state without another commit, debit or push',async()=>{
@@ -95,4 +95,47 @@ for(const outcome of ['success','ackLost'])test('shipping player batch '+outcome
  assert.equal(f.state.queue.length,2);assert.equal(first.body.results[0].ok,outcome==='success');
  const status=await f.invoke({op:'operationReceipt',operationId,intent:{op:'requestsBatch',rows}});assert.deepEqual(status.body,{committed:true,revision:8});
  const replay=await f.invoke(body);assert.equal(replay.body.results[0].ok,true);assert.equal(f.attempts(),1);assert.equal(f.state.queue.length,2);
+});
+
+function receiptAdapter(api){
+ const start=source.indexOf('function operationIntent('),end=source.indexOf('async function commit(',start);
+ assert.ok(start>=0&&end>start);
+ const context=vm.createContext({...access,Error,crypto,TextEncoder,api,hash:async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('')});
+ vm.runInContext(stripTypeScriptTypes(source.slice(start,end)),context);
+ return {proof:context.operationProof,lookup:context.lookupOperation};
+}
+test('native receipt adapter derives Account scope from the verified actor and always uses guarded lookup',async()=>{
+ const requests=[],room={id:'native-room',spaceId:'native-space'},who={accountId:'00000000-0000-4000-8000-000000000002',role:'player',playerId:'P1',spaceId:room.spaceId};
+ const adapter=receiptAdapter(async(path,body)=>{requests.push({path,body});return {committed:false};});
+ const proof=await adapter.proof({operationId,spaceId:'forged',accountId:'forged',token:'device:fixture'},who,room,{op:'requestsBatch',rows:[]});
+ assert.deepEqual(JSON.parse(JSON.stringify(proof.actor_context)),{role:'player',account_id:who.accountId,player_id:'P1',actor_streamer_id:null,space_id:room.spaceId,streamer_id:room.id});
+ await adapter.lookup(proof,room);
+ assert.equal(requests[0].path,'/rest/v1/rpc/papa_native_operation_receipt');
+ assert.equal(requests[0].body.actor_context.account_id,who.accountId);assert.equal(requests[0].body.requested_space,room.spaceId);
+ await assert.rejects(()=>adapter.lookup({...proof,actor_context:{...proof.actor_context,space_id:'forged'}},room),/範圍不正確/);
+ await assert.rejects(()=>adapter.lookup({...proof,actor_context:null},room),/範圍不正確/);assert.equal(requests.length,1);
+});
+test('native proof rejects legacy credentials and foreign scopes; guarded lookup revocation is never treated as a committed receipt',async()=>{
+ const room={id:'native-room',spaceId:'native-space'},who={accountId:'00000000-0000-4000-8000-000000000002',role:'streamer_admin',streamer_id:room.id,spaceId:room.spaceId};
+ const adapter=receiptAdapter(async()=>{throw Error('ROOM_ACTOR_MEMBERSHIP_INVALID');});
+ await assert.rejects(()=>adapter.proof({operationId,token:'legacy'}, {...who,accountId:null},room,action),/找不到主播/);
+ await assert.rejects(()=>adapter.proof({operationId},{...who,spaceId:'foreign'},room,action),/找不到主播/);
+ await assert.rejects(()=>adapter.proof({operationId},{...who,streamer_id:'other-room'},room,action),/自己的主播/);
+ const proof=await adapter.proof({operationId},who,room,action);
+ await assert.rejects(()=>adapter.lookup(proof,room),/MEMBERSHIP_INVALID/);
+ const president=await adapter.proof({operationId},{accountId:who.accountId,role:'super_admin'},room,action);
+ assert.equal(president.actor_context.player_id,null);assert.equal(president.actor_context.actor_streamer_id,null);
+});
+test('legacy receipt adapter retains its exact RPC payload and omits native actor context',async()=>{
+ let request;const adapter=receiptAdapter(async(path,body)=>{request={path,body};return {committed:false};}),room={id:'papa',spaceId:'space-001'};
+ const proof=await adapter.proof({operationId,token:'streamer:legacy'},{role:'streamer_admin',streamer_id:room.id,spaceId:room.spaceId},room,action);
+ assert.equal('actor_context' in proof,false);await adapter.lookup(proof,room);
+ assert.equal(request.path,'/rest/v1/rpc/papa_operation_receipt');
+ assert.deepEqual(Object.keys(request.body).sort(),['requested_actor','requested_operation','requested_room','requested_space']);
+});
+test('native business handler remains closed while the receipt dependency is prepared',async()=>{
+ const f=fixture();f.native();const result=await f.invoke({op:'operationReceipt',operationId,intent:{op:'mutate',action}});
+ assert.equal(result.status,400);assert.match(result.body.error,/資料頁尚未開放/);
+ assert.equal(f.requests.some(r=>r.path.endsWith('/papa_native_operation_receipt')||r.path.endsWith('/papa_operation_receipt')),false);
+ assert.equal(f.writes(),0);assert.equal(f.pushes(),0);
 });
