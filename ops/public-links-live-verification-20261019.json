@@ -1,0 +1,72 @@
+{
+  "verifiedAt": "2026-10-19T14:21:56.624Z",
+  "productionMutations": false,
+  "release": {
+    "version": "10.19-WEB.2",
+    "backendVersion": "10.19-WEB.2",
+    "builtAt": "2026-10-19T14:11:32.986Z"
+  },
+  "api": {
+    "version": "10.19-WEB.2",
+    "publicLinks": 1,
+    "nativeApps": false
+  },
+  "checks": [
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 200,
+      "server": "cloudflare"
+    },
+    {
+      "path": "/sm",
+      "method": "GET",
+      "status": 200,
+      "server": "cloudflare",
+      "metadata": {
+        "spaceId": "space-001",
+        "kind": "hall",
+        "canonicalPath": "/sm",
+        "streamerId": null
+      }
+    },
+    {
+      "path": "/pa/book",
+      "method": "GET",
+      "status": 200,
+      "server": "cloudflare",
+      "metadata": {
+        "spaceId": "space-001",
+        "kind": "streamer",
+        "canonicalPath": "/pa",
+        "streamerId": "papa",
+        "section": "book"
+      }
+    },
+    {
+      "path": "/PA/book",
+      "method": "GET",
+      "status": 308,
+      "server": "cloudflare",
+      "location": "/pa/book"
+    },
+    {
+      "path": "/pa",
+      "method": "HEAD",
+      "status": 200,
+      "server": "cloudflare"
+    },
+    {
+      "path": "/assets/pa-party-approved.png",
+      "method": "GET",
+      "status": 206,
+      "server": "cloudflare"
+    },
+    {
+      "path": "/public-route-not-registered-1019",
+      "method": "GET",
+      "status": 404,
+      "server": "cloudflare"
+    }
+  ]
+}

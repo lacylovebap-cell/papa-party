@@ -1,0 +1,15 @@
+{
+  "$schema": "../.local-public-route-validation/worker-runtime/node_modules/wrangler/config-schema.json",
+  "name": "pa-public-routes",
+  "account_id": "058353ad0dca517382620dc1a3037413",
+  "main": "public-route-worker.bundle.mjs",
+  "compatibility_date": "2026-10-19",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{"pattern":"https://paparty.app/*","zone_id":"a61ce596f977f8465d256a242c68b2ee"}],
+  "vars": {
+    "PUBLIC_ORIGIN": "https://paparty.app",
+    "ASSET_MODE": "route-origin",
+    "ROUTE_ORIGIN_CONFIRMED": "true"
+  }
+}
