@@ -1,0 +1,810 @@
+TAP version 13
+# Subtest: share only accepts resolved public homepages and rejects private navigation
+ok 1 - share only accepts resolved public homepages and rejects private navigation
+  ---
+  duration_ms: 2.2548
+  type: 'test'
+  ...
+# Subtest: QR is H with four-module quiet zone and original embedded approved logo
+ok 2 - QR is H with four-module quiet zone and original embedded approved logo
+  ---
+  duration_ms: 30.2914
+  type: 'test'
+  ...
+# Subtest: long public links leave centre alignment pattern clear
+ok 3 - long public links leave centre alignment pattern clear
+  ---
+  duration_ms: 11.4437
+  type: 'test'
+  ...
+# Subtest: canvas renderer revokes temporary SVG URL on success and failure
+ok 4 - canvas renderer revokes temporary SVG URL on success and failure
+  ---
+  duration_ms: 38.9527
+  type: 'test'
+  ...
+# Subtest: actual SVG and PNG decode to exact public URL at 256, 512, 1024px, with official logo
+ok 5 - actual SVG and PNG decode to exact public URL at 256, 512, 1024px, with official logo # SKIP Offline scan requires local sharp and Python OpenCV (no production access).
+  ---
+  duration_ms: 0.2256
+  type: 'test'
+  ...
+# Subtest: only validated 聲瑪 hall or exact legacy lobby can load its existing discovery API
+ok 6 - only validated 聲瑪 hall or exact legacy lobby can load its existing discovery API
+  ---
+  duration_ms: 1.8656
+  type: 'test'
+  ...
+# Subtest: lobby header logins preserve selected mode and filters without platform category step or secrets
+ok 7 - lobby header logins preserve selected mode and filters without platform category step or secrets
+  ---
+  duration_ms: 2.4106
+  type: 'test'
+  ...
+# Subtest: hall share requests only current stable scope on demand and uses configured canonical URL
+ok 8 - hall share requests only current stable scope on demand and uses configured canonical URL
+  ---
+  duration_ms: 2.9818
+  type: 'test'
+  ...
+# Subtest: unknown or unconfigured hall never fabricates a /sm share URL
+ok 9 - unknown or unconfigured hall never fabricates a /sm share URL
+  ---
+  duration_ms: 1.2442
+  type: 'test'
+  ...
+# Subtest: unsupported pretty hall stops before creating discovery or making network calls
+ok 10 - unsupported pretty hall stops before creating discovery or making network calls
+  ---
+  duration_ms: 2.0299
+  type: 'test'
+  ...
+# Subtest: lobby removes only redundant intro wordmark and provides all small header controls plus accessible modal
+ok 11 - lobby removes only redundant intro wordmark and provides all small header controls plus accessible modal
+  ---
+  duration_ms: 0.7103
+  type: 'test'
+  ...
+# Subtest: rotation has one timer, pauses for combined interactions and does not overlap asynchronous pages
+ok 12 - rotation has one timer, pauses for combined interactions and does not overlap asynchronous pages
+  ---
+  duration_ms: 1.6433
+  type: 'test'
+  ...
+# Subtest: reload round-trips each page and exact player/history subview without inheriting unrelated URL selectors
+ok 13 - reload round-trips each page and exact player/history subview without inheriting unrelated URL selectors
+  ---
+  duration_ms: 6.2897
+  type: 'test'
+  ...
+# Subtest: actual tab navigation overwrites stale URL state and browser Back restores the exact subview
+ok 14 - actual tab navigation overwrites stale URL state and browser Back restores the exact subview
+  ---
+  duration_ms: 6.0316
+  type: 'test'
+  ...
+# Subtest: background rendering retains scroll and open details but does not restore another view
+ok 15 - background rendering retains scroll and open details but does not restore another view
+  ---
+  duration_ms: 1.5675
+  type: 'test'
+  ...
+# Subtest: portal player entry opens the existing player login without reading a room
+ok 16 - portal player entry opens the existing player login without reading a room
+  ---
+  duration_ms: 4.929
+  type: 'test'
+  ...
+# Subtest: portal manager entry opens manager login even when a player is signed in
+ok 17 - portal manager entry opens manager login even when a player is signed in
+  ---
+  duration_ms: 1.1359
+  type: 'test'
+  ...
+# Subtest: portal player entry does not borrow a manager identity
+ok 18 - portal player entry does not borrow a manager identity
+  ---
+  duration_ms: 1.1095
+  type: 'test'
+  ...
+# Subtest: remembered player still resolves permissions through existing entry
+ok 19 - remembered player still resolves permissions through existing entry
+  ---
+  duration_ms: 1.1811
+  type: 'test'
+  ...
+# Subtest: remembered admin still resolves permissions through existing entry
+ok 20 - remembered admin still resolves permissions through existing entry
+  ---
+  duration_ms: 1.0479
+  type: 'test'
+  ...
+# Subtest: a fabricated login mode never supplies a role or bypasses the existing entry
+ok 21 - a fabricated login mode never supplies a role or bypasses the existing entry
+  ---
+  duration_ms: 1.0858
+  type: 'test'
+  ...
+# Subtest: marketing links stay on the portal, including ordinary campaign parameters
+ok 22 - marketing links stay on the portal, including ordinary campaign parameters
+  ---
+  duration_ms: 0.497
+  type: 'test'
+  ...
+# Subtest: existing room, space, notification and PWA links preserve exact query and hash
+ok 23 - existing room, space, notification and PWA links preserve exact query and hash
+  ---
+  duration_ms: 0.5562
+  type: 'test'
+  ...
+# Subtest: production build keeps the portal separate from the existing app and includes its assets
+ok 24 - production build keeps the portal separate from the existing app and includes its assets
+  ---
+  duration_ms: 2.6201
+  type: 'test'
+  ...
+# Subtest: settings is lazy and scoped to the own streamer; player/foreign override cannot start a request
+ok 25 - settings is lazy and scoped to the own streamer; player/foreign override cannot start a request
+  ---
+  duration_ms: 5.3688
+  type: 'test'
+  ...
+# Subtest: a president can manage a hall without an active streamer and can target another streamer
+ok 26 - a president can manage a hall without an active streamer and can target another streamer
+  ---
+  duration_ms: 1.2015
+  type: 'test'
+  ...
+# Subtest: a changed identity or scope during initial read cannot open a stale management dialog
+ok 27 - a changed identity or scope during initial read cannot open a stale management dialog
+  ---
+  duration_ms: 0.5497
+  type: 'test'
+  ...
+# Subtest: check is on demand and shows exact proposed URL or historical-alias conflict without changing the current link
+ok 28 - check is on demand and shows exact proposed URL or historical-alias conflict without changing the current link
+  ---
+  duration_ms: 1.5232
+  type: 'test'
+  ...
+# Subtest: save sends one CAS mutation and stays locked throughout asynchronous post-save synchronization
+ok 29 - save sends one CAS mutation and stays locked throughout asynchronous post-save synchronization
+  ---
+  duration_ms: 2.7192
+  type: 'test'
+  ...
+# Subtest: errors unlock without fabricating a save, retain CAS until reload, and reject invalid check data
+ok 30 - errors unlock without fabricating a save, retain CAS until reload, and reject invalid check data
+  ---
+  duration_ms: 1.3859
+  type: 'test'
+  ...
+# Subtest: switching scope or closing the dialog ignores late mutation results and blocks old form events
+ok 31 - switching scope or closing the dialog ignores late mutation results and blocks old form events
+  ---
+  duration_ms: 0.7478
+  type: 'test'
+  ...
+# Subtest: independent hall namespace is fixed pa and cannot be overwritten by its editable input
+ok 32 - independent hall namespace is fixed pa and cannot be overwritten by its editable input
+  ---
+  duration_ms: 0.6276
+  type: 'test'
+  ...
+# Subtest: a configured independent namespace has no lobby URL and preserves its immutable layout
+ok 33 - a configured independent namespace has no lobby URL and preserves its immutable layout
+  ---
+  duration_ms: 0.5265
+  type: 'test'
+  ...
+# Subtest: unconfigured metadata disables share/copy and successful-save callback failure does not claim the save failed
+ok 34 - unconfigured metadata disables share/copy and successful-save callback failure does not claim the save failed
+  ---
+  duration_ms: 0.7071
+  type: 'test'
+  ...
+# Subtest: public-link cache invalidation rejects in-flight stale identity results while reusing current scope reads
+ok 35 - public-link cache invalidation rejects in-flight stale identity results while reusing current scope reads
+  ---
+  duration_ms: 1.325
+  type: 'test'
+  ...
+# Subtest: metadata invalidated before its scheduled request never makes a redundant API call
+ok 36 - metadata invalidated before its scheduled request never makes a redundant API call
+  ---
+  duration_ms: 0.2901
+  type: 'test'
+  ...
+# Subtest: actual pretty bootstrap partitions only room preferences and restores the exact page without stale URL hints
+ok 37 - actual pretty bootstrap partitions only room preferences and restores the exact page without stale URL hints
+  ---
+  duration_ms: 5.6192
+  type: 'test'
+  ...
+# Subtest: actual sync and Back/Forward keep the pretty prefix and restore complete admin details/history without duplicate history entries
+ok 38 - actual sync and Back/Forward keep the pretty prefix and restore complete admin details/history without duplicate history entries
+  ---
+  duration_ms: 5.6843
+  type: 'test'
+  ...
+# Subtest: switching pretty room uses the target registered prefix and preserves only its permitted section
+ok 39 - switching pretty room uses the target registered prefix and preserves only its permitted section
+  ---
+  duration_ms: 6.1833
+  type: 'test'
+  ...
+# Subtest: room-switch lookup failure falls back to a clean legacy target, and a late reply cannot replace a newer page
+ok 40 - room-switch lookup failure falls back to a clean legacy target, and a late reply cannot replace a newer page
+  ---
+  duration_ms: 2.9373
+  type: 'test'
+  ...
+# Subtest: share always uses the currently viewed room and returns its public homepage, never the manager owner or current subpage
+ok 41 - share always uses the currently viewed room and returns its public homepage, never the manager owner or current subpage
+  ---
+  duration_ms: 2.6097
+  type: 'test'
+  ...
+# Subtest: same-room manager login preserves direct admin player/tab destination; cross-room login cannot leave the old pretty prefix
+ok 42 - same-room manager login preserves direct admin player/tab destination; cross-room login cannot leave the old pretty prefix
+  ---
+  duration_ms: 3.776
+  type: 'test'
+  ...
+# Subtest: direct pretty admin or center opens the existing login form and retains intended tab/player selectors
+ok 43 - direct pretty admin or center opens the existing login form and retains intended tab/player selectors
+  ---
+  duration_ms: 3.9715
+  type: 'test'
+  ...
+# Subtest: pretty player login restores public destinations while legacy login stays home and cannot grant admin
+ok 44 - pretty player login restores public destinations while legacy login stays home and cannot grant admin
+  ---
+  duration_ms: 9.1798
+  type: 'test'
+  ...
+# Subtest: returning to a pretty public page consumes the original pending song intent exactly once after login
+ok 45 - returning to a pretty public page consumes the original pending song intent exactly once after login
+  ---
+  duration_ms: 1.7494
+  type: 'test'
+  ...
+# Subtest: pretty routing restores the existing room, subview and preference scope without creating identity
+ok 46 - pretty routing restores the existing room, subview and preference scope without creating identity
+  ---
+  duration_ms: 4.7258
+  type: 'test'
+  ...
+# Subtest: a nonlegacy route retains explicit Space entry rather than reusing legacy business data
+ok 47 - a nonlegacy route retains explicit Space entry rather than reusing legacy business data
+  ---
+  duration_ms: 0.3165
+  type: 'test'
+  ...
+# Subtest: metadata lookup is scoped, coalesced and cached, never sends a login or downloads a directory
+ok 48 - metadata lookup is scoped, coalesced and cached, never sends a login or downloads a directory
+  ---
+  duration_ms: 2.8993
+  type: 'test'
+  ...
+# Subtest: unconfigured routes and poisoned public metadata cannot produce a fabricated share link
+ok 49 - unconfigured routes and poisoned public metadata cannot produce a fabricated share link
+  ---
+  duration_ms: 1.2465
+  type: 'test'
+  ...
+# Subtest: public room backgrounds project safe decorative images without injected markup
+ok 50 - public room backgrounds project safe decorative images without injected markup
+  ---
+  duration_ms: 3.5772
+  type: 'test'
+  ...
+# Subtest: room rotation uses small pages and reuses previously loaded page data after cache TTL
+ok 51 - room rotation uses small pages and reuses previously loaded page data after cache TTL
+  ---
+  duration_ms: 2.5372
+  type: 'test'
+  ...
+# Subtest: lobby reload preserves filters and independent pages, and drops authority hints
+ok 52 - lobby reload preserves filters and independent pages, and drops authority hints
+  ---
+  duration_ms: 1.6956
+  type: 'test'
+  ...
+# Subtest: room and exact song links preserve source IDs without carrying another streamer or login context
+ok 53 - room and exact song links preserve source IDs without carrying another streamer or login context
+  ---
+  duration_ms: 1.404
+  type: 'test'
+  ...
+# Subtest: controller requests bounded pages, reuses cached reads and only invalidates the affected list
+ok 54 - controller requests bounded pages, reuses cached reads and only invalidates the affected list
+  ---
+  duration_ms: 1.9045
+  type: 'test'
+  ...
+# Subtest: late search responses and stopped pages cannot replace newer results
+ok 55 - late search responses and stopped pages cannot replace newer results
+  ---
+  duration_ms: 7.7167
+  type: 'test'
+  ...
+# Subtest: out-of-range pages clamp once and malformed public links fail closed
+ok 56 - out-of-range pages clamp once and malformed public links fail closed
+  ---
+  duration_ms: 0.9501
+  type: 'test'
+  ...
+# Subtest: Back/Forward cache restoration keeps search usable and reuses fresh data without fixed polling
+ok 57 - Back/Forward cache restoration keeps search usable and reuses fresh data without fixed polling
+  ---
+  duration_ms: 1.6016
+  type: 'test'
+  ...
+# Subtest: revisiting cached pages cannot keep old song metadata alive beyond its fixed TTL
+ok 58 - revisiting cached pages cannot keep old song metadata alive beyond its fixed TTL
+  ---
+  duration_ms: 0.9218
+  type: 'test'
+  ...
+# Subtest: lookup uses only bounded aliases and server stable IDs; an old home goes directly to its latest home
+ok 59 - lookup uses only bounded aliases and server stable IDs; an old home goes directly to its latest home
+  ---
+  duration_ms: 5.0227
+  type: 'test'
+  ...
+# Subtest: exact historical two-segment aliases win before a possible shorter-page interpretation
+ok 60 - exact historical two-segment aliases win before a possible shorter-page interpretation
+  ---
+  duration_ms: 0.7372
+  type: 'test'
+  ...
+# Subtest: dotted halls, independent homes, old slash aliases and case variants keep subpages
+ok 61 - dotted halls, independent homes, old slash aliases and case variants keep subpages
+  ---
+  duration_ms: 3.1645
+  type: 'test'
+  ...
+# Subtest: hall stable identity and former hash routes are preserved without guessing a room
+ok 62 - hall stable identity and former hash routes are preserved without guessing a room
+  ---
+  duration_ms: 1.22
+  type: 'test'
+  ...
+# Subtest: hall pretty reload keeps bounded search, filters, pages and the selected login UI intent
+ok 63 - hall pretty reload keeps bounded search, filters, pages and the selected login UI intent
+  ---
+  duration_ms: 1.5293
+  type: 'test'
+  ...
+# Subtest: public route destinations reject duplicate/invalid login hints and clamp existing lobby query bounds
+ok 64 - public route destinations reject duplicate/invalid login hints and clamp existing lobby query bounds
+  ---
+  duration_ms: 0.8121
+  type: 'test'
+  ...
+# Subtest: streamer aliases keep exactly one player/admin login hint and only the existing page state
+ok 65 - streamer aliases keep exactly one player/admin login hint and only the existing page state
+  ---
+  duration_ms: 1.1742
+  type: 'test'
+  ...
+# Subtest: public route admin detail IDs are bounded before becoming navigation state
+ok 66 - public route admin detail IDs are bounded before becoming navigation state
+  ---
+  duration_ms: 0.9508
+  type: 'test'
+  ...
+# Subtest: system paths, malformed paths, misses, and resolver failures do not silently switch identity
+ok 67 - system paths, malformed paths, misses, and resolver failures do not silently switch identity
+  ---
+  duration_ms: 1.8514
+  type: 'test'
+  ...
+# Subtest: browser alias resolution fails closed for missing version, disabled configuration or invalid stable room metadata
+ok 68 - browser alias resolution fails closed for missing version, disabled configuration or invalid stable room metadata
+  ---
+  duration_ms: 1.8697
+  type: 'test'
+  ...
+# Subtest: template bootstrap keeps the pretty URL, uses only a same-origin clean shell, and runs scripts once
+ok 69 - template bootstrap keeps the pretty URL, uses only a same-origin clean shell, and runs scripts once
+  ---
+  duration_ms: 2.8154
+  type: 'test'
+  ...
+# Subtest: hall loads its original lobby shell; fixed root base prevents nested relative asset paths
+ok 70 - hall loads its original lobby shell; fixed root base prevents nested relative asset paths
+  ---
+  duration_ms: 0.681
+  type: 'test'
+  ...
+# Subtest: template expected-destination validation uses the same login and bounded lobby state as route resolution
+ok 71 - template expected-destination validation uses the same login and bounded lobby state as route resolution
+  ---
+  duration_ms: 2.0001
+  type: 'test'
+  ...
+# Subtest: external scripts, fetch redirects, oversized HTML and bad responses fail before page or history mutation
+ok 72 - external scripts, fetch redirects, oversized HTML and bad responses fail before page or history mutation
+  ---
+  duration_ms: 1.8726
+  type: 'test'
+  ...
+# Subtest: template loader refuses invalid route protocol before fetching or injecting the app shell
+ok 73 - template loader refuses invalid route protocol before fetching or injecting the app shell
+  ---
+  duration_ms: 0.7922
+  type: 'test'
+  ...
+# Subtest: partial script failure is retained to prevent duplicate app startup or duplicate requests
+ok 74 - partial script failure is retained to prevent duplicate app startup or duplicate requests
+  ---
+  duration_ms: 0.888
+  type: 'test'
+  ...
+# Subtest: pretty homepage candidates retain alias spelling and never infer streamer IDs
+ok 75 - pretty homepage candidates retain alias spelling and never infer streamer IDs
+  ---
+  duration_ms: 3.707
+  type: 'test'
+  ...
+# Subtest: every existing section extends the chosen home and old alias subpages keep their section
+ok 76 - every existing section extends the chosen home and old alias subpages keep their section
+  ---
+  duration_ms: 1.2251
+  type: 'test'
+  ...
+# Subtest: unknown and system routes are not resolved as streamer aliases
+ok 77 - unknown and system routes are not resolved as streamer aliases
+  ---
+  duration_ms: 0.5635
+  type: 'test'
+  ...
+# Subtest: unsafe paths cannot become public resolver input
+ok 78 - unsafe paths cannot become public resolver input
+  ---
+  duration_ms: 0.7087
+  type: 'test'
+  ...
+# Subtest: mount isolation and localhost previews retain exact route candidates
+ok 79 - mount isolation and localhost previews retain exact route candidates
+  ---
+  duration_ms: 0.3886
+  type: 'test'
+  ...
+# Subtest: canonical shares contain only a public homepage without login or selected-player state
+ok 80 - canonical shares contain only a public homepage without login or selected-player state
+  ---
+  duration_ms: 0.4227
+  type: 'test'
+  ...
+# Subtest: navigation round-trips exact admin/player/history state and drops other account or notice hints
+ok 81 - navigation round-trips exact admin/player/history state and drops other account or notice hints
+  ---
+  duration_ms: 3.6264
+  type: 'test'
+  ...
+# Subtest: page serialization rejects cross-origin home and never serializes invalid routes or hidden hashes
+ok 82 - page serialization rejects cross-origin home and never serializes invalid routes or hidden hashes
+  ---
+  duration_ms: 0.6077
+  type: 'test'
+  ...
+# Subtest: canonical GET returns original shell HTTP200 with safe base and projected stable-ID metadata
+ok 83 - canonical GET returns original shell HTTP200 with safe base and projected stable-ID metadata
+  ---
+  duration_ms: 48.583
+  type: 'test'
+  ...
+# Subtest: aliases 308 directly to latest canonical while keeping exact subpage and only safe query
+ok 84 - aliases 308 directly to latest canonical while keeping exact subpage and only safe query
+  ---
+  duration_ms: 3.7014
+  type: 'test'
+  ...
+# Subtest: canonical dirty query is cleaned once; legal login intent survives without becoming authority
+ok 85 - canonical dirty query is cleaned once; legal login intent survives without becoming authority
+  ---
+  duration_ms: 4.4733
+  type: 'test'
+  ...
+# Subtest: hall preserves bounded search/page filters and returns only hall shell; no fake streamer identity
+ok 86 - hall preserves bounded search/page filters and returns only hall shell; no fake streamer identity
+  ---
+  duration_ms: 3.1711
+  type: 'test'
+  ...
+# Subtest: root and reserved/static/media requests bypass registry and map only configured project mount
+ok 87 - root and reserved/static/media requests bypass registry and map only configured project mount
+  ---
+  duration_ms: 4.9454
+  type: 'test'
+  ...
+# Subtest: unknown valid route tries at most two indexed paths then preserves asset 404
+ok 88 - unknown valid route tries at most two indexed paths then preserves asset 404
+  ---
+  duration_ms: 2.3847
+  type: 'test'
+  ...
+# Subtest: a registered dot-code that resembles a file extension remains valid after static 404
+ok 89 - a registered dot-code that resembles a file extension remains valid after static 404
+  ---
+  duration_ms: 2.0122
+  type: 'test'
+  ...
+# Subtest: HEAD resolves registry but uses asset HEAD and returns no body; HEAD aliases stay bodyless 308
+ok 90 - HEAD resolves registry but uses asset HEAD and returns no body; HEAD aliases stay bodyless 308
+  ---
+  duration_ms: 1.6985
+  type: 'test'
+  ...
+# Subtest: POST is never proxied to registry or asset origin
+ok 91 - POST is never proxied to registry or asset origin
+  ---
+  duration_ms: 1.6666
+  type: 'test'
+  ...
+# Subtest: current-host asset origin, cross-origin request and non-public API credential fail closed
+ok 92 - current-host asset origin, cross-origin request and non-public API credential fail closed
+  ---
+  duration_ms: 1.4041
+  type: 'test'
+  ...
+# Subtest: asset redirects never recurse to current host and cross-origin registry responses are rejected
+ok 93 - asset redirects never recurse to current host and cross-origin registry responses are rejected
+  ---
+  duration_ms: 1.851
+  type: 'test'
+  ...
+# Subtest: invalid metadata, upstream errors, oversized or cross-origin-script shells do not return apparent success
+ok 94 - invalid metadata, upstream errors, oversized or cross-origin-script shells do not return apparent success
+  ---
+  duration_ms: 5.1493
+  type: 'test'
+  ...
+# Subtest: explicit route-origin mode uses same-zone Request only behind the confirmed Route/DNS origin
+ok 95 - explicit route-origin mode uses same-zone Request only behind the confirmed Route/DNS origin
+  ---
+  duration_ms: 3.7491
+  type: 'test'
+  ...
+# (node:24320) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: full Edge bundle resolves and reads public URLs before authentication, native business guards, activity or snapshots
+ok 96 - full Edge bundle resolves and reads public URLs before authentication, native business guards, activity or snapshots
+  ---
+  duration_ms: 60.8009
+  type: 'test'
+  ...
+# Subtest: full Edge management routes use only verified camel-case actor identity and explicit stable scope
+ok 97 - full Edge management routes use only verified camel-case actor identity and explicit stable scope
+  ---
+  duration_ms: 21.4581
+  type: 'test'
+  ...
+# Subtest: players, missing or expired credentials cannot perform URL management despite forged request roles
+ok 98 - players, missing or expired credentials cannot perform URL management despite forged request roles
+  ---
+  duration_ms: 14.9223
+  type: 'test'
+  ...
+# Subtest: president can target a hall without incidental streamer slug changing the stable target
+ok 99 - president can target a hall without incidental streamer slug changing the stable target
+  ---
+  duration_ms: 2.9891
+  type: 'test'
+  ...
+# Subtest: public route handler whitelists database replies, rejects cross-scope replies and carries unknown-path null without business work
+ok 100 - public route handler whitelists database replies, rejects cross-scope replies and carries unknown-path null without business work
+  ---
+  duration_ms: 5.8603
+  type: 'test'
+  ...
+# Subtest: invalid inputs and database rejection do not fall through into native or business mutations
+ok 101 - invalid inputs and database rejection do not fall through into native or business mutations
+  ---
+  duration_ms: 10.0807
+  type: 'test'
+  ...
+# Subtest: emergency read-only mode blocks every save before its RPC while keeping resolution, info and management reads compatible
+ok 102 - emergency read-only mode blocks every save before its RPC while keeping resolution, info and management reads compatible
+  ---
+  duration_ms: 6.8532
+  type: 'test'
+  ...
+# Subtest: confirmed seeds resolve stable IDs only; service-only functions and RLS expose no private tables or helpers
+ok 103 - confirmed seeds resolve stable IDs only; service-only functions and RLS expose no private tables or helpers
+  ---
+  duration_ms: 2645.7094
+  type: 'test'
+  ...
+# Subtest: missing confirmed stable mapping aborts migration without changing business records or leaving a partial registry
+ok 104 - missing confirmed stable mapping aborts migration without changing business records or leaving a partial registry
+  ---
+  duration_ms: 2081.6686
+  type: 'test'
+  ...
+# Subtest: verified streamer edits own code; repeated and case-insensitive paths remain immutable direct aliases to latest identity
+ok 105 - verified streamer edits own code; repeated and case-insensitive paths remain immutable direct aliases to latest identity
+  ---
+  duration_ms: 2077.9802
+  type: 'test'
+  ...
+# Subtest: historical aliases cannot be reassigned and all invalid/system codes are refused without writes
+ok 106 - historical aliases cannot be reassigned and all invalid/system codes are refused without writes
+  ---
+  duration_ms: 2071.8671
+  type: 'test'
+  ...
+# Subtest: other hall dot homes and independent pa dot namespace use explicit Space configuration; hall renames preserve every old URL in one hop
+ok 107 - other hall dot homes and independent pa dot namespace use explicit Space configuration; hall renames preserve every old URL in one hop
+  ---
+  duration_ms: 2051.0044
+  type: 'test'
+  ...
+# Subtest: forged role, stale memberships, disabled accounts/rooms, cross-Space targets and layout changes cannot gain authority
+ok 108 - forged role, stale memberships, disabled accounts/rooms, cross-Space targets and layout changes cannot gain authority
+  ---
+  duration_ms: 2011.2408
+  type: 'test'
+  ...
+# Subtest: transaction failure rolls back code, aliases, scoped revision and Audit together; serialized stale edits cannot double apply
+ok 109 - transaction failure rolls back code, aliases, scoped revision and Audit together; serialized stale edits cannot double apply
+  ---
+  duration_ms: 2015.5922
+  type: 'test'
+  ...
+# Subtest: a child-path reservation failure during hall rename rolls back the hall and every child path
+ok 110 - a child-path reservation failure during hall rename rolls back the hall and every child path
+  ---
+  duration_ms: 1994.7045
+  type: 'test'
+  ...
+# Subtest: Edge adapter ignores untrusted authority fields, validates before calls, whitelists outputs and uses only bounded RPCs
+ok 111 - Edge adapter ignores untrusted authority fields, validates before calls, whitelists outputs and uses only bounded RPCs
+  ---
+  duration_ms: 1957.906
+  type: 'test'
+  ...
+# Subtest: canonical same-Space public room links preserve each public page and bypass only redundant Space entry
+ok 112 - canonical same-Space public room links preserve each public page and bypass only redundant Space entry
+  ---
+  duration_ms: 6.3674
+  type: 'test'
+  ...
+# Subtest: unknown native inactive noncanonical dedicated and forged destinations keep the original Space entry guard
+ok 113 - unknown native inactive noncanonical dedicated and forged destinations keep the original Space entry guard
+  ---
+  duration_ms: 2.0812
+  type: 'test'
+  ...
+# Subtest: manager cross-room switches cannot enter another backend and president keeps its management section
+ok 114 - manager cross-room switches cannot enter another backend and president keeps its management section
+  ---
+  duration_ms: 0.633
+  type: 'test'
+  ...
+# Subtest: plain room switching clears consumed notice metadata and old pending song actions
+ok 115 - plain room switching clears consumed notice metadata and old pending song actions
+  ---
+  duration_ms: 0.4503
+  type: 'test'
+  ...
+# Subtest: actual header and alternate streamer selectors keep the selected songbook after reload without showing Space choice
+ok 116 - actual header and alternate streamer selectors keep the selected songbook after reload without showing Space choice
+  ---
+  duration_ms: 23.0865
+  type: 'test'
+  ...
+# Subtest: actual common-song navigation hands exactly one target song and request kind to the real startup path
+ok 117 - actual common-song navigation hands exactly one target song and request kind to the real startup path
+  ---
+  duration_ms: 15.0021
+  type: 'test'
+  ...
+# Subtest: actual unsafe or unknown switch destinations still stop at startup entry before a business read
+ok 118 - actual unsafe or unknown switch destinations still stop at startup entry before a business read
+  ---
+  duration_ms: 17.3387
+  type: 'test'
+  ...
+# Subtest: actual management selector uses the same scoped destination helper and preserves the president section
+ok 119 - actual management selector uses the same scoped destination helper and preserves the president section
+  ---
+  duration_ms: 3.1223
+  type: 'test'
+  ...
+# Subtest: open prepares viewed public homepage without copying or sharing; title safe and hall supported
+ok 120 - open prepares viewed public homepage without copying or sharing; title safe and hall supported
+  ---
+  duration_ms: 3.8395
+  type: 'test'
+  ...
+# Subtest: copy reports success only after actual copy; permission denied selects fallback
+ok 121 - copy reports success only after actual copy; permission denied selects fallback
+  ---
+  duration_ms: 2.0439
+  type: 'test'
+  ...
+# Subtest: native share uses QR image only when supported, otherwise exact homepage text
+ok 122 - native share uses QR image only when supported, otherwise exact homepage text
+  ---
+  duration_ms: 2.2122
+  type: 'test'
+  ...
+# Subtest: user cancel never copies or retries and concurrent taps share once
+ok 123 - user cancel never copies or retries and concurrent taps share once
+  ---
+  duration_ms: 0.5966
+  type: 'test'
+  ...
+# Subtest: unsupported image retries text once; absent share API copies without transmitting
+ok 124 - unsupported image retries text once; absent share API copies without transmitting
+  ---
+  duration_ms: 0.8245
+  type: 'test'
+  ...
+# Subtest: downloads use PNG and self-contained SVG, have image-open fallback and release blob URLs
+ok 125 - downloads use PNG and self-contained SVG, have image-open fallback and release blob URLs
+  ---
+  duration_ms: 1.8152
+  type: 'test'
+  ...
+# Subtest: late QR completion after close cannot mutate or leak object URL; QR failure still permits text sharing
+ok 126 - late QR completion after close cannot mutate or leak object URL; QR failure still permits text sharing
+  ---
+  duration_ms: 0.6488
+  type: 'test'
+  ...
+# Subtest: private URLs rejected before opening a dialog and malicious display names are escaped
+ok 127 - private URLs rejected before opening a dialog and malicious display names are escaped
+  ---
+  duration_ms: 0.8554
+  type: 'test'
+  ...
+# Subtest: canvas unavailable preserves SVG preview and download without a broken PNG button
+ok 128 - canvas unavailable preserves SVG preview and download without a broken PNG button
+  ---
+  duration_ms: 0.4403
+  type: 'test'
+  ...
+# Subtest: switch keeps the same public page and player credit tab, unknown routes fall back
+ok 129 - switch keeps the same public page and player credit tab, unknown routes fall back
+  ---
+  duration_ms: 2.0166
+  type: 'test'
+  ...
+# Subtest: streamer cannot navigate into another management room; super admin keeps section
+ok 130 - streamer cannot navigate into another management room; super admin keeps section
+  ---
+  duration_ms: 0.4001
+  type: 'test'
+  ...
+# Subtest: template names use current streamer including old default manual; brand remains stable
+ok 131 - template names use current streamer including old default manual; brand remains stable
+  ---
+  duration_ms: 0.3921
+  type: 'test'
+  ...
+# Subtest: every crown tier uses ordinary request double fee, preserving card-opening fee
+ok 132 - every crown tier uses ordinary request double fee, preserving card-opening fee
+  ---
+  duration_ms: 1.4986
+  type: 'test'
+  ...
+# Subtest: new streamer has independent empty business data and a usable template
+ok 133 - new streamer has independent empty business data and a usable template
+  ---
+  duration_ms: 9.7842
+  type: 'test'
+  ...
+1..133
+# tests 133
+# suites 0
+# pass 132
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 19843.4936

@@ -1,7 +1,36 @@
 import {createLobbyRoomRotation,installLobbyRoomRotation} from './lobby-room-rotation.js?v=10.19-WEB.1';
 import {API,PUBLISHABLE_KEY} from './config.js?v=10.19-WEB.1';
 import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.19-WEB.1';
+import {createPublicShare} from './share-dialog.js';
+import {createPublicLinkClient,readPublicRouteContext} from './public-links.js';
+import {lobbyPublicScope,lobbyLoginLocation,lobbyLoginPrompt,openLobbyPublicShare} from './lobby-public-share.js';
 const $=s=>document.querySelector(s),escape=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mountUrl=new URL('../',import.meta.url),context=readPublicRouteContext({document,href:location.href,mountUrl});
+const scope=lobbyPublicScope({context,href:location.href,mountUrl});
+if(scope.supported)startLobbyPage();
+else{
+ document.title='PA Party｜大廳尚未開放';
+ $('main').innerHTML='<section class="card"><h1>此廳目前尚未開放</h1><p class="muted">請回官網選擇已開放的大廳。</p></section>';
+ for(const selector of ['#lobby-player-login','#lobby-admin-login']){const link=$(selector);link.removeAttribute('href');link.setAttribute('aria-disabled','true');}
+ $('#lobby-share').disabled=true;
+}
+function startLobbyPage(){
+const notify=message=>{$('#lobby-entry-status').textContent=message;};
+notify(lobbyLoginPrompt(location.href,scope.name));
+$('#lobby-player-login').href=lobbyLoginLocation(location.href,'player');
+$('#lobby-admin-login').href=lobbyLoginLocation(location.href,'admin');
+const api=async body=>{
+ const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)}),value=await response.json();
+ if(!response.ok||value.error)throw Error(value.error||'連線暫時無法使用，請稍後重試');return value;
+};
+const links=createPublicLinkClient({api}),share=createPublicShare({modal:(title,body)=>{
+ const dialog=$('#dialog');dialog.innerHTML='<div class="dialog-head"><h2>'+escape(title)+'</h2><button type="button" aria-label="關閉" data-share-close>✕</button></div><div class="dialog-body">'+body+'</div>';
+ dialog.querySelector('[data-share-close]').onclick=()=>dialog.close();if(!dialog.open)dialog.showModal();
+},toast:notify});
+$('#lobby-share').onclick=async()=>{
+ const button=$('#lobby-share');if(button.disabled)return;button.disabled=true;
+ try{await openLobbyPublicShare({scope,links,share});}catch(error){notify(error.message||'大廳專屬網址尚未啟用');}finally{button.disabled=false;}
+};
 let composing=false;const timers={rooms:null,songs:null};
 function optionList(input,rows,selected,defaultLabel){
  const choices=[...new Set((rows||[]).filter(x=>typeof x==='string'&&x&&x.length<=100))];
@@ -9,10 +38,7 @@ function optionList(input,rows,selected,defaultLabel){
  input.innerHTML='<option value="">'+defaultLabel+'</option>'+choices.map(x=>'<option value="'+escape(x)+'" '+(x===selected?'selected':'')+'>'+escape(x)+'</option>').join('');
 }
 let roomRotation;
-const lobby=createPublicLobby({roomPageSize:3,href:location.href,replaceLocation:url=>history.replaceState(null,'',url),api:async body=>{
- const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)}),value=await response.json();
- if(!response.ok||value.error)throw Error(value.error||'連線暫時無法使用，請稍後重試');return value;
-},render:(kind,value,q)=>{
+const lobby=createPublicLobby({roomPageSize:3,href:location.href,replaceLocation:url=>history.replaceState(null,'',url),api,render:(kind,value,q)=>{
  $('#'+kind+'-results').innerHTML=kind==='rooms'?lobbyRoomsHtml(value,location.href):lobbySongsHtml(value,location.href);
  if(kind==='rooms')roomRotation?.sync();
  if(kind==='songs'){
@@ -37,7 +63,8 @@ document.addEventListener('click',e=>{const button=e.target.closest('button');if
  if(button.dataset.lobbySort){clearTimeout(timers.songs);lobby.update({sort:button.dataset.lobbySort,q:$('#lobby-q').value});}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.target.dataset.lobbyJump){e.preventDefault();jump(e.target.dataset.lobbyJump);}});
-installPublicLobbyLifecycle({lobby,cancelSearch:()=>Object.values(timers).forEach(clearTimeout)});
+installPublicLobbyLifecycle({lobby,cancelSearch:()=>{Object.values(timers).forEach(clearTimeout);share.dispose();}});
 roomRotation=createLobbyRoomRotation({snapshot:()=>({...lobby.roomSnapshot(),...(lobby.state().roomQ?{total:0}:{})}),advance:()=>lobby.rotateRooms()});
 installLobbyRoomRotation({document,window,region:document.querySelector('[data-lobby-room-section]'),rotation:roomRotation});
 lobby.start();
+}

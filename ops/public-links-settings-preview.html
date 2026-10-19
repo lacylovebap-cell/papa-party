@@ -1,0 +1,10 @@
+<!doctype html><html lang="zh-Hant"><head><base href="/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>本機介面預覽</title><link rel="stylesheet" href="src/style.css"><link rel="stylesheet" href="src/mobile.css"><link rel="stylesheet" href="src/theme.css"><link rel="stylesheet" href="src/share-dialog.css"><link rel="stylesheet" href="src/public-links.css"></head><body><main><p>本機假資料介面預覽，沒有連接正式資料庫。</p></main><dialog id="dialog"></dialog><div id="toast" role="status"></div><script type="module">
+import {createPublicShare} from '/src/share-dialog.js';
+import {createPublicLinkSettings} from '/src/public-link-settings.js';
+const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const modal=(title,body)=>{const node=document.querySelector('#dialog');node.innerHTML='<div class="dialog-head"><h2>'+escape(title)+'</h2><button type="button" aria-label="關閉">✕</button></div><div class="dialog-body">'+body+'</div>';node.querySelector('[aria-label=關閉]').onclick=()=>node.close();if(!node.open)node.showModal();};
+const toast=text=>document.querySelector('#toast').textContent=text;
+const share=createPublicShare({modal,toast});
+const api=async body=>{const response=await fetch('/fixture-api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),value=await response.json();if(!response.ok||value.error)throw Error(value.error||'本機預覽錯誤');return value;};
+createPublicLinkSettings({api,context:()=>({role:'streamer_admin',actorKey:'local-ui-fixture',spaceId:'space-001',streamerId:'papa',name:'怕怕',spaceName:'聲瑪'}),modal,toast,share}).open();
+</script></body></html>

@@ -1,12 +1,22 @@
 <!doctype html>
-<html lang="zh-Hant">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f1f5fb"><title>找不到頁面｜PA Party</title></head>
-<body>
-<main><h1>找不到這個頁面</h1><p>請從 PA Party 入口重新選擇空間。</p><a href="/papa-party/">回到 PA Party</a></main>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#171222"><title>PA Party</title><style>body{margin:0;background:#100d16;color:#eee5f7;font:16px/1.7 system-ui,sans-serif}main{max-width:640px;margin:12vh auto;padding:24px}a{color:#d6b5ef}</style></head><body>
+<main><h1>PA Party</h1><p id="route-status" role="status">正在開啟首頁…</p><a id="route-home" href="/">回官網</a></main>
 <script type="module">
-import {spacePathFallback} from '/papa-party/src/space-path-fallback.js';
-const destination=spacePathFallback(location.href,new URL('/papa-party/',location.href));
-if(destination)location.replace(destination);
-</script>
-</body>
-</html>
+const mount=new URL(location.hostname.endsWith('.github.io')?'/papa-party/':'/',location.href);
+document.querySelector('#route-home').href=mount.href;
+try{
+ const [{resolvePublicPage,loadPublicTemplate},{API,PUBLISHABLE_KEY}]=await Promise.all([import(new URL('src/public-route-bootstrap.js?v=10.19-WEB.1',mount)),import(new URL('src/config.js?v=10.19-WEB.1',mount))]);
+ const result=await resolvePublicPage(location.href,{mountUrl:mount,resolve:async path=>{
+  const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify({op:'publicRouteResolve',path}),signal:AbortSignal.timeout(12000)});
+  const value=await response.json();if(!response.ok||value?.error)throw Error('ROUTE_UNAVAILABLE');return value;
+ }});
+ if(result)await loadPublicTemplate(result,{mountUrl:mount});
+ else{
+  const {spacePathFallback}=await import(new URL('src/space-path-fallback.js?v=10.19-WEB.1',mount));
+  const legacy=spacePathFallback(location.href,mount);
+  if(legacy)location.replace(legacy);else document.querySelector('#route-status').textContent='找不到這個頁面，請回官網選擇主播。';
+ }
+}catch{
+ const status=document.querySelector('#route-status');if(status)status.textContent='目前無法確認這個網址，請稍後重試或回官網。';
+}
+</script></body></html>

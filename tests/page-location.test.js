@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {pageLocation,pageDestination,streamerDestination} from '../src/streamer-navigation.js';
 import {refreshView,rememberView} from '../src/view-refresh.js';
+import {publicApplicationPage} from '../src/public-links.js';
 
 test('reload round-trips each page and exact player/history subview without inheriting unrelated URL selectors',()=>{
  const base='https://paparty.app/?spaceId=space-1&streamer=papa&demo=1#home';
@@ -30,7 +31,7 @@ test('actual tab navigation overwrites stale URL state and browser Back restores
  const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
  const initial='https://paparty.app/?streamer=papa&adminTab=queue#admin',stack=[initial];let reads=0;
  const location={href:initial};
- const ctx=vm.createContext({URL,pageDestination,pageLocation,location,history:{state:null,pushState:(_state,_title,url)=>{stack.push(url);location.href=url;},replaceState:(_state,_title,url)=>{location.href=url;}},
+ const ctx=vm.createContext({URL,pageDestination,pageLocation,publicApplicationPage,publicRouteContext:null,spaceMount:'https://paparty.app/',location,history:{state:null,pushState:(_state,_title,url)=>{stack.push(url);location.href=url;},replaceState:(_state,_title,url)=>{location.href=url;}},
   route:'admin',tab:'queue',subtab:'overview',selectedPlayer:null,queueHistory:false,admin:{role:'super_admin'},session:null,entryPending:false,
   filters:{q:'',tags:[],language:''},pages:{},roomSearch:{generation:0},pendingCommonRequest:null,
   signatures:{},clearTimeout(){},refresh:async()=>{reads++;},render(){},put(){},playerManagement:{setMode(){}},adminQuery:''});

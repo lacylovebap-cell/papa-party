@@ -20,7 +20,7 @@ export function lobbyLocation(href,query){
 export function lobbyRoomDestination(base,room,songId,kind){
  if(!lobbySlug(room?.slug))throw Error('主播入口尚未確認');
  if(songId!==undefined&&(typeof songId!=='string'||!songId||songId.length>200||!['live','saved'].includes(kind)))throw Error('歌曲入口尚未確認');
- const u=new URL('v2.html',base),intent=loginIntent(base);u.search='';u.hash=songId?'book':'home';u.searchParams.set('streamer',room.slug);if(intent)u.searchParams.set('portalLogin',intent);
+ const mount=new URL('../',import.meta.url),source=new URL(base),root=source.pathname.endsWith('/lobby.html')?new URL('./',source):source.origin===mount.origin?new URL(mount.pathname,source):new URL('/',source);const u=new URL('v2.html',root),intent=loginIntent(base);u.search='';u.hash=songId?'book':'home';u.searchParams.set('streamer',room.slug);if(intent)u.searchParams.set('portalLogin',intent);
  if(songId){u.searchParams.set('commonRequest',songId);u.searchParams.set('commonKind',kind);}
  return u.href;
 }

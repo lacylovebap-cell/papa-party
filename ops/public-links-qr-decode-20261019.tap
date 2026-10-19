@@ -1,0 +1,13 @@
+✔ share only accepts resolved public homepages and rejects private navigation (2.2472ms)
+✔ QR is H with four-module quiet zone and original embedded approved logo (28.9339ms)
+✔ long public links leave centre alignment pattern clear (10.8091ms)
+✔ canvas renderer revokes temporary SVG URL on success and failure (38.4502ms)
+✔ actual SVG and PNG decode to exact public URL at 256, 512, 1024px, with official logo (12396.2322ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13103.8138

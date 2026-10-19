@@ -11,7 +11,8 @@ const badgeBundle='const badgeCatalogModule=(()=>{'+badgeRead('badge-catalog.js'
  +'const badgeRulesModule=(()=>{const {BADGE_CATALOG}=badgeCatalogModule;'+badgeRead('badge-rules.js')+';return {evaluateBadgeRules,badgeDay,badgeShow};})();\n'
  +'const {roomBadgeChanges}=(()=>{const {evaluateBadgeRules,badgeDay,badgeShow}=badgeRulesModule;'+badgeRead('badge-state.js')+';return {roomBadgeChanges};})();\n';
 const lobbyImages=read('supabase/functions/party-api/lobby-images.js').replace(/^export /gm,'');
-const bundled=badgeBundle+lobbyImages+'\n'+code.replace(/^import .*from '\.\/(?:badge-state|lobby-images).js';\r?\n/gm,'');
+const publicRouteBundle='const {createPublicRoutes}=(()=>{'+read('supabase/functions/party-api/public-routes.js').replace(/^export /gm,'')+';return {createPublicRoutes};})();\n';
+const bundled=badgeBundle+lobbyImages+'\n'+publicRouteBundle+code.replace(/^import .*from '\.\/(?:badge-state|lobby-images|public-routes).js';\r?\n/gm,'');
 fs.writeFileSync(new URL('deploy-function.txt',root),bundled);
 fs.writeFileSync(new URL('deploy-function.html',root),'<meta charset="utf-8"><pre>'+bundled.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>');
 console.log('Notification edge bundle created');

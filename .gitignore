@@ -11,3 +11,5 @@ notification-audio-test.html
 deploy-*.html
 /supabase/.temp/
 /.badge-replay/
+
+/.local-public-route-validation/
