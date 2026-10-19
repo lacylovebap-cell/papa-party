@@ -1,5 +1,5 @@
 import {canonicalPublicHome,parsePublicRoutePath} from './public-route-location.js';
-import {pageLocation} from './streamer-navigation.js?v=10.19-WEB.1';
+import {pageLocation} from './streamer-navigation.js?v=10.19-WEB.2';
 
 const text=value=>typeof value==='string'&&value.length>0&&value.length<=200&&!/[\u0000-\u001f\u007f]/.test(value);
 const slug=value=>typeof value==='string'&&/^[a-z0-9][a-z0-9-]{0,63}$/.test(value);

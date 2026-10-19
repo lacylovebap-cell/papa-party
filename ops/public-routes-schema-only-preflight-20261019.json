@@ -1,0 +1,523 @@
+{
+  "tables": [
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "table": "papa_accounts",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "disabled_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "notNull": false,
+          "identity": ""
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX papa_accounts_pkey ON public.papa_accounts USING btree (id)"
+      ],
+      "triggers": null,
+      "constraints": [
+        {
+          "name": "papa_accounts_pkey",
+          "definition": "PRIMARY KEY (id)"
+        }
+      ],
+      "rowSecurity": true
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "table": "papa_manager_account_links",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "manager_key",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "notNull": true,
+          "identity": ""
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX papa_manager_account_links_pkey ON public.papa_manager_account_links USING btree (manager_key)",
+        "CREATE UNIQUE INDEX papa_manager_account_links_account_id_key ON public.papa_manager_account_links USING btree (account_id)"
+      ],
+      "triggers": null,
+      "constraints": [
+        {
+          "name": "papa_manager_account_links_account_id_fkey",
+          "definition": "FOREIGN KEY (account_id) REFERENCES papa_accounts(id)"
+        },
+        {
+          "name": "papa_manager_account_links_account_id_key",
+          "definition": "UNIQUE (account_id)"
+        },
+        {
+          "name": "papa_manager_account_links_manager_key_check",
+          "definition": "CHECK (((manager_key = 'president'::text) OR (manager_key ~ '^streamer:.+'::text)))"
+        },
+        {
+          "name": "papa_manager_account_links_pkey",
+          "definition": "PRIMARY KEY (manager_key)"
+        }
+      ],
+      "rowSecurity": true
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "table": "papa_platform_roles",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "granted_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "notNull": true,
+          "identity": ""
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX papa_platform_roles_pkey ON public.papa_platform_roles USING btree (account_id)"
+      ],
+      "triggers": null,
+      "constraints": [
+        {
+          "name": "papa_platform_roles_account_id_fkey",
+          "definition": "FOREIGN KEY (account_id) REFERENCES papa_accounts(id)"
+        },
+        {
+          "name": "papa_platform_roles_pkey",
+          "definition": "PRIMARY KEY (account_id)"
+        },
+        {
+          "name": "papa_platform_roles_role_check",
+          "definition": "CHECK ((role = 'president'::text))"
+        }
+      ],
+      "rowSecurity": true
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "table": "papa_space_memberships",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "space_id",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "streamer_id",
+          "type": "text",
+          "default": null,
+          "notNull": false,
+          "identity": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'active'::text",
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "notNull": true,
+          "identity": ""
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX papa_space_memberships_pkey ON public.papa_space_memberships USING btree (id)",
+        "CREATE UNIQUE INDEX papa_membership_player_unique ON public.papa_space_memberships USING btree (account_id, space_id, role) WHERE (streamer_id IS NULL)",
+        "CREATE UNIQUE INDEX papa_membership_streamer_unique ON public.papa_space_memberships USING btree (account_id, space_id, role, streamer_id) WHERE (streamer_id IS NOT NULL)",
+        "CREATE INDEX papa_membership_space_active ON public.papa_space_memberships USING btree (space_id, role, account_id) WHERE (status = 'active'::text)",
+        "CREATE UNIQUE INDEX papa_membership_identity_scope ON public.papa_space_memberships USING btree (id, account_id, space_id)"
+      ],
+      "triggers": null,
+      "constraints": [
+        {
+          "name": "papa_membership_identity_scope",
+          "definition": "UNIQUE (id, account_id, space_id)"
+        },
+        {
+          "name": "papa_space_memberships_account_id_fkey",
+          "definition": "FOREIGN KEY (account_id) REFERENCES papa_accounts(id)"
+        },
+        {
+          "name": "papa_space_memberships_check",
+          "definition": "CHECK (((role = 'streamer_admin'::text) = (streamer_id IS NOT NULL)))"
+        },
+        {
+          "name": "papa_space_memberships_pkey",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "papa_space_memberships_role_check",
+          "definition": "CHECK ((role = ANY (ARRAY['player'::text, 'streamer_admin'::text, 'space_admin'::text])))"
+        },
+        {
+          "name": "papa_space_memberships_space_id_fkey",
+          "definition": "FOREIGN KEY (space_id) REFERENCES papa_spaces(id)"
+        },
+        {
+          "name": "papa_space_memberships_status_check",
+          "definition": "CHECK ((status = ANY (ARRAY['active'::text, 'suspended'::text])))"
+        },
+        {
+          "name": "papa_space_memberships_streamer_id_space_id_fkey",
+          "definition": "FOREIGN KEY (streamer_id, space_id) REFERENCES papa_space_streamers(streamer_id, space_id)"
+        }
+      ],
+      "rowSecurity": true
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "table": "papa_space_streamers",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "streamer_id",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "space_id",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "notNull": true,
+          "identity": ""
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX papa_space_streamers_pkey ON public.papa_space_streamers USING btree (streamer_id)",
+        "CREATE UNIQUE INDEX papa_space_streamers_streamer_id_space_id_key ON public.papa_space_streamers USING btree (streamer_id, space_id)"
+      ],
+      "triggers": null,
+      "constraints": [
+        {
+          "name": "papa_space_streamers_pkey",
+          "definition": "PRIMARY KEY (streamer_id)"
+        },
+        {
+          "name": "papa_space_streamers_space_id_fkey",
+          "definition": "FOREIGN KEY (space_id) REFERENCES papa_spaces(id)"
+        },
+        {
+          "name": "papa_space_streamers_streamer_id_space_id_key",
+          "definition": "UNIQUE (streamer_id, space_id)"
+        }
+      ],
+      "rowSecurity": true
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "table": "papa_spaces",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "slug",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "display_name",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'active'::text",
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "accounting_rollover_hour",
+          "type": "smallint",
+          "default": "0",
+          "notNull": true,
+          "identity": ""
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX papa_spaces_pkey ON public.papa_spaces USING btree (id)",
+        "CREATE UNIQUE INDEX papa_spaces_slug_key ON public.papa_spaces USING btree (slug)"
+      ],
+      "triggers": null,
+      "constraints": [
+        {
+          "name": "papa_spaces_accounting_rollover_hour_check",
+          "definition": "CHECK (((accounting_rollover_hour >= 0) AND (accounting_rollover_hour <= 23)))"
+        },
+        {
+          "name": "papa_spaces_pkey",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "papa_spaces_slug_key",
+          "definition": "UNIQUE (slug)"
+        },
+        {
+          "name": "papa_spaces_status_check",
+          "definition": "CHECK ((status = ANY (ARRAY['active'::text, 'suspended'::text])))"
+        }
+      ],
+      "rowSecurity": true
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "table": "papa_streamer_accounts",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "streamer_id",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "password_hash",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "default": "true",
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "notNull": true,
+          "identity": ""
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX papa_streamer_accounts_pkey ON public.papa_streamer_accounts USING btree (streamer_id)"
+      ],
+      "triggers": [
+        "CREATE TRIGGER papa_streamer_device_revoke_trigger AFTER UPDATE ON public.papa_streamer_accounts FOR EACH ROW EXECUTE FUNCTION papa_manager_device_revoke()"
+      ],
+      "constraints": [
+        {
+          "name": "papa_streamer_accounts_pkey",
+          "definition": "PRIMARY KEY (streamer_id)"
+        }
+      ],
+      "rowSecurity": true
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "table": "papa_v2_entities",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "kind",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "id",
+          "type": "text",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "data",
+          "type": "jsonb",
+          "default": null,
+          "notNull": true,
+          "identity": ""
+        },
+        {
+          "name": "space_id",
+          "type": "text",
+          "default": null,
+          "notNull": false,
+          "identity": ""
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX papa_v2_entities_pkey ON public.papa_v2_entities USING btree (kind, id)",
+        "CREATE INDEX papa_room_kind ON public.papa_v2_entities USING btree (kind, ((data ->> 'streamer_id'::text)))",
+        "CREATE INDEX papa_room_player ON public.papa_v2_entities USING btree (((data ->> 'streamer_id'::text)), ((data ->> 'playerId'::text)))",
+        "CREATE INDEX papa_room_song ON public.papa_v2_entities USING btree (((data ->> 'streamer_id'::text)), ((data ->> 'songId'::text)))",
+        "CREATE INDEX papa_room_status ON public.papa_v2_entities USING btree (((data ->> 'streamer_id'::text)), ((data ->> 'status'::text)))",
+        "CREATE INDEX papa_room_time ON public.papa_v2_entities USING btree (((data ->> 'streamer_id'::text)), ((data ->> 'at'::text)))",
+        "CREATE INDEX papa_song_search_source_trgm ON public.papa_v2_entities USING gin (papa_song_search_source(data) gin_trgm_ops) WHERE (kind = 'songs'::text)",
+        "CREATE INDEX papa_queue_preparation_due ON public.papa_v2_entities USING btree (((data ->> 'preparationEndsAt'::text))) WHERE ((kind = 'queue'::text) AND ((data ->> 'status'::text) = 'waiting'::text) AND ((data ->> 'preparationEndsAt'::text) IS NOT NULL) AND (COALESCE((data ->> 'readyAt'::text), ''::text) = ''::text))",
+        "CREATE INDEX papa_entity_space_kind ON public.papa_v2_entities USING btree (space_id, kind, id) WHERE (space_id IS NOT NULL)",
+        "CREATE INDEX papa_entity_room_read ON public.papa_v2_entities USING btree (space_id, kind, ((data ->> 'streamer_id'::text)), id) WHERE (kind = ANY (ARRAY['songs'::text, 'ledger'::text, 'queue'::text, 'crowns'::text, 'cards'::text, 'wishes'::text]))",
+        "CREATE INDEX papa_completed_player_room ON public.papa_v2_entities USING btree (space_id, ((data ->> 'streamer_id'::text)), ((data ->> 'playerId'::text))) WHERE ((kind = 'queue'::text) AND ((data ->> 'status'::text) = 'completed'::text))",
+        "CREATE INDEX papa_accounting_source ON public.papa_v2_entities USING btree (space_id, ((data ->> 'streamer_id'::text)), ((data ->> 'source_transaction_id'::text))) WHERE (kind = 'queue'::text)",
+        "CREATE INDEX papa_accounting_queue_settlement ON public.papa_v2_entities USING btree (space_id, ((data ->> 'streamer_id'::text)), ((data ->> 'queueId'::text))) WHERE (kind = 'ledger'::text)",
+        "CREATE INDEX papa_queue_room_kind_status ON public.papa_v2_entities USING btree (space_id, ((data ->> 'streamer_id'::text)), ((data ->> 'kind'::text)), ((data ->> 'status'::text))) WHERE (kind = 'queue'::text)",
+        "CREATE INDEX papa_queue_own_active ON public.papa_v2_entities USING btree (space_id, ((data ->> 'playerId'::text)), ((data ->> 'streamer_id'::text))) WHERE ((kind = 'queue'::text) AND ((data ->> 'status'::text) = ANY (ARRAY['pending'::text, 'waiting'::text])))"
+      ],
+      "triggers": [
+        "CREATE TRIGGER papa_accounting_fact_guard BEFORE DELETE OR UPDATE ON public.papa_v2_entities FOR EACH ROW EXECUTE FUNCTION papa_accounting_preserve_fact()",
+        "CREATE CONSTRAINT TRIGGER papa_accounting_links AFTER INSERT OR UPDATE ON public.papa_v2_entities DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION papa_accounting_link_guard()",
+        "CREATE TRIGGER papa_catalog_song_candidate AFTER INSERT OR UPDATE ON public.papa_v2_entities FOR EACH ROW WHEN ((new.kind = 'songs'::text)) EXECUTE FUNCTION papa_catalog_index_song()",
+        "CREATE TRIGGER papa_entity_event AFTER INSERT OR DELETE OR UPDATE ON public.papa_v2_entities FOR EACH ROW EXECUTE FUNCTION papa_capture_event()",
+        "CREATE TRIGGER papa_entity_space_guard_trigger BEFORE INSERT OR UPDATE ON public.papa_v2_entities FOR EACH ROW EXECUTE FUNCTION papa_entity_space_guard()",
+        "CREATE TRIGGER papa_legacy_streamer_space_map_trigger AFTER INSERT OR UPDATE OF data ON public.papa_v2_entities FOR EACH ROW WHEN ((new.kind = 'meta'::text)) EXECUTE FUNCTION papa_legacy_streamer_space_map()",
+        "CREATE TRIGGER papa_player_device_revoke_trigger AFTER UPDATE OF data ON public.papa_v2_entities FOR EACH ROW WHEN ((new.kind = 'players'::text)) EXECUTE FUNCTION papa_player_device_revoke()"
+      ],
+      "constraints": [
+        {
+          "name": "papa_accounting_links",
+          "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+        },
+        {
+          "name": "papa_entity_space_scope",
+          "definition": "CHECK ((((kind = ANY (ARRAY['players'::text, 'settings'::text, 'meta'::text])) AND (space_id IS NULL)) OR ((kind = ANY (ARRAY['songs'::text, 'ledger'::text, 'queue'::text, 'crowns'::text, 'cards'::text, 'wishes'::text])) AND (space_id IS NOT NULL))))"
+        },
+        {
+          "name": "papa_v2_entities_kind_check",
+          "definition": "CHECK ((kind = ANY (ARRAY['players'::text, 'songs'::text, 'ledger'::text, 'queue'::text, 'crowns'::text, 'cards'::text, 'wishes'::text, 'settings'::text, 'meta'::text])))"
+        },
+        {
+          "name": "papa_v2_entities_pkey",
+          "definition": "PRIMARY KEY (kind, id)"
+        },
+        {
+          "name": "papa_v2_entities_space_id_fkey",
+          "definition": "FOREIGN KEY (space_id) REFERENCES papa_spaces(id)"
+        }
+      ],
+      "rowSecurity": true
+    }
+  ],
+  "registry": null,
+  "capturedAt": "2026-10-19T14:10:49.038054+00:00",
+  "databaseBytes": 528510099,
+  "routeFunctions": null,
+  "postgresVersion": "17.6"
+}

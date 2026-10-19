@@ -39,7 +39,9 @@ export function spaceDestination(url,mountUrl,space,{page='home',path=false}={})
  if(!space||!validSlug(space.slug)||!validSlug(space.streamerSlug)||typeof space.id!=='string'||!space.id)throw Error('空間網址不正確');
  const current=new URL(streamerDestination(url,space.streamerSlug)),mount=new URL(mountUrl);
  if(current.origin!==mount.origin)throw Error('空間網址不正確');
- current.pathname=path?mount.pathname.replace(/\/$/,'')+'/'+space.slug:mount.pathname;
+ // The root is now the official portal. Returning there after verification
+ // would bounce portal -> v2 -> verified entry -> portal indefinitely.
+ current.pathname=path?mount.pathname.replace(/\/$/,'')+'/'+space.slug:new URL('v2.html',mount).pathname;
  current.searchParams.set('space',space.slug);current.searchParams.set('spaceId',space.id);
  for(const key of ['commonRequest','commonKind','player','adminTab','tab'])current.searchParams.delete(key);
  current.hash=page==='admin'?'admin':'home';return current.href;

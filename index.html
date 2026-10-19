@@ -20,9 +20,14 @@ header .nav{height:100px;gap:20px}.word-brand{display:flex;flex-direction:column
 </style>
 <script type="module">
 import {legacyPortalDestination} from './src/portal-routing.js?v=10.19-PORTAL.1';
-const next=legacyPortalDestination(location.href);
-if(next)location.replace(next);
-</script><link rel="stylesheet" href="src/portal-entry-picker.css?v=10.19-WEB.1"></head>
+import {installed,readPreference,launchPlan} from './src/pwa-start.js?v=10.19-PWA.1';
+const mount=new URL('./',location.href);let preference=null;
+try{preference=readPreference(localStorage,mount);}catch{}
+const plan=launchPlan({href:location.href,mount,standalone:installed(window),referrer:document.referrer,navigationType:performance.getEntriesByType('navigation')[0]?.type,preference});
+if(plan){if(plan.portal)history.replaceState(history.state,'',plan.target);else location.replace(plan.target);}
+else {const next=legacyPortalDestination(location.href);if(next)location.replace(next);}
+if(!plan||plan.portal){const {appStartButton,updateAppStart}=await import('./src/pwa-start-ui.js?v=10.19-PWA.1');document.querySelector('.nav-actions')?.insertAdjacentHTML('beforeend',appStartButton());updateAppStart();}
+</script><link rel="stylesheet" href="src/portal-entry-picker.css?v=10.19-WEB.2"></head>
 <body>
 <a class="skip" href="#main">跳至主要內容</a>
 <header><nav class="wrap nav" aria-label="主要導覽"><a class="official-brand" href="#" aria-label="PA Party 回到首頁"><span class="official-logo" role="img" aria-label="PA Party 官方標誌"></span></a><div class="links" id="navlinks"><a href="#features">功能介紹</a><a href="#experience">產品體驗</a><a href="#audience">為誰打造</a><a href="#plans">方案與租用</a></div><div class="nav-actions"><a class="mini" href="index.html?entryLogin=player" data-portal-login="player">玩家登入 ↗</a><a class="mini" href="index.html?entryLogin=admin" data-portal-login="admin">管理登入</a></div><button class="menu" aria-controls="navlinks" aria-expanded="false" aria-label="開啟導覽選單">選單 +</button></nav></header>
@@ -82,4 +87,4 @@ fileInput.onchange=()=>{const file=fileInput.files[0];if(!file)return;if(!['imag
 const waves=document.querySelector('#waves');for(let i=0;i<46;i++){const y=120+i*8;const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',`M -40 ${y+170} C 140 ${y+220-i*3}, 240 ${-60+i*13}, 405 ${y} S 610 ${560-i*9}, 850 ${y+10}`);waves.appendChild(p)}
 if('IntersectionObserver'in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches){document.body.classList.add('animate');const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.08});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el))}
 </script>
-<dialog id="portal-login-dialog" aria-labelledby="portal-login-title"><div class="entry-heading"><h2 id="portal-login-title">玩家登入</h2><button type="button" data-entry-close aria-label="關閉登入入口">×</button></div><form><label>選擇類別<select name="entryCategory" required></select></label><label><span data-entry-name-label>名稱</span><select name="entryDestination" required disabled></select></label><p data-entry-hint role="status"></p><button type="submit" disabled>繼續</button></form></dialog><script type="module">import {mountPortalEntryPicker} from './src/portal-entry-picker.js?v=10.19-WEB.1';mountPortalEntryPicker({document,href:location.href,navigate:url=>location.assign(url)});</script></body></html>
+<dialog id="portal-login-dialog" aria-labelledby="portal-login-title"><div class="entry-heading"><h2 id="portal-login-title">玩家登入</h2><button type="button" data-entry-close aria-label="關閉登入入口">×</button></div><form><label>選擇類別<select name="entryCategory" required></select></label><label><span data-entry-name-label>名稱</span><select name="entryDestination" required disabled></select></label><p data-entry-hint role="status"></p><button type="submit" disabled>繼續</button></form></dialog><script type="module">import {mountPortalEntryPicker} from './src/portal-entry-picker.js?v=10.19-WEB.2';mountPortalEntryPicker({document,href:location.href,navigate:url=>location.assign(url)});</script></body></html>

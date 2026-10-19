@@ -1,0 +1,50 @@
+{
+  "validatedAt": "2026-10-19T14:10:07.996Z",
+  "environment": "isolated-local-postgresql",
+  "host": "127.0.0.1",
+  "port": 55439,
+  "productionAccess": false,
+  "steps": [
+    {
+      "name": "exact-migration-keeps-all-ten-business-tables-identical",
+      "passed": true
+    },
+    {
+      "name": "two-independent-psql-connections-same-revision",
+      "passed": true,
+      "advisoryWaitObserved": true,
+      "winnerCode": 0,
+      "loserCode": 3,
+      "loserError": "PUBLIC_ROUTE_VERSION_CONFLICT",
+      "waitedMs": 5377,
+      "auditCount": 1,
+      "aliasCount": 3,
+      "revision": 1
+    },
+    {
+      "name": "committed-value-retry-no-duplicate-alias-or-audit",
+      "passed": true
+    },
+    {
+      "name": "forced-audit-failure-atomically-rolls-back-code-alias-revision-audit",
+      "passed": true
+    },
+    {
+      "name": "hall-child-path-failure-rolls-back-entire-hall-rename",
+      "passed": true
+    },
+    {
+      "name": "all-original-business-and-audit-fixture-rows-remain-identical-after-validation",
+      "passed": true
+    }
+  ],
+  "postgresVersion": "postgres (PostgreSQL) 17.11",
+  "connection": {
+    "server_version": "17.11",
+    "address": "127.0.0.1",
+    "port": 55439
+  },
+  "passed": true,
+  "serverStopped": true,
+  "migrationSha256": "6700739f71c486d8816d097621857fdf6a00bbd50be504b8c4bb51a596dbf27b"
+}

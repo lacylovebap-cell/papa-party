@@ -1,4 +1,4 @@
-import {pageDestination} from './streamer-navigation.js?v=10.19-WEB.1';
+import {pageDestination} from './streamer-navigation.js?v=10.19-WEB.2';
 
 const sections=new Set(['home','book','common-book','center','gallery','admin']);
 const pageQuery=new Set(['adminTab','tab','player','queue']);

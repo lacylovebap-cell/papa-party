@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "environment": "isolated local workerd; all outbound requests intercepted by local fixtures",
+  "productionWrites": false,
+  "node": "v24.19.0",
+  "miniflare": "4.20260730.0",
+  "workerd": "1.20260730.1",
+  "compatibilityDate": "2026-07-30",
+  "bundleSha256": "60e1a8945b50f48b4c41f2dcf71a156721ec71488e58a53dfda032ac76668056",
+  "checksPassed": 10,
+  "checks": [
+    {
+      "name": "canonical HTTP 200 uses original shell and safe stable-ID metadata",
+      "passed": true,
+      "outboundRequests": 2
+    },
+    {
+      "name": "alias one-hop HTTP 308 preserves subpage and safe query",
+      "passed": true,
+      "outboundRequests": 2
+    },
+    {
+      "name": "canonical child page HTTP 200 keeps selected page",
+      "passed": true,
+      "outboundRequests": 3
+    },
+    {
+      "name": "hall uses original lobby shell",
+      "passed": true,
+      "outboundRequests": 2
+    },
+    {
+      "name": "HEAD canonical and alias responses contain no body",
+      "passed": true,
+      "outboundRequests": 4
+    },
+    {
+      "name": "root and static bypass registry; private headers and query stay local",
+      "passed": true,
+      "outboundRequests": 3
+    },
+    {
+      "name": "Range survives original media HTTP 206",
+      "passed": true,
+      "outboundRequests": 1
+    },
+    {
+      "name": "unknown route retains original 404 with bounded lookups",
+      "passed": true,
+      "outboundRequests": 3
+    },
+    {
+      "name": "POST fails closed without outbound calls",
+      "passed": true,
+      "outboundRequests": 0
+    },
+    {
+      "name": "unconfirmed origin safely fails HTTP 503 without any outbound call",
+      "passed": true,
+      "outboundRequests": 0
+    }
+  ],
+  "limitations": [
+    "Cloudflare account Route/DNS forwarding is not simulated by Miniflare. Actual zone route and TLS/origin verification remain deployment preflight tasks."
+  ]
+}

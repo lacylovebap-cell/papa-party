@@ -164,7 +164,7 @@ test('player entry switches to the canonical target profile and clears stale roo
  const result=await entry.resolve(),entered=await entry.enter(result.space);
  assert.equal(entered.identity.role,'player');assert.equal(entered.identity.spaceId,'space-002');assert.equal(entered.identity.playerId,'NATIVE-P1');assert.equal(entered.identity.loginId,'');
  assert.notEqual(entered.identity.sessionId,login.identity.sessionId);assertPublic(entered);
- const url=new URL(entered.url);assert.equal(url.origin,'https://party.test');assert.equal(url.pathname,'/app/');assert.equal(url.hash,'#home');
+ const url=new URL(entered.url);assert.equal(url.origin,'https://party.test');assert.equal(url.pathname,'/app/v2.html');assert.equal(url.hash,'#home');
  assert.equal(url.searchParams.get('space'),'other');assert.equal(url.searchParams.get('spaceId'),'space-002');assert.equal(url.searchParams.get('streamer'),'native-room');
  for(const key of ['commonRequest','commonKind','player','adminTab','tab'])assert.equal(url.searchParams.has(key),false);
  assert.deepEqual(f.calls.filter(call=>['deviceSwitchSpace','deviceRefresh'].includes(call.op)).slice(-2).map(call=>call.op),['deviceSwitchSpace','deviceRefresh']);

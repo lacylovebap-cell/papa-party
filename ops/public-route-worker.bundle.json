@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "builder": "esbuild",
+  "builderVersion": "0.28.2",
+  "entry": "ops/public-route-worker.mjs",
+  "output": "ops/public-route-worker.bundle.mjs",
+  "bytes": 26595,
+  "sha256": "60e1a8945b50f48b4c41f2dcf71a156721ec71488e58a53dfda032ac76668056",
+  "inputs": {
+    "ops/public-route-worker.mjs": "a956d7422d2576d4b6001181124c0c4eb7751a9aabc397fc7f5858bfea8d202f",
+    "src/config.js": "78e402639f719ec4fd3ed600820487a9a70e205e91741a5bd7c563a995a14766",
+    "src/public-lobby.js?v=10.19-WEB.2": "00d6836edbf8b93e07598b0a888545756b8fc1bb063c924ce6e4ab581ff3b0a9",
+    "src/public-route-bootstrap.js": "6628d1ce0b0f9f23b950b9626125aefa0273903858cdf623fbf130fa55f9549e",
+    "src/public-route-location.js": "88e9c46a4c00f580b7893552aa76eb0e0217257d1dfa311495f088cc102fad67",
+    "src/public-route-location.js?v=10.19-WEB.2": "88e9c46a4c00f580b7893552aa76eb0e0217257d1dfa311495f088cc102fad67",
+    "src/streamer-navigation.js?v=10.19-WEB.2": "451514ac65060362a91825f32f78b0262c9080c4f4ac35131d5b7d4aab77ed87"
+  }
+}

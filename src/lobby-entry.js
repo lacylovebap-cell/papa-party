@@ -1,6 +1,7 @@
-import {createLobbyRoomRotation,installLobbyRoomRotation} from './lobby-room-rotation.js?v=10.19-WEB.1';
-import {API,PUBLISHABLE_KEY} from './config.js?v=10.19-WEB.1';
-import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.19-WEB.1';
+import {appStartButton,updateAppStart} from './pwa-start-ui.js?v=10.19-PWA.2';
+import {createLobbyRoomRotation,installLobbyRoomRotation} from './lobby-room-rotation.js?v=10.19-WEB.2';
+import {API,PUBLISHABLE_KEY} from './config.js?v=10.19-WEB.2';
+import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.19-WEB.2';
 import {createPublicShare} from './share-dialog.js';
 import {createPublicLinkClient,readPublicRouteContext} from './public-links.js';
 import {lobbyPublicScope,lobbyLoginLocation,lobbyLoginPrompt,openLobbyPublicShare} from './lobby-public-share.js';
@@ -67,4 +68,6 @@ installPublicLobbyLifecycle({lobby,cancelSearch:()=>{Object.values(timers).forEa
 roomRotation=createLobbyRoomRotation({snapshot:()=>({...lobby.roomSnapshot(),...(lobby.state().roomQ?{total:0}:{})}),advance:()=>lobby.rotateRooms()});
 installLobbyRoomRotation({document,window,region:document.querySelector('[data-lobby-room-section]'),rotation:roomRotation});
 lobby.start();
+document.querySelector('header .header-inner')?.insertAdjacentHTML('beforeend',appStartButton());
+updateAppStart(null,new URL('lobby.html',mountUrl).href);
 }
