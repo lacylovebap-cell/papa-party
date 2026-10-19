@@ -20,8 +20,13 @@ header .nav{height:100px;gap:20px}.word-brand{display:flex;flex-direction:column
 </style>
 <script type="module">
 import {legacyPortalDestination} from './src/portal-routing.js?v=10.19-PORTAL.1';
-const next=legacyPortalDestination(location.href);
-if(next)location.replace(next);
+import {installed,readPreference,launchPlan} from './src/pwa-start.js?v=10.19-PWA.1';
+const mount=new URL('./',location.href);let preference=null;
+try{preference=readPreference(localStorage,mount);}catch{}
+const plan=launchPlan({href:location.href,mount,standalone:installed(window),referrer:document.referrer,navigationType:performance.getEntriesByType('navigation')[0]?.type,preference});
+if(plan){if(plan.portal)history.replaceState(history.state,'',plan.target);else location.replace(plan.target);}
+else {const next=legacyPortalDestination(location.href);if(next)location.replace(next);}
+if(!plan||plan.portal){const {appStartButton,updateAppStart}=await import('./src/pwa-start-ui.js?v=10.19-PWA.1');document.querySelector('.nav-actions')?.insertAdjacentHTML('beforeend',appStartButton());updateAppStart();}
 </script><link rel="stylesheet" href="src/portal-entry-picker.css?v=10.19-WEB.1"></head>
 <body>
 <a class="skip" href="#main">跳至主要內容</a>
