@@ -5,14 +5,14 @@
 const mount=new URL(location.hostname.endsWith('.github.io')?'/papa-party/':'/',location.href);
 document.querySelector('#route-home').href=mount.href;
 try{
- const [{resolvePublicPage,loadPublicTemplate},{API,PUBLISHABLE_KEY}]=await Promise.all([import(new URL('src/public-route-bootstrap.js?v=10.19-WEB.2',mount)),import(new URL('src/config.js?v=10.19-WEB.2',mount))]);
+ const [{resolvePublicPage,loadPublicTemplate},{API,PUBLISHABLE_KEY}]=await Promise.all([import(new URL('src/public-route-bootstrap.js?v=10.20-WEB.1',mount)),import(new URL('src/config.js?v=10.20-WEB.1',mount))]);
  const result=await resolvePublicPage(location.href,{mountUrl:mount,resolve:async path=>{
   const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify({op:'publicRouteResolve',path}),signal:AbortSignal.timeout(12000)});
   const value=await response.json();if(!response.ok||value?.error)throw Error('ROUTE_UNAVAILABLE');return value;
  }});
  if(result)await loadPublicTemplate(result,{mountUrl:mount});
  else{
-  const {spacePathFallback}=await import(new URL('src/space-path-fallback.js?v=10.19-WEB.2',mount));
+  const {spacePathFallback}=await import(new URL('src/space-path-fallback.js?v=10.20-WEB.1',mount));
   const legacy=spacePathFallback(location.href,mount);
   if(legacy)location.replace(legacy);else document.querySelector('#route-status').textContent='找不到這個頁面，請回官網選擇主播。';
  }

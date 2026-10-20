@@ -1,4 +1,4 @@
-# APP 安裝來源與預設首頁 — 本機完成，待正式 RPC 核准
+# APP 安裝來源與預設首頁 — APP 啟動修正與正式部署記錄
 
 ## 根因
 
@@ -21,7 +21,7 @@ iOS 17.2 官方文件明確說加入主畫面時只複製 cookies，不複製其
 - 最後補驗初始 HTML 先提供來源 manifest、舊 bare-root APP 啟動遷移及 cache query：35 項相關測試通過（與前群重疊）；新增一項不同測試，非將重疊數字相加。
 - 真實 workerd 最終 14 項通過，含動態 manifest、iOS 空 storage 傳遞、固定 id／scope、舊主播、未知／停用來源及原網址 200／308／HEAD／Range 回歸。
 - 本機瀏覽器全為假資料、所有 API 止於 localhost：無來源進 chooser；怕怕來源首次啟動自動開怕怕；暫看米雪未改偏好、重開仍怕怕；手動改米雪後仍從原怕怕 install URL 重開也進米雪。
-- 390×844 viewport 的設定 dialog 幾何為 358.4×661.95，左右各 16px、沒有水平超出。實際設定畫面在 `pwa-home-settings-local-20261020.png`，桌面截圖。
+- 390×844 viewport 的設定 dialog 幾何為 358.4×661.95，左右各 16px、沒有水平超出。實際設定畫面在 `pwa-home-settings-local-20261020.png`，設定畫面。
 - 網站與 Edge bundle 建置成功；未進行正式資料庫變更或正式部署。本輪正式環境仍為前次 WEB.2。
 
 ## 待核准的唯一資料庫變更
@@ -43,3 +43,6 @@ iOS 17.2 官方文件明確說加入主畫面時只複製 cookies，不複製其
 ## 尚需實機驗收
 
 離線測試已分別涵蓋 Android standalone、iOS navigator.standalone 及 iOS 空 storage；這不等於真實手機已安裝／強制停止／重新開機測試。正式部署後仍需 Android 與 iPhone 各驗證首次安裝、重開、改預設及登出登入；不要求使用者刪除原 APP 或資料。
+
+
+2026-10-20 使用者已明確批准此單一唯讀 RPC 與本批部署。正式結果另見 pwa-start-deployment-result-20261020.json；上方本機階段時間點的未部署描述保留為測試歷程。

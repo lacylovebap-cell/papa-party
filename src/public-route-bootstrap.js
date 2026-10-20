@@ -1,6 +1,6 @@
-import {parsePublicRoutePath,canonicalPublicHome,publicPageDestination} from './public-route-location.js?v=10.19-WEB.2';
-import {pageLocation} from './streamer-navigation.js?v=10.19-WEB.2';
-import {lobbyQuery,lobbyLocation} from './public-lobby.js?v=10.19-WEB.2';
+import {parsePublicRoutePath,canonicalPublicHome,publicPageDestination} from './public-route-location.js?v=10.20-WEB.1';
+import {pageLocation} from './streamer-navigation.js?v=10.20-WEB.1';
+import {lobbyQuery,lobbyLocation} from './public-lobby.js?v=10.20-WEB.1';
 
 const metadataFields=['version','kind','spaceId','streamerId','streamerSlug','canonicalPath','matchedPath','isAlias','code','spaceCode','revision','configured','layout'];
 const templateLoads=new WeakMap();
