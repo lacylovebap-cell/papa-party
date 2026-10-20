@@ -1,0 +1,164 @@
+{
+  "verifiedAt": "2026-10-20T10:15:27.022Z",
+  "expectedVersion": "10.20-WEB.1",
+  "productionMutations": false,
+  "businessSnapshotsRead": false,
+  "privatePlayerOrAuditDataRead": false,
+  "polling": false,
+  "requests": 13,
+  "checks": [
+    {
+      "name": "frontend release",
+      "passed": true,
+      "version": "10.20-WEB.1",
+      "backendVersion": "10.20-WEB.1"
+    },
+    {
+      "name": "Edge release and capabilities",
+      "passed": true,
+      "version": "10.20-WEB.1",
+      "publicAppHomes": 1,
+      "nativeApps": false
+    },
+    {
+      "name": "one bounded public home page",
+      "passed": true,
+      "page": 1,
+      "pageSize": 12,
+      "returned": 6,
+      "total": 6,
+      "totalPages": 1
+    },
+    {
+      "name": "Michelle stable identity from public directory",
+      "passed": true,
+      "source": {
+        "v": 1,
+        "kind": "streamer",
+        "spaceId": "space-001",
+        "streamerId": "9d4983b7-642a-41bb-bc6c-e91f5c692a53"
+      },
+      "streamerSlug": "michelle"
+    },
+    {
+      "name": "Papa exact public homepage",
+      "passed": true,
+      "source": {
+        "v": 1,
+        "kind": "streamer",
+        "spaceId": "space-001",
+        "streamerId": "papa"
+      },
+      "streamerSlug": "papa",
+      "homePath": "/pa"
+    },
+    {
+      "name": "hall exact public homepage",
+      "passed": true,
+      "source": {
+        "v": 1,
+        "kind": "hall",
+        "spaceId": "space-001",
+        "streamerId": null
+      },
+      "streamerSlug": null,
+      "homePath": "/sm"
+    },
+    {
+      "name": "Michelle exact public homepage",
+      "passed": true,
+      "source": {
+        "v": 1,
+        "kind": "streamer",
+        "spaceId": "space-001",
+        "streamerId": "9d4983b7-642a-41bb-bc6c-e91f5c692a53"
+      },
+      "streamerSlug": "michelle",
+      "homePath": "/v2.html?streamer=michelle#home"
+    },
+    {
+      "name": "generic shared APP manifest",
+      "passed": true,
+      "path": "/manifest.webmanifest",
+      "status": 200,
+      "id": "./",
+      "scope": "./",
+      "startUrl": "./app.html",
+      "source": null
+    },
+    {
+      "name": "Papa source manifest",
+      "passed": true,
+      "path": "/manifest.webmanifest?install=eyJ2IjoxLCJraW5kIjoic3RyZWFtZXIiLCJzcGFjZUlkIjoic3BhY2UtMDAxIiwic3RyZWFtZXJJZCI6InBhcGEifQ",
+      "status": 200,
+      "id": "./",
+      "scope": "./",
+      "startUrl": "./app.html?install=eyJ2IjoxLCJraW5kIjoic3RyZWFtZXIiLCJzcGFjZUlkIjoic3BhY2UtMDAxIiwic3RyZWFtZXJJZCI6InBhcGEifQ",
+      "source": {
+        "v": 1,
+        "kind": "streamer",
+        "spaceId": "space-001",
+        "streamerId": "papa"
+      }
+    },
+    {
+      "name": "hall source manifest",
+      "passed": true,
+      "path": "/manifest.webmanifest?install=eyJ2IjoxLCJraW5kIjoiaGFsbCIsInNwYWNlSWQiOiJzcGFjZS0wMDEiLCJzdHJlYW1lcklkIjpudWxsfQ",
+      "status": 200,
+      "id": "./",
+      "scope": "./",
+      "startUrl": "./app.html?install=eyJ2IjoxLCJraW5kIjoiaGFsbCIsInNwYWNlSWQiOiJzcGFjZS0wMDEiLCJzdHJlYW1lcklkIjpudWxsfQ",
+      "source": {
+        "v": 1,
+        "kind": "hall",
+        "spaceId": "space-001",
+        "streamerId": null
+      }
+    },
+    {
+      "name": "Michelle source manifest",
+      "passed": true,
+      "path": "/manifest.webmanifest?install=eyJ2IjoxLCJraW5kIjoic3RyZWFtZXIiLCJzcGFjZUlkIjoic3BhY2UtMDAxIiwic3RyZWFtZXJJZCI6IjlkNDk4M2I3LTY0MmEtNDFiYi1iYzZjLWU5MWY1YzY5MmE1MyJ9",
+      "status": 200,
+      "id": "./",
+      "scope": "./",
+      "startUrl": "./app.html?install=eyJ2IjoxLCJraW5kIjoic3RyZWFtZXIiLCJzcGFjZUlkIjoic3BhY2UtMDAxIiwic3RyZWFtZXJJZCI6IjlkNDk4M2I3LTY0MmEtNDFiYi1iYzZjLWU5MWY1YzY5MmE1MyJ9",
+      "source": {
+        "v": 1,
+        "kind": "streamer",
+        "spaceId": "space-001",
+        "streamerId": "9d4983b7-642a-41bb-bc6c-e91f5c692a53"
+      }
+    },
+    {
+      "name": "APP shell is publicly available",
+      "passed": true,
+      "path": "/app.html",
+      "status": 200
+    },
+    {
+      "name": "pretty book HTML contains its initial install source",
+      "passed": true,
+      "path": "/pa/book",
+      "status": 200,
+      "source": {
+        "v": 1,
+        "kind": "streamer",
+        "spaceId": "space-001",
+        "streamerId": "papa"
+      },
+      "section": "book"
+    },
+    {
+      "name": "uppercase alias preserves book destination",
+      "passed": true,
+      "path": "/PA/book",
+      "status": 308,
+      "location": "/pa/book"
+    }
+  ],
+  "passed": 14,
+  "failed": 0,
+  "allPassed": true
+}

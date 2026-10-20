@@ -1,0 +1,95 @@
+{
+  "release": "10.20-WEB.1",
+  "status": "deployed",
+  "verifiedAt": "2026-10-20T10:16:22.257Z",
+  "codeCommit": "f9ef4c15b730446734f8862d4618ca289d8a0c0e",
+  "pwaCheckpoint": "0ec5070",
+  "pages": {
+    "runId": 39406433924,
+    "conclusion": "success"
+  },
+  "database": {
+    "approvedByUser": true,
+    "migration": "20261020100934_pwa_public_app_homes",
+    "functionsAdded": [
+      "public.papa_public_app_homes(text,text,integer,integer,text,text,text)"
+    ],
+    "newTables": 0,
+    "businessDataChanged": false,
+    "maintenanceRun": false,
+    "acl": {
+      "anon": false,
+      "authenticated": false,
+      "serviceRole": true
+    },
+    "stable": true,
+    "fixedSearchPath": "pg_catalog, public",
+    "pageSizeMaximum": 12,
+    "advisors": {
+      "unchanged": true,
+      "findings": [
+        {
+          "name": "rls_enabled_no_policy",
+          "level": "INFO",
+          "count": 73
+        },
+        {
+          "name": "function_search_path_mutable",
+          "level": "WARN",
+          "count": 3
+        },
+        {
+          "name": "anon_security_definer_function_executable",
+          "level": "WARN",
+          "count": 1
+        },
+        {
+          "name": "authenticated_security_definer_function_executable",
+          "level": "WARN",
+          "count": 1
+        }
+      ]
+    }
+  },
+  "edge": {
+    "name": "party-api",
+    "version": 53,
+    "status": "ACTIVE",
+    "verifyJwt": false,
+    "versionLabel": "10.20-WEB.1",
+    "publicAppHomes": 1,
+    "pwaInstallSource": 1,
+    "nativeApps": false,
+    "bundleSha256": "306b70a420292ceb5b43dbed01fa8f80efa2c3a88b09975bf1d5db777c773534"
+  },
+  "worker": {
+    "name": "pa-public-routes",
+    "versionId": "6b13d49d-0f44-40e9-bb65-fc500bc50e4c",
+    "bundleSha256": "8dc1b1c6b71a51610150800df199494e5b37c3a5c0c454011b6ecd550d727e69",
+    "route": "https://paparty.app/*",
+    "dnsChanged": false
+  },
+  "tests": {
+    "initialIntegrationPassed": 154,
+    "distinctFollowupAdded": 1,
+    "releaseTargetedPassed": 52,
+    "workerdPassed": 14,
+    "productionReadOnlyChecksPassed": 14,
+    "countsOverlap": true,
+    "physicalDeviceTests": "pending"
+  },
+  "protection": {
+    "privateDataExported": false,
+    "playerBalanceChanged": false,
+    "songOrPerformanceDataChanged": false,
+    "existingAuditChanged": false,
+    "newPolling": false,
+    "newRealtime": false
+  },
+  "limitations": [
+    "Only existing publicly enabled business Spaces are returned; other Space capability guards remain unchanged.",
+    "Existing Space display_name is PA Party; /sm still resolves the existing 聲瑪 lobby. No formal metadata was rewritten.",
+    "Physical Android/iPhone installation, force-stop and restart validation remains pending."
+  ],
+  "rollback": "Preserve app.html, launcher modules, source resolver API and RPC after any new installation; deploy a compatible forward fix. Do not remove preferences, source records or original data."
+}
