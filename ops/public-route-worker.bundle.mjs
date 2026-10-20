@@ -28,7 +28,7 @@ function pageDestination(href, { route, tab, subtab, selectedPlayer, queueHistor
 
 // src/public-route-location.js
 var sections = /* @__PURE__ */ new Set(["home", "book", "common-book", "center", "gallery", "admin"]);
-var systemRoots = /* @__PURE__ */ new Set(["index.html", "v2.html", "preview.html", "404.html", "api", "assets", "src", "tests", "ops", "supabase", "node_modules", ".well-known", "solo", "login", "logout", "auth", "oauth", "callback", "admin", "home", "book", "common-book", "center", "gallery", "catalog", "shared", "songs", "player", "players", "queue", "history", "cards", "wall", "wishes", "achievements", "medals", "lobby", "settings", "share", "notifications", "favicon.ico", "robots.txt", "sitemap.xml", "release.json", "manifest", "index", "preview", "404", "sw", "favicon", "robots", "sitemap", "manifest.json", "manifest.webmanifest", "sw.js", "service-worker.js"]);
+var systemRoots = /* @__PURE__ */ new Set(["app.html", "index.html", "v2.html", "preview.html", "404.html", "api", "assets", "src", "tests", "ops", "supabase", "node_modules", ".well-known", "solo", "login", "logout", "auth", "oauth", "callback", "admin", "home", "book", "common-book", "center", "gallery", "catalog", "shared", "songs", "player", "players", "queue", "history", "cards", "wall", "wishes", "achievements", "medals", "lobby", "settings", "share", "notifications", "favicon.ico", "robots.txt", "sitemap.xml", "release.json", "manifest", "index", "preview", "404", "sw", "favicon", "robots", "sitemap", "manifest.json", "manifest.webmanifest", "sw.js", "service-worker.js"]);
 var segment = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38}[A-Za-z0-9])?$/;
 var dotted = (part) => {
   const parts = part.split(".");
@@ -78,7 +78,7 @@ function parsePublicRoutePath(input, { mountUrl } = {}) {
 // src/public-route-location.js?v=10.19-WEB.2
 var sections2 = /* @__PURE__ */ new Set(["home", "book", "common-book", "center", "gallery", "admin"]);
 var pageQuery = /* @__PURE__ */ new Set(["adminTab", "tab", "player", "queue"]);
-var systemRoots2 = /* @__PURE__ */ new Set(["index.html", "v2.html", "preview.html", "404.html", "api", "assets", "src", "tests", "ops", "supabase", "node_modules", ".well-known", "solo", "login", "logout", "auth", "oauth", "callback", "admin", "home", "book", "common-book", "center", "gallery", "catalog", "shared", "songs", "player", "players", "queue", "history", "cards", "wall", "wishes", "achievements", "medals", "lobby", "settings", "share", "notifications", "favicon.ico", "robots.txt", "sitemap.xml", "release.json", "manifest", "index", "preview", "404", "sw", "favicon", "robots", "sitemap", "manifest.json", "manifest.webmanifest", "sw.js", "service-worker.js"]);
+var systemRoots2 = /* @__PURE__ */ new Set(["app.html", "index.html", "v2.html", "preview.html", "404.html", "api", "assets", "src", "tests", "ops", "supabase", "node_modules", ".well-known", "solo", "login", "logout", "auth", "oauth", "callback", "admin", "home", "book", "common-book", "center", "gallery", "catalog", "shared", "songs", "player", "players", "queue", "history", "cards", "wall", "wishes", "achievements", "medals", "lobby", "settings", "share", "notifications", "favicon.ico", "robots.txt", "sitemap.xml", "release.json", "manifest", "index", "preview", "404", "sw", "favicon", "robots", "sitemap", "manifest.json", "manifest.webmanifest", "sw.js", "service-worker.js"]);
 var segment2 = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38}[A-Za-z0-9])?$/;
 var dotted2 = (part) => {
   const parts = part.split(".");
@@ -250,6 +250,40 @@ async function resolvePublicPage(href, { mountUrl, resolve } = {}) {
   return null;
 }
 
+// src/pwa-install-source.js
+var identity = (value) => typeof value === "string" && value.length > 0 && value.length <= 200 && value.trim() === value && !/[\u0000-\u0020\u007f-\u009f\u202a-\u202e\u2066-\u2069]/u.test(value);
+var MAX_TOKEN = 1024;
+function normalizeInstallSource(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value) || !["hall", "streamer"].includes(value.kind) || !identity(value.spaceId) || value.v !== void 0 && value.v !== 1) return null;
+  const streamerId = value.kind === "hall" ? null : value.streamerId;
+  if (value.kind === "hall" && value.streamerId != null || value.kind === "streamer" && !identity(streamerId)) return null;
+  return { v: 1, kind: value.kind, spaceId: value.spaceId, streamerId };
+}
+function encodeInstallSource(value) {
+  const source = normalizeInstallSource(value);
+  if (!source) return null;
+  try {
+    const bytes = new TextEncoder().encode(JSON.stringify(source));
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    const token = btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+    return token.length <= MAX_TOKEN ? token : null;
+  } catch {
+    return null;
+  }
+}
+function decodeInstallSource(token) {
+  if (typeof token !== "string" || !token.length || token.length > MAX_TOKEN || !/^[A-Za-z0-9_-]+$/.test(token) || token.length % 4 === 1) return null;
+  try {
+    const binary = atob(token.replaceAll("-", "+").replaceAll("_", "/")), bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0)), raw = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+    if (!raw || typeof raw !== "object" || Array.isArray(raw) || raw.v !== 1 || Object.keys(raw).some((key) => !["v", "kind", "spaceId", "streamerId"].includes(key))) return null;
+    const value = normalizeInstallSource(raw);
+    return value && encodeInstallSource(value) === token ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 // ops/public-route-worker.mjs
 var ORIGIN = "https://paparty.app";
 var RESPONSE_HEADERS = ["content-type", "cache-control", "etag", "last-modified", "accept-ranges", "content-range", "content-disposition", "content-encoding", "expires", "content-security-policy", "x-frame-options"];
@@ -353,12 +387,12 @@ async function assetResponse(fetch, request, config, path, { template = false } 
   if (response.status >= 300 && response.status < 400 && response.status !== 304) throw Error("PUBLIC_ROUTE_ASSET_REDIRECT");
   return response;
 }
-function resolveApi(env, config, fetch) {
+function publicApi(env, config, fetch) {
   const api = new URL(env.API || API);
   if (api.protocol !== "https:" || api.username || api.password || api.origin === config.origin || api.search || api.hash || api.pathname !== "/functions/v1/party-api") throw Error("PUBLIC_ROUTE_API_ORIGIN");
   const key = publicKey(env.PUBLISHABLE_KEY || PUBLISHABLE_KEY);
-  return async (path) => {
-    const response = await fetch(api.href, { method: "POST", redirect: "manual", signal: AbortSignal.timeout(8e3), headers: { "Content-Type": "application/json", apikey: key, "Cache-Control": "no-store" }, body: JSON.stringify({ op: "publicRouteResolve", path }) });
+  return async (body) => {
+    const response = await fetch(api.href, { method: "POST", redirect: "manual", signal: AbortSignal.timeout(8e3), headers: { "Content-Type": "application/json", apikey: key, "Cache-Control": "no-store" }, body: JSON.stringify(body) });
     if (response.url && new URL(response.url).origin !== api.origin || !response.ok || !/^application\/json(?:;|$)/i.test(response.headers.get("content-type") || "")) throw Error("PUBLIC_ROUTE_LOOKUP_FAILED");
     const raw = await boundedText(response, 16384);
     let value;
@@ -371,6 +405,33 @@ function resolveApi(env, config, fetch) {
     return value;
   };
 }
+function resolveApi(env, config, fetch) {
+  const lookup = publicApi(env, config, fetch);
+  return (path) => lookup({ op: "publicRouteResolve", path });
+}
+async function installManifest(fetch, request, config, env, head) {
+  const tokens = config.current.searchParams.getAll("install"), source = tokens.length === 1 ? decodeInstallSource(tokens[0]) : null;
+  let verified = null;
+  if (source) {
+    const row = await publicApi(env, config, fetch)({ op: "publicAppHome", v: 1, kind: source.kind, spaceId: source.spaceId, streamerId: source.streamerId });
+    const target = normalizeInstallSource(row);
+    if (row?.active === true && target && target.kind === source.kind && target.spaceId === source.spaceId && target.streamerId === source.streamerId && (source.kind === "hall" || typeof row.streamerSlug === "string" && /^[a-z0-9][a-z0-9-]{0,63}$/.test(row.streamerSlug))) verified = source;
+  }
+  const getRequest = head ? new Request(request.url, { method: "GET", headers: request.headers }) : request;
+  const upstream = await assetResponse(fetch, getRequest, config, "manifest.webmanifest", { template: true });
+  if (upstream.status !== 200 || !/^application\/(?:manifest\+)?json(?:;|$)/i.test(upstream.headers.get("content-type") || "")) throw Error("APP_MANIFEST_TEMPLATE_FAILED");
+  let manifest;
+  try {
+    manifest = JSON.parse(await boundedText(upstream, 32768));
+  } catch {
+    throw Error("APP_MANIFEST_TEMPLATE_INVALID");
+  }
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest) || new URL(manifest.id, config.origin + "/manifest.webmanifest").href !== config.origin + "/" || new URL(manifest.scope, config.origin + "/manifest.webmanifest").href !== config.origin + "/" || typeof manifest.name !== "string" || !Array.isArray(manifest.icons)) throw Error("APP_MANIFEST_IDENTITY_INVALID");
+  manifest.start_url = "./app.html" + (verified ? "?install=" + encodeInstallSource(verified) : "");
+  const headers = outputHeaders(upstream.headers, { privateResponse: true, rewritten: true });
+  headers.set("Content-Type", "application/manifest+json; charset=utf-8");
+  return new Response(head ? null : JSON.stringify(manifest), { status: 200, headers });
+}
 function renderTemplate(html, result) {
   if (html.length > 262144 || !/<html\b/i.test(html) || !/<head\b[^>]*>/i.test(html) || !/<\/head\s*>/i.test(html) || !/<body\b/i.test(html)) throw Error("PUBLIC_ROUTE_TEMPLATE_INVALID");
   for (const tag of html.matchAll(/<script\b[^>]*>/gi)) {
@@ -382,7 +443,9 @@ function renderTemplate(html, result) {
   }
   const metadata = { ...result.metadata, section: result.section }, json = JSON.stringify(metadata).replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
   const clean = html.replace(/<base\b[^>]*>/gi, "").replace(/<script\b[^>]*\bid\s*=\s*(['"])public-route-data\1[^>]*>[\s\S]*?<\/script\s*>/gi, "");
-  return clean.replace(/<head\b[^>]*>/i, (head) => head + '<base href="/"><script type="application/json" id="public-route-data">' + json + "<\/script>");
+  const token = encodeInstallSource({ v: 1, kind: metadata.kind, spaceId: metadata.spaceId, streamerId: metadata.streamerId }), manifestTag = '<link rel="manifest" href="/manifest.webmanifest' + (token ? "?install=" + token : "") + '">';
+  const prepared = clean.replace(/<link\b(?=[^>]*\brel\s*=\s*(['"])manifest\1)[^>]*>/gi, "");
+  return prepared.replace(/<head\b[^>]*>/i, (head) => head + '<base href="/">' + manifestTag + '<script type="application/json" id="public-route-data">' + json + "<\/script>");
 }
 function createPublicRouteWorker({ fetch = globalThis.fetch } = {}) {
   return { async fetch(request, env = {}) {
@@ -400,13 +463,14 @@ function createPublicRouteWorker({ fetch = globalThis.fetch } = {}) {
       return fail("PUBLIC_ROUTE_CONFIGURATION_REQUIRED", 503, head);
     }
     try {
+      if (current.pathname === "/manifest.webmanifest") return await installManifest(fetch, request, config, env, head);
       const parsed = parsePublicRoutePath(current.href, { mountUrl: config.origin + "/" });
       let preliminary;
       const passthrough = async () => {
         const response2 = preliminary || await assetResponse(fetch, request, config, current.pathname);
         return new Response(head ? null : response2.body, { status: response2.status, statusText: response2.statusText, headers: outputHeaders(response2.headers) });
       };
-      if (!parsed.eligible) return await passthrough();
+      if (current.pathname === "/app.html" || !parsed.eligible) return await passthrough();
       if (STATIC_EXTENSION.test(current.pathname)) {
         preliminary = await assetResponse(fetch, request, config, current.pathname);
         if (preliminary.status !== 404) return await passthrough();

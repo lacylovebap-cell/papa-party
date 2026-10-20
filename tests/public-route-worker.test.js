@@ -48,7 +48,7 @@ test('hall preserves bounded search/page filters and returns only hall shell; no
  const follow=await f.worker.fetch(new Request(u),env);assert.equal(follow.status,200);const body=await follow.text();assert.ok(body.includes('"kind":"hall"'));assert.ok(body.includes('"streamerId":null'));assert.equal(f.assetCalls.at(-1).url,env.ASSET_ORIGIN+'lobby.html');
 });
 test('root and reserved/static/media requests bypass registry and map only configured project mount',async()=>{
- for(const path of ['/','/index.html?entryLogin=player','/v2.html?streamer=papa','/login','/api','/assets/video.mp4','/video.webm','/logo.png','/src/app.js?v=10.19-WEB.1&token=secret']){
+ for(const path of ['/','/app.html?install=public-stable-token','/index.html?entryLogin=player','/v2.html?streamer=papa','/login','/api','/assets/video.mp4','/video.webm','/logo.png','/src/app.js?v=10.19-WEB.1&token=secret']){
   const f=fixture({registry:()=>assert.fail('static must not lookup registry')});const r=await f.request(path,{headers:{range:'bytes=0-100',cookie:'session'}});assert.equal(r.status,200,path);assert.equal(f.registryCalls.length,0);const target=new URL(f.assetCalls[0].url);assert.equal(target.origin,'https://assets.example.test');assert.ok(target.pathname.startsWith('/project/'));assert.equal(target.searchParams.has('token'),false);assert.equal(f.assetCalls[0].headers.get('range'),'bytes=0-100');assert.equal(r.headers.get('set-cookie'),null);
   if(path.includes('?v='))assert.equal(target.searchParams.get('v'),'10.19-WEB.1');
  }

@@ -1,8 +1,12 @@
+import {prepareInstallManifest} from './pwa-install-source.js';
 const INSTALL_ERROR='目前無法開啟安裝視窗，請使用瀏覽器選單加入主畫面。';
 
 // The browser supplies one install opportunity. Nothing is prompted, stored or
 // requested until the caller invokes prompt() from a user gesture.
-export function createWebAppInstall({environment=globalThis,target=environment,onChange}={}){
+export function createWebAppInstall({environment=globalThis,target=environment,onChange,source,mountUrl}={}){
+ // Callers prepare the current verified public scope before the browser creates
+ // its install event. No storage, source lookup, or permission request is needed.
+ let manifestHref=null;
  let media=null;
  try{media=environment?.matchMedia?.('(display-mode: standalone)')||null;}catch{}
  const isStandalone=()=>{
@@ -35,6 +39,17 @@ export function createWebAppInstall({environment=globalThis,target=environment,o
   deferred=event;error='';publish();
  };
  const mediaChange=()=>{if(isStandalone())confirmInstalled();};
+ const prepareSource=value=>{
+  if(destroyed||pending)return null;
+  const href=prepareInstallManifest({document:environment?.document,source:value,mountUrl:mountUrl||environment?.location?.origin+'/'});
+  if(href&&href!==manifestHref){
+   // A held install event may describe the preceding page's manifest. Reusing
+   // it after visiting a different host could bind the wrong initial home.
+   manifestHref=href;const hadEvent=Boolean(deferred);deferred=null;error='';if(hadEvent)publish();
+  }
+  return href;
+ };
+ if(source!==undefined)prepareSource(source);
  target?.addEventListener?.('beforeinstallprompt',beforeInstall);
  target?.addEventListener?.('appinstalled',confirmInstalled);
  if(typeof media?.addEventListener==='function')media.addEventListener('change',mediaChange);
@@ -42,6 +57,7 @@ export function createWebAppInstall({environment=globalThis,target=environment,o
 
  return {
   snapshot,
+  prepareSource,
   subscribe(listener){
    if(destroyed||typeof listener!=='function')return ()=>{};
    listeners.add(listener);try{listener(snapshot());}catch{}

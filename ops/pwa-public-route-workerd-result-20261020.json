@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "environment": "isolated local workerd; all outbound requests intercepted by local fixtures",
+  "productionWrites": false,
+  "node": "v24.19.0",
+  "miniflare": "4.20260730.0",
+  "workerd": "1.20260730.1",
+  "compatibilityDate": "2026-07-30",
+  "bundleSha256": "8dc1b1c6b71a51610150800df199494e5b37c3a5c0c454011b6ecd550d727e69",
+  "checksPassed": 14,
+  "checks": [
+    {
+      "name": "canonical HTTP 200 uses original shell and safe stable-ID metadata",
+      "passed": true,
+      "outboundRequests": 2
+    },
+    {
+      "name": "alias one-hop HTTP 308 preserves subpage and safe query",
+      "passed": true,
+      "outboundRequests": 2
+    },
+    {
+      "name": "canonical child page HTTP 200 keeps selected page",
+      "passed": true,
+      "outboundRequests": 3
+    },
+    {
+      "name": "hall uses original lobby shell",
+      "passed": true,
+      "outboundRequests": 2
+    },
+    {
+      "name": "HEAD canonical and alias responses contain no body",
+      "passed": true,
+      "outboundRequests": 4
+    },
+    {
+      "name": "root and static bypass registry; private headers and query stay local",
+      "passed": true,
+      "outboundRequests": 4
+    },
+    {
+      "name": "Range survives original media HTTP 206",
+      "passed": true,
+      "outboundRequests": 1
+    },
+    {
+      "name": "unknown route retains original 404 with bounded lookups",
+      "passed": true,
+      "outboundRequests": 3
+    },
+    {
+      "name": "POST fails closed without outbound calls",
+      "passed": true,
+      "outboundRequests": 0
+    },
+    {
+      "name": "source manifests keep shared id and scope while carrying exact public stable IDs",
+      "passed": true,
+      "outboundRequests": 4
+    },
+    {
+      "name": "active legacy streamers without custom routes retain the same stable source",
+      "passed": true,
+      "outboundRequests": 2
+    },
+    {
+      "name": "unknown source becomes APP chooser and malformed tokens never query metadata",
+      "passed": true,
+      "outboundRequests": 5
+    },
+    {
+      "name": "manifest HEAD verifies source and identity without returning body or stale entity headers",
+      "passed": true,
+      "outboundRequests": 2
+    },
+    {
+      "name": "unconfirmed origin safely fails HTTP 503 without any outbound call",
+      "passed": true,
+      "outboundRequests": 0
+    }
+  ],
+  "limitations": [
+    "Cloudflare account Route/DNS forwarding is not simulated by Miniflare. Actual zone route and TLS/origin verification remain deployment preflight tasks."
+  ]
+}

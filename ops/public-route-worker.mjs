@@ -2,6 +2,7 @@
 import {API as DEFAULT_API,PUBLISHABLE_KEY as DEFAULT_PUBLIC_KEY} from '../src/config.js';
 import {parsePublicRoutePath} from '../src/public-route-location.js';
 import {resolvePublicPage} from '../src/public-route-bootstrap.js';
+import {decodeInstallSource,encodeInstallSource,normalizeInstallSource} from '../src/pwa-install-source.js';
 
 const ORIGIN='https://paparty.app';
 const RESPONSE_HEADERS=['content-type','cache-control','etag','last-modified','accept-ranges','content-range','content-disposition','content-encoding','expires','content-security-policy','x-frame-options'];
@@ -72,17 +73,40 @@ async function assetResponse(fetch,request,config,path,{template=false}={}){
  if(response.status>=300&&response.status<400&&response.status!==304)throw Error('PUBLIC_ROUTE_ASSET_REDIRECT');
  return response;
 }
-function resolveApi(env,config,fetch){
+function publicApi(env,config,fetch){
  const api=new URL(env.API||DEFAULT_API);
  if(api.protocol!=='https:'||api.username||api.password||api.origin===config.origin||api.search||api.hash||api.pathname!=='/functions/v1/party-api')throw Error('PUBLIC_ROUTE_API_ORIGIN');
  const key=publicKey(env.PUBLISHABLE_KEY||DEFAULT_PUBLIC_KEY);
- return async path=>{
-  const response=await fetch(api.href,{method:'POST',redirect:'manual',signal:AbortSignal.timeout(8000),headers:{'Content-Type':'application/json',apikey:key,'Cache-Control':'no-store'},body:JSON.stringify({op:'publicRouteResolve',path})});
+ return async body=>{
+  const response=await fetch(api.href,{method:'POST',redirect:'manual',signal:AbortSignal.timeout(8000),headers:{'Content-Type':'application/json',apikey:key,'Cache-Control':'no-store'},body:JSON.stringify(body)});
   if(response.url&&new URL(response.url).origin!==api.origin||!response.ok||!/^application\/json(?:;|$)/i.test(response.headers.get('content-type')||''))throw Error('PUBLIC_ROUTE_LOOKUP_FAILED');
   const raw=await boundedText(response,16384);
   let value;try{value=JSON.parse(raw);}catch{throw Error('PUBLIC_ROUTE_LOOKUP_INVALID');}
   if(value?.error)throw Error('PUBLIC_ROUTE_LOOKUP_FAILED');return value;
  };
+}
+function resolveApi(env,config,fetch){const lookup=publicApi(env,config,fetch);return path=>lookup({op:'publicRouteResolve',path});}
+
+async function installManifest(fetch,request,config,env,head){
+ // A manifest's id/scope stay shared. Only its initial public stable-ID hint is
+ // personalized. No browser/account cookies, identities, or mutable URL slugs
+ // are copied into either the manifest URL or the eventual launch URL.
+ const tokens=config.current.searchParams.getAll('install'),source=tokens.length===1?decodeInstallSource(tokens[0]):null;
+ let verified=null;
+ if(source){const row=await publicApi(env,config,fetch)({op:'publicAppHome',v:1,kind:source.kind,spaceId:source.spaceId,streamerId:source.streamerId});
+  const target=normalizeInstallSource(row);
+  if(row?.active===true&&target&&target.kind===source.kind&&target.spaceId===source.spaceId&&target.streamerId===source.streamerId
+   &&(source.kind==='hall'||typeof row.streamerSlug==='string'&&/^[a-z0-9][a-z0-9-]{0,63}$/.test(row.streamerSlug)))verified=source;
+ }
+ const getRequest=head?new Request(request.url,{method:'GET',headers:request.headers}):request;
+ const upstream=await assetResponse(fetch,getRequest,config,'manifest.webmanifest',{template:true});
+ if(upstream.status!==200||!/^application\/(?:manifest\+)?json(?:;|$)/i.test(upstream.headers.get('content-type')||''))throw Error('APP_MANIFEST_TEMPLATE_FAILED');
+ let manifest;try{manifest=JSON.parse(await boundedText(upstream,32768));}catch{throw Error('APP_MANIFEST_TEMPLATE_INVALID');}
+ if(!manifest||typeof manifest!=='object'||Array.isArray(manifest)||new URL(manifest.id,config.origin+'/manifest.webmanifest').href!==config.origin+'/'
+  ||new URL(manifest.scope,config.origin+'/manifest.webmanifest').href!==config.origin+'/'||typeof manifest.name!=='string'||!Array.isArray(manifest.icons))throw Error('APP_MANIFEST_IDENTITY_INVALID');
+ manifest.start_url='./app.html'+(verified?'?install='+encodeInstallSource(verified):'');
+ const headers=outputHeaders(upstream.headers,{privateResponse:true,rewritten:true});headers.set('Content-Type','application/manifest+json; charset=utf-8');
+ return new Response(head?null:JSON.stringify(manifest),{status:200,headers});
 }
 function renderTemplate(html,result){
  if(html.length>262144||!/<html\b/i.test(html)||!/<head\b[^>]*>/i.test(html)||!/<\/head\s*>/i.test(html)||!/<body\b/i.test(html))throw Error('PUBLIC_ROUTE_TEMPLATE_INVALID');
@@ -92,7 +116,11 @@ function renderTemplate(html,result){
  }
  const metadata={...result.metadata,section:result.section},json=JSON.stringify(metadata).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
  const clean=html.replace(/<base\b[^>]*>/gi,'').replace(/<script\b[^>]*\bid\s*=\s*(['"])public-route-data\1[^>]*>[\s\S]*?<\/script\s*>/gi,'');
- return clean.replace(/<head\b[^>]*>/i,head=>head+'<base href="/"><script type="application/json" id="public-route-data">'+json+'</script>');
+ const token=encodeInstallSource({v:1,kind:metadata.kind,spaceId:metadata.spaceId,streamerId:metadata.streamerId}),manifestTag='<link rel="manifest" href="/manifest.webmanifest'+(token?'?install='+token:'')+'">';
+ // Put the verified install hint into the initial HTML, before the browser
+ // discovers the manifest. This also works before the app's data finishes loading.
+ const prepared=clean.replace(/<link\b(?=[^>]*\brel\s*=\s*(['"])manifest\1)[^>]*>/gi,'');
+ return prepared.replace(/<head\b[^>]*>/i,head=>head+'<base href="/">'+manifestTag+'<script type="application/json" id="public-route-data">'+json+'</script>');
 }
 
 export function createPublicRouteWorker({fetch=globalThis.fetch}={}){
@@ -101,11 +129,12 @@ export function createPublicRouteWorker({fetch=globalThis.fetch}={}){
   if(!['GET','HEAD'].includes(request.method)){const response=fail('METHOD_NOT_ALLOWED',405,head);response.headers.set('Allow','GET, HEAD');return response;}
   let current,config;try{current=new URL(request.url);config=trustedConfig(env,current);}catch{return fail('PUBLIC_ROUTE_CONFIGURATION_REQUIRED',503,head);}
   try{
+   if(current.pathname==='/manifest.webmanifest')return await installManifest(fetch,request,config,env,head);
    const parsed=parsePublicRoutePath(current.href,{mountUrl:config.origin+'/'});
    let preliminary;
    const passthrough=async()=>{const response=preliminary||await assetResponse(fetch,request,config,current.pathname);return new Response(head?null:response.body,{status:response.status,statusText:response.statusText,headers:outputHeaders(response.headers)});};
    // The platform root, all system/static/media paths, and non-route paths never query the registry.
-   if(!parsed.eligible)return await passthrough();
+   if(current.pathname==='/app.html'||!parsed.eligible)return await passthrough();
    // A dot can be either a static extension or a legitimate hall/host code.
    // Prefer an actual existing file, but a missing .MP4/.PNG name may still be a registered homepage.
    if(STATIC_EXTENSION.test(current.pathname)){preliminary=await assetResponse(fetch,request,config,current.pathname);if(preliminary.status!==404)return await passthrough();}

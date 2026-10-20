@@ -2,7 +2,7 @@ import {pageDestination} from './streamer-navigation.js?v=10.19-WEB.2';
 
 const sections=new Set(['home','book','common-book','center','gallery','admin']);
 const pageQuery=new Set(['adminTab','tab','player','queue']);
-const systemRoots=new Set(['index.html','v2.html','preview.html','404.html','api','assets','src','tests','ops','supabase','node_modules','.well-known','solo','login','logout','auth','oauth','callback','admin','home','book','common-book','center','gallery','catalog','shared','songs','player','players','queue','history','cards','wall','wishes','achievements','medals','lobby','settings','share','notifications','favicon.ico','robots.txt','sitemap.xml','release.json','manifest','index','preview','404','sw','favicon','robots','sitemap','manifest.json','manifest.webmanifest','sw.js','service-worker.js']);
+const systemRoots=new Set(['app.html','index.html','v2.html','preview.html','404.html','api','assets','src','tests','ops','supabase','node_modules','.well-known','solo','login','logout','auth','oauth','callback','admin','home','book','common-book','center','gallery','catalog','shared','songs','player','players','queue','history','cards','wall','wishes','achievements','medals','lobby','settings','share','notifications','favicon.ico','robots.txt','sitemap.xml','release.json','manifest','index','preview','404','sw','favicon','robots','sitemap','manifest.json','manifest.webmanifest','sw.js','service-worker.js']);
 const segment=/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38}[A-Za-z0-9])?$/;
 const dotted=part=>{const parts=part.split('.');return parts.length===2&&parts.every(value=>segment.test(value));};
 const invalid=reason=>({eligible:false,candidates:[],reason});
