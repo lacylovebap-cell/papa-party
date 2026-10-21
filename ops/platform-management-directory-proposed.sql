@@ -29,7 +29,8 @@ begin
  with visible as materialized (
   select s.* from public.papa_spaces s where president or s.status='active' and
    (s.owner_account_id=subject or exists(select 1 from public.papa_space_memberships m where m.space_id=s.id and m.account_id=subject and m.role='space_admin'
-    and m.status='active' and (case when section_name='accounts' then 'administrators' else 'streamers' end)=any(m.permissions)))
+    and m.status='active' and (case when section_name='accounts' then 'administrators'=any(m.permissions)
+     when section_name='halls' then m.permissions && array['streamers','administrators'] else 'streamers'=any(m.permissions) end)))
  ), rooms as materialized (
   select r.value as descriptor from public.papa_v2_entities e cross join lateral jsonb_array_elements(
    case when jsonb_typeof(e.data->'streamers')='array' then e.data->'streamers' else '[]'::jsonb end) r(value) where e.kind='meta' and e.id='1'

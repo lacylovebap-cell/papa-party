@@ -19,17 +19,17 @@ async function setup(page,width){
   const hall={id:'hall-Q',name:longName,kind:'hall',status:'active',ownerAccountId:owner,revision:41};
   const streamer={id:'streamer-1',slug:'test-streamer',name:longName,spaceId:'hall-Q',spaceName:longName,active:false,descriptor:{id:'streamer-1',slug:'test-streamer',display_name:longName,home_title:'Existing home',subtitle:'Existing subtitle',active:false}};
   const membership={id:'member-1',accountId:member,name:longName,role:'space_admin',streamerId:null,status:'active',permissions:[],permissionsExplicit:false,effectivePermissions:['songs','queue']};
-  window.pmCalls=[];window.pmActor='president';window.pmFailure=null;window.pmDeferred=null;window.pmRelease=null;
+  window.pmCalls=[];window.pmActor='president';window.pmCapabilities={allowed:true,president:true};window.pmFailure=null;window.pmDeferred=null;window.pmRelease=null;
   const api=async body=>{window.pmCalls.push(structuredClone(body));if(window.pmFailure===body.op){window.pmFailure=null;throw Error('fixture failure');}if(window.pmDeferred===body.op){window.pmDeferred=null;await new Promise(resolve=>window.pmRelease=resolve);}
    if(body.op==='platformManagementDirectory'){const rows=body.section==='overview'?[]:body.section==='halls'?[hall]:body.section==='accounts'?[{id:member,name:longName,managerKey:'streamer:test-streamer'}]:[streamer];return {rows,total:rows.length,page:1,pages:1,registryRevision:7,summary:{halls:1,independent:0,streamers:1,managers:2,unclassified:0}};}
-   if(body.op==='platformManagementDetail')return {space:hall,memberships:[membership],total:1,page:body.page,pages:1,canManageMemberships:true,...(body.streamerId?{streamer:{descriptor:streamer.descriptor,archivedAt:null}}:{})};
+   if(body.op==='platformManagementDetail')return {space:hall,memberships:[membership],total:1,page:body.page,pages:1,canManageMemberships:true,canEditSpace:false,...(body.streamerId?{streamer:{descriptor:streamer.descriptor,archivedAt:null}}:{})};
    if(body.op==='platformStreamerCredentials')return {exists:true,enabled:false};
    if(body.op==='platformManagementDependencies')return {songs:0,players:0,ledger:0,audit:4,safeToDelete:false};
    return {ok:true};
   };
   const root=document.querySelector('#app');let controller;
   const paint=()=>{root.innerHTML=controller.html();controller.bind(root);};
-  controller=createPlatformManagement({api,identity:()=>window.pmActor,escape,changed:paint,confirm:()=>true});window.pm=controller;window.pmPaint=paint;
+  controller=createPlatformManagement({api,identity:()=>window.pmActor,capabilities:()=>window.pmCapabilities,escape,changed:paint,confirm:()=>true});window.pm=controller;window.pmPaint=paint;
   await controller.load({section:'halls'});
  },{owner,member,longName});
  await page.waitForFunction(()=>[...document.querySelectorAll('link')].every(link=>link.sheet));
@@ -75,5 +75,29 @@ try{
   await page.evaluate(()=>{window.pm.clear();window.pmPaint();window.pmRelease();});await page.waitForTimeout(40);
   assert.equal(await page.evaluate(()=>window.pmCalls.length),count,'no late directory reload after clear: '+operation);assert.equal(await page.evaluate(()=>window.pm.state().loaded),false);assert.equal(await page.evaluate(()=>window.pm.state().saving),false);
  }
- console.log('platform management clear/write races passed');
+
+ // Choosing an account for one grant must not leak into later hall details.
+ await setup(page,390);await section(page,'accounts');await page.locator('[data-pm-action="account-memberships"]').click();await page.locator('[data-pm-action="detail"]').click();
+ assert.equal(await page.locator('[data-pm-form="membership"] [name="accountId"]').inputValue(),member);
+ await page.locator('[data-pm-action="close-editor"]').first().click();await page.locator('[data-pm-action="detail"]').click();assert.equal(await page.locator('[data-pm-form="membership"] [name="accountId"]').inputValue(),'','grant target is consumed once');
+ await section(page,'accounts');await page.locator('[data-pm-action="account-memberships"]').click();await section(page,'streamers');await section(page,'halls');await page.locator('[data-pm-action="detail"]').click();assert.equal(await page.locator('[data-pm-form="membership"] [name="accountId"]').inputValue(),'','navigation clears pending target');
+ // Delayed readers must not overwrite a different editor opened afterwards.
+ for(const operation of ['platformManagementDetail','platformStreamerCredentials']){
+  await setup(page,390);await section(page,'streamers');await page.evaluate(op=>window.pmDeferred=op,operation);
+  await page.locator(`[data-pm-action="${operation==='platformManagementDetail'?'detail':'credentials'}"]`).click();await page.waitForFunction(()=>!!window.pmRelease);
+  await page.locator('[data-pm-action="create-streamer"]').click();await page.evaluate(()=>window.pmRelease());await page.waitForTimeout(30);
+  assert.equal(await page.locator('[data-pm-form="streamer"]').count(),1,operation+' cannot replace new streamer editor');
+ }
+ // An existing account can be found without copying a raw identifier.
+ await setup(page,390);await page.locator('[data-pm-action="create-space"]').click();await page.locator('[data-pm-form="create-space"] [name="name"]').fill('Preserved draft');
+ await page.locator('[data-pm-action="lookup-accounts"]').click();await page.locator('.pm-account-picker [data-pm-action="select-account"]').waitFor();await noOverflow(page,390,'bounded account search');
+ await page.locator('.pm-account-picker [name="accountQuery"]').fill('LongPublic');await submit(page,'account-search');await page.locator('.pm-account-picker [data-pm-action="select-account"]').click();
+ assert.equal(await page.locator('[data-pm-form="create-space"] [name="ownerAccountId"]').inputValue(),member);assert.equal(await page.locator('[data-pm-form="create-space"] [name="name"]').inputValue(),'Preserved draft');
+ const accountQuery=(await page.evaluate(()=>window.pmCalls.filter(body=>body.section==='accounts').at(-1)));assert.equal(accountQuery.q,'LongPublic');assert.equal(accountQuery.page,1);
+ // Scoped membership administration never renders president controls.
+ await setup(page,390);await page.evaluate(async()=>{window.pmCapabilities={allowed:true,president:false,permissions:{administrators:true},sections:['overview','halls','accounts']};await window.pm.load({section:'halls'});});
+ assert.equal(await page.locator('[data-pm-action="create-space"]').count(),0);assert.equal(await page.locator('[data-pm-action="section"][data-pm-id="streamers"]').count(),0);
+ await page.locator('[data-pm-action="detail"]').click();assert.equal(await page.locator('[data-pm-form="membership"]').count(),1);assert.equal(await page.locator('[data-pm-form="edit-space"]').count(),0);assert.equal(await page.locator('[data-pm-action="suspend"]').count(),0);await noOverflow(page,390,'scoped manager');
+ await page.evaluate(()=>{window.pmCapabilities={allowed:false};window.pm.sync();window.pmPaint();});assert.equal(await page.locator('[data-pm-action]').count(),0);assert.equal(await page.locator('[data-pm-form]').count(),0);
+ console.log('platform management clear/write, editor, account-target, picker and scoped-capability checks passed');
 }finally{await browser.close();server.close();}

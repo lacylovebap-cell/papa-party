@@ -1,3 +1,4 @@
+import {managementRpcRequest} from '../supabase/functions/party-api/management-rpc.js';
 import {managerPermissionRequirement} from '../src/management-permissions.js';
 import {createLobbyImageReader} from '../supabase/functions/party-api/lobby-images.js';
 import {createPublicRoutes} from '../supabase/functions/party-api/public-routes.js';
@@ -69,7 +70,7 @@ function fixture(outcome='success'){
    scope:{spaceId:b.requested_space,roomId:b.requested_room},day:accountingDay(new Date().toISOString(),19),rolloverHour:19,timezone:'Asia/Taipei',revision:state.revision});
   throw Error('Unexpected fixture endpoint '+path);
  };
- const context=vm.createContext({managerPermissionRequirement,createLobbyImageReader,createPublicRoutes,createPublicAppHomes,roomBadgeChanges,accountingDay,...core,...access,...patch,...rules,...bulk,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
+ const context=vm.createContext({managementRpcRequest,managerPermissionRequirement,createLobbyImageReader,createPublicRoutes,createPublicAppHomes,roomBadgeChanges,accountingDay,...core,...access,...patch,...rules,...bulk,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
   Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://db.example':'fixture-key'},serve:fn=>handler=fn},EdgeRuntime:{waitUntil(){}},
   CATALOG_OPS:new Set(),catalogMetadataView:view=>view,fixtureState:state});
  vm.runInContext(roomCode+'\n'+code,context);

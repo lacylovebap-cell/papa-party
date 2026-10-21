@@ -46,6 +46,27 @@ test('business commit rechecks revoked permissions and rolls back failed writes 
  await assert.rejects(call(),/permission denied/);
 });
 
+test('non-commit RPC guard preserves typed named arguments and rejects cross-room or forged context',async t=>{
+ const {db,q,run,president,delegate}=await fixture(t);
+ await db.exec(`create table guarded_probe(value jsonb);
+ create function papa_achievement_manual_grant(requested_space text,requested_room text,actor_context jsonb,requested_player text,requested_code text,requested_reason text,requested_show_day date)
+ returns jsonb language plpgsql set search_path=public as $$ begin insert into guarded_probe values(actor_context);return jsonb_build_object('player',requested_player,'day',requested_show_day);end;$$;
+ create function papa_catalog_batch_add(room_id text,variant_ids text[],lyrics_mode text,actor_id text)
+ returns jsonb language sql as $$ select to_jsonb(variant_ids) $$;`);
+ await run(president,'membership',{spaceId:'space-001',revision:0,accountId:delegate,role:'streamer_admin',streamerId:'room-a',permissions:['players','songs'],status:'active'});
+ const ctx={role:'streamer_admin',account_id:delegate,space_id:'space-001',actor_streamer_id:'room-a'};
+ const body={requested_space:'space-001',requested_room:'room-a',actor_context:ctx,requested_player:'p',requested_code:'P01',requested_reason:'verified',requested_show_day:'2026-10-21'};
+ const call=(name,args,c=ctx)=>q('select papa_management_guarded_rpc($1,$2,$3) result',[name,args,c]);
+ assert.deepEqual((await call('papa_achievement_manual_grant',body))[0].result,{player:'p',day:'2026-10-21'});
+ assert.deepEqual((await call('papa_catalog_batch_add',{room_id:'room-a',variant_ids:['v1','v2'],lyrics_mode:'shared',actor_id:'verified:'+JSON.stringify(ctx)}))[0].result,['v1','v2']);
+ await assert.rejects(call('papa_achievement_manual_grant',{...body,requested_room:'room-b'}),/ACCESS_DENIED/);
+ await assert.rejects(call('papa_achievement_manual_grant',{...body,unexpected:'x'}),/SIGNATURE_INVALID/);
+ await assert.rejects(call('papa_achievement_manual_grant',{...body,actor_context:{...ctx,account_id:president}}),/ACCESS_DENIED/);
+ await run(president,'membership',{spaceId:'space-001',revision:1,accountId:delegate,role:'streamer_admin',streamerId:'room-a',permissions:['songs'],status:'active'});
+ await assert.rejects(call('papa_achievement_manual_grant',body),/ACCESS_DENIED/);
+ assert.equal((await q('select count(*)::int n from guarded_probe'))[0].n,1);
+});
+
 test('existing hall suspend/restore preserves business rows; newly created tenants cannot activate',async t=>{
  const f=await fixture(t),{q,run,president,owner}=f;
  await q("insert into papa_v2_entities(kind,id,data) values('ledger','keep',$1)",[{streamer_id:'room-a',playerId:'private-player',delta:3,note:'unchanged'}]);

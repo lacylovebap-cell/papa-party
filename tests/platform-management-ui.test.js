@@ -30,3 +30,23 @@ test('Edge management handlers use verified subject and validate scope before in
  await assert.rejects(invoke({op:'platformManagementDependencies',spaceId:'h',streamerId:'s'},{accountId:'other',role:'player'}),/總裁/);
  await assert.rejects(invoke({op:'platformManagementDetail',spaceId:'h',q:'',page:0}),/格式/);assert.equal(calls.length,1);
 });
+
+test('explicit pending or revoked management capabilities cannot read or mutate the centre',async()=>{
+ const calls=[];let capabilities={};const c=createPlatformManagement({api:async body=>{calls.push(body);return page();},identity:()=> 'verified',capabilities:()=>capabilities,escape,changed:()=>{}});
+ await c.load({section:'halls'});await c.openDetail({id:'h'});assert.equal(await c.mutate('create',{name:'forged'}),false);assert.equal(calls.length,0);assert.ok(!c.html().includes('data-pm-action="section"'));
+ capabilities={allowed:true,president:false,permissions:{reports:true},sections:['overview']};await c.load();assert.equal(calls.length,1);await c.load({section:'accounts'});assert.equal(calls.length,1);assert.ok(!c.html().includes('新增廳'));
+ capabilities={allowed:false};c.sync();assert.equal(c.state().loaded,false);assert.deepEqual(c.state().rows,[]);
+});
+test('scoped membership admin sees verified grant tools without president-only actions',async()=>{
+ const calls=[];const capabilities={allowed:true,president:false,permissions:{administrators:true},sections:['overview','halls','accounts']};
+ const detail={space:{id:'h',name:'Hall',status:'active',revision:1},memberships:[],canManageMemberships:true,canEditSpace:false};
+ const c=createPlatformManagement({api:async body=>{calls.push(body);return body.op==='platformManagementDetail'?detail:page([{id:'h',name:'Hall'}]);},identity:()=> 'verified',capabilities,escape,changed:()=>{}});
+ await c.load({section:'halls'});await c.openDetail({id:'h'});const html=c.html();assert.match(html,/data-pm-form="membership"/);assert.ok(!html.includes('data-pm-form="edit-space"'));for(const action of ['create-space','create-streamer','suspend','credentials','dependencies'])assert.ok(!html.includes('data-pm-action="'+action+'"'));
+ assert.equal(await c.mutate('suspend',{spaceId:'h'}),false);assert.equal(await c.mutate('edit',{spaceId:'h',name:'forged'}),false);assert.equal(calls.length,2);
+ await c.load({section:'streamers'});assert.equal(calls.length,2);
+});
+test('detail results are discarded after navigation or a verified account change',async()=>{
+ let resolve,actor='A';const c=createPlatformManagement({api:body=>body.op==='platformManagementDetail'?new Promise(r=>resolve=r):Promise.resolve(page()),identity:()=>actor,escape,changed:()=>{}});
+ const detail=c.openDetail({id:'h'});await c.load({section:'accounts'});resolve({space:{id:'h',name:'private'},memberships:[]});await detail;assert.equal(c.state().editor,null);
+ const next=c.openDetail({id:'h'});actor='B';c.sync();resolve({space:{id:'h',name:'private'},memberships:[]});await next;assert.equal(c.state().editor,null);
+});

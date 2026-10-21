@@ -1,0 +1,11 @@
+{
+  "syntheticOnly": true,
+  "checks": [
+    "inflight-write-serializes-revocation",
+    "revocation-prevents-next-write",
+    "revocation-first-rejects-stale-write",
+    "concurrent-edit-cas"
+  ],
+  "passed": 4,
+  "at": "2026-10-21T11:50:27.343Z"
+}

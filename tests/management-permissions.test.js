@@ -6,6 +6,6 @@ test('manager permissions cover writes, private reads and deny new operations by
  for(const type of ['queue','onBehalf','streamerDraw'])assert.equal(requirement({op:'mutate',action:{type}}),'queue');
  for(const type of ['allocate','ledger','player','crown'])assert.equal(requirement({op:'mutate',action:{type}}),'players');
  assert.equal(requirement({op:'read'}),'all','legacy manager read includes multiple private modules');
- assert.equal(requirement({op:'futureUnsafeWrite'}),'all');assert.equal(requirement({op:'publicRouteSave'}),'streamers');
+ assert.equal(requirement({op:'futureUnsafeWrite'}),'all');assert.equal(requirement({op:'publicRouteSave'}),'all');
  for(const op of ['deviceLogout','platformManageSpace','boardThreads','chatSend'])assert.equal(requirement({op}),null);
 });

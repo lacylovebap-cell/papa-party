@@ -62,8 +62,11 @@ A final focused test additionally verified that service_role can execute the dir
 
 ## Approval risks and remaining integration
 
-- Production migration is not approved. Applying this proposal would briefly lock metadata tables while adding columns/indexes/triggers/functions. Only tiny management metadata/Audit grows; the existing event table is not scanned or rebuilt.
+- User approved this management migration on 2026-10-21. Applying it briefly locks metadata tables while adding columns/indexes/triggers/functions. Only tiny management metadata/Audit grows; the existing event table is not scanned or rebuilt.
 - Registry writes will additionally acquire mapping share locks. Existing registry writers must preserve their current lock order; an actual multi-session Postgres interleaving check remains advisable before production approval.
 - Before enabling granular grants, Edge must enforce room_permission centrally, including restrictive `all` for old all-data snapshots. Narrow-role module read models and a space_admin login bridge are not provided here. New tenants remain suspended to prevent unsafe partial provisioning.
 - Owner transfer, tenant reclassification, account login creation/rebinding/password reset, cross-Space moves and permanent deletion are outside these RPCs. They require separate complete integration and their applicable approvals; they are not advertised as completed by this SQL.
 - Rollback should disable the management UI/Edge entry points and revoke execution of the new RPCs. Keep the additive columns/table/Audit intact; do not drop history or rewind existing business data. Function/trigger rollback must be reviewed against any archived mappings already created.
+
+
+2026-10-21 release gate: management login bridge is implemented using existing verified Account sessions; no business role promotion. Business and allowlisted catalog/badge/quota/URL writes use transaction-scoped permission locks. Four actual PostgreSQL 15 multi-connection cases passed (ops/platform-management-postgres-result.json). Narrow-role ordinary business page reads, standalone credential creation, owner transfer and new tenant activation remain outside the enabled management metadata flow. Formal additive migration was applied successfully; no management or business data mutations were run.

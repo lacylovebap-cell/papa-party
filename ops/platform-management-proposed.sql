@@ -13,7 +13,7 @@ create table if not exists public.papa_management_audit(
  request_data jsonb not null,before_data jsonb,after_data jsonb not null,created_at timestamptz not null default now()
 );
 alter table public.papa_management_audit enable row level security;
-revoke all on public.papa_management_audit from public,anon,authenticated;
+revoke all on public.papa_management_audit from public,anon,authenticated,service_role;
 create index if not exists papa_management_audit_space_created on public.papa_management_audit(space_id,created_at);
 
 -- All callers receive their Account ID from the verified server session. This

@@ -86,7 +86,7 @@ async function catalogOperation(b:any,who:any){
   if(!catalogUuid(b.familyId)||b.variantId!=null&&!catalogUuid(b.variantId))throw Error('請先選擇共同歌曲');
   return await api('/rest/v1/rpc/papa_catalog_report_issue',{room_id:room.id,family_id:b.familyId,
    variant_id:b.variantId||null,issue_type:b.issueType,description:String(b.description||'').slice(0,3000),
-   suggestion:String(b.suggestion||'').slice(0,3000)});
+   suggestion:String(b.suggestion||'').slice(0,3000)},undefined,{role:who.role,account_id:who.accountId,space_id:room.spaceId||'space-001',actor_streamer_id:who.streamer_id||null});
  }
  if(op==='catalogIssues'){
   if(!isManager(who))throw Error('請先登入主播管理');
