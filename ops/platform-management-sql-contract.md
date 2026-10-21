@@ -1,11 +1,12 @@
 # Platform management SQL contract — local proposal, 2026-10-21
 
-Status: local PGlite verification only. No production query, migration, data correction, deployment or credential creation was performed for this proposal.
+Status: approved by the user on 2026-10-21, conditional on completing login and atomic authorization verification before deployment. Local PGlite verification only; no production migration, data correction, deployment or credential creation performed for this proposal.
 
 ## Files and execution order
 
 1. `ops/platform-management-proposed.sql`
 2. `ops/platform-management-directory-proposed.sql`
+3. `ops/platform-management-commit-proposed.sql` — allowlisted wrapper for existing streamer-admin business commits; locks Account, Space, mapping, memberships and legacy credential/link rows before checking the operation permission and executing the existing transaction. Business calculations and receipts remain in their original functions. Local rollback/revocation tests pass; actual multi-connection concurrency and non-commit write RPC coverage remain release gates.
 
 Existing dependencies: Space/Account foundation, canonical `papa_v2_revision`, global `meta/1`, `papa_manager_account_links`, and `papa_streamer_accounts`.
 

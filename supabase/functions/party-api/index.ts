@@ -351,7 +351,9 @@ async function commit(before:any,after:any,context:any={}){
  }
  const receipted=!!(context.roomScoped&&receipt);
  if(receipted&&receipt.attempt)receipt.attempt.started=true;
- const result=await api('/rest/v1/rpc/'+(receipted?'papa_room_operational_commit_receipted':provision?'papa_room_admin_commit_with_player_bindings':context.roomScoped?'papa_room_operational_commit':context.roomWriteScoped?'papa_room_admin_commit':'papa_release_b_commit'),{expected:before.revision,changes,removed:patch.removed,actor_context:actorContext,notices,...(scoped?{requested_room:context.streamer_id}:{}),...(provision?{player_bindings:player_bindings}:{}),...(receipted?{operation_id:receipt.operation_id,actor_key:receipt.actor_key,request_hash:receipt.request_hash}:{})});
+ const commitName=(receipted?'papa_room_operational_commit_receipted':provision?'papa_room_admin_commit_with_player_bindings':context.roomScoped?'papa_room_operational_commit':context.roomWriteScoped?'papa_room_admin_commit':'papa_release_b_commit');
+ const commitArguments={expected:before.revision,changes,removed:patch.removed,actor_context:actorContext,notices,...(scoped?{requested_room:context.streamer_id}:{}),...(provision?{player_bindings:player_bindings}:{}),...(receipted?{operation_id:receipt.operation_id,actor_key:receipt.actor_key,request_hash:receipt.request_hash}:{})};
+ const result=await api('/rest/v1/rpc/'+(context.role==='streamer_admin'?'papa_management_business_commit':commitName),context.role==='streamer_admin'?{commit_name:commitName,arguments:commitArguments}:commitArguments);
  if(receipted){
   if(!result||!Number.isSafeInteger(result.revision)||result.revision<0||typeof result.duplicate!=='boolean')throw unknownOperationOutcome(Error('送出結果尚未確認'));
   if(result.duplicate)return load(true,context.streamer_id,context.space_id,null,receipt.quota_player||context.player_id||null);

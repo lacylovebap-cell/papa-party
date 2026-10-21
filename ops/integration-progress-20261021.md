@@ -37,6 +37,10 @@
 
 ## 下一步
 
+2026-10-21 使用者已明確批准六個管理欄位、一張管理 Audit、管理函式及封存保護，條件為完成登入／原子授權驗證後部署。不要再次要求相同批准；未涵蓋跨廳搬移、永久刪除或網址 migration。
+
+新增 ops/platform-management-commit-proposed.sql：streamer_admin 商務 commit 包裝重用既有結算／回執 RPC；依 Account→Space→mapping/membership 鎖定後重驗權限，同交易執行原 commit。Edge commit 已接線。新增隔離測試涵蓋撤權拒絕、錯廳拒絕、函式 allowlist、匿名拒絕及商務失敗 rollback；通過。原回執 handler 11項測試通過，原管理 lifecycle 7項亦通過。這仍不等於實際多連線並發驗證，也未涵蓋所有繞過 commit 的個別寫入 RPC。廳管理員登入橋接／窄權限讀取仍待完成，尚未套用正式 migration 或部署。
+
 續作補驗：tests/platform-management-edge.test.js 新增3項實際handler測試通過：未授權者不觸發帳號讀取、跨廳拒絕且登入設定僅回傳存在/啟用狀態、管理寫入使用已驗證身分且拒絕非法操作。此為本機驗證，尚未部署管理中心，也不代表原子權限撤銷與廳管理登入缺口已完成。
 
 先完成上述登入／原子授權缺口，依ops/platform-management-sql-contract.md整合驗證，再提交明確migration與風險供核准。新的hall slash aliases提案須一起確認後才套用。已上線歌曲／選單不重複部署。繼續開發分支已合併正式WEB.2，保留本機管理改動；此分支沒有推送正式main。

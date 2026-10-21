@@ -31,7 +31,14 @@ function fixture(outcome='success'){
  state.queue=[{id:'q1',playerId:'P1',streamer_id:'papa',songId:'s1',title:'Song',artist:'Artist',kind:'saved',status:'waiting',creditCost:1,at,acceptedAt:at,preparedAt:at}];
  const who={role:'streamer_admin',accountId:'00000000-0000-4000-8000-000000000001',spaceId:'space-001',streamerId:'papa',playerId:null};
  const fetch=async(url,request)=>{
-  const path=new URL(url).pathname,b=request.body?JSON.parse(request.body):null;requests.push({path,body:b});
+  let path=new URL(url).pathname,b=request.body?JSON.parse(request.body):null;requests.push({path,body:b});
+  if(path.endsWith('/papa_management_business_commit')){
+   assert.equal(b.commit_name,'papa_room_operational_commit_receipted');
+   assert.equal(b.arguments.actor_context.account_id,who.accountId);
+   assert.equal(b.arguments.actor_context.role,'streamer_admin');
+   assert.equal(b.arguments.actor_context.actor_streamer_id,'papa');
+   path='/rest/v1/rpc/'+b.commit_name;b=b.arguments;
+  }
   if(path.endsWith('/papa_management_room_permission')){assert.equal(b.subject,who.accountId);assert.equal(b.requested_streamer,'papa');return Response.json(true);}
   if(path.endsWith('/papa_verified_session_actor'))return Response.json(expired?null:who);
   if(path.endsWith('/papa_streamer_directory'))return Response.json(state.streamers.map(r=>({...r,spaceId:'space-001'})));

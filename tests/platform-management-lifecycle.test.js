@@ -15,6 +15,7 @@ async function fixture(t) {
  await q("insert into papa_v2_entities(kind,id,data) values('meta','unrelated',$1)",[{streamers:[{id:'room-a',slug:'room-a',display_name:'Wrong duplicate',active:false}]}]);
  await db.exec(fs.readFileSync('ops/platform-management-proposed.sql','utf8'));
  await db.exec(fs.readFileSync('ops/platform-management-directory-proposed.sql','utf8'));
+ await db.exec(fs.readFileSync('ops/platform-management-commit-proposed.sql','utf8'));
  const account=async()=>(await q('insert into papa_accounts default values returning id'))[0].id;
  const president=await account(),owner=await account(),delegate=await account(),outsider=await account();
  await q("insert into papa_platform_roles(account_id,role) values($1,'president')",[president]);
@@ -24,6 +25,26 @@ async function fixture(t) {
  const detail=(who,space='space-001',room=null,search='',page=1)=>q('select papa_management_detail($1,$2,$3,$4,$5) result',[who,space,room,search,page]).then(r=>r[0].result);
  return {db,q,run,directory,detail,president,owner,delegate,outsider,account};
 }
+
+test('business commit rechecks revoked permissions and rolls back failed writes in one transaction',async t=>{
+ const {db,q,run,president,delegate}=await fixture(t);
+ await db.exec(`create table commit_probe(value jsonb);
+ create function papa_room_admin_commit(expected bigint,changes jsonb,removed jsonb,actor_context jsonb,notices jsonb,requested_room text)
+ returns bigint language plpgsql as $$ begin insert into public.commit_probe values(changes);if expected=99 then raise exception 'PROBE_FAILURE';end if;return expected+1;end;$$;`);
+ await run(president,'membership',{spaceId:'space-001',revision:0,accountId:delegate,role:'streamer_admin',streamerId:'room-a',permissions:['songs'],status:'active'});
+ const args={expected:1,changes:[],removed:[],notices:[],requested_room:'room-a',actor_context:{role:'streamer_admin',account_id:delegate,actor_streamer_id:'room-a',streamer_id:'room-a',space_id:'space-001',action:'song'}};
+ const call=(a=args,name='papa_room_admin_commit')=>q('select papa_management_business_commit($1,$2) result',[name,a]);
+ assert.equal((await call())[0].result,2);
+ await assert.rejects(call({...args,expected:99}),/PROBE_FAILURE/);
+ assert.equal((await q('select count(*)::int n from commit_probe'))[0].n,1);
+ await assert.rejects(call({...args,requested_room:'room-b'}),/ACCESS_DENIED/);
+ await assert.rejects(call(args,'papa_manage_space'),/COMMIT_INVALID/);
+ await run(president,'membership',{spaceId:'space-001',revision:1,accountId:delegate,role:'streamer_admin',streamerId:'room-a',permissions:[],status:'active'});
+ await assert.rejects(call(),/ACCESS_DENIED/);
+ assert.equal((await q('select count(*)::int n from commit_probe'))[0].n,1);
+ await db.exec('set role anon');
+ await assert.rejects(call(),/permission denied/);
+});
 
 test('existing hall suspend/restore preserves business rows; newly created tenants cannot activate',async t=>{
  const f=await fixture(t),{q,run,president,owner}=f;
