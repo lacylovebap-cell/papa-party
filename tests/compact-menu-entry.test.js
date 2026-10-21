@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-const source=fs.readFileSync('src/compact-menu-entry.js','utf8').replace(/^import .*\n/,'').replaceAll('import.meta.url',"'https://paparty.app/src/compact-menu-entry.js'");
+const source=fs.readFileSync('src/compact-menu-entry.js','utf8').replace(/^import .*\r?\n/,'').replaceAll('import.meta.url',"'https://paparty.app/src/compact-menu-entry.js'");
 test('independent entry restores menus rebuilt by an older cached app, without observing menu descendants',()=>{
  let callback,observed,calls=0,compact=false;
  const menu={classList:{contains:()=>compact}},header={querySelector:()=>menu};
