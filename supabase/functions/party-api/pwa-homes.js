@@ -5,7 +5,7 @@ const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const identity=value=>typeof value==='string'&&value.length>0&&value.length<=200&&value.trim()===value&&!/[\u0000-\u0020\u007f-\u009f]/u.test(value);
 const label=value=>typeof value==='string'&&value.trim().length>0&&value.length<=200&&!/[\u0000-\u001f\u007f-\u009f]/u.test(value);
 const slug=value=>typeof value==='string'&&/^[a-z0-9][a-z0-9-]{0,63}$/.test(value);
-const path=value=>typeof value==='string'&&/^\/[A-Za-z0-9][A-Za-z0-9.-]{0,80}$/.test(value);
+const path=value=>typeof value==='string'&&value.length<=123&&/^\/[A-Za-z0-9][A-Za-z0-9.-]{0,80}(\/[A-Za-z0-9][A-Za-z0-9-]{0,39})?$/.test(value);
 const kinds=new Set(['hall','streamer']);
 
 function sourceTarget(body){
