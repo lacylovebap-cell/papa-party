@@ -1,8 +1,9 @@
+import {stripTypeScriptTypes} from 'node:module';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const source=fs.readFileSync('supabase/functions/party-api/index.ts','utf8');
+const source=stripTypeScriptTypes(fs.readFileSync('supabase/functions/party-api/index.ts','utf8'));
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
 const segment=(start,end)=>source.slice(source.indexOf(start),source.indexOf(end,source.indexOf(start)));
 const president={role:'super_admin',accountId:'verified-president'};

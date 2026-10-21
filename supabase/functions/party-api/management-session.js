@@ -2,8 +2,9 @@
 // Only the Edge-verified Account is used; no caller-selected actor is accepted.
 export async function readManagementSession(api,who){
  if(!who||typeof who.accountId!=='string'||!/^[a-f\d]{8}-(?:[a-f\d]{4}-){3}[a-f\d]{12}$/i.test(who.accountId))throw Error('請先登入');
+ if(who.role!=='super_admin')return {version:1,allowed:false,president:false,permissions:{streamers:false,administrators:false,reports:false},sections:[]};
  const result=await api('/rest/v1/rpc/papa_management_session',{subject:who.accountId});
- return validateManagementSession(result);
+ const value=validateManagementSession(result);if(!value.president)return {version:1,allowed:false,president:false,permissions:{streamers:false,administrators:false,reports:false},sections:[]};return value;
 }
 export function validateManagementSession(result){
  const permitted=['overview','halls','streamers','accounts','cleanup'],permissions=result?.permissions;

@@ -26,6 +26,6 @@ export function createManagementEntry({api,identity,changed=()=>{}}){
   }finally{if(owner===account&&ticket===generation){pending=null;changed();}}})().then(complete);
   return work;
  }
- return {load,clear,state:()=>state,identity:()=>owner===identity()&&state.ready&&state.capabilities?.allowed?owner:null,
+ return {load,clear,state:()=>state,identity:()=>owner===identity()&&state.ready&&state.capabilities?.allowed&&state.capabilities?.president?owner:null,
   sync:()=>{if(owner&&owner!==identity())clear();}};
 }
