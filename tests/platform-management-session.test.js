@@ -46,9 +46,10 @@ test('management login bridge reads only enabled scoped authority and never prom
 });
 
 test('management session Edge adapter uses verified Account only and projects bounded non-secret capabilities',async()=>{
- const who={accountId,role:'player',playerId:'real-player',token:'existing-token'},copy={...who};let calls=0;
+ const who={accountId,role:'super_admin',token:'existing-token'},copy={...who};let calls=0;
  const api=async(path,args)=>{calls++;assert.equal(path,'/rest/v1/rpc/papa_management_session');assert.deepEqual(args,{subject:accountId});return {...all,accountId:'must-not-leak',token:'must-not-leak',role:'super_admin'};};
  assert.deepEqual(await readManagementSession(api,who),all);assert.deepEqual(who,copy);assert.equal(calls,1);
+ for(const role of ['player','streamer_admin','space_admin'])assert.deepEqual(await readManagementSession(api,{accountId,role}),denied);assert.equal(calls,1);
  for(const bad of [null,{accountId:'bad'},{role:'super_admin'}])await assert.rejects(readManagementSession(api,bad),/登入/);
  assert.equal(calls,1);
  for(const bad of [{...all,sections:['overview','overview']},{...denied,allowed:true},{...all,president:true,permissions:{streamers:false,administrators:true,reports:true}},{...all,sections:['overview','halls','streamers','accounts','cleanup','private']},null])assert.throws(()=>validateManagementSession(bad),/尚未確認/);

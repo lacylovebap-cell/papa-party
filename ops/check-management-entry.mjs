@@ -14,16 +14,16 @@ try{
  await page.addInitScript(()=>localStorage.setItem('papa-v2-player',JSON.stringify({token:'player:synthetic-only',role:'player',accountId:'22222222-2222-4222-8222-222222222222'})));
  await page.route('https://zwhcgqwbtummydapuori.supabase.co/**',async route=>{
   const body=route.request().postDataJSON()||{};ops.push(body.op);
-  const result=body.op==='platformManagementSession'?{version:1,allowed:true,president:false,permissions:{streamers:false,administrators:true,reports:false},sections:['overview','halls','accounts']}:
+  const result=body.op==='platformManagementSession'?(body.token?.startsWith('admin:')?{version:1,allowed:true,president:true,permissions:{streamers:true,administrators:true,reports:true},sections:['overview','halls','streamers','accounts','cleanup']}:{version:1,allowed:false,president:false,permissions:{streamers:false,administrators:false,reports:false},sections:[]}):
    body.op==='platformManagementDirectory'?{rows:[],page:1,pages:1,total:0,registryRevision:1,summary:{halls:1,streamers:1,managers:1}}:{};
   await route.fulfill({json:result});
  });
  const url='http://127.0.0.1:'+server.address().port+'/v2.html?streamer=papa&spaceId=space-001&tab=platform#center';await page.goto(url);
- await page.getByRole('heading',{name:'平台管理中心',exact:true}).waitFor();await page.locator('[data-pm-action="section"][data-pm-id="halls"]').waitFor();
- assert.equal(await page.locator('[data-pm-action="create-space"]').count(),0);
- assert.equal(await page.locator('[data-pm-action="section"][data-pm-id="streamers"]').count(),0);
+ await page.getByRole('heading',{name:'平台管理中心',exact:true}).waitFor();await page.getByText('此頁僅供總裁帳號使用，主播請使用自己的後台。').waitFor();
+ assert.equal(await page.locator('[data-pm-action]').count(),0);assert.ok(!ops.includes('platformManagementDirectory'));
  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('papa-v2-player')).role),'player');
- assert.equal(ops.filter(op=>op==='platformManagementSession').length,1);assert.ok(!ops.includes('read'),'metadata management must not download business state');
- await page.reload();await page.locator('[data-pm-action="section"][data-pm-id="halls"]').waitFor();assert.equal(new URL(page.url()).searchParams.get('tab'),'platform');assert.deepEqual(errors,[]);
- console.log('Full application scoped management entry and reload passed; no business snapshot requested');
+ await page.evaluate(()=>localStorage.setItem('papa-v2-admin',JSON.stringify({token:'admin:synthetic-only',role:'super_admin',legacy:true,accountId:'11111111-1111-4111-8111-111111111111'})));
+ await page.reload();await page.locator('[data-pm-action=\"section\"][data-pm-id=\"halls\"]').waitFor();assert.equal(new URL(page.url()).searchParams.get('tab'),'platform');
+ assert.ok(!ops.includes('read'),'metadata management must not download business state');assert.deepEqual(errors,[]);
+ console.log('Full app rejects non-president centre entry and accepts president after reload; no business snapshot');
 }finally{await browser.close();server.close();}

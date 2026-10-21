@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {streamerAdminDestination} from '../src/streamer-admin-route.js';
-const source=fs.readFileSync('src/application-menu-launch.js','utf8').replace(/^import .*\n/gm,'').replaceAll('import.meta.url',"'https://paparty.app/src/application-menu-launch.js'");
+const source=fs.readFileSync('src/application-menu-launch.js','utf8').replace(/^import .*\r?\n/gm,'').replaceAll('import.meta.url',"'https://paparty.app/src/application-menu-launch.js'");
 test('independent entry restores menus rebuilt by an older cached app, without observing menu descendants',()=>{
  let callback,observed,calls=0,compact=false;
  const menu={classList:{contains:()=>compact},querySelectorAll:()=>[]},header={querySelector:()=>menu};
