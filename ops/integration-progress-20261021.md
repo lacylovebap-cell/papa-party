@@ -37,4 +37,6 @@
 
 ## 下一步
 
+續作補驗：tests/platform-management-edge.test.js 新增3項實際handler測試通過：未授權者不觸發帳號讀取、跨廳拒絕且登入設定僅回傳存在/啟用狀態、管理寫入使用已驗證身分且拒絕非法操作。此為本機驗證，尚未部署管理中心，也不代表原子權限撤銷與廳管理登入缺口已完成。
+
 先完成上述登入／原子授權缺口，依ops/platform-management-sql-contract.md整合驗證，再提交明確migration與風險供核准。新的hall slash aliases提案須一起確認後才套用。已上線歌曲／選單不重複部署。繼續開發分支已合併正式WEB.2，保留本機管理改動；此分支沒有推送正式main。
