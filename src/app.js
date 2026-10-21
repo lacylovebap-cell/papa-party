@@ -1,5 +1,5 @@
 
-import {installCompactMenu} from './compact-menu.js?v=1021-menu-1';
+import {installCompactMenu} from './compact-menu.js?v=1021-menu-2';
 import {createPlatformManagement} from './platform-management.js';
 import {createManagementEntry} from './management-entry.js';
 import {streamerWriteData} from './streamer-write-data.js';
