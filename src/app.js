@@ -1,4 +1,4 @@
-import {installCompactMenu} from './compact-menu.js';
+import {installCompactMenu} from './compact-menu.js?v=1021-menu-1';
 import {createPlatformDirectory} from './platform-directory.js';
 import {streamerWriteData} from './streamer-write-data.js';
 import {appStartButton,updateAppStart} from './pwa-start-ui.js?v=10.20-PWA.1';
