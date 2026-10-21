@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import {streamerAdminDestination} from '../src/streamer-admin-navigation.js';
+import {streamerAdminDestination} from '../src/streamer-admin-route.js';
 import {pageLocation} from '../src/streamer-navigation.js';
 const mountUrl='https://paparty.app/';
 test('streamer backend always opens queue and preserves the existing room scope',()=>{
  const u=new URL(streamerAdminDestination(mountUrl+'v2.html?streamer=papa&space=papa-party&spaceId=space-001&adminTab=platform&tab=platform&player=p1&queue=history#home',{mountUrl}));
  assert.equal(u.pathname,'/v2.html');assert.equal(u.searchParams.get('streamer'),'papa');
- assert.equal(u.searchParams.get('space'),'papa-party');assert.equal(u.searchParams.get('spaceId'),'space-001');
+ assert.equal(u.searchParams.has('space'),false);assert.equal(u.searchParams.has('spaceId'),false);
  assert.equal(u.searchParams.get('portalLogin'),'admin');assert.equal(pageLocation(u.href).tab,'queue');assert.equal(pageLocation(u.href).route,'admin');
  for(const key of ['tab','player','queue'])assert.equal(u.searchParams.has(key),false);
 });
