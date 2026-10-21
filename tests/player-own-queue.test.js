@@ -50,7 +50,7 @@ test('owner batch is atomic for a room, rejects foreign/finished/hidden/noop/inj
 });
 test('half-song replacement releases reservations and blocks increases that exceed the original hour',()=>{
  const {s,actor,id}=fixture(),half=s.songs[2].songId;s.songs[0].creditCost=2;s.queue[0].creditCost=2;s.queue[0].items[0].creditCost=2;
- const next=run(s,'replaceOwn',{id,songId:half},actor,now);assert.equal(next.queue[0].creditCost,1);assert.equal(savedQuota(scopeState(next),at,actor.playerId).reserved,1);
+ const next=run(s,'replaceOwn',{id,songId:half},actor,now);assert.equal(next.queue[0].creditCost,.5);assert.equal(savedQuota(scopeState(next),at,actor.playerId).reserved,.5);
  const full=structuredClone(next);full.streamerSettings.papa.hourlyLimit=1;
  assert.throws(()=>run(full,'replaceOwn',{id,songId:s.songs[0].songId},actor,now),/原小時/);
  const insufficient=structuredClone(s);insufficient.ledger=[];assert.throws(()=>run(insufficient,'replaceOwn',{id,songId:s.songs[1].songId},actor,now),/存歌不足/);

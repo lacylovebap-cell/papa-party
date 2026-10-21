@@ -36,7 +36,7 @@ test('a later live gift or invalid request note failure cannot retain an earlier
 
 test('half repeat and paired halves each reserve their complete one-credit quote',()=>{
  let source=setup({costs:[.5,.5,.5],limit:2});source=run(source,'song',{...source.songs[1],shortMode:'pair',pairSongIds:[source.songs[2].songId]});
- const next=batch(source,[row(source,0),row(source,1,{pairSongId:source.songs[2].songId})]);assert.deepEqual(next.queue.map(q=>q.creditCost),[1,1]);assert.equal(next.queue[0].items[0].performances,2);assert.equal(next.queue[1].items.length,2);assert.equal(reservedHour(room(next),now),2);assert.equal(reservedCredits(room(next),actor(next).playerId),2);
+ const next=batch(source,[row(source,0,{pairSongId:source.songs[0].songId}),row(source,1,{pairSongId:source.songs[2].songId})]);assert.deepEqual(next.queue.map(q=>q.creditCost),[1,1]);assert.equal(next.queue[0].items[0].performances,2);assert.equal(next.queue[1].items.length,2);assert.equal(reservedHour(room(next),now),2);assert.equal(reservedCredits(room(next),actor(next).playerId),2);
 });
 
 test('batch fills common capacity before personal quota and validates subsequent rows against both',()=>{

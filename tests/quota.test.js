@@ -43,7 +43,7 @@ test('player and manager cancellation release the full two-credit reservation wh
 test('half song repeat and paired half songs each consume one hourly slot',()=>{
  let s=setup(),a=s.songs[2],b=s.songs[3];
  s=run(s,'song',{...a,shortMode:'both',pairSongIds:[b.songId]});
- s=request(s,2);assert.equal(s.queue[0].items[0].performances,2);assert.equal(s.queue[0].creditCost,1);
+ s=request(s,2,{pairSongId:a.songId});assert.equal(s.queue[0].items[0].performances,2);assert.equal(s.queue[0].creditCost,1);
  s=request(s,2,{pairSongId:b.songId});assert.equal(s.queue[1].items.length,2);assert.equal(s.queue[1].creditCost,1);
  assert.deepEqual(quota(s),[0,2]);s=complete(s,s.queue[0].id);s=complete(s,s.queue[1].id);
  assert.deepEqual(quota(s),[2,0]);assert.equal(balance(s,player(s).playerId),18);

@@ -1,3 +1,6 @@
+import {createLobbyImageReader} from '../supabase/functions/party-api/lobby-images.js';
+import {createPublicRoutes} from '../supabase/functions/party-api/public-routes.js';
+import {createPublicAppHomes} from '../supabase/functions/party-api/pwa-homes.js';
 import {roomBadgeChanges} from '../supabase/functions/party-api/badge-state.js';
 import * as bulk from '../src/player-bulk-tools.js';
 import test from 'node:test';
@@ -28,6 +31,7 @@ function fixture(outcome='success'){
  const who={role:'streamer_admin',accountId:'00000000-0000-4000-8000-000000000001',spaceId:'space-001',streamerId:'papa',playerId:null};
  const fetch=async(url,request)=>{
   const path=new URL(url).pathname,b=request.body?JSON.parse(request.body):null;requests.push({path,body:b});
+  if(path.endsWith('/papa_management_room_permission')){assert.equal(b.subject,who.accountId);assert.equal(b.requested_streamer,'papa');return Response.json(true);}
   if(path.endsWith('/papa_verified_session_actor'))return Response.json(expired?null:who);
   if(path.endsWith('/papa_streamer_directory'))return Response.json(state.streamers.map(r=>({...r,spaceId:'space-001'})));
   if(path.endsWith('/papa_operation_receipt')){
@@ -57,7 +61,7 @@ function fixture(outcome='success'){
    scope:{spaceId:b.requested_space,roomId:b.requested_room},day:accountingDay(new Date().toISOString(),19),rolloverHour:19,timezone:'Asia/Taipei',revision:state.revision});
   throw Error('Unexpected fixture endpoint '+path);
  };
- const context=vm.createContext({roomBadgeChanges,accountingDay,...core,...access,...patch,...rules,...bulk,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
+ const context=vm.createContext({createLobbyImageReader,createPublicRoutes,createPublicAppHomes,roomBadgeChanges,accountingDay,...core,...access,...patch,...rules,...bulk,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
   Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://db.example':'fixture-key'},serve:fn=>handler=fn},EdgeRuntime:{waitUntil(){}},
   CATALOG_OPS:new Set(),catalogMetadataView:view=>view,fixtureState:state});
  vm.runInContext(roomCode+'\n'+code,context);
@@ -142,4 +146,16 @@ test('native business handler remains closed while the receipt dependency is pre
  assert.equal(result.status,400);assert.match(result.body.error,/資料頁尚未開放/);
  assert.equal(f.requests.some(r=>r.path.endsWith('/papa_native_operation_receipt')||r.path.endsWith('/papa_operation_receipt')),false);
  assert.equal(f.writes(),0);assert.equal(f.pushes(),0);
+});
+
+
+test('confirmed batch price mismatch creates no receipt; a successful receipt replays its original amounts',async()=>{
+ const f=fixture();f.player();const rows=[{songId:'s1',kind:'live',giftConfirmed:true}],quote={songId:'s1',kind:'live',creditCost:1,price:2990,double:500};
+ const job={streamer:'papa',rows,expectedQuotes:[{...quote,price:1}]},body={op:'requestsBatch',revision:7,operationId,jobs:[job]};
+ const rejected=await f.invoke(body);assert.equal(rejected.body.results[0].ok,false);assert.match(rejected.body.results[0].error,/價格已變更/);assert.equal(f.writes(),0);assert.equal(f.attempts(),0);
+ const missing=await f.invoke({op:'operationReceipt',operationId,intent:{op:'requestsBatch',rows}});assert.deepEqual(missing.body,{committed:false});
+ job.expectedQuotes=[quote];const first=await f.invoke(body);assert.equal(first.body.results[0].ok,true,JSON.stringify(first.body));assert.equal(f.writes(),1);assert.equal(f.state.queue.at(-1).price,2990);
+ // Retry the same submitted intent after the room's current settings have changed.
+ f.state.streamerSettings.papa.livePrice=7000;
+ const replay=await f.invoke(body);assert.equal(replay.body.results[0].ok,true,JSON.stringify(replay.body));assert.equal(f.writes(),1);assert.equal(f.attempts(),1);assert.equal(f.state.queue.at(-1).price,2990);
 });

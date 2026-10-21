@@ -1,6 +1,6 @@
 const routes=new Set(['home','book','common-book','center','gallery','admin']);
 const playerTabs=new Set(['overview','favorites','ledger','queue','achievements','crowns','cards','wishes']);
-const adminTabs=new Set(['queue','songs','players','ledger','crowns','cards','wishes','stats','events','medals','settings','activity','catalog']);
+const adminTabs=new Set(['queue','songs','players','ledger','crowns','cards','wishes','stats','events','medals','settings','activity','catalog','platform']);
 export function pageLocation(href,fallbackTab='queue'){
  const url=new URL(href),route=routes.has(url.hash.slice(1))?url.hash.slice(1):'home';
  const requested=url.searchParams.get('adminTab'),tab=adminTabs.has(requested)?requested:adminTabs.has(fallbackTab)?fallbackTab:'queue';
