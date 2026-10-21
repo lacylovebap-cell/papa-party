@@ -37,4 +37,4 @@
 
 ## 下一步
 
-先完成上述登入／原子授權缺口，依ops/platform-management-sql-contract.md整合驗證，再提交明確migration與風險供核准。新的hall slash aliases提案須一起確認後才套用。已上線歌曲／選單不重複部署。繼續開發目錄仍以865d5cf為base，後續合併WEB.2時保留本機管理改動。
+先完成上述登入／原子授權缺口，依ops/platform-management-sql-contract.md整合驗證，再提交明確migration與風險供核准。新的hall slash aliases提案須一起確認後才套用。已上線歌曲／選單不重複部署。繼續開發分支已合併正式WEB.2，保留本機管理改動；此分支沒有推送正式main。
