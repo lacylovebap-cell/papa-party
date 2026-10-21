@@ -4,6 +4,9 @@ export function installCompactMenu({document,window,route,hallNavigation,spaceId
  window.__paMenuCleanup?.();
  menu.classList.add('compact-main-menu');menu.open=false;
  const summary=menu.querySelector('summary');summary.setAttribute('aria-label','開啟選單');
+ const icon=document.createElement('span');icon.className='compact-menu-icon';icon.setAttribute('aria-hidden','true');
+ for(let i=0;i<3;i++)icon.append(document.createElement('span'));
+ summary.replaceChildren(icon);summary.setAttribute('aria-expanded','false');
  // A same-header reinstall should regroup the original action nodes rather
  // than nesting the previous sections inside the tools section.
  const originals=[...panel.children].flatMap(node=>node.matches('section')?[...node.querySelectorAll('.compact-menu-items')].flatMap(items=>[...items.children]):[node]);panel.replaceChildren(...originals);
@@ -14,7 +17,7 @@ export function installCompactMenu({document,window,route,hallNavigation,spaceId
  const remaining=[...panel.children];if(remaining.length){const section=document.createElement('section'),heading=document.createElement('h3'),items=document.createElement('div');heading.textContent='設定與工具';items.className='compact-menu-items';items.append(...remaining);section.append(heading,items);sections.splice(Math.min(2,sections.length),0,section);}
  panel.replaceChildren(...sections);
  let watcher=null,disposed=false,hallRequested=false;
- const close=()=>{menu.open=false;watcher?.destroy();watcher=null;summary.textContent='選單';summary.setAttribute('aria-expanded','false');summary.setAttribute('aria-label','開啟選單');};
+ const close=()=>{menu.open=false;watcher?.destroy();watcher=null;summary.setAttribute('aria-expanded','false');summary.setAttribute('aria-label','開啟選單');};
  async function loadHall(){
   if(hallRequested||!hallNavigation||!spaceId)return;hallRequested=true;
   try{const hall=await hallNavigation.get(spaceId);if(disposed||!menu.isConnected||!hall)return;
@@ -22,7 +25,7 @@ export function installCompactMenu({document,window,route,hallNavigation,spaceId
    const link=document.createElement('a');link.className='lobby-button';link.href=hall.url;link.textContent=hall.name.endsWith('大廳')?hall.name:hall.name+'大廳';navigationSection.querySelector('.lobby-button')?.remove();navigationSection.append(link);
   }catch{hallRequested=false;}
  }
- const toggle=()=>{summary.textContent=menu.open?'×':'選單';summary.setAttribute('aria-expanded',String(menu.open));summary.setAttribute('aria-label',menu.open?'關閉選單':'開啟選單');if(menu.open){document.querySelectorAll('.compact-main-menu[open]').forEach(other=>{if(other!==menu)other.open=false;});if(!watcher&&window.CloseWatcher){try{watcher=new window.CloseWatcher();watcher.addEventListener('close',close);}catch{watcher=null;}}resize();loadHall();}else{watcher?.destroy();watcher=null;}};
+ const toggle=()=>{summary.setAttribute('aria-expanded',String(menu.open));summary.setAttribute('aria-label',menu.open?'關閉選單':'開啟選單');if(menu.open){document.querySelectorAll('.compact-main-menu[open]').forEach(other=>{if(other!==menu)other.open=false;});if(!watcher&&window.CloseWatcher){try{watcher=new window.CloseWatcher();watcher.addEventListener('close',close);}catch{watcher=null;}}resize();loadHall();}else{watcher?.destroy();watcher=null;}};
  const outside=e=>{if(menu.open&&!menu.contains(e.target))close();};
  const key=e=>{if(e.key==='Escape'&&menu.open){e.preventDefault();close();summary.focus();}};
  const resize=()=>{const top=summary.getBoundingClientRect().bottom;panel.style.maxHeight=Math.max(44,(window.visualViewport?.height||window.innerHeight)-top-24)+'px';};
@@ -33,5 +36,5 @@ export function installCompactMenu({document,window,route,hallNavigation,spaceId
  dialogObserver?.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['open']});
  menu.addEventListener('toggle',toggle);menu.addEventListener('click',click);document.addEventListener('pointerdown',outside);document.addEventListener('keydown',key);window.addEventListener('popstate',close);window.addEventListener('hashchange',close);window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);resize();
  window.__paMenuCleanup=()=>{disposed=true;close();dialogObserver?.disconnect();menu.removeEventListener('toggle',toggle);menu.removeEventListener('click',click);document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',key);window.removeEventListener('popstate',close);window.removeEventListener('hashchange',close);window.removeEventListener('resize',resize);window.visualViewport?.removeEventListener('resize',resize);};
- if(!document.querySelector('#compact-menu-styles')){const link=document.createElement('link');link.id='compact-menu-styles';link.rel='stylesheet';link.href=new URL('./compact-menu.css',import.meta.url).href;document.head.append(link);}
+ if(!document.querySelector('#compact-menu-styles')){const link=document.createElement('link');link.id='compact-menu-styles';link.rel='stylesheet';link.href=new URL('./compact-menu.css?v=1021-menu-1',import.meta.url).href;document.head.append(link);}
 }
