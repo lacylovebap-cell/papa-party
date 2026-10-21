@@ -8,7 +8,7 @@ export function drawSong(songs,category,seen=[],previous=null,random=Math.random
  const selected=Array.isArray(category)?category:[category];
  const tags=new Set(selected.filter(value=>typeof value==='string'&&value.startsWith('tag:')).map(value=>value.slice(4)).filter(Boolean));
  const all=Array.isArray(category)?selected.length===0||selected.includes('all'):tags.size===0;
- const candidates=songs.filter(s=>all||tags.size>0&&[...tags].every(tag=>newPracticeSongTags(s).includes(tag)));
+ const candidates=songs.filter(s=>!s.hidden&&!s.deleted&&!s.disabled&&s.active!==false&&s.available!==false&&(all||tags.size>0&&[...tags].every(tag=>newPracticeSongTags(s).includes(tag))));
  if(!candidates.length)return {song:null,seen:[]};
  let history=seen.filter(id=>candidates.some(s=>s.songId===id)),pool=candidates.filter(s=>!history.includes(s.songId));
  if(!pool.length){history=[];pool=candidates.filter(s=>s.songId!==previous);if(!pool.length)pool=candidates;}

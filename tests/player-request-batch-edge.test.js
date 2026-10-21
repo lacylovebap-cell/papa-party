@@ -15,7 +15,7 @@ function declaration(name){
  const start=lines.findIndex(line=>line.startsWith('async function '+name+'('));assert.ok(start>=0,name);
  const end=lines.findIndex((line,index)=>index>start&&line==='}');assert.ok(end>start,name+' closes');return lines.slice(start,end+1).join('\n');
 }
-const start=source.indexOf(" if(b.op==='requestsBatch'){"),end=source.indexOf(" if(b.op==='listeningHistoryPage'){",start);
+const start=source.indexOf(" if(b.op==='requestsBatch'||b.op==='requestBatchQuote'){"),end=source.indexOf(" if(b.op==='listeningHistoryPage'){",start);
 assert.ok(start>=0&&end>start);
 const conflictHelpers=source.slice(source.indexOf('const revisionConflictMessage='),source.indexOf('async function api('));
 const selectionHelpers=source.slice(source.indexOf('// Use verified display metadata'),source.indexOf('async function mutateStreamerRegistry('));

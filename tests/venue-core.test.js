@@ -72,7 +72,7 @@ test('completion cannot consume credits still reserved by another request in the
 
 test('half-song repeats and pairs choose a pool using the complete one-credit quote',()=>{
  let s=deposit(radio(deposit(setup(),2)),0.5,'radio');
- s=request(s,0.5);assert.equal(s.queue[0].creditCost,1);assert.equal(s.queue[0].items[0].performances,2);
+ s=request(s,0.5,{pairSongId:song(s,0.5).songId});assert.equal(s.queue[0].creditCost,1);assert.equal(s.queue[0].items[0].performances,2);
  assert.equal(s.queue[0].consumed_storage_pool,'shengma');assert.equal(held(s),1);assert.equal(held(s,'radio'),0);
  s=run(s,'song',{title:'搭配半首',artist:'歌手',creditCost:0.5});
  const a=song(s,0.5),b=s.songs.at(-1);s=run(s,'song',{...a,shortMode:'pair',pairSongIds:[b.songId]});

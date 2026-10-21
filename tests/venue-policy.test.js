@@ -121,7 +121,7 @@ test('settings, snapshot sources and actual quoted costs reject malformed values
 
 test('weighted and paired-half quotes share the existing hourly quota across venues',()=>{
  const state=radio({ledger:[ledger(5,'radio'),ledger(5,'shengma')],songs:[{songId:'long',title:'長歌',artist:'歌手',creditCost:2},{songId:'half-a',title:'半首甲',artist:'歌手',creditCost:0.5,shortMode:'both',pairSongIds:['half-b']},{songId:'half-b',title:'半首乙',artist:'歌手',creditCost:0.5}]});
- for(const payload of [{},{pairSongId:'half-b'}]){
+ for(const payload of [{pairSongId:'half-a'},{pairSongId:'half-b'}]){
   const quoted=quoteSong(state,'half-a',payload,playerId,now);assert.equal(quoted.creditCost,1);
   const snapshot=venuePolicySavedSnapshot(state,playerId,quoted.creditCost);
   assert.deepEqual(snapshot,{venue:state.settings.current_space,consumed_storage_pool:state.settings.current_space});

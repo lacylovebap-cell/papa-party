@@ -1,0 +1,42 @@
+{
+  "release": "10.21-WEB.2",
+  "commit": "b56e3472978e79d0aa61a4f335d0368b992c8c2d",
+  "verifiedAt": "2026-10-21T06:40:42.442673+00:00",
+  "pagesRun": 39556546493,
+  "pagesConclusion": "success",
+  "edgeVersion": 55,
+  "edgeStatus": "ACTIVE",
+  "edgeSourceMatches": true,
+  "testsPassed": 62,
+  "menuViewportWidths": [
+    320,
+    375,
+    390,
+    430,
+    768,
+    1024,
+    1440
+  ],
+  "browserFixtures": [
+    "favorite weighted totals",
+    "manager hidden/manual and dice",
+    "half repeat and pair",
+    "stale single/favorite prices"
+  ],
+  "liveFilesMatched": [
+    "release.json",
+    "v2.html",
+    "src/app.js",
+    "src/core.js",
+    "src/compact-menu.css",
+    "index.html"
+  ],
+  "databaseMigrationsApplied": [],
+  "productionBusinessDataChanged": false,
+  "officialWebsiteChanged": false,
+  "excluded": [
+    "platform management schema/UI",
+    "new hall slash route migration",
+    "test streamer permanent deletion"
+  ]
+}

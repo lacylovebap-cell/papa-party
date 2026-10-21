@@ -1,0 +1,36 @@
+{
+  "release": "10.21-WEB.1",
+  "codeCommit": "865d5cf85e1e37e107e7a42af195dcf1b07c0ccc",
+  "verifiedAt": "2026-10-20T16:41:59.427Z",
+  "pagesRun": 39459489228,
+  "pagesConclusion": "success",
+  "edgeVersion": 54,
+  "migration": "platform_directory_readonly",
+  "testsPassed": 11,
+  "liveFilesMatchedIgnoringLineEndings": [
+    "index.html",
+    "v2.html",
+    "src/app.js",
+    "src/platform-directory.js",
+    "src/streamer-write-data.js"
+  ],
+  "anonymousDirectoryRejected": true,
+  "acl": {
+    "anon": false,
+    "authenticated": false,
+    "serviceRole": true
+  },
+  "liveDirectory": {
+    "total": 1,
+    "page": 1,
+    "pages": 1,
+    "returnedRows": 1
+  },
+  "businessDataChanged": false,
+  "officialSiteDesignChanged": false,
+  "testStreamersDeleted": false,
+  "limitations": [
+    "Tenant creation, granular administration and subscriptions remain incomplete.",
+    "Authenticated browser and physical-device acceptance not performed."
+  ]
+}
