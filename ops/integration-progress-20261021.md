@@ -1,46 +1,11 @@
-# 2026-10-21 進度與正式狀態
+# 2026-10-21 平台管理中心正式部署
 
-## 已上線：10.21-WEB.2
+WEB.3 已上線。main 690f8e469bdfbc01817874b9cad2fb9026b0cd5c，Pages 39595879028 success，party-api v56 ACTIVE，正式 Edge 原始碼完全一致。六項管理欄位、管理 Audit 及相關服務端函式依使用者批准套用；正式查核管理異動0筆、原 Space 分類/owner/revision未變、舊管理員授權退化0筆。
 
-- main commit b56e3472978e79d0aa61a4f335d0368b992c8c2d；GitHub Pages 39556546493 成功。
-- party-api v55 ACTIVE；正式下載內容與已驗證本機 bundle 完全相同。
-- 歌曲首數／現點給歌手金額連動；半首預設一次0.5，主動唱兩次或配對才1；原雙費規則保留。
-- 玩家不可點隱藏歌／隱藏配對；管理員手動可選；骰子排除隱藏、刪除、停用及不提供歌曲。
-- 單首及收藏確認拒絕背景更新後的舊報價；收藏即時更新金額；跨主播一次唯讀報價，結算前核對已確認首數／金額。
-- 管理代點與分配摘要依半首／兩次／配對即時變更；修改既有重複半首的備註保留原1首及2次演唱。
-- 精簡應用程式選單，四組、目前頁隱藏、44px操作、外點/Esc/導航/成功開彈窗關閉。
-- 62 項針對性自動測試通過；三組實際 headless browser fixture 通過；7種選單寬度通過。
-- 正式 GET 六檔一致；官網 index、樣式、登入、manifest、推播 worker保持原有內容。
-- 無正式 migration、帳務補正、玩家資料寫入或測試通知。
+已上線：五分頁管理中心；廳 metadata新增/編輯/停用/恢復；既有Space主播新增/編輯/停用；既有管理帳號啟停/安全重設主播登入密碼；既有 Account 授權搜尋/任命/撤銷；已停用主播封存/還原與只回傳數量的依賴檢查；既有驗證帳號可依廳管理權限進入管理中心，業務身分不被升級。會員/Space撤權與允許的業務commit、勳章/曲庫/額度/網址寫入同交易重驗。
 
-## 本機已完成、尚未部署
+42項 targeted tests、4項真正PostgreSQL15多連線案例、管理UI7種寬度與競態、完整app管理入口/重整測試通過。保留同期另一分支已上線的漢堡選單更新。正式app以實際WEB.3查詢參數驗證內容一致。
 
-- src/platform-management.js/css 五分頁管理中心：搜尋、總頁數／跳頁、編輯／停用／恢復、既有主播registry新增/編輯、管理授權及封存操作接線；登入設定按需讀單筆並保留原啟停狀態。失敗保留輸入，晚回應／離開頁面不重新載入私人清單。
-- ops/platform-management-proposed.sql 與directory companion：租戶中繼資料、冪等原子RPC、append-only Audit、封存反重新啟用guard、依賴數量報告、新舊權限相容。
-- Edge新增管理RPC接線與streamer_admin權限門禁；舊完整管理read要求all，窄權限無法下載整包私人資料。
-- 管理SQL/UI相關13項測試通過；管理中心7寬度、表單失敗、晚回應競態的browser fixture通過。
-- 所屬廳導航改用已部署publicAppHome唯讀查詢按需快取；不依spaceId猜廳名稱。
-- 其他廳 /廳ID/主播ID 的SQL提案保留所有舊alias及Audit；3個隔離情境通過。APP來源adapter與子分頁新舊路徑5項通過。
+尚未完成：無既有帳號時的獨立管理登入帳號建立；新租戶完整營運啟用；窄權限業務模組頁面讀取（管理 metadata 可用，舊整包業務讀取拒絕）；負責人交接/類型重分類；永久刪除；其他廳slash網址migration。後四類有各自資料保護/批准範圍，不能把本次六欄一表批准當成任意正式搬移/刪除的批准。
 
-## 仍未完成／不能宣稱整套平台完成
-
-- space_admin管理登入橋接、窄權限模組讀取UI、個別管理帳號新增/登入方式/重綁/安全重設密碼、負責人交接與租戶重分類。
-- 新租戶完整營運隔離及啟用；目前新增空間刻意保持suspended，不能以管理UI繞過既有資料頁門禁。
-- 窄權限撤銷在舊商務commit內的同交易重驗與實際多連線Postgres並發驗證；目前中央Edge門禁不能取代原子SQL授權。
-- 永久刪除；依賴報告一律safeToDelete=false，未完整查核關聯不宣稱可刪。
-- 真實Android/iOS/PWA與無CloseWatcher的原生返回鍵完整驗收；headless fixture不代表實機驗收。
-- 正式資料庫變更仍須另行核准，不能把一般「上線」視為migration批准。
-
-## 正式唯讀查核
-
-2026-10-21只查Space/公開路由中繼資料：現有唯一Space為space-001、slug papa-party、display_name PA Party、active；公開路由layout flat、code sm，共12個主播mapping。這證明目前聲瑪公開入口與相容Space對應；沒有自行重命名、重分類、搬移或指派owner。
-
-## 下一步
-
-2026-10-21 使用者已明確批准六個管理欄位、一張管理 Audit、管理函式及封存保護，條件為完成登入／原子授權驗證後部署。不要再次要求相同批准；未涵蓋跨廳搬移、永久刪除或網址 migration。
-
-新增 ops/platform-management-commit-proposed.sql：streamer_admin 商務 commit 包裝重用既有結算／回執 RPC；依 Account→Space→mapping/membership 鎖定後重驗權限，同交易執行原 commit。Edge commit 已接線。新增隔離測試涵蓋撤權拒絕、錯廳拒絕、函式 allowlist、匿名拒絕及商務失敗 rollback；通過。原回執 handler 11項測試通過，原管理 lifecycle 7項亦通過。這仍不等於實際多連線並發驗證，也未涵蓋所有繞過 commit 的個別寫入 RPC。廳管理員登入橋接／窄權限讀取仍待完成，尚未套用正式 migration 或部署。
-
-續作補驗：tests/platform-management-edge.test.js 新增3項實際handler測試通過：未授權者不觸發帳號讀取、跨廳拒絕且登入設定僅回傳存在/啟用狀態、管理寫入使用已驗證身分且拒絕非法操作。此為本機驗證，尚未部署管理中心，也不代表原子權限撤銷與廳管理登入缺口已完成。
-
-先完成上述登入／原子授權缺口，依ops/platform-management-sql-contract.md整合驗證，再提交明確migration與風險供核准。新的hall slash aliases提案須一起確認後才套用。已上線歌曲／選單不重複部署。繼續開發分支已合併正式WEB.2，保留本機管理改動；此分支沒有推送正式main。
+沒有正式玩家/帳務/演唱資料更正、私人Audit匯出、清理刪除、付費升級。官網index/主題/manifest/sw保留。回復方式是還原Web/Edge至既有release，保留新增欄位、Audit及歷史，不破壞式drop。

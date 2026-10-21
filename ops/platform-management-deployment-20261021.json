@@ -1,0 +1,38 @@
+{
+  "version": "10.21-WEB.3",
+  "commit": "690f8e469bdfbc01817874b9cad2fb9026b0cd5c",
+  "edgeVersion": 56,
+  "edgeSourceSha256": "6b05acaaa5b7b6ece89bd6a5720393213eeefab014610b79086dd4a656f7e23a",
+  "migration": "platform_management_verified_integration",
+  "pagesRun": 39595879028,
+  "pagesStatus": "completed",
+  "targetedTests": 42,
+  "postgresConcurrencyCases": 4,
+  "browserWidths": [
+    320,
+    375,
+    390,
+    430,
+    768,
+    1024,
+    1440
+  ],
+  "appEntryReload": true,
+  "productionManagementWrites": 0,
+  "existingSpaceMetadataChanged": 0,
+  "legacyManagerAccessRegressions": 0,
+  "remaining": [
+    "new-credential creation and standalone hall login",
+    "new tenant operational provisioning",
+    "narrow-role business page read UI",
+    "owner transfer and tenant type change",
+    "permanent deletion review and authorization",
+    "separate hall URL migration"
+  ],
+  "pagesConclusion": "success",
+  "liveAssetsMatch": true,
+  "edgeSourceMatch": true,
+  "unauthenticatedEntryRejected": true,
+  "completedAt": "2026-10-21T11:59:51.702Z",
+  "advisorNewWarnings": 0
+}
