@@ -929,7 +929,12 @@ const portalMode=incoming.searchParams.get('portalLogin');
 if(!demo&&['player','admin'].includes(portalMode)){
  incoming.searchParams.delete('portalLogin');history.replaceState(history.state,'',incoming.href);
  route=portalMode==='admin'?'admin':'home';
- if(portalMode==='admin'?!admin:!session){showSpaceEntry();if(portalMode==='admin')await adminLogin();else await loginDialog();return;}
+ if(portalMode==='admin'?!admin:!session){
+  // A selected room must load its scoped directory before opening login.
+  // The global entry placeholder contains only the seeded papa descriptor.
+  if(entryPending)showSpaceEntry();else {route='home';await refresh(true);}
+  if(portalMode==='admin')await adminLogin();else await loginDialog();return;
+ }
 }
 if(managementPage()&&(admin||session)){render();return;}if(entryPending&&!await openSpaceEntry())return;await refresh(true);if((admin||session)&&!demo)void managementEntry.load();if(route==='common-book')await loadCommonBook(0);if(typeof publicRouteContext!=='undefined'&&publicRouteContext){if(requestedPage==='admin'&&!admin)await adminLogin();else if(requestedPage==='center'&&!session)await loginDialog();}if(pendingCommonRequest){if(session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}else await loginDialog();}}catch(e){header();$('#app').innerHTML=card('連線還沒準備好',`<p>${h(e.message)}</p><p class="muted">管理員完成 V2 部署設定後即可使用。現有正式資料沒有被改動。</p>${button('主播後台','admin')}`,true);}}
 let lastHour=hourKey(clock());setInterval(()=>{const nextHour=hourKey(clock());if(!entryPending&&!document.hidden&&nextHour!==lastHour){lastHour=nextHour;refresh(true).catch(()=>{});}if($('#hour'))$('#hour').innerHTML=hour();},1000);

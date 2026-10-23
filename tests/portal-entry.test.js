@@ -6,16 +6,17 @@ import {legacyPortalDestination} from '../src/portal-routing.js';
 
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const bootstrap=source.slice(source.indexOf('async function start(){'),source.indexOf('\nlet lastHour=',source.indexOf('async function start(){')));
-function fixture({mode='player',session=null,admin=null}={}){
+function fixture({mode='player',session=null,admin=null,entryPending=true,readError=false}={}){
  const effects=[];
- const context=vm.createContext({URL,demo:false,session,admin,route:'home',entryPending:true,
+ const context=vm.createContext({URL,demo:false,session,admin,route:'home',entryPending,
   location:{href:'https://paparty.app/v2.html?portalLogin='+mode},
   history:{state:null,replaceState(_state,_title,url){context.location.href=String(url);}},
   showSpaceEntry(){effects.push('entry-screen');},
   async loginDialog(){effects.push('player-login');},
   async adminLogin(){effects.push('admin-login');},
   async openSpaceEntry(){effects.push('verified-entry:'+context.route);return false;},
-  async refresh(){effects.push('room-read');},
+  async refresh(){effects.push('room-read');if(readError)throw Error('Scope denied');},
+  managementPage:()=>false,
   header(){effects.push('error');},$:()=>({}),card:()=>'',h:String,button:()=>''
  });
  vm.runInContext(bootstrap,context);
@@ -32,6 +33,17 @@ test('portal manager entry opens manager login even when a player is signed in',
 });
 test('portal player entry does not borrow a manager identity',async()=>{
  const f=fixture({admin:{role:'super_admin'}});await f.run();assert.deepEqual(f.effects,['entry-screen','player-login']);
+});
+
+for(const mode of ['player','admin'])test('scoped '+mode+' entry loads its authoritative room directory before showing login',async()=>{
+ const f=fixture({mode,entryPending:false});await f.run();
+ assert.deepEqual(f.effects,['room-read',mode==='admin'?'admin-login':'player-login']);
+ assert.equal(f.context.route,'home');
+});
+
+test('a rejected room scope never falls back to the seeded papa login directory',async()=>{
+ const f=fixture({mode:'admin',entryPending:false,readError:true});await f.run();
+ assert.deepEqual(f.effects,['room-read','error']);
 });
 for(const mode of ['player','admin'])test('remembered '+mode+' still resolves permissions through existing entry',async()=>{
  const f=fixture({mode,session:mode==='player'?{role:'player'}:null,admin:mode==='admin'?{role:'streamer_admin'}:null});
