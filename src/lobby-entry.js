@@ -17,7 +17,15 @@ else{
 }
 function startLobbyPage(){
 const notify=message=>{$('#lobby-entry-status').textContent=message;};
-notify(lobbyLoginPrompt(location.href,scope.name));
+const loginPrompt=lobbyLoginPrompt(location.href,scope.name);
+if(loginPrompt){
+ const dialog=$('#dialog');
+ dialog.innerHTML='<div class="dialog-head"><h2 id="lobby-login-title">請先選擇主播</h2></div><div class="dialog-body"><p>'+escape(loginPrompt)+'</p><button type="button" data-login-confirm autofocus>確認</button></div>';
+ dialog.setAttribute('aria-labelledby','lobby-login-title');
+ dialog.querySelector('[data-login-confirm]').onclick=()=>{dialog.close();$('#lobby-room-q').focus();};
+ dialog.addEventListener('close',()=>dialog.removeAttribute('aria-labelledby'),{once:true});
+ dialog.showModal();
+}
 $('#lobby-player-login').href=lobbyLoginLocation(location.href,'player');
 $('#lobby-admin-login').href=lobbyLoginLocation(location.href,'admin');
 const api=async body=>{
