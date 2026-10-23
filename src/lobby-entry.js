@@ -4,7 +4,7 @@ import {API,PUBLISHABLE_KEY} from './config.js?v=10.20-WEB.1';
 import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.20-WEB.1';
 import {createPublicShare} from './share-dialog.js';
 import {createPublicLinkClient,readPublicRouteContext} from './public-links.js';
-import {lobbyPublicScope,lobbyLoginLocation,lobbyLoginPrompt,openLobbyPublicShare} from './lobby-public-share.js';
+import {lobbyPublicScope,lobbyLoginLocation,lobbyLoginIntent,lobbyLoginPrompt,openLobbyPublicShare} from './lobby-public-share.js';
 const $=s=>document.querySelector(s),escape=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mountUrl=new URL('../',import.meta.url),context=readPublicRouteContext({document,href:location.href,mountUrl});
 const scope=lobbyPublicScope({context,href:location.href,mountUrl});
@@ -17,8 +17,13 @@ else{
 }
 function startLobbyPage(){
 const notify=message=>{$('#lobby-entry-status').textContent=message;};
-const loginPrompt=lobbyLoginPrompt(location.href,scope.name);
-if(loginPrompt){
+let loginMode=lobbyLoginIntent(location.href);
+function showLoginPrompt(kind){
+ loginMode=kind;
+ const target=lobbyLoginLocation(location.href,kind);
+ history.replaceState(history.state,'',target);
+ for(const link of document.querySelectorAll('#rooms-results a,#songs-results a')){const url=new URL(link.href);url.searchParams.set('portalLogin',kind);link.href=url.href;}
+ const loginPrompt=lobbyLoginPrompt(target,scope.name);
  const dialog=$('#dialog');
  dialog.innerHTML='<div class="dialog-head"><h2 id="lobby-login-title">請先選擇主播</h2></div><div class="dialog-body"><p>'+escape(loginPrompt)+'</p><button type="button" data-login-confirm autofocus>確認</button></div>';
  dialog.setAttribute('aria-labelledby','lobby-login-title');
@@ -28,6 +33,7 @@ if(loginPrompt){
 }
 $('#lobby-player-login').href=lobbyLoginLocation(location.href,'player');
 $('#lobby-admin-login').href=lobbyLoginLocation(location.href,'admin');
+for(const kind of ['player','admin'])$('#lobby-'+kind+'-login').onclick=event=>{event.preventDefault();showLoginPrompt(kind);};
 const api=async body=>{
  const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)}),value=await response.json();
  if(!response.ok||value.error)throw Error(value.error||'連線暫時無法使用，請稍後重試');return value;
@@ -47,7 +53,7 @@ function optionList(input,rows,selected,defaultLabel){
  input.innerHTML='<option value="">'+defaultLabel+'</option>'+choices.map(x=>'<option value="'+escape(x)+'" '+(x===selected?'selected':'')+'>'+escape(x)+'</option>').join('');
 }
 let roomRotation;
-const lobby=createPublicLobby({roomPageSize:3,href:location.href,replaceLocation:url=>history.replaceState(null,'',url),api,render:(kind,value,q)=>{
+const lobby=createPublicLobby({roomPageSize:3,href:location.href,replaceLocation:url=>history.replaceState(null,'',loginMode?lobbyLoginLocation(url,loginMode):url),api,render:(kind,value,q)=>{
  $('#'+kind+'-results').innerHTML=kind==='rooms'?lobbyRoomsHtml(value,location.href):lobbySongsHtml(value,location.href);
  if(kind==='rooms')roomRotation?.sync();
  if(kind==='songs'){
