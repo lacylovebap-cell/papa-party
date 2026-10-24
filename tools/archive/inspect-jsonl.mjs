@@ -12,7 +12,6 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import readline from 'node:readline';
 import { createGunzip } from 'node:zlib';
-import { pipeline } from 'node:stream/promises';
 
 const columns = [
   'id', 'streamer_id', 'entity_kind', 'entity_id', 'action',
@@ -43,9 +42,7 @@ function eventId(value) {
 
 async function digestFile(filepath) {
   const digest=crypto.createHash('sha256');
-  await pipeline(fs.createReadStream(filepath), async function* (chunks) {
-    for await (const chunk of chunks) digest.update(chunk);
-  });
+  for await (const chunk of fs.createReadStream(filepath)) digest.update(chunk);
   return digest.digest('hex');
 }
 
