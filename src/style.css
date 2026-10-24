@@ -121,3 +121,6 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
  .queue-row .queue-artist{display:block!important;white-space:normal}
  .queue-row .queue-meta .queue-state{font-size:12px!important}
 }
+
+/* One-time device setup: no header reflow, no business overlay. */
+.notice-first-setup{position:fixed;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:80;display:flex;flex-wrap:wrap;gap:8px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:12px;background:#21192d;border:1px solid #78608e;border-radius:12px;box-shadow:0 8px 24px #0006}.notice-first-setup button{min-height:44px;white-space:normal}.notice-first-setup button:first-child{flex:1}

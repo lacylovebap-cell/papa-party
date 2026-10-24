@@ -3,6 +3,15 @@ export const NOTICE_TYPES={
 };
 export function cleanNoticePrefs(input={}){const v={muteAll:input.muteAll===true,muteSound:input.muteSound===true,pushEnabled:input.pushEnabled===true,types:{}};for(const [type,[,level]] of Object.entries(NOTICE_TYPES)){const src=input.types?.[type]||{};v.types[type]=Object.fromEntries(['center','popup','sound','push','badge'].map(k=>[k,typeof src[k]==='boolean'?src[k]:['center','badge'].includes(k)||level===2]));}return v;}
 export function noticeChannels(prefs,type){const p=cleanNoticePrefs(prefs),v={...(p.types[type]||p.types.system)};v.sound=v.sound&&!p.muteSound&&!p.muteAll;v.popup=v.popup&&!p.muteAll;v.push=v.push&&p.pushEnabled&&!p.muteAll;return v;}
+// Recheck delayed push retries against the current queue, never against a stale
+// notification payload. This does not remove the historical inbox entry.
+export function queueNoticeCurrent(notice,row){
+ if(!['accepted','ready'].includes(notice.type)||!notice.entity_id)return true;
+ const q=row?.data;
+ if(!q||row.space_id!==notice.space_id||q.streamer_id!==notice.streamer_id||q.playerId!==notice.recipient||q.status!=='waiting'||q.archived_at||q.voided_at)return false;
+ if(Date.parse(q.preparationStartedAt)>Date.parse(notice.created_at))return false;
+ return notice.type!=='ready'||Boolean(q.readyAt)&&q.awaitingAcknowledgment!==true&&q.awaitingPreparation!==true;
+}
 // Only business differences produce notifications. Ordering, timestamps and migration
 // backfills cannot replay old requests. Personal operation feedback remains a toast.
 export function deriveNotices(before,after,context,t=new Date().toISOString()){
@@ -21,7 +30,7 @@ export function deriveNotices(before,after,context,t=new Date().toISOString()){
    else if(q.status==='stored')add(q.playerId,'status',`${title}已轉為存歌`,q.id);
    else if(q.status==='waiting'&&!preparationChanged)add(q.playerId,'accepted',`${title}已確認，加入待播`,q.id);
   }
-  if(q.status==='waiting'&&q.awaitingPreparation!==true&&preparationChanged)add(q.playerId,q.preparationMinutes===0?'ready':'accepted',q.preparationMinutes===0?`${title}準備好了，即將演唱`:`${title}已確認收到，準備約 ${q.preparationMinutes??5} 分鐘`,q.id);
+  if(q.status==='waiting'&&!q.archived_at&&!q.voided_at&&q.awaitingAcknowledgment!==true&&q.awaitingPreparation!==true&&preparationChanged&&!(old.readyAt&&q.readyAt&&q.preparationMinutes===0))add(q.playerId,q.preparationMinutes===0?'ready':'accepted',q.preparationMinutes===0?`${title}準備好演唱囉 🎤`:`${title}主播已收到你的點歌，預計準備 ${q.preparationMinutes??5} 分鐘。`,q.id);
  }
  const oldLedger=new Map(before.ledger.filter(x=>x.streamer_id===roomId).map(x=>[x.id,x]));
  for(const x of after.ledger.filter(x=>x.streamer_id===roomId)){const old=oldLedger.get(x.id);if(!old||old.amount!==x.amount){const delta=Number(x.amount)-Number(old?.amount||0);add(x.playerId,'credit',`${delta>=0?'新增':'扣除'} ${Math.abs(delta)} 首存歌${x.openingBalance?'（初始存歌）':''}`,x.id);}else if(old.note!==x.note||old.at!==x.at)add(x.playerId,'credit','存歌紀錄已修改',x.id);oldLedger.delete(x.id);}

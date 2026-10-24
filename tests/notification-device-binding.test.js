@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import {createNotifications} from '../src/notifications.js';
 
 test('existing Web Push binds once per device/room, without prompting, duplicate subscription, or rebinding access refresh',async()=>{
- const names=['document','window','Audio','localStorage','navigator','setInterval'];
+ const names=['document','window','Audio','localStorage','navigator','setInterval','Notification'];
  const saved=new Map(names.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
  let room='papa',device='device-one',registrations=0;const requests=[];
  const put=(name,value)=>Object.defineProperty(globalThis,name,{value,configurable:true,writable:true});
  try{
   put('document',{hidden:false,body:{append(){}},createElement:()=>({close(){},addEventListener(){}}),querySelectorAll:()=>[],addEventListener(){}});
-  put('window',{addEventListener(){}});put('Audio',class{constructor(url){this.src=String(url);}pause(){}});
+  put('Notification',{permission:'granted'});put('window',{addEventListener(){}});put('Audio',class{constructor(url){this.src=String(url);}pause(){}});
   put('localStorage',{getItem:()=>null,setItem(){}});put('setInterval',()=>0);
   put('navigator',{serviceWorker:{getRegistration:async()=>{registrations++;return {pushManager:{getSubscription:async()=>({toJSON:()=>({endpoint:'https://push.example/device',keys:{}})})}};}}});
   const notices=createNotifications({api:async b=>{requests.push(b);return {rows:[],unread:{},preferences:{pushEnabled:true}};},context:()=>({role:'player',recipient:'P1',streamer:room,deviceSessionId:device}),toast(){}});
@@ -31,7 +31,7 @@ function pushHarness(t,{getRegistration,upsert=async()=>({})}={}){
  const listeners={},requests=[],subscription={toJSON:()=>({endpoint:'https://push.example/device',keys:{}})},registration={pushManager:{getSubscription:async()=>subscription}};
  let current={role:'player',recipient:'P1',streamer:'papa',spaceId:'space-001',deviceSessionId:'device-one'},registrationReads=0,permissionPrompts=0;
  put('document',{hidden:false,body:{append(){}},createElement:()=>({close(){},addEventListener(){}}),querySelectorAll:()=>[],addEventListener(type,fn){listeners[type]=fn;}});
- put('window',{addEventListener(){}});put('Audio',class{constructor(url){this.src=String(url);}pause(){}});
+ put('Notification',{permission:'granted'});put('window',{addEventListener(){}});put('Audio',class{constructor(url){this.src=String(url);}pause(){}});
  put('localStorage',{getItem:()=>null,setItem(){}});put('setInterval',()=>0);
  put('Notification',{permission:'granted',requestPermission(){permissionPrompts++;throw Error('automatic permission prompt');}});
  put('navigator',{serviceWorker:{getRegistration:async()=>{registrationReads++;return getRegistration?getRegistration():registration;}}});

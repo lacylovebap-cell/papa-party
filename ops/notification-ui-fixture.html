@@ -1,0 +1,8 @@
+<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>通知初次設定離線檢查</title><link rel="stylesheet" href="../src/style.css"><header id="header"></header><main><h2>通知初次設定離線檢查</h2><p>此頁使用合成身分，不連線正式資料庫。</p></main><script type="module">
+import {createNotifications} from '../src/notifications.js';
+const map=new Map();const store={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v)};
+Object.defineProperty(globalThis,'localStorage',{value:store,configurable:true});
+Object.defineProperty(globalThis,'Notification',{value:{permission:'default',requestPermission:()=>Promise.resolve('denied')},configurable:true});
+const notices=createNotifications({api:async()=>({rows:[],preferences:{},unread:{}}),context:()=>({demo:true,streamer:'fixture',recipient:'P1',role:'player'}),toast:()=>{}});
+document.querySelector('header').innerHTML=notices.button(true);
+</script></html>

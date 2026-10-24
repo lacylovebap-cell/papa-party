@@ -9,6 +9,7 @@ function harness(t,{permission='granted',requestPermission,register,getSubscript
  const put=(name,value)=>Object.defineProperty(globalThis,name,{value,configurable:true,writable:true});
  t.after(()=>{for(const [name,descriptor] of saved)if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];});
  const documentListeners={},dialogListeners={},requests=[],toasts=[],healthTarget={innerHTML:''},healthButton={disabled:false},errorTarget={textContent:''};
+ let soundPlays=0,soundBlocked=false;
  let current={role:'player',recipient:'P1',streamer:'papa',spaceId:'space-001',deviceSessionId:'device-one'},prefs=initialPreferences,prompts=0,workerReads=0,workerRegistrations=0,subscriptions=0,inGesture=false;
  const subscription={endpoint:'https://push.example/device',toJSON:()=>({endpoint:'https://push.example/device',keys:{}})};
  const registration={active:{},pushManager:{getSubscription:()=>getSubscription?getSubscription():Promise.resolve(subscription),subscribe:async()=>{subscriptions++;return subscription;}}};
@@ -16,7 +17,7 @@ function harness(t,{permission='granted',requestPermission,register,getSubscript
  put('document',{hidden:false,body:{append(){}},createElement:()=>dialog,querySelectorAll:()=>[],addEventListener(type,fn){documentListeners[type]=fn;}});
  const notification={permission,requestPermission(){prompts++;assert.equal(inGesture,true,'permission prompt requires the explicit synchronous click');return requestPermission?requestPermission():Promise.resolve('granted');}};
  put('window',{Notification:notification,PushManager:class{},addEventListener(){}});put('Notification',notification);put('isSecureContext',true);
- put('Audio',class{constructor(url){this.src=String(url);}pause(){}});put('localStorage',{getItem:name=>storage.get(name)??null,setItem(name,value){if(storageError)throw Error('storage unavailable');storage.set(name,value);}});put('setInterval',()=>0);
+ put('Audio',class{constructor(url){this.src=String(url);}pause(){}play(){soundPlays++;return soundBlocked?Promise.reject(Error('autoplay blocked')):Promise.resolve();}});put('localStorage',{getItem:name=>storage.get(name)??null,setItem(name,value){if(storageError)throw Error('storage unavailable');storage.set(name,value);}});put('setInterval',()=>0);
  put('FormData',class{constructor(form){this.values=new Set(form.values||[]);}has(key){return this.values.has(key);}});
  put('navigator',{serviceWorker:{getRegistration:async()=>{workerReads++;return registration;},register:()=>{workerRegistrations++;return register?register():Promise.resolve(registration);},ready:Promise.resolve(registration)}});
  const create=()=>createNotifications({api:async body=>{requests.push({...body,context:{...current}});const result=apiHook?await apiHook(body):undefined;if(body.op==='noticePreferences')prefs=body.preferences;if(result!==undefined)return result;if(body.op==='pushKey')return {publicKey:'AQID'};if(body.op==='notifications')return {rows,preferences:prefs,unread:{}};return {};},context:()=>({...current}),toast:message=>toasts.push(message),onNavigate});
@@ -26,6 +27,7 @@ function harness(t,{permission='granted',requestPermission,register,getSubscript
  const click=(action,id)=>{const button={dataset:{notice:action,noticeId:id}};inGesture=true;try{return documentListeners.click({target:{closest:()=>button},preventDefault(){}});}finally{inGesture=false;}};
  const form={id:'notice-settings',values:['pushEnabled'],submit:{disabled:false},querySelector(){return this.submit;}};
  return {get notices(){return notices;},dialog,requests,toasts,errorTarget,healthTarget,notification,registration,subscription,settle,click,form,storage,
+  pointer(){documentListeners.pointerdown();},soundPlays:()=>soundPlays,blockSound(value){soundBlocked=value;},
   reload(){dialog.open=false;dialog.innerHTML='';for(const listeners of [documentListeners,dialogListeners])for(const name of Object.keys(listeners))delete listeners[name];notices=create();notices.button();},
   setContext(patch){current={...current,...patch};},prompts:()=>prompts,reads:()=>workerReads,registrations:()=>workerRegistrations,subscriptions:()=>subscriptions,
   async settings(){await click('settings');await settle();},close(){dialog.close();},submit(){return dialogListeners.submit({target:form,preventDefault(){}});}};
@@ -114,7 +116,7 @@ test('disabling this device survives reload and blocks remembered binding withou
  assert.deepEqual(h.requests.map(body=>body.op),['pushUnsubscribe']);assert.equal(h.requests[0].endpoint,h.subscription.endpoint);assert.match(h.healthTarget.innerHTML,/已在這台裝置停用/);
  h.reload();const reads=h.reads();await h.notices.refresh();await h.settle();await h.notices.refresh();await h.settle();
  assert.equal(h.reads(),reads,'disabled room does not even inspect the subscription during refresh');assert.equal(h.requests.some(body=>body.op==='pushSubscribe'),false);assert.equal(h.requests.some(body=>body.op==='noticePreferences'),false);
- assert.equal(h.storage.size,1,'choice is a single scoped local marker');await h.settings();assert.match(h.healthTarget.innerHTML,/已在這台裝置停用/);
+ assert.equal([...h.storage.keys()].filter(k=>k.includes('push-disabled:')).length,1,'disable choice is a single scoped local marker');await h.settings();assert.match(h.healthTarget.innerHTML,/已在這台裝置停用/);
 });
 
 for(const [name,patch] of [['room',{streamer:'michelle'}],['Space',{spaceId:'space-002'}],['recipient',{recipient:'P2'}],['device',{deviceSessionId:'device-two'}]]){
@@ -172,4 +174,41 @@ test('a replacement recipient binding waits for the old in-flight upsert so the 
  const pending=deferred();let binds=0;const h=harness(t,{apiHook:body=>body.op==='pushSubscribe'&&++binds===1?pending.promise:undefined});await h.settings();const old=h.click('enablePush');await h.settle();
  h.setContext({recipient:'P2',deviceSessionId:'device-two'});await h.settings();const latest=h.click('enablePush');await h.settle();assert.equal(h.requests.filter(body=>body.op==='pushSubscribe').length,1);
  pending.resolve({});await Promise.all([old,latest]);const bindings=h.requests.filter(body=>body.op==='pushSubscribe');assert.deepEqual(bindings.map(body=>body.context.recipient),['P1','P2']);assert.equal(h.requests.filter(body=>body.op==='noticePreferences').length,1);assert.equal(h.toasts.filter(message=>message.includes('已啟用')).length,1);
+});
+
+
+test('first setup requests permission only on click and persists across reload and room switches',async t=>{
+ const h=harness(t,{permission:'default'});assert.match(h.notices.button(),/開啟音效與通知/);assert.equal(h.prompts(),0);
+ await h.click('initialSetup');assert.equal(h.prompts(),1);h.reload();assert.doesNotMatch(h.notices.button(),/開啟音效與通知/);
+ h.setContext({streamer:'other',recipient:'P2',spaceId:'other-space'});assert.doesNotMatch(h.notices.button(),/開啟音效與通知/);assert.equal(h.prompts(),1);
+});
+test('denied and dismissed setup never repeatedly request notification permission',async t=>{
+ const h=harness(t,{permission:'denied'});assert.doesNotMatch(h.notices.button(),/開啟音效與通知/);await h.click('initialSetup');assert.equal(h.prompts(),0);
+ h.notification.permission='default';h.reload();assert.doesNotMatch(h.notices.button(),/開啟音效與通知/);
+});
+test('skip first setup persists and does not request notification permission',async t=>{
+ const h=harness(t,{permission:'default'});await h.click('skipSetup');h.reload();assert.doesNotMatch(h.notices.button(),/開啟音效與通知/);assert.equal(h.prompts(),0);
+});
+test('revoked permission does not silently rebind a remembered subscription',async t=>{
+ const h=harness(t,{permission:'denied',initialPreferences:{pushEnabled:true}});await h.notices.refresh();await h.settle();assert.equal(h.requests.filter(x=>x.op==='pushSubscribe').length,0);assert.equal(h.prompts(),0);
+});
+
+test('audio restores on interaction after reload and room change, but explicit off stays off',async t=>{
+ const h=harness(t);h.blockSound(true);h.pointer();await h.settle();assert.equal(h.soundPlays(),1);
+ h.blockSound(false);h.pointer();await h.settle();assert.equal(h.soundPlays(),2);
+ h.setContext({streamer:'other'});h.notices.button();h.pointer();await h.settle();assert.equal(h.soundPlays(),2,'identity does not reset an activated audio element');
+ h.reload();h.pointer();await h.settle();assert.equal(h.soundPlays(),3);
+ h.storage.set('pa-notice-device-preferences-v1',JSON.stringify({setupDone:true,soundEnabled:false}));h.reload();h.pointer();await h.settle();assert.equal(h.soundPlays(),3);
+});
+test('previously granted permission that resets to default does not show first setup again',async t=>{
+ const h=harness(t);assert.doesNotMatch(h.notices.button(),/開啟音效與通知/);h.notification.permission='default';h.reload();assert.doesNotMatch(h.notices.button(),/開啟音效與通知/);assert.equal(h.prompts(),0);
+});
+
+test('already granted permission enables an unset preference once without another permission prompt',async t=>{
+ const h=harness(t,{initialPreferences:{}});await h.notices.refresh();await h.settle();await h.settle();await h.notices.refresh();
+ assert.equal(h.prompts(),0);assert.equal(h.requests.filter(x=>x.op==='pushSubscribe').length,1);assert.equal(h.requests.filter(x=>x.op==='noticePreferences').length,1);
+});
+test('granted permission repairs a missing subscription once without prompting',async t=>{
+ const h=harness(t,{initialPreferences:{pushEnabled:true},getSubscription:()=>Promise.resolve(null)});await h.notices.refresh();await h.settle();await h.settle();await h.notices.refresh();
+ assert.equal(h.prompts(),0);assert.equal(h.subscriptions(),1);assert.equal(h.requests.filter(x=>x.op==='pushSubscribe').length,1);
 });
