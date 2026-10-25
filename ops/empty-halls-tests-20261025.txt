@@ -1,0 +1,38 @@
+✔ grouping preserves every original grant, never merges names or missing identity (2.9425ms)
+✔ existing server page renders each Account once with separate grants and retains owner guard (3.9415ms)
+✔ group by Account only; preserve individual grant IDs, scope, permissions and source objects (2.6136ms)
+✔ empty hall or independent tenant needs no administrator and replay creates nothing twice (2667.4025ms)
+✔ owner remains optional but a chosen valid owner keeps the existing scoped role; later assignment works (2083.1921ms)
+✔ database pages 20 Accounts, keeping all roles on the same page; no cross-hall leakage (2133.0182ms)
+✔ anonymous cannot call replaced functions and audit failure rolls back new hall (2022.0102ms)
+✔ business commit rechecks revoked permissions and rolls back failed writes in one transaction (2704.8684ms)
+✔ non-commit RPC guard preserves typed named arguments and rejects cross-room or forged context (2130.3967ms)
+✔ existing hall suspend/restore preserves business rows; newly created tenants cannot activate (2103.7389ms)
+✔ archive is scoped, idempotent, requires disabled streamer and preserves aliases/history (2031.8011ms)
+✔ streamer grants use existing Accounts and enforce exact Space/role/permitted-subset boundaries (2041.6995ms)
+✔ management directory uses canonical meta only, stays scoped, paginates and labels bound accounts (2002.9183ms)
+✔ cleanup review returns only counts, reports unexamined links and never authorizes deletion (1936.677ms)
+✔ legacy room authority is preserved until explicit grant editing, then only selected permissions remain (1964.0652ms)
+✔ stale revisions and Audit failure roll back fully; Audit and RPCs are inaccessible to browser roles (1948.6681ms)
+(node:29148) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ management keeps five sections, bounded paging, escaped metadata and rejects stale responses (5.1182ms)
+✔ management mutations reuse request key after uncertain result and never auto-retry (0.749ms)
+✔ leaving management during write prevents late response from loading private data again (0.4249ms)
+✔ Edge management handlers use verified subject and validate scope before invoking RPC (76.9962ms)
+✔ explicit pending or revoked management capabilities cannot read or mutate the centre (0.6888ms)
+✔ hall managers and streamers cannot open any platform centre tools (0.5398ms)
+✔ detail results are discarded after navigation or a verified account change (0.6745ms)
+✔ routine directory text hides internal UUID and uses stable public label when supplied (0.8292ms)
+✔ editor markup is a modal template and failed save error stays inside it (6.7989ms)
+✔ legacy account labels containing internal UUID never appear as visible identity (0.8766ms)
+✔ all platform reads and writes reject player, hall, streamer and missing Account actors (3.5301ms)
+✔ president guard leaves ordinary streamer business operations in their existing own-room ACL (0.3136ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19230.9582

@@ -1,6 +1,6 @@
 
 import {installCompactMenu} from './application-menu.js?v=1023-menu-1';
-import {createPlatformManagement} from './platform-management.js?v=10.25-ADMIN.1';
+import {createPlatformManagement} from './platform-management.js?v=10.25-ADMIN.2';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
 import {streamerWriteData} from './streamer-write-data.js';

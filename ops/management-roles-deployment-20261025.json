@@ -1,0 +1,18 @@
+{
+  "commit": "8d3812f8695521d58bd9d1719d246323a3ae0549",
+  "matchedLiveAssets": [
+    "src/platform-management.js",
+    "src/management-role-groups.js",
+    "src/app.js"
+  ],
+  "membershipControlsDeployed": false,
+  "edgeDeployed": false,
+  "verifiedAt": "2026-10-25T11:44:51.3846042Z",
+  "htmlVersionVerified": true,
+  "backend": "10.25-NOTICE.1",
+  "pagesConclusion": "success",
+  "testsPassed": 23,
+  "frontend": "10.25-ADMIN.1",
+  "databaseModified": false,
+  "pagesRun": 40190080353
+}
