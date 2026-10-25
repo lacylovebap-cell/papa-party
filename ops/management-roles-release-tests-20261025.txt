@@ -1,0 +1,33 @@
+✔ grouping preserves every original grant, never merges names or missing identity (2.6778ms)
+✔ existing server page renders each Account once with separate grants and retains owner guard (3.6483ms)
+✔ business commit rechecks revoked permissions and rolls back failed writes in one transaction (2657.8948ms)
+✔ non-commit RPC guard preserves typed named arguments and rejects cross-room or forged context (2106.9565ms)
+✔ existing hall suspend/restore preserves business rows; newly created tenants cannot activate (2064.5418ms)
+✔ archive is scoped, idempotent, requires disabled streamer and preserves aliases/history (2010.2196ms)
+✔ streamer grants use existing Accounts and enforce exact Space/role/permitted-subset boundaries (2050.6252ms)
+✔ management directory uses canonical meta only, stays scoped, paginates and labels bound accounts (2057.4466ms)
+✔ cleanup review returns only counts, reports unexamined links and never authorizes deletion (1975.7077ms)
+✔ legacy room authority is preserved until explicit grant editing, then only selected permissions remain (1998.1736ms)
+✔ stale revisions and Audit failure roll back fully; Audit and RPCs are inaccessible to browser roles (1998.3177ms)
+(node:25424) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ management keeps five sections, bounded paging, escaped metadata and rejects stale responses (5.1066ms)
+✔ management mutations reuse request key after uncertain result and never auto-retry (0.7468ms)
+✔ leaving management during write prevents late response from loading private data again (0.4419ms)
+✔ Edge management handlers use verified subject and validate scope before invoking RPC (74.8548ms)
+✔ explicit pending or revoked management capabilities cannot read or mutate the centre (0.6417ms)
+✔ hall managers and streamers cannot open any platform centre tools (0.5444ms)
+✔ detail results are discarded after navigation or a verified account change (0.5318ms)
+✔ routine directory text hides internal UUID and uses stable public label when supplied (0.6374ms)
+✔ editor markup is a modal template and failed save error stays inside it (6.4588ms)
+✔ legacy account labels containing internal UUID never appear as visible identity (0.7722ms)
+✔ all platform reads and writes reject player, hall, streamer and missing Account actors (3.3091ms)
+✔ president guard leaves ordinary streamer business operations in their existing own-room ACL (0.2731ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19236.62
