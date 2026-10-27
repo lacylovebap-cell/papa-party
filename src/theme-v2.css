@@ -1,0 +1,49 @@
+/* Homepage theme system. Active only when data-theme-v2 is set by a published
+   theme (or inside the editor preview). Shapes, radii and sizes are untouched:
+   only colours, fills, image layers and masks change. */
+:root[data-theme-v2]{background:var(--home-background);--blue:var(--home-accent);--line:var(--home-line);--muted:var(--theme-muted);color-scheme:var(--theme-scheme)}
+[data-theme-v2] body{background:transparent;color:var(--home-text)}
+.theme-page-layer{position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--theme-page-layer)}
+[data-theme-v2] header{background:var(--theme-nav);border-color:var(--home-line)}
+/* Logo artwork is unchanged; only the area behind it is tinted. */
+[data-theme-v2] .brand{background:var(--theme-logo);border-radius:12px}
+[data-theme-v2] h1,[data-theme-v2] h2,[data-theme-v2] h3,[data-theme-v2] h4,[data-theme-v2] .card b,[data-theme-v2] .stat b{color:var(--theme-title)}
+[data-theme-v2] .muted,[data-theme-v2] .subtle,[data-theme-v2] small{color:var(--theme-muted)}
+[data-theme-v2] .card{background:var(--theme-card-fill);border-color:var(--home-line);color:var(--home-text)}
+[data-theme-v2] .crown,[data-theme-v2] .medal-row,[data-theme-v2] .fate,[data-theme-v2] .admin-banner,[data-theme-v2] dialog{background:var(--home-panel);border-color:var(--home-line);color:var(--home-text)}
+[data-theme-v2] button{border-color:var(--home-line);color:var(--home-text);background:var(--theme-soft)}
+/* Status colours are semantic; on light pages they are deepened for contrast. */
+[data-theme-v2=light] .state-label{filter:brightness(.62) saturate(1.5)}
+[data-theme-v2] button.primary,[data-theme-v2] button.active,[data-theme-v2] .tabs button.active{background:var(--home-button);border-color:var(--theme-button-solid);color:var(--home-buttonText)}
+[data-theme-v2] button:hover{border-color:var(--home-accent)}
+[data-theme-v2] input,[data-theme-v2] select,[data-theme-v2] textarea{background:var(--theme-input);color:var(--home-text);border-color:var(--home-line)}
+[data-theme-v2] a{color:var(--home-accent)}
+[data-theme-v2] .tag,[data-theme-v2] .notice,[data-theme-v2] .stat{background:var(--home-glow);color:var(--home-text)}
+[data-theme-v2] .song{border-color:var(--home-line)}
+/* Banner: panel colour, then the picture, then the adjustable mask band, then text. */
+[data-theme-v2] .integrated-hero{background:var(--home-panel);border-color:var(--home-line)}
+[data-theme-v2] .integrated-hero:after{background:var(--theme-banner-mask)}
+[data-theme-v2] .hero-overlay h2,[data-theme-v2] .hero-overlay .now-playing strong{color:var(--theme-title)}
+[data-theme-v2] .hero-overlay .status-note,[data-theme-v2] .hero-overlay .now-playing,[data-theme-v2] .hero-overlay p{color:var(--home-text)}
+[data-theme-v2] .hero-overlay .hour small{color:var(--theme-muted)}
+[data-theme-v2] .hero-overlay .hour{border-top-color:var(--home-line)}
+[data-theme-v2] .header-menu .header-actions,[data-theme-v2] .admin-more-options{background:var(--home-panel);border-color:var(--home-line)}
+/* Decorations: positioned in percent of the homepage, never intercept taps. */
+.theme-home-host{position:relative}
+.theme-decor-layer{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+.theme-decor{position:absolute;height:auto;transform:translate(-50%,-50%);user-select:none;-webkit-user-drag:none;max-width:none}
+.theme-decor-layer.editable{z-index:6}
+.theme-decor-layer.editable .theme-decor{pointer-events:auto;cursor:grab;outline:1px dashed #ffffff99;outline-offset:2px;touch-action:none}
+/* Hall homepage banner (lobby). Same layer order as the streamer banner. */
+.theme-hall-banner{position:relative;overflow:hidden;border:1px solid var(--home-line,#302837);border-radius:14px;margin:0 0 18px;min-height:150px;background:var(--home-panel,#16131c);aspect-ratio:16/6}
+.theme-hall-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.theme-hall-banner:after{content:'';position:absolute;inset:0;background:var(--theme-banner-mask,none);pointer-events:none}
+.theme-hall-banner .theme-hall-banner-text{position:relative;z-index:1;padding:22px 20px;max-width:60%}
+.theme-hall-banner h1{margin:0 0 6px}
+@media(max-width:650px){.theme-hall-banner{aspect-ratio:16/9}.theme-hall-banner .theme-hall-banner-text{padding:14px;max-width:70%}}
+[data-theme-v2].lobby-page .lobby-room,[data-theme-v2] .lobby-page .lobby-room,[data-theme-v2] .lobby-room{background:var(--theme-card-fill);border-color:var(--home-line)}
+.theme-hall-banner+.lobby-intro{margin:0;padding:0}
+/* Text that the default dark skin colours by hand, re-pointed at theme colours. */
+[data-theme-v2] .empty,[data-theme-v2] .manual,[data-theme-v2] .status-note,[data-theme-v2] .preparation-note,[data-theme-v2] .number{color:var(--theme-muted)}
+[data-theme-v2] .song small,[data-theme-v2] label{color:var(--home-text)}
+[data-theme-v2] details>summary{border-color:var(--home-line)}

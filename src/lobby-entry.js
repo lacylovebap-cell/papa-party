@@ -4,6 +4,7 @@ import {API,PUBLISHABLE_KEY} from './config.js?v=10.20-WEB.1';
 import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.20-WEB.1';
 import {createPublicShare} from './share-dialog.js';
 import {createPublicLinkClient,readPublicRouteContext} from './public-links.js';
+import {installLobbyTheme} from './lobby-theme.js?v=10.28-THEME.1';
 import {lobbyPublicScope,lobbyLoginLocation,lobbyLoginIntent,lobbyLoginPrompt,openLobbyPublicShare} from './lobby-public-share.js';
 const $=s=>document.querySelector(s),escape=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mountUrl=new URL('../',import.meta.url),context=readPublicRouteContext({document,href:location.href,mountUrl});
@@ -38,6 +39,7 @@ const api=async body=>{
  const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:PUBLISHABLE_KEY},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)}),value=await response.json();
  if(!response.ok||value.error)throw Error(value.error||'連線暫時無法使用，請稍後重試');return value;
 };
+installLobbyTheme({api,spaceId:scope.spaceId,document,hallName:scope.name}).catch(()=>{});
 const links=createPublicLinkClient({api}),share=createPublicShare({modal:(title,body)=>{
  const dialog=$('#dialog');dialog.innerHTML='<div class="dialog-head"><h2>'+escape(title)+'</h2><button type="button" aria-label="關閉" data-share-close>✕</button></div><div class="dialog-body">'+body+'</div>';
  dialog.querySelector('[data-share-close]').onclick=()=>dialog.close();if(!dialog.open)dialog.showModal();

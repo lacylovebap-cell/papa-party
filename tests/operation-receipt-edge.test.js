@@ -4,6 +4,7 @@ import {createLobbyImageReader} from '../supabase/functions/party-api/lobby-imag
 import {createPublicRoutes} from '../supabase/functions/party-api/public-routes.js';
 import {createPublicAppHomes} from '../supabase/functions/party-api/pwa-homes.js';
 import {roomBadgeChanges} from '../supabase/functions/party-api/badge-state.js';
+import {createThemeApi} from '../supabase/functions/party-api/theme-api.js';
 import * as bulk from '../src/player-bulk-tools.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -70,7 +71,7 @@ function fixture(outcome='success'){
    scope:{spaceId:b.requested_space,roomId:b.requested_room},day:accountingDay(new Date().toISOString(),19),rolloverHour:19,timezone:'Asia/Taipei',revision:state.revision});
   throw Error('Unexpected fixture endpoint '+path);
  };
- const context=vm.createContext({managementRpcRequest,managerPermissionRequirement,createLobbyImageReader,createPublicRoutes,createPublicAppHomes,roomBadgeChanges,accountingDay,...core,...access,...patch,...rules,...bulk,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
+ const context=vm.createContext({managementRpcRequest,managerPermissionRequirement,createLobbyImageReader,createThemeApi,createPublicRoutes,createPublicAppHomes,roomBadgeChanges,accountingDay,...core,...access,...patch,...rules,...bulk,Error,URL,Response,TextEncoder,crypto,structuredClone,fetch,
   Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://db.example':'fixture-key'},serve:fn=>handler=fn},EdgeRuntime:{waitUntil(){}},
   CATALOG_OPS:new Set(),catalogMetadataView:view=>view,fixtureState:state});
  vm.runInContext(roomCode+'\n'+code,context);

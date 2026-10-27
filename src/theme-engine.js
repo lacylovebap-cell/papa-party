@@ -1,0 +1,193 @@
+// PA Party theme engine (pure, no DOM, no network).
+// Shared by the browser editor, page renderer and the Edge reducer bundle, so
+// every top-level name is prefixed to avoid clashes inside the Edge bundle.
+// A theme is one compact JSON object. Images are stored as Storage paths only;
+// opacity, focus and masks are numbers rendered by CSS, never baked into files.
+
+export const THEME_VERSION=1;
+export const THEME_COLOR_KEYS=['background','nav','logo','panel','line','button','button2','buttonText','title','text','accent'];
+export const THEME_COLOR_LABELS={background:'頁面底色',nav:'頂部導覽列',logo:'Logo 區底色',panel:'卡片底色',line:'邊框顏色',button:'按鈕主色',button2:'按鈕漸層第二色',buttonText:'按鈕文字',title:'標題文字',text:'一般說明文字',accent:'強調色'};
+export const THEME_TEMPLATES=[
+ {id:'violet-night',name:'紫夜',base:'#8b5cf6',mode:'dark'},
+ {id:'peach',name:'蜜桃',base:'#ff8a7a',mode:'light'},
+ {id:'mint',name:'薄荷',base:'#2fbf8f',mode:'light'},
+ {id:'star-blue',name:'星藍',base:'#3b82f6',mode:'dark'},
+ {id:'milk-tea',name:'奶茶',base:'#b98b62',mode:'light'}
+];
+export const THEME_SWATCHES=['#ff0000','#ff4d8d','#ff8a7a','#f59e0b','#facc15','#84cc16','#2fbf8f','#14b8a6','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef','#b98b62','#64748b'];
+// Recommended source sizes and compression targets per image role.
+export const THEME_IMAGE_ROLES={
+ background:{label:'整頁背景圖片',max:2000,targetKB:350,source:'2000 × 2000 px'},
+ banner:{label:'首頁橫幅',max:1600,targetKB:300,source:'1600 × 800 px'},
+ card:{label:'統一卡片底圖',max:1200,targetKB:200,source:'1200 × 800 px'},
+ decor:{label:'裝飾圖片',max:800,targetKB:150,source:'800 × 800 px'}
+};
+export const THEME_DECOR_LIMIT=6;
+export const THEME_MAX_BYTES=8192;
+const themeHexPattern=/^#[0-9a-f]{6}$/i;
+// Only the platform's own content-addressed theme objects are accepted.
+const themeAssetPattern=/^https:\/\/[a-z0-9.-]+\/storage\/v1\/object\/public\/papa-photos\/themes\/(s|h)\/([A-Za-z0-9_-]{1,200})\/([a-f0-9]{64})\.webp$/;
+// The hall card default (22%) matches how the hall page already shows streamer images.
+export const THEME_IMAGE_DEFAULTS={
+ background:{x:50,y:50,opacity:100,mask:35},
+ banner:{x:60,y:35,opacity:100,mask:85,maskWidth:45,maskPosition:20,maskFeather:55,hallX:50,hallY:35,hallOpacity:22},
+ card:{x:50,y:50,opacity:100,mask:65}
+};
+const themeImageRanges={x:[0,100],y:[0,100],opacity:[0,100],mask:[0,95],maskWidth:[0,100],maskPosition:[0,100],maskFeather:[0,100],hallX:[0,100],hallY:[0,100],hallOpacity:[0,100]};
+
+// ---------- colour maths ----------
+export function themeRgb(hex){const v=String(hex).replace('#','');return [0,2,4].map(i=>parseInt(v.slice(i,i+2),16));}
+export function themeHex(rgb){return '#'+rgb.map(n=>Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,'0')).join('');}
+export function themeHsl(hex){
+ const [r,g,b]=themeRgb(hex).map(n=>n/255),max=Math.max(r,g,b),min=Math.min(r,g,b),l=(max+min)/2;
+ if(max===min)return [0,0,l];
+ const d=max-min,s=l>.5?d/(2-max-min):d/(max+min);
+ const h=max===r?((g-b)/d+(g<b?6:0)):max===g?((b-r)/d+2):((r-g)/d+4);
+ return [h*60,s,l];
+}
+export function themeFromHsl(h,s,l){
+ h=((h%360)+360)%360;s=Math.max(0,Math.min(1,s));l=Math.max(0,Math.min(1,l));
+ const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;
+ const [r,g,b]=h<60?[c,x,0]:h<120?[x,c,0]:h<180?[0,c,x]:h<240?[0,x,c]:h<300?[x,0,c]:[c,0,x];
+ return themeHex([(r+m)*255,(g+m)*255,(b+m)*255]);
+}
+export function themeLuminance(hex){return themeRgb(hex).map(n=>{n/=255;return n<=.03928?n/12.92:((n+.055)/1.055)**2.4;}).reduce((sum,n,i)=>sum+n*[.2126,.7152,.0722][i],0);}
+export function themeContrast(a,b){const x=themeLuminance(a),y=themeLuminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
+// Moves only the lightness of fg until it reaches the target contrast on bg.
+export function themeEnsureContrast(fg,bg,target){
+ if(themeContrast(fg,bg)>=target)return fg;
+ const [h,s,l]=themeHsl(fg),lighter=themeLuminance(bg)<.4;
+ for(let step=1;step<=40;step++){const next=themeFromHsl(h,s,lighter?Math.min(1,l+step*.025):Math.max(0,l-step*.025));if(themeContrast(next,bg)>=target)return next;}
+ return lighter?'#ffffff':'#111111';
+}
+export function themeShade(hex,delta){const [h,s,l]=themeHsl(hex);return themeFromHsl(h,s,l+delta);}
+export function themeAlpha(hex,alpha){const [r,g,b]=themeRgb(hex);return `rgba(${r},${g},${b},${Math.max(0,Math.min(1,alpha)).toFixed(3).replace(/\.?0+$/,'')||'0'})`;}
+
+// ---------- smart palette ----------
+const themePaletteCache=new Map();
+export function themeSmartPalette(base,mode='dark'){
+ const color=themeHexPattern.test(base||'')?base.toLowerCase():'#8b5cf6',key=color+mode;
+ if(themePaletteCache.has(key))return {...themePaletteCache.get(key)};
+ const [h,rawS,rawL]=themeHsl(color),s=rawS<.08?0:Math.max(.45,rawS),tint=rawS<.08?0:1,keepL=Math.max(.32,Math.min(.68,rawL)),bs=rawS<.08?0:rawS;
+ let p;
+ if(mode==='light'){
+  p={background:themeFromHsl(h,.55*tint,.965),nav:themeFromHsl(h,.5*tint,.985),logo:themeFromHsl(h,.4*tint,.15),panel:themeFromHsl(h,.6*tint,.995),line:themeFromHsl(h,.35*tint,.84),
+   button:themeFromHsl(h,bs,keepL),button2:themeFromHsl(h+24,bs,Math.min(.78,keepL+.06)),accent:themeFromHsl(h,Math.max(.6,s)*tint,.4),title:themeFromHsl(h,.45*tint,.15),text:themeFromHsl(h,.15*tint,.33)};
+ }else{
+  p={background:themeFromHsl(h,.35*tint,.07),nav:themeFromHsl(h,.35*tint,.085),logo:themeFromHsl(h,.4*tint,.13),panel:themeFromHsl(h,.3*tint,.12),line:themeFromHsl(h,.35*tint,.27),
+   button:themeFromHsl(h,bs,keepL),button2:themeFromHsl(h+24,bs,Math.min(.78,keepL+.06)),accent:themeFromHsl(h,Math.max(.55,s)*tint,.74),title:themeFromHsl(h,.45*tint,.95),text:themeFromHsl(h,.18*tint,.8)};
+ }
+ p.title=themeEnsureContrast(themeEnsureContrast(p.title,p.panel,7),p.background,7);
+ p.text=themeEnsureContrast(themeEnsureContrast(p.text,p.panel,4.5),p.background,4.5);
+ p.accent=themeEnsureContrast(p.accent,p.panel,3);
+ Object.assign(p,themeFitButtons(p.button,p.button2));
+ themePaletteCache.set(key,p);if(themePaletteCache.size>64)themePaletteCache.delete(themePaletteCache.keys().next().value);
+ return {...p};
+}
+// Picks white or dark button text, nudging the button pair the fewest steps
+// (darker for white text, lighter for dark text) until both ends reach 4.5:1.
+export function themeFitButtons(button,button2){
+ let best=null;
+ for(const [text,delta] of [['#ffffff',-.02],['#17121f',.02]]){
+  let a=button,b=button2,steps=0;
+  while(Math.min(themeContrast(text,a),themeContrast(text,b))<4.5&&steps<30){a=themeShade(a,delta);b=themeShade(b,delta);steps++;}
+  // White text is the house style; dark text wins only when clearly cheaper.
+  if(!best||steps+3<best.steps)best={steps,button:a,button2:b,buttonText:text};
+ }
+ return {button:best.button,button2:best.button2,buttonText:best.buttonText};
+}
+// Button text must stay readable on both gradient ends.
+export function themeButtonText(button,button2=button){
+ const candidates=['#ffffff','#17121f'],score=c=>Math.min(themeContrast(c,button),themeContrast(c,button2));
+ return candidates.sort((a,b)=>score(b)-score(a))[0];
+}
+export function themeContrastReport(theme){
+ const c=themeNormalize(theme).colors,rows=[
+  ['標題文字／卡片',themeContrast(c.title,c.panel),4.5],['說明文字／卡片',themeContrast(c.text,c.panel),4.5],['說明文字／頁面',themeContrast(c.text,c.background),4.5],
+  ['按鈕文字／按鈕',Math.min(themeContrast(c.buttonText,c.button),themeContrast(c.buttonText,c.button2)),4.5],['強調色／卡片',themeContrast(c.accent,c.panel),3]];
+ return rows.map(([label,ratio,need])=>({label,ratio:Math.round(ratio*10)/10,ok:ratio>=need,need}));
+}
+
+// ---------- schema ----------
+export function themeDefault(){return {v:THEME_VERSION,base:'#8b5cf6',mode:'dark',button:'gradient',colors:themeSmartPalette('#8b5cf6','dark'),images:{},decor:[]};}
+export function themeAsset(url){const m=typeof url==='string'&&url.length<=600?url.match(themeAssetPattern):null;return m?{kind:m[1],owner:m[2],hash:m[3]}:null;}
+const themeNumber=(value,[min,max],fallback)=>{const n=Number(value);return Number.isFinite(n)?Math.round(Math.max(min,Math.min(max,n))):fallback;};
+function themeImage(role,input,hall){
+ if(!input||typeof input!=='object'||Array.isArray(input))return null;
+ const defaults=THEME_IMAGE_DEFAULTS[role],out={},url=themeAsset(input.url)?input.url:'';
+ if(url)out.url=url;
+ for(const key of Object.keys(defaults)){if(hall&&key.startsWith('hall'))continue;const v=themeNumber(input[key],themeImageRanges[key],defaults[key]);if(v!==defaults[key])out[key]=v;}
+ // Background and card layers exist only with an uploaded image; banner settings
+ // also shape the original banner image, so they are kept without a new upload.
+ if(!url&&role!=='banner')return null;
+ return Object.keys(out).length?out:null;
+}
+// Lenient: turns anything into a safe, complete-enough theme (defaults omitted).
+export function themeNormalize(input,{hall=false}={}){
+ const v=input&&typeof input==='object'&&!Array.isArray(input)?input:{},base=themeHexPattern.test(v.base||'')?v.base.toLowerCase():'#8b5cf6',mode=v.mode==='light'?'light':'dark';
+ const auto=themeSmartPalette(base,mode),colors={};
+ for(const key of THEME_COLOR_KEYS)colors[key]=themeHexPattern.test(v.colors?.[key]||'')?v.colors[key].toLowerCase():auto[key];
+ const images={};
+ for(const role of ['background','banner','card']){const image=themeImage(role,v.images?.[role],hall);if(image)images[role]=image;}
+ const decor=(Array.isArray(v.decor)?v.decor:[]).filter(d=>d&&themeAsset(d.url)).slice(0,THEME_DECOR_LIMIT).map(d=>({url:d.url,x:themeNumber(d.x,[0,100],50),y:themeNumber(d.y,[0,100],20),size:themeNumber(d.size,[4,60],18),opacity:themeNumber(d.opacity,[0,100],100)}));
+ // Colours the user tuned by hand survive a base/mode change until the next one-click palette.
+ const manual=[...new Set((Array.isArray(v.manual)?v.manual:[]).filter(k=>THEME_COLOR_KEYS.includes(k)))];
+ return {v:THEME_VERSION,base,mode,button:v.button==='solid'?'solid':'gradient',colors,images,decor,...(manual.length?{manual}:{})};
+}
+// Strict, used before any save: rejects malformed input instead of guessing.
+export function themeValidate(value,{hall=false,owner=null}={}){
+ if(value===null)return null;
+ if(!value||typeof value!=='object'||Array.isArray(value))throw Error('主題設定格式不正確');
+ if(!themeHexPattern.test(value.base||''))throw Error('請選有效的主色');
+ if(value.colors!==undefined&&(!value.colors||typeof value.colors!=='object'||Array.isArray(value.colors)||Object.entries(value.colors).some(([k,c])=>!THEME_COLOR_KEYS.includes(k)||!themeHexPattern.test(c))))throw Error('配色請使用有效的六碼色彩');
+ const urls=[...['background','banner','card'].map(r=>value.images?.[r]?.url).filter(Boolean),...(Array.isArray(value.decor)?value.decor.map(d=>d?.url):[])];
+ if(Array.isArray(value.decor)&&value.decor.length>THEME_DECOR_LIMIT)throw Error('裝飾圖片最多 '+THEME_DECOR_LIMIT+' 張');
+ for(const url of urls){const asset=themeAsset(url);if(!asset)throw Error('圖片尚未上傳完成，請重新選擇圖片');if(asset.kind!==(hall?'h':'s')||owner!==null&&asset.owner!==owner)throw Error('圖片不屬於目前的主播或廳，請重新上傳');}
+ const theme=themeNormalize(value,{hall});
+ if(JSON.stringify(theme).length>THEME_MAX_BYTES)throw Error('主題設定過大');
+ return theme;
+}
+export function themeImageUrls(theme){if(!theme)return [];const t=themeNormalize(theme);return [...Object.values(t.images).map(i=>i.url).filter(Boolean),...t.decor.map(d=>d.url)];}
+export function themeChangedImages(before,after){const a=new Set(themeImageUrls(before)),b=themeImageUrls(after);return b.some(u=>!a.has(u))||a.size!==new Set(b).size;}
+export function themeSame(a,b){return JSON.stringify(a?themeNormalize(a):null)===JSON.stringify(b?themeNormalize(b):null);}
+
+// ---------- rendering helpers (strings only) ----------
+export function themeImageValue(image,role){return {...THEME_IMAGE_DEFAULTS[role],...(image||{})};}
+// Band mask: solid between the band edges, feathered ramps outside them.
+export function themeBannerMask(theme,banner){
+ const t=themeNormalize(theme),b=themeImageValue(banner??t.images.banner,'banner'),color=t.colors.background,alpha=b.mask/100;
+ if(alpha<=0||b.maskWidth<=0)return 'none';
+ const half=b.maskWidth/2,ramp=b.maskFeather/100*35,p=b.maskPosition;
+ const stops=[[p-half-ramp,0],[p-half,alpha],[p+half,alpha],[p+half+ramp,0]].map(([at,a])=>`${themeAlpha(color,a)} ${Math.round(at*10)/10}%`);
+ return `linear-gradient(90deg,${stops.join(',')})`;
+}
+const themeCssUrl=url=>/^(https:|blob:|data:image\/)/.test(url)&&!/["\\\n\r]/.test(url)?`url("${url}")`:'none';
+// One background shorthand that keeps text crisp: image opacity is simulated by
+// a translucent panel-coloured veil, so only the picture appears to fade.
+export function themeLayeredBackground(color,image,role,urlOverride){
+ const img=themeImageValue(image,role),url=urlOverride||img.url;
+ if(!url)return color;
+ const veil=themeAlpha(color,1-img.opacity/100),layers=[];
+ if(img.mask>0)layers.push(`linear-gradient(${themeAlpha(color,img.mask/100)},${themeAlpha(color,img.mask/100)})`);
+ if(img.opacity<100)layers.push(`linear-gradient(${veil},${veil})`);
+ layers.push(`${themeCssUrl(url)} ${img.x}% ${img.y}%/cover no-repeat`);
+ return layers.join(',')+','+color;
+}
+export function themeButtonFill(theme){const t=themeNormalize(theme);return t.button==='solid'?t.colors.button:`linear-gradient(135deg,${t.colors.button},${t.colors.button2})`;}
+// CSS custom properties applied to :root (real pages) or a preview container.
+export function themeCssVariables(theme,{resolve=u=>u}={}){
+ const t=themeNormalize(theme),c=t.colors,card=t.images.card;
+ return {
+  '--home-background':c.background,'--home-panel':c.panel,'--home-line':c.line,'--home-button':themeButtonFill(t),'--home-buttonText':c.buttonText,
+  '--home-accent':c.accent,'--home-secondary':c.button2,'--home-glow':themeAlpha(c.accent,.14),'--home-text':c.text,'--home-panelText':c.text,
+  '--theme-title':c.title,'--theme-nav':c.nav,'--theme-logo':c.logo,'--theme-button-solid':c.button,'--theme-muted':themeAlpha(c.text,.78),
+  '--theme-input':t.mode==='light'?'#ffffff':themeAlpha('#000000',.28),'--theme-soft':themeAlpha(c.line,t.mode==='light'?.35:.4),
+  '--theme-card-fill':card?.url?themeLayeredBackground(c.panel,card,'card',resolve(card.url)):c.panel,
+  '--theme-banner-mask':themeBannerMask(t),
+  '--theme-scheme':t.mode
+ };
+}
+export function themePageLayer(theme,{resolve=u=>u}={}){
+ const t=themeNormalize(theme),bg=t.images.background;
+ return bg?.url?themeLayeredBackground(t.colors.background,bg,'background',resolve(bg.url)):'';
+}

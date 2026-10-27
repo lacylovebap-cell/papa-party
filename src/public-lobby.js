@@ -29,12 +29,14 @@ export function lobbyPager(kind,total,page,size){
  const max=Math.max(1,Math.ceil(total/size)),e=lobbyEscape;
  return '<div class="pagination" data-lobby-pagination="'+kind+'"><button type="button" data-lobby-page="'+kind+'" data-page="'+(page-1)+'" '+(page?'':'disabled')+'>上一頁</button><label class="page-jump">第 <input type="number" min="1" max="'+max+'" value="'+(page+1)+'" data-lobby-jump="'+e(kind)+'" aria-label="'+(kind==='rooms'?'主播':'歌曲')+'頁碼"> 頁 / 共 '+max+' 頁</label><button type="button" data-lobby-jump-button="'+kind+'">跳頁</button><button type="button" data-lobby-page="'+kind+'" data-page="'+(page+1)+'" '+(page+1<max?'':'disabled')+'>下一頁</button></div>';
 }
+// The streamer's own hall-card crop: numbers only, so no style injection.
+export function lobbyFocusStyle(focus){const n=v=>Number.isFinite(v)?Math.max(0,Math.min(100,Math.round(v))):null;if(!focus)return '';const x=n(focus.x),y=n(focus.y),o=n(focus.opacity);return x===null||y===null||o===null?'':' style="object-position:'+x+'% '+y+'%;opacity:'+o/100+'"';}
 export function lobbyImageUrl(value){try{if(value==='assets/papa-singer-hero.jpg')return value;const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&u.href.length<=2048?u.href:'';}catch{return '';}}
 export function lobbyRoomsHtml(value,base){
  const e=lobbyEscape;
  if(value.loading)return '<p role="status">讀取主播中…</p>';
  if(value.error)return '<p class="error" role="status">'+e(value.error)+'</p><button type="button" data-lobby-retry="rooms">重新讀取</button>';
- return '<div class="lobby-rooms">'+value.rows.map(r=>'<a class="lobby-room" href="'+e(lobbyRoomDestination(base,r))+'">'+(lobbyImageUrl(r.heroImage)?'<img class="lobby-room-image" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="'+e(lobbyImageUrl(r.heroImage))+'">':'')+'<span aria-hidden="true">🎤</span><strong>'+e(r.display_name)+'</strong><small>進入主播首頁 →</small></a>').join('')+'</div>'+(value.rows.length?'':'<p class="empty">沒有符合的聲瑪主播</p>')+lobbyPager('rooms',value.total,value.page,value.pageSize||20);
+ return '<div class="lobby-rooms">'+value.rows.map(r=>'<a class="lobby-room" href="'+e(lobbyRoomDestination(base,r))+'">'+(lobbyImageUrl(r.heroImage)?'<img class="lobby-room-image" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="'+e(lobbyImageUrl(r.heroImage))+'"'+lobbyFocusStyle(r.heroFocus)+'>':'')+'<span aria-hidden="true">🎤</span><strong>'+e(r.display_name)+'</strong><small>進入主播首頁 →</small></a>').join('')+'</div>'+(value.rows.length?'':'<p class="empty">沒有符合的聲瑪主播</p>')+lobbyPager('rooms',value.total,value.page,value.pageSize||20);
 }
 export function lobbySongsHtml(value,base){
  const e=lobbyEscape;

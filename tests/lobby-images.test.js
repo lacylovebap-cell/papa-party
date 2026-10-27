@@ -7,9 +7,9 @@ test('one bounded projection selects image scalars only, including canonical UUI
  const path=lobbyImageProjectionPath(['papa','11111111-1111-4111-8111-111111111111']),url=new URL(path,'https://db.example');
  assert.equal(url.pathname,'/rest/v1/papa_v2_entities');assert.equal(url.searchParams.get('kind'),'in.(meta,settings)');assert.equal(url.searchParams.get('id'),'eq.1');assert.equal(url.searchParams.get('limit'),'2');
  const fields=url.searchParams.get('select').split(',');
- assert.equal(fields.length,7);assert.equal(fields[0],'kind');assert.equal(fields[1],'i0_mode:data->streamerSettings->"papa"->home->>imageMode');
- assert.match(fields[3],/^i1_mode:data->streamerSettings->"11111111-1111-4111-8111-111111111111"->home->>imageMode$/);
- assert.equal(fields[5],'legacy_mode:data->home->>imageMode');
+ assert.equal(fields.length,15);assert.equal(fields[0],'kind');assert.equal(fields[1],'i0_mode:data->streamerSettings->"papa"->home->>imageMode');
+ assert.match(fields[7],/^i1_mode:data->streamerSettings->"11111111-1111-4111-8111-111111111111"->home->>imageMode$/);
+ assert.equal(fields[13],'legacy_mode:data->home->>imageMode');
  assert.equal(fields.some(field=>field==='data'||field.endsWith('->home')||field.includes('*')),false);
  assert.match(new URL(lobbyImageProjectionPath(['123']),'https://db.example').searchParams.get('select'),/->"123"->home/);
  for(const ids of [[],Array.from({length:21},(_,i)=>'r'+i),['same','same'],['papa,secret:data'],['a->password'],['x&select=data'],['x.y'],['x"']])assert.throws(()=>lobbyImageProjectionPath(ids));

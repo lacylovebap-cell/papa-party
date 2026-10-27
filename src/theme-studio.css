@@ -1,0 +1,77 @@
+/* Editor chrome stays neutral so it never inherits the theme being edited.
+   Doubled class selectors outrank the [data-theme-v2] page rules. */
+html.ts-open,html.ts-open body{overflow:hidden}
+.ts-root.ts-root{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;background:#0f0d13;color:#ece6f5;font:14px/1.5 system-ui,-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",sans-serif;color-scheme:dark}
+.ts-root.ts-root *{box-sizing:border-box}
+.ts-root.ts-root h3{color:#f4effb;font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:6px}
+.ts-root.ts-root input,.ts-root.ts-root select{background:#1d1925;color:#ece6f5;border:1px solid #3a3346;border-radius:8px}
+.ts-root.ts-root button{font:inherit;color:inherit;background:#221d2b;border:1px solid #3a3346;border-radius:9px;padding:6px 10px;cursor:pointer}
+.ts-root.ts-root button:disabled,.ts-root.ts-root .disabled{opacity:.45;cursor:not-allowed}
+.ts-root .ts-top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #2c2636;background:#141119}
+.ts-root .ts-status{flex:1;color:#c9b8e0;font-size:12px}
+.ts-root .ts-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:0}
+.ts-root .ts-preview-col{min-width:0;display:flex;flex-direction:column;padding:12px;background:#0b0a0e;border-right:1px solid #2c2636;overflow:auto}
+.ts-root .ts-preview-bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-bottom:10px}
+.ts-root .ts-frame-wrap{position:relative;overflow:hidden;display:flex;justify-content:center}
+.ts-root .ts-frame{border:0;border-radius:18px;background:#000;transform-origin:top center;box-shadow:0 0 0 1px #3a3346,0 12px 40px #0008;flex:none}
+.ts-root .ts-note{font-size:11px;color:#9a8fab;text-align:center;margin:8px 0 0}
+.ts-root .ts-controls{overflow:auto;padding:12px 14px 30px}
+.ts-root .ts-section{border:1px solid #2c2636;border-radius:12px;padding:12px;margin-bottom:12px;background:#15121b}
+.ts-root .ts-fieldset{border:0;margin:0;padding:0;min-width:0}
+.ts-root .ts-fieldset:disabled{opacity:.55}
+.ts-root .ts-seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:#1a1621;border:1px solid #2c2636;border-radius:10px;padding:3px}
+.ts-root .ts-seg button{border:0;background:transparent;padding:6px 10px}
+.ts-root.ts-root .ts-seg button.on{background:#7c4dd6;color:#fff}
+.ts-root .ts-wide{display:flex}
+.ts-root .ts-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}
+.ts-root .ts-label{font-size:12px;color:#c4b8d6;display:inline-flex;align-items:center;gap:4px;margin:8px 0 4px}
+.ts-root input[type=color]{width:44px;height:36px;padding:2px;cursor:pointer}
+.ts-root .ts-hex{width:96px;padding:7px 8px;font-family:ui-monospace,Menlo,monospace;text-transform:uppercase}
+.ts-root.ts-root .ts-btn{padding:7px 12px}
+.ts-root.ts-root .ts-main{background:linear-gradient(135deg,#7c4dd6,#c04fd8);border-color:#9b6be6;color:#fff;font-weight:600}
+.ts-root.ts-root .ts-ghost{background:transparent}
+.ts-root .ts-file{position:relative;display:inline-block;overflow:hidden;cursor:pointer;background:#221d2b;border:1px solid #3a3346;border-radius:9px}
+.ts-root .ts-file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ts-root .ts-swatches{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.ts-root.ts-root .ts-swatches button{width:26px;height:26px;border-radius:50%;padding:0;border:2px solid #0000}
+.ts-root.ts-root .ts-swatches button.on{border-color:#fff}
+.ts-root .ts-templates{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.ts-root.ts-root .ts-templates button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;font-size:12px}
+.ts-root .ts-templates i{width:22px;height:22px;border-radius:50%;display:block}
+.ts-root .ts-templates small{color:#9a8fab;font-size:10px}
+.ts-root .ts-palette{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.ts-root .ts-color{display:flex;align-items:center;gap:8px;border:1px solid #2c2636;border-radius:9px;padding:5px 6px;min-width:0}
+.ts-root .ts-color input[type=color]{width:34px;height:30px;flex:none}
+.ts-root .ts-color span{display:flex;flex-direction:column;font-size:12px;min-width:0;flex:1}
+.ts-root .ts-color small{color:#9a8fab;font-family:ui-monospace,Menlo,monospace;font-size:10px}
+.ts-root.ts-root .ts-reset{padding:2px 7px;font-size:13px}
+.ts-root .ts-help{width:20px;height:20px;padding:0!important;border-radius:50%!important;font-size:11px;line-height:18px;background:#2b2436!important;color:#d6c6ef}
+.ts-root .ts-help-pop{position:fixed;z-index:2;max-width:290px;background:#2a2236;border:1px solid #6d50a3;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;box-shadow:0 8px 24px #0009}
+.ts-root .ts-hint{font-size:12px;color:#a99dbb;margin:6px 0}
+.ts-root .ts-hint .ok{color:#7fd8aa}.ts-root .ts-hint .bad{color:#ff9b9b}
+.ts-root .ts-warn{font-size:12px;color:#ffcf8a}
+.ts-root .ts-locked{font-size:13px;color:#ffd38a;background:#2b2216;border:1px solid #5a4423;border-radius:9px;padding:8px 10px}
+.ts-root .ts-slider{display:block;margin:8px 0}
+.ts-root .ts-slider span{display:flex;align-items:center;gap:6px;font-size:12px;color:#c4b8d6}
+.ts-root .ts-slider output{margin-left:auto;font-family:ui-monospace,Menlo,monospace;color:#fff}
+.ts-root .ts-slider input{width:100%;accent-color:#9b6be6}
+.ts-root .ts-img-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ts-root .ts-focus{position:relative;height:120px;border-radius:10px;border:1px solid #3a3346;background:#000 center/contain no-repeat;margin:8px 0 2px;cursor:crosshair;touch-action:none}
+.ts-root .ts-focus-card{height:90px;max-width:220px}
+.ts-root .ts-dot{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:2px solid #fff;background:#9b6be6aa;box-shadow:0 0 0 2px #0008;pointer-events:none}
+.ts-root .ts-sub{border-top:1px dashed #3a3346;margin-top:10px;padding-top:8px}
+.ts-root .ts-check{display:flex;gap:6px;align-items:center;font-size:12px;margin:6px 0}
+.ts-root .ts-decor-item{display:flex;gap:8px;align-items:center;border:1px solid #2c2636;border-radius:9px;padding:6px;margin:8px 0}
+.ts-root .ts-decor-item img{width:54px;height:54px;object-fit:contain;background:repeating-conic-gradient(#2a2433 0 25%,#1b1722 0 50%) 0/12px 12px;border-radius:6px}
+.ts-root .ts-grow{flex:1;min-width:0}
+.ts-root .ts-col{display:flex;flex-direction:column;gap:4px}
+.ts-root .ts-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid #2c2636;background:#141119}
+.ts-root .ts-cleanup summary{cursor:pointer;font-size:12px;color:#c4b8d6}
+@media(max-width:860px){
+ .ts-root .ts-body{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);overflow:auto}
+ .ts-root .ts-preview-col{border-right:0;border-bottom:1px solid #2c2636;overflow:visible}
+ .ts-root .ts-controls{overflow:visible}
+ .ts-root .ts-templates{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .ts-root .ts-actions .ts-grow{display:none}
+ .ts-root .ts-actions .ts-btn{flex:1 1 40%}
+}
