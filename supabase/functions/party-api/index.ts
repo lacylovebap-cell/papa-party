@@ -12,6 +12,7 @@ import {createPublicRoutes} from './public-routes.js';
 import {createPublicAppHomes} from './pwa-homes.js';
 import {readManagementSession} from './management-session.js';
 import {managementRpcRequest} from './management-rpc.js';
+import {createManagementProvision,MANAGEMENT_PROVISION_MESSAGES} from './management-provision.js';
 // No browser access to tables or VAPID secrets. All recipient keys come from actor().
 import webpush from 'npm:web-push@3.6.7';
 import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,queueNoticeCurrent,validPushSubscription,canonicalNoticeLink,webNoticePath} from '../../../src/notification-rules.js';
@@ -113,7 +114,7 @@ function schedulePush(room?:string,recipients:string[]=[]){EdgeRuntime.waitUntil
 
 import {deriveNotices} from '../../../src/notification-rules.js';
 // Authentication is checked here for every operation; no browser service key.
-import {empty,TABLES,mutate,publicView,migrateLegacy,previewImport,applyImport,playerSearch,upgradePlatform,scopeState,searchAcrossStreamers,balance,reservedCredits,usedHour,reservedHour,quoteSong,hourKey,canRequestSaved,ownQueueReplacementQuote} from '../../../src/core.js';
+import {DEFAULTS,empty,TABLES,mutate,publicView,migrateLegacy,previewImport,applyImport,playerSearch,upgradePlatform,scopeState,searchAcrossStreamers,balance,reservedCredits,usedHour,reservedHour,quoteSong,hourKey,canRequestSaved,ownQueueReplacementQuote} from '../../../src/core.js';
 import {venuePolicySavedSnapshot} from '../../../src/venue-policy.js';
 import {buildNativePlayerBindings} from '../../../src/native-player-bindings.js';
 import {chatAccess} from '../../../src/chat-policy.js';
@@ -210,7 +211,7 @@ async function api(path:string,body?:unknown,method?:string,verifiedContext?:any
   Object.assign(messages,{LISTENING_HISTORY_SCOPE_INVALID:'找不到主播的常聽歌單',LISTENING_HISTORY_ACTOR_INVALID:'無法查看其他玩家的常聽歌單',LISTENING_HISTORY_PLAYER_INVALID:'找不到此玩家',LISTENING_HISTORY_PAGE_INVALID:'常聽歌單分頁資料不正確',SONG_FAVORITES_SCOPE_INVALID:'找不到可收藏的主播空間',SONG_FAVORITES_ACTOR_INVALID:'登入已到期，請重新登入',SONG_FAVORITES_SONG_INVALID:'歌曲已隱藏或更新，請重新選擇',SONG_FAVORITES_INPUT_INVALID:'收藏資料不正確',SONG_FAVORITES_PAGE_INVALID:'收藏分頁資料不正確',NEW_PRACTICE_SCOPE_INVALID:'找不到主播的新練歌曲',NEW_PRACTICE_PAGE_INVALID:'新練歌曲分頁資料不正確',STREAMER_REGISTRY_DUPLICATE:'主播網址已使用',STREAMER_REGISTRY_ACTOR_INVALID:'總裁登入已到期，請重新登入',
    STREAMER_REGISTRY_SCOPE_INVALID:'請切換到該主播空間再編輯',STREAMER_REGISTRY_ROOM_INVALID:'找不到主播',
    STREAMER_REGISTRY_SPACE_INVALID:'找不到可使用的空間',STREAMER_REGISTRY_DESCRIPTOR_INVALID:'主播資料格式錯誤'});
-  Object.assign(messages,{MANAGEMENT_ACCESS_DENIED:'管理授權已變更，請重新確認',MANAGEMENT_VERSION_CONFLICT:'管理資料剛更新，請重新開啟後再操作',SPACE_PROVISIONING_REQUIRED:'此空間尚需完成營運啟用設定',STREAMER_DISABLE_BEFORE_ARCHIVE:'請先停用主播，再進行封存',STREAMER_ARCHIVED:'此主播已封存，請先還原封存',OWNER_TRANSFER_REQUIRED:'負責人交接需要另行確認',PERMISSION_ESCALATION:'無法授予超出自己範圍的權限'});
+  Object.assign(messages,{MANAGEMENT_ACCESS_DENIED:'管理授權已變更，請重新確認',MANAGEMENT_VERSION_CONFLICT:'管理資料剛更新，請重新開啟後再操作',SPACE_PROVISIONING_REQUIRED:'此空間尚需完成營運啟用設定',STREAMER_DISABLE_BEFORE_ARCHIVE:'請先停用主播，再進行封存',STREAMER_ARCHIVED:'此主播已封存，請先還原封存',OWNER_TRANSFER_REQUIRED:'負責人交接需要另行確認',PERMISSION_ESCALATION:'無法授予超出自己範圍的權限'});if(typeof MANAGEMENT_PROVISION_MESSAGES==='object')Object.assign(messages,MANAGEMENT_PROVISION_MESSAGES);
   let rejected=false,conflict=false,headUnavailable=false,catalogUnavailable=false,snapshotInvalid=false;try{const detail=JSON.parse(text);rejected=path.startsWith('/rest/v1/rpc/')&&r.status<500&&typeof detail?.code==='string'&&/^(?:[0-9A-Z]{5}|PGRST\d{3})$/.test(detail.code);conflict=rejectedRevisionConflict(path,r.status,detail);headUnavailable=missingRoomSyncHead(path,r.status,detail);catalogUnavailable=missingConditionalCatalogMetadata(path,r.status,detail);snapshotInvalid=path==='/rest/v1/rpc/papa_notice_category_page'&&r.status>=400&&r.status<500&&detail.code==='P0001'&&detail.message==='NOTICE_SNAPSHOT_INVALID';}catch{}
   if(snapshotInvalid)throw Object.assign(Error('通知列表已更新，請重新讀取第一頁'),{code:'NOTICE_SNAPSHOT_INVALID',rpcRejected:true});
   if(conflict)throw Object.assign(revisionConflictError(),{rpcRejected:rejected});
@@ -591,7 +592,10 @@ const eventTotals=new Map();
 async function eventTotal(room:any,global:boolean){const key=JSON.stringify([room.spaceId,room.id,global]),cached=eventTotals.get(key);if(cached&&Date.now()-cached.at<60000)return cached.total;const total=await api('/rest/v1/rpc/papa_event_total',{room_id:room.id,include_global:global});if(typeof total!=='number'||!Number.isSafeInteger(total)||total<0)throw Error('操作歷史頁數尚未確認');if(eventTotals.size>=128)eventTotals.delete(eventTotals.keys().next().value);eventTotals.set(key,{at:Date.now(),total});return total;}
 const publicRoutes=createPublicRoutes({api});
 const publicAppHomes=createPublicAppHomes({api});
-Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.26-ADMIN.1',spaceCenterDirectory:1,notificationFinal:1,platformDirectory:1,platformManagement:2,managementDisplayNumbers:1,topLayerFeedback:1,weightedSongCredits:1,compactMenu:1,publicAppHomes:1,pwaInstallSource:1,publicLinks:1,publicLobby:1,medalProgress:1,medalManagement:4,medalEvidence:1,cleanerPlayerDice:1,playerDiceOnly:1,medalRevocation:1,badgeRules:2,achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});if(b.op==='publicRouteResolve')return respond(await publicRoutes.resolve(b.path));if(b.op==='publicRouteInfo')return respond(await publicRoutes.info(b));if(b.op==='publicAppHomes')return respond(await publicAppHomes.list(b));if(b.op==='publicAppHome')return respond(await publicAppHomes.one(b));if(b.op==='publicLobbyRooms')return respond(await publicLobbyRooms(b));if(b.op==='publicLobbySongs')return respond(await catalogOperation(b,null));const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['platformManagementSession','platformSpaceDirectory','platformManageSpace','platformManagementDirectory','platformManagementDetail','platformManagementDependencies','platformStreamerSave','platformDirectory','spaces','spaceResolve','spaceEntry','nativePushRegister','nativePushDisable','publicRouteSettings','publicRouteCheck','publicRouteSave'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
+// Created on first platform use so isolated handler harnesses need no extra globals.
+let managementProvisionInstance:any=null;
+const managementProvision=()=>managementProvisionInstance||=createManagementProvision({api:(path:string,body?:unknown)=>api(path,body),defaults:DEFAULTS,adminUser:ADMIN||null});
+Deno.serve(async req=>{const operationAttempt={started:false};let receiptedRequest=false,activityRequest:any=null;if(req.method==='OPTIONS')return new Response(null,{headers:cors});const respond=(data:any,status=200)=>{if(status===200&&activityRequest)observeActivity(activityRequest.body,activityRequest.who);return new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});};try{if(req.method!=='POST')return respond({error:'Method not allowed'},405);const b=await req.json();receiptedRequest=!!(b.operationId&&(b.op==='mutate'&&scopedOperationalAction(b.action)||['requestsBatch','ownQueueBatch'].includes(b.op)));if(b.op==='releaseInfo')return respond({version:'10.28-ADMIN.1',managementProvision:1,spaceCenterDirectory:1,notificationFinal:1,platformDirectory:1,platformManagement:2,managementDisplayNumbers:1,topLayerFeedback:1,weightedSongCredits:1,compactMenu:1,publicAppHomes:1,pwaInstallSource:1,publicLinks:1,publicLobby:1,medalProgress:1,medalManagement:4,medalEvidence:1,cleanerPlayerDice:1,playerDiceOnly:1,medalRevocation:1,badgeRules:2,achievements:true,activityMonitoring:true,cardVideo:true,operationReceipts:true,conditionalCatalogMetadata:true,messageCenterV2:true,scopedRealtimeV2:false,nativeApps:false});if(b.op==='publicRouteResolve')return respond(await publicRoutes.resolve(b.path));if(b.op==='publicRouteInfo')return respond(await publicRoutes.info(b));if(b.op==='publicAppHomes')return respond(await publicAppHomes.list(b));if(b.op==='publicAppHome')return respond(await publicAppHomes.one(b));if(b.op==='publicLobbyRooms')return respond(await publicLobbyRooms(b));if(b.op==='publicLobbySongs')return respond(await catalogOperation(b,null));const credentialOperation=['deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences'].includes(b.op),who=credentialOperation?null:await actor(b.token||'',['platformManagementSession','platformAccounts','platformProvisionStreamer','platformStreamerLogin','platformStreamerLoginStatus','platformSpaceReadiness','platformDeleteReview','platformDelete','platformSpaceDirectory','platformManageSpace','platformManagementDirectory','platformManagementDetail','platformManagementDependencies','platformStreamerSave','platformDirectory','spaces','spaceResolve','spaceEntry','nativePushRegister','nativePushDisable','publicRouteSettings','publicRouteCheck','publicRouteSave'].includes(b.op)?null:b.streamer||'papa'),t=new Date().toISOString();
  if(typeof b.op==='string'&&b.op.startsWith('platform')&&b.op!=='platformManagementSession'&&(!isSuper(who)||!who.accountId))throw Error('平台管理中心僅限總裁帳號');
  if(who?.role==='streamer_admin'){
   const permission=managerPermissionRequirement(b);
@@ -680,6 +684,13 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   return respond({rooms:rooms.map((room:any)=>({id:room.id,slug:room.slug,display_name:room.display_name}))});
  }
  if(b.op==='platformManagementSession')return respond(await readManagementSession(api,who));
+ if(b.op==='platformAccounts')return respond(await managementProvision().accounts(b,who));
+ if(b.op==='platformProvisionStreamer')return respond(await managementProvision().provision(b,who));
+ if(b.op==='platformStreamerLogin')return respond(await managementProvision().login(b,who));
+ if(b.op==='platformStreamerLoginStatus')return respond(await managementProvision().loginStatus(b,who));
+ if(b.op==='platformSpaceReadiness')return respond(await managementProvision().readiness(b,who));
+ if(b.op==='platformDeleteReview')return respond(await managementProvision().deleteReview(b,who));
+ if(b.op==='platformDelete')return respond(await managementProvision().remove(b,who));
  if(b.op==='platformSpaceDirectory'){
   if(!isSuper(who)||!who.accountId)throw Error('平台管理中心僅限總裁帳號');
   if(!['all','hall','independent'].includes(b.category)||typeof b.q!=='string'||b.q.length>100||!Number.isSafeInteger(b.page)||b.page<1||b.page>100000||b.spaceId!=null&&(typeof b.spaceId!=='string'||!b.spaceId||b.spaceId.length>200))throw Error('空間查詢格式不正確');
@@ -834,7 +845,16 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
  if(who?.spaceId&&who.spaceId!=='space-001')
   throw Error('此 Space 的資料頁尚未開放');
  if(b.op==='streamerLogin'){
-  const snapshot=await loadCommunicationState(),r=scopeState(snapshot,b.streamer).currentStreamer,token='streamer:'+crypto.randomUUID()+crypto.randomUUID();
+  const snapshot=await loadCommunicationState();let r:any;
+  try{r=scopeState(snapshot,b.streamer).currentStreamer;}catch(error){
+   // A streamer provisioned in a new Space already has its login, but that
+   // Space's operational pages open only with the verified native release.
+   const all=await api('/rest/v1/rpc/papa_streamer_directory',{}).catch(()=>null);
+   if(Array.isArray(all)&&all.some((room:any)=>(room?.id===b.streamer||room?.slug===b.streamer)&&(room.spaceId||'space-001')!=='space-001'))
+    throw Error('此空間的營運功能尚未開放；登入帳號已建立，開放後即可用同一組代碼與密碼登入');
+   throw error;
+  }
+  const token='streamer:'+crypto.randomUUID()+crypto.randomUUID();
   const sessionHash=await hash(token);
   if(typeof b.password!=='string'||!await api('/rest/v1/rpc/papa_manager_login',{kind:'streamer',room:r.id,password:b.password,auth_user:ADMIN||null,session_hash:sessionHash}))throw Error('主播密碼不正確、尚未啟用或嘗試過多，請稍後再試');
   const identity=await api('/rest/v1/rpc/papa_bind_verified_legacy_session',{session_hash:sessionHash});
