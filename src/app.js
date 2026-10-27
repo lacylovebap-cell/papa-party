@@ -176,7 +176,7 @@ let sharedLyricHistory={variantId:null,rows:[]};
 const roomLanguages={data:null,loadedAt:0,loading:false};
 const roomSearch={book:null,home:null,songs:null,unsupported:false,generation:0,timer:null,cache:new Map()};
 if(!admin?.device&&admin?.until<Date.now()){admin=null;put('admin',null);}if(!admin)draft=null;
-const isSuperAdmin=()=>!!admin&&admin.role!=='streamer_admin';
+const isSuperAdmin=()=>!!admin&&['admin','super_admin'].includes(admin.role);
 const clock=()=>stamp(Date.now()+offset),me=()=>state.players.find(p=>p.playerId===session?.playerId),isAdmin=()=>!!admin&&route==='admin',actor=()=>isAdmin()?{role:'admin'}:session?{role:'player',playerId:session.playerId,loginId:session.loginId}:null;
 const button=(label,act,id='',cls='tiny',extra='')=>`<button type="button" class="${cls}" data-act="${act}" data-id="${h(id)}" ${extra}>${label}</button>`;
 const blank=(text='還沒有紀錄，先留個位置 ♡')=>`<div class="empty">${h(text)}</div>`;

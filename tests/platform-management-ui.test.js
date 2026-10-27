@@ -57,3 +57,13 @@ test('editor markup is a modal template and failed save error stays inside it',a
 test('legacy account labels containing internal UUID never appear as visible identity',async()=>{
  const id='22222222-2222-4222-8222-222222222222';const c=createPlatformManagement({api:async()=>page([{id,name:id,managerKey:'streamer:artist'}]),identity:()=> 'president',escape,changed:()=>{}});await c.load({section:'accounts'});const html=c.html();assert.match(html,/streamer:artist/);assert.ok(!html.replace(/data-pm-id="[^"]*"/g,'').includes(id));
 });
+
+// Exercise the actual app guard: newly introduced hall roles must fail closed.
+test('app president controls reject hall, host, player and unknown roles',()=>{
+ const source=fs.readFileSync('src/app.js','utf8');
+ const guard=source.match(/const isSuperAdmin=([^;]+);/)[1];
+ const check=new Function('admin','return ('+guard+')();');
+ for(const role of ['space_admin','streamer_admin','player','unknown',undefined])assert.equal(check({role}),false);
+ assert.equal(check(null),false);
+ for(const role of ['admin','super_admin'])assert.equal(check({role}),true);
+});
