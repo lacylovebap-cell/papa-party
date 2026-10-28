@@ -2708,6 +2708,10 @@ function themeEnsureContrast(fg, bg, target) {
   }
   return lighter ? "#ffffff" : "#111111";
 }
+function themeMix(hex, over, amount) {
+  const a = themeRgb(hex), b = themeRgb(over);
+  return themeHex(a.map((n, i) => n * (1 - amount) + b[i] * amount));
+}
 function themeShade(hex, delta) {
   const [h, s, l] = themeHsl(hex);
   return themeFromHsl(h, s, l + delta);
@@ -2929,8 +2933,9 @@ function themeCssVariables(theme, { resolve = (u) => u } = {}) {
     "--theme-logo": c.logo,
     "--theme-button-solid": c.button,
     "--theme-muted": themeAlpha(c.text, 0.78),
-    "--theme-input": t.mode === "light" ? "#ffffff" : themeAlpha("#000000", 0.28),
+    "--theme-input": t.mode === "light" ? "#ffffff" : themeMix(c.panel, "#000000", 0.28),
     "--theme-soft": themeAlpha(c.line, t.mode === "light" ? 0.35 : 0.4),
+    "--theme-button-soft": themeMix(c.panel, c.button, t.mode === "light" ? 0.16 : 0.3),
     "--theme-card-fill": card?.url ? themeLayeredBackground(c.panel, card, "card", resolve(card.url)) : c.panel,
     "--theme-banner-mask": themeBannerMask(t),
     ...themeDividerVariables(t),
