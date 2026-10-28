@@ -3,10 +3,10 @@
 // one access check when opening, one hall-theme read when switching to the
 // hall, image uploads on save/publish, and the save/publish write itself.
 import {THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
- themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.28-UI.1';
-import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.28-UI.1';
-import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-UI.1';
-import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-UI.1';
+ themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.28-UI.2';
+import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.28-UI.2';
+import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-UI.2';
+import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-UI.2';
 
 const LOCAL_HOST='https://local.preview';
 const h=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

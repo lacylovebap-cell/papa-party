@@ -229,3 +229,12 @@ test('decoration motion is one optional word per decoration and survives the ser
  let s=room();s=mutate(s,{type:'settings',streamer:'papa',data:{theme:{base:'#000000',decor:[{url:asset(),motion:'follow',x:10,y:90}]}}},{role:'admin'},'2026-10-28T00:00:00.000Z');
  assert.equal(scopeState(s,'papa').settings.theme.decor[0].motion,'follow');
 });
+
+test('iPhone fallback: theme images use a bundled WebP encoder only when the canvas cannot write WebP', async () => {
+  const fs = await import('node:fs');
+  const src = fs.readFileSync(new URL('../src/theme-image.js', import.meta.url), 'utf8');
+  assert.ok(fs.existsSync(new URL('../src/vendor/webp-enc/webp_enc.wasm', import.meta.url)));
+  assert.match(src, /themeCanWriteWebp\(\)\)return themeCanvasBlobNative/);
+  assert.match(src, /import\('\.\/vendor\/webp-enc\/webp_enc\.js'\)/);
+  assert.doesNotMatch(src, /請改用新版 Chrome/);
+});

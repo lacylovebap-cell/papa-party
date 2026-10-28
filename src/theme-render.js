@@ -1,7 +1,7 @@
 // Applies a theme to a document root (real pages) or to the preview iframe.
 // Pure CSS: colours, image opacity and masks change custom properties only, so
 // slider moves never re-request an image or touch the network.
-import {themeNormalize,themeCssVariables,themePageLayer,themeImageValue} from './theme-engine.js?v=10.28-UI.1';
+import {themeNormalize,themeCssVariables,themePageLayer,themeImageValue} from './theme-engine.js?v=10.28-UI.2';
 
 const themeVarNames=new Set();
 export function themeApply(root,theme,{resolve=u=>u,hall=false}={}){
