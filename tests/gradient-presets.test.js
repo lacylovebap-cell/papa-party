@@ -80,4 +80,11 @@ test('studio uses one main-colour preset area, and medals replay with compact â–
  const css=source('src/theme.css');
  assert.match(css,/\.medal-row \.medal-replay\{right:41px/);
  assert.match(css,/block-size:28px!important/);
+ // Card content starts below the icon row so â–¶ / ! never cover the medal icon.
+ assert.match(css,/\.medal-row\{position:relative;padding-top:40px\}/);
+});
+
+test('medal and theme modules load one consistent version (no stale duplicate instances)',()=>{
+ for(const file of ['src/app.js','src/medal-management.js','src/medal-evidence.js','app.html','v2.html','lobby.html','preview.html'])
+  assert.doesNotMatch(source(file),/(achievements-view|medal-management|medal-evidence|theme-engine|theme-render|theme-studio|theme-image)\.js\?v=10\.29-THEME\.1|theme\.css\?v=10\.29-THEME\.1/,file);
 });

@@ -47,7 +47,7 @@ import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} fro
 import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.20-WEB.1';
 import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.20-WEB.1';
 import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.29-THEME.2';
-import {createMedalManagement} from './medal-management.js?v=10.29-THEME.1';
+import {createMedalManagement} from './medal-management.js?v=10.29-THEME.2';
 import {roomPricing,roomRollover,queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,requestFees,reservedCredits,reservedHour,savedQuota,songSelection,cancelRecovery} from './core.js?v=10.29-PRICE.2';
 import {formatGift} from './pricing-engine.js?v=10.29-PRICE.2';
 import {feeColumns,giftReveal,priceGuide,crownGuide} from './pricing-ui.js?v=10.29-PRICE.2';

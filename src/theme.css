@@ -235,7 +235,8 @@ html #app .queue-row .queue-note-open{min-height:20px!important;padding:1px 6px!
 /* Transient decoration only: the original medal, colours and frame remain intact. */
 /* Icon-only replay and help sit together, outside the card content flow.
    Fixed block/inline sizes prevent the global button theme from stretching them. */
-.medal-row{position:relative}
+/* Content starts below the 28px icon buttons (7px + 28px + gap), so ▶ never covers the medal icon. */
+.medal-row{position:relative;padding-top:40px}
 .medal-row .medal-help,.medal-row .medal-replay{
  position:absolute;top:7px;display:grid;place-items:center;
  box-sizing:border-box;inline-size:28px!important;block-size:28px!important;
