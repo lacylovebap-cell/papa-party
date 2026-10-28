@@ -3,8 +3,8 @@
 // owns the dialog, the network calls and the save. The draft keeps what was
 // typed (as text) so switching billing mode never loses a value; forSave()
 // drops the fees a mode does not collect.
-import {hallPricingInput,normalizePricing,DEFAULT_NAMES} from './pricing-engine.js?v=10.29-PRICE.2';
-import {priceGuide,crownGuide} from './pricing-ui.js?v=10.29-PRICE.2';
+import {hallPricingInput,normalizePricing,DEFAULT_NAMES} from './pricing-engine.js?v=10.29-SPACE.1';
+import {priceGuide,crownGuide} from './pricing-ui.js?v=10.29-SPACE.1';
 
 const PARTY_LABEL={singer:'主播',host:'主持',hall:'廳主號'};
 export const pricingParties=p=>p.mode==='none'?['singer']:p.mode==='single'?['singer',p.singleFee==='hall'?'hall':'host']:['singer','host','hall'];

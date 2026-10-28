@@ -1,5 +1,5 @@
 import {groupManagementRoles,managementRoleLabel} from './management-role-groups.js?v=10.25-ADMIN.2';
-import {pricingEditorHtml,pricingBasicsHtml,pricingDraft,readPricingForm,changePricingDraft,forSave} from './space-pricing-editor.js?v=10.29-PRICE.2';
+import {pricingEditorHtml,pricingBasicsHtml,pricingDraft,readPricingForm,changePricingDraft,forSave} from './space-pricing-editor.js?v=10.29-SPACE.1';
 // The management centre uses the existing Account, Space and streamer registry.
 // No operational player or accounting snapshots are downloaded here.
 const sections=[['all-spaces','全部空間'],['hall-spaces','廳'],['independent-spaces','獨立主播'],['overview','總覽'],['halls','廳與租戶管理'],['streamers','主播管理'],['accounts','管理帳號'],['cleanup','停用與清理']];

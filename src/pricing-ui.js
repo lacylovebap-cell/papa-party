@@ -2,7 +2,7 @@
 // HTML builders (no DOM, no network) so the dialogs, the price guide and the
 // crown guide all say the same short thing, in the Space's own words, and the
 // page's theme colours style them through pricing-ui.css.
-import {formatGift,quoteSummary,PRICING_NOTE} from './pricing-engine.js?v=10.29-PRICE.2';
+import {formatGift,quoteSummary,PRICING_NOTE} from './pricing-engine.js?v=10.29-SPACE.1';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
