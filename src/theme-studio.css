@@ -46,7 +46,7 @@ html.ts-open,html.ts-open body{overflow:hidden}
 .ts-root .ts-color small{color:#9a8fab;font-family:ui-monospace,Menlo,monospace;font-size:10px}
 .ts-root.ts-root .ts-reset{padding:2px 7px;font-size:13px}
 .ts-root .ts-help{width:20px;height:20px;padding:0!important;border-radius:50%!important;font-size:11px;line-height:18px;background:#2b2436!important;color:#d6c6ef}
-.ts-root .ts-help-pop{position:fixed;z-index:2;max-width:290px;background:#2a2236;border:1px solid #6d50a3;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;box-shadow:0 8px 24px #0009}
+.ts-root .ts-help-pop{position:fixed;z-index:2;max-width:290px;cursor:pointer;background:#2a2236;border:1px solid #6d50a3;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;box-shadow:0 8px 24px #0009}
 .ts-root .ts-hint{font-size:12px;color:#a99dbb;margin:6px 0}
 .ts-root .ts-hint .ok{color:#7fd8aa}.ts-root .ts-hint .bad{color:#ff9b9b}
 .ts-root .ts-warn{font-size:12px;color:#ffcf8a}
@@ -75,3 +75,5 @@ html.ts-open,html.ts-open body{overflow:hidden}
  .ts-root .ts-actions .ts-grow{display:none}
  .ts-root .ts-actions .ts-btn{flex:1 1 40%}
 }
+.ts-root .ts-help-pop p{margin:0;padding-right:22px}
+.ts-root.ts-root .ts-help-close{position:absolute;top:4px;right:4px;width:26px;height:26px;padding:0;border:0;background:transparent;font-size:14px;line-height:26px}

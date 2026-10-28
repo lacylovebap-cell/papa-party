@@ -199,6 +199,7 @@ export function openThemeStudio(options){
  // mask guides and decorations. All only change numbers in memory.
  function bindFrame(){
   let drag=null;
+  doc.addEventListener('pointerdown',()=>{if(helpFor)hideHelp();},true);
   doc.addEventListener('pointerdown',e=>{
    const t=current().working;if(current().reset||!can('basic'))return;
    const guide=e.target.closest('[data-guide]'),decor=e.target.closest('.theme-decor'),bannerImg=e.target.closest('[data-banner-img]'),hallImg=e.target.closest('.ts-hallcard');
@@ -263,10 +264,11 @@ export function openThemeStudio(options){
   }catch(error){ui.status='';toast(error.message||'圖片處理失敗');syncActions();}
  }
  root.addEventListener('click',async e=>{
-  const el=e.target.closest('button,[data-help]');if(!el)return;
+  const el=e.target.closest('button,[data-help]');
+  // Any tap closes the help bubble; tapping the same ? again just closes it.
+  if(el?.matches('[data-help]')){e.preventDefault();if(helpFor===el){hideHelp();return;}showHelp(el);return;}
+  hideHelp();if(!el)return;
   const tg=current(),t=tg.working;
-  if(el.matches('[data-help]')){showHelp(el);return;}
-  hideHelp();
   if(el.dataset.ts==='close'){if((targets.streamer?.dirty||targets.hall?.dirty)&&!confirm('有未儲存的修改，確定要關閉並放棄嗎？'))return;close();return;}
   if(el.dataset.ts==='smart'){regenerate(true);markDirty();schedule();return;}
   if(el.dataset.ts==='discard'){targets[ui.target]=makeTarget(tg.published,tg.draft,tg.owner,tg.hall);renderControls();renderPage();return;}
@@ -294,8 +296,12 @@ export function openThemeStudio(options){
    const img=ensureImage(role==='hall'?'banner':role);if(role==='hall'){img.hallX=x;img.hallY=y;}else{img.x=x;img.y=y;}box.querySelector('.ts-dot').style.cssText=`left:${x}%;top:${y}%`;markDirty(false);schedule();};
   move(e);const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);};addEventListener('pointermove',move);addEventListener('pointerup',up);
  });
- function showHelp(el){const pop=$('[data-ts-help-pop]'),r=el.getBoundingClientRect();pop.textContent=THEME_HELP[el.dataset.help]||'';pop.hidden=false;pop.style.top=Math.min(innerHeight-140,r.bottom+6)+'px';pop.style.left=Math.max(8,Math.min(innerWidth-300,r.left-140))+'px';}
- function hideHelp(){$('[data-ts-help-pop]').hidden=true;}
+ let helpFor=null;
+ function showHelp(el){const pop=$('[data-ts-help-pop]'),r=el.getBoundingClientRect();helpFor=el;pop.innerHTML='<button type="button" class="ts-help-close" aria-label="關閉說明">✕</button><p>'+h(THEME_HELP[el.dataset.help]||'')+'</p>';pop.hidden=false;pop.style.top=Math.min(innerHeight-140,r.bottom+6)+'px';pop.style.left=Math.max(8,Math.min(innerWidth-300,r.left-140))+'px';}
+ function hideHelp(){helpFor=null;$('[data-ts-help-pop]').hidden=true;}
+ // Scrolling the controls moves the ? away from its bubble, so close it.
+ $('[data-ts-controls]').addEventListener('scroll',()=>{if(helpFor)hideHelp();},{passive:true});
+ root.querySelector('.ts-body').addEventListener('scroll',()=>{if(helpFor)hideHelp();},{passive:true});
  async function switchTarget(next){
   if(next==='hall'&&!targets.hall){
    try{ui.status='讀取廳主題…';syncActions();const r=await api({op:'hallThemeEdit',spaceId:ui.access.spaceId,management:true});targets.hall=makeTarget(r.published?.theme||null,r.draft?.theme||null,ui.access.spaceId,true);remember(r.published?.theme);remember(r.draft?.theme);ui.access.hall.features=r.features||ui.access.hall.features;}
@@ -351,9 +357,10 @@ export function openThemeStudio(options){
    else out.textContent=` 已清理 ${r.removed} 張未使用圖片。`;
   }catch(error){out.textContent=' '+(error.message||'暫時無法清理');}
  }
- function close(){for(const p of pending.values())URL.revokeObjectURL(p.localUrl);root.remove();document.documentElement.classList.remove('ts-open');removeEventListener('resize',sizeFrame);removeEventListener('keydown',esc);onClose();}
+ function close(){for(const p of pending.values())URL.revokeObjectURL(p.localUrl);root.remove();document.documentElement.classList.remove('ts-open');removeEventListener('resize',resized);removeEventListener('keydown',esc);onClose();}
  const esc=e=>{if(e.key==='Escape'){hideHelp();}};
- addEventListener('resize',sizeFrame);addEventListener('keydown',esc);
+ const resized=()=>{hideHelp();sizeFrame();};
+ addEventListener('resize',resized);addEventListener('keydown',esc);
 
  renderPageTabs();renderControls();syncActions();ensureFrame();
  api({op:'themeAccess',streamer:room.id,management:true}).then(access=>{ui.access=access;renderControls();}).catch(error=>{ui.accessError=error.message||'權限讀取失敗';renderControls();});
