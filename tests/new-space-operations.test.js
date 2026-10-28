@@ -22,6 +22,23 @@ test('a new independent Space can be activated and its streamer can log in and r
  assert.equal(read.body.state.currentStreamer.spaceId,fairy.spaceId);
 });
 
+test('readiness shows whether the price list has amounts, without blocking 開放營運',async t=>{
+ const f=await nativeFixture(t);
+ const fairy=await f.provision({name:'仙女',slug:'fairy',password:'fairy-pass-1'});
+ const readiness=async()=>{const r=await f.call({op:'platformSpaceReadiness',spaceId:fairy.spaceId,token:f.president.token});assert.equal(r.status,200,JSON.stringify(r.body));return r.body;};
+ let r=await readiness();
+ assert.deepEqual(r.items.map(i=>[i.code,i.done]),[['streamer',true],['login',true],['pricing',false],['operations',false],['route',false]]);
+ assert.equal(r.canActivate,true,'missing amounts never block opening');
+ assert.match(r.items.find(i=>i.code==='pricing').detail,/顯示 0/);
+ const base={v:1,mode:'none',singleFee:'host',names:{singer:'仙女',host:'主持',hall:'廳主號'},unit:'星星',perUnit:{singer:0,host:0,hall:0},policy:'auto',plans:[],tiers:[]};
+ const save=async(pricing,expectedRevision)=>{const s=await f.call({op:'platformSpacePricingSave',operationId:crypto.randomUUID(),spaceId:fairy.spaceId,expectedRevision,rolloverHour:20,pricing,token:f.president.token});assert.equal(s.status,200,JSON.stringify(s.body));};
+ await save(base,0);
+ assert.equal((await readiness()).items.find(i=>i.code==='pricing').done,false,'a list of zeros is not filled in');
+ await save({...base,perUnit:{singer:300,host:0,hall:0}},1);
+ const priced=(await readiness()).items.find(i=>i.code==='pricing');
+ assert.equal(priced.done,true);assert.match(priced.detail,/20:00/);
+});
+
 async function openFairy(f){
  const fairy=await f.provision({name:'仙女',slug:'fairy',password:'fairy-pass-1'});
  const opened=await f.setSpaceStatus(fairy.spaceId,'restore');assert.equal(opened.status,200,JSON.stringify(opened.body));

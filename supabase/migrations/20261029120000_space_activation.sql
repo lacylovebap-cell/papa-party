@@ -143,7 +143,7 @@ end;$$;
 
 create or replace function public.papa_management_space_readiness(subject uuid,requested_space text)
 returns jsonb language plpgsql stable security definer set search_path='' as $$
-declare space_row public.papa_spaces;hosts jsonb;route_code text;missing_login jsonb;items jsonb;operational boolean;
+declare space_row public.papa_spaces;hosts jsonb;route_code text;missing_login jsonb;items jsonb;operational boolean;pricing jsonb;priced boolean;
 begin
  if not public.papa_management_is_president(subject) then raise exception 'MANAGEMENT_ACCESS_DENIED';end if;
  select * into space_row from public.papa_spaces where id=requested_space;
@@ -156,12 +156,24 @@ begin
  select coalesce(jsonb_agg(h->'name'),'[]'::jsonb) into missing_login from jsonb_array_elements(hosts) h where not (h->>'login')::boolean;
  select code into route_code from public.papa_public_route_spaces where space_id=requested_space;
  operational=space_row.status='active';
+ -- Information only (never blocks 開放營運): a Space without amounts would
+ -- quote 0 for every request until its price list is filled in.
+ select p.value into pricing from public.papa_space_policies p where p.space_id=requested_space and p.policy_key='pricing';
+ priced=pricing is not null and (
+  exists(select 1 from jsonb_each(case when jsonb_typeof(pricing->'perUnit')='object' then pricing->'perUnit' else '{}'::jsonb end) e
+   where jsonb_typeof(e.value)='number' and (e.value#>>'{}')::numeric>0)
+  or exists(select 1 from jsonb_array_elements(case when jsonb_typeof(pricing->'plans')='array' then pricing->'plans' else '[]'::jsonb end) plan
+   cross join lateral (values(plan->'singer'),(plan->'host'),(plan->'hall')) amount(v)
+   where jsonb_typeof(plan)='object' and jsonb_typeof(amount.v)='number' and (amount.v#>>'{}')::numeric>0));
  items=jsonb_build_array(
   jsonb_build_object('code','streamer','done',jsonb_array_length(hosts)>0,'label','主播資料',
    'detail',case when jsonb_array_length(hosts)>0 then '已建立 '||jsonb_array_length(hosts)||' 位主播' else '尚未建立主播' end),
   jsonb_build_object('code','login','done',jsonb_array_length(hosts)>0 and jsonb_array_length(missing_login)=0,'label','登入帳號',
    'detail',case when jsonb_array_length(hosts)=0 then '建立主播後即可建立登入帳號' when jsonb_array_length(missing_login)=0 then '每位主播都已有可登入帳號'
     else '尚未建立登入：'||(select string_agg(x#>>'{}','、') from jsonb_array_elements(missing_login) x) end),
+  jsonb_build_object('code','pricing','done',priced,'label','價目設定',
+   'detail',case when priced then '已設定，每日 '||lpad(coalesce(space_row.accounting_rollover_hour,19)::text,2,'0')||':00 換場'
+    else '尚未填寫金額：玩家點歌會顯示 0，建議開放前先到「價目設定」填好' end),
   jsonb_build_object('code','operations','done',operational,'label','開放營運（主播登入、歌本、點歌、存歌、帳務）',
    'detail',case when operational then '已開放' when jsonb_array_length(hosts)>0 and jsonb_array_length(missing_login)<jsonb_array_length(hosts)
     then '主播與登入帳號已就緒，可按「開放營運」' else '需先建立主播與可登入的帳號，才能開放營運' end),

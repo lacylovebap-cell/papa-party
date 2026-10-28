@@ -131,3 +131,13 @@ test('readiness explains each requirement and offers direct actions for missing 
  const dialog=modal();assert.ok(dialog.includes('✓ 主播資料')&&dialog.includes('○ 登入帳號')&&dialog.includes('不會為了移除提示而略過會員方案或權限'));
  await press('credentials-by-id','fairy');assert.deepEqual([calls.at(-1).op,calls.at(-1).spaceId,calls.at(-1).streamerId],['platformStreamerLoginStatus','space-fairy','fairy']);
 });
+
+test('readiness without amounts still offers 開放營運 and a direct 填寫價目 button',async()=>{
+ const readiness={spaceId:'space-fairy',name:'仙女',kind:'independent',status:'suspended',operational:false,canActivate:true,hosts:[{id:'fairy',name:'仙女',slug:'fairy',login:true,account:true}],
+  items:[{code:'streamer',done:true,label:'主播資料',detail:'已建立 1 位主播'},{code:'login',done:true,label:'登入帳號',detail:'每位主播都已有可登入帳號'},{code:'pricing',done:false,label:'價目設定',detail:'尚未填寫金額：玩家點歌會顯示 0，建議開放前先到「價目設定」填好'},{code:'operations',done:false,label:'開放營運',detail:'可按「開放營運」'}]};
+ const {c,calls,press,modal}=controller(body=>body.op==='platformSpaceReadiness'?readiness:directory());
+ await c.load();await press('readiness','space-fairy');
+ const dialog=modal();assert.ok(dialog.includes('○ 價目設定')&&dialog.includes('填寫價目')&&dialog.includes('開放營運'));
+ await press('pricing','space-fairy');assert.deepEqual([calls.at(-1).op,calls.at(-1).spaceId],['platformSpacePricing','space-fairy']);
+ readiness.items[2].done=true;await c.load();await press('readiness','space-fairy');assert.ok(!modal().includes('填寫價目'));
+});
