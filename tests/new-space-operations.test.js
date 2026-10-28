@@ -36,7 +36,7 @@ test('a new Space starts with a blank plan and stays isolated from 聲瑪 in bot
  const own=await f.call({op:'read',streamer:'fairy'},fairy.token);
  const settings=own.body.state.settings;
  assert.equal(settings.livePrice,0);assert.equal(settings.liveDouble,0);assert.equal(settings.crownDouble,0);
- assert.deepEqual(settings.plans,[]);assert.ok(settings.tiers.length===5&&settings.tiers.every(x=>x.fee===0&&x.price===0));
+ assert.deepEqual(settings.plans,[]);assert.ok(settings.tiers.length===0);
  // Her login cannot open 聲瑪's room, and a 聲瑪 room is never served under her Space.
  const foreign=await f.call({op:'read',streamer:'papa'},fairy.token);assert.equal(foreign.status,400);
  const spoof=await f.call({op:'read',streamer:'papa',spaceId:fairy.spaceId});assert.equal(spoof.status,400);
@@ -113,8 +113,8 @@ async function fairyWithSong(f){
  view=(await f.call({op:'read',streamer:'fairy'},fairy.token)).body.state;
  return {...fairy,view,songId:view.songs[0].songId};
 }
-const createPlayer=(f,fairy,revision,{name='小粉絲',loginCode='fan-1',password='fan-pass-1'}={},token=fairy.token)=>
- f.call({op:'spacePlayerCreate',streamer:'fairy',revision,name,loginCode,password,ids:'tt-123'},token);
+const createPlayer=(f,fairy,revision,{name='小粉絲',loginCode='fan-1',password='fan-pass-1',ids='tt-123'}={},token=fairy.token)=>
+ f.call({op:'spacePlayerCreate',streamer:'fairy',revision,name,loginCode,password,ids},token);
 
 test('her own player list: she adds a player with a login code; that player logs in only to her Space and requests a song',async t=>{
  const f=await nativeFixture(t);
@@ -152,7 +152,7 @@ test('player codes are unique per Space; removing a player stops the login; hall
  const fairy=await fairyWithSong(f);
  const first=await createPlayer(f,fairy,fairy.view.revision);assert.equal(first.status,200,JSON.stringify(first.body));
  let revision=(await f.call({op:'read',streamer:'fairy'},fairy.token)).body.state.revision;
- const duplicate=await createPlayer(f,fairy,revision,{name:'別人'});
+ const duplicate=await createPlayer(f,fairy,revision,{name:'別人',ids:'tt-999'});
  assert.equal(duplicate.status,400);assert.match(duplicate.body.error,/已有人使用/);
  const changed=await f.call({op:'spacePlayerAccess',streamer:'fairy',playerId:first.body.playerId,password:'new-pass-2'},fairy.token);
  assert.equal(changed.status,200,JSON.stringify(changed.body));

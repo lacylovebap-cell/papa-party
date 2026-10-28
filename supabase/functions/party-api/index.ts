@@ -1076,6 +1076,8 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
    if(source.revision!==b.revision)throw revisionConflictError();
    const next=mutate(source,{type:'player',streamer:room.id,data:{name:b.name,ids:b.ids||'',names:'',certification:'',note:b.note||''}},coreActor(who),t);
    const created=next.players[next.players.length-1];
+   // Like commit(): a native room keeps its own settings row, never the legacy alias.
+   next.settings=next.streamerSettings?.[room.id]||source.settings;
    const patch=stateChanges(source,next,{preserveOrder:true});
    const changes=patch.changes.map((row:any)=>{if(row.kind!=='players')return row;const {password:_password,...data}=row.data;return {...row,data};});
    const result=await api('/rest/v1/rpc/papa_space_player_create',{expected:source.revision,changes,removed:patch.removed,actor_context:context,notices:[],requested_room:room.id,new_player:created.playerId,login_code:code,password});
