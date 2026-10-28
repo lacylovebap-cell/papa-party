@@ -141,3 +141,9 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
 .queue-row .queue-more[open]>.queue-more-content{position:absolute;right:0;top:calc(100% + 4px);z-index:30;display:flex;flex-direction:column;align-items:flex-start;gap:6px!important;width:max-content;max-width:min(calc(100vw - 32px),560px);padding:8px;border:1px solid var(--line,#3b2d5d);border-radius:10px;background:var(--home-panel,var(--panel,#1b1528));box-shadow:0 8px 24px #0008}
 .queue-more-group{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
 .queue-more-group:empty{display:none}
+/* 10.28-QUEUE.2 tags at the top right, player note on line 5 */
+.queue-row .queue-tags{position:absolute;top:6px;right:0;max-width:58%;font-size:10.5px;line-height:1.3;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.queue-row:has(>.queue-tags){position:relative}
+.queue-row:has(>.queue-tags) .queue-stack .queue-title{padding-right:48px}
+.queue-compact .queue-note-line{display:flex!important;align-items:center;gap:4px;margin-top:2px;font-size:12px;line-height:1.4;white-space:nowrap;overflow:hidden}
+.queue-note-full{white-space:pre-wrap;overflow-wrap:anywhere}

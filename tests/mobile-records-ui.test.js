@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {requestSourceLabel} from '../src/request-source.js';
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
-const queueRows=app.split(/\r?\n/).find(line=>line.startsWith('function queueRows('));
+const appLines=app.split(/\r?\n/),queueRows=['function queueSourceShort(','function queueTags(','function queueNoteLine(','function queueRows('].map(prefix=>appLines.find(line=>line.startsWith(prefix))).join('\n');
 const h=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function render(rows,{manager=false,playerId='mine',songs=[],history=false,currentSort='newest',historySort='newest',showSort=true,sortCurrent=!manager}={}){
  const original=structuredClone(rows),context=vm.createContext({listSorts:{queueCurrent:currentSort,queueHistory:historySort},timeValue:value=>Date.parse(value)||0,
@@ -18,9 +18,9 @@ const record={id:'q',playerId:'mine',songId:'s',title:'歷史 <歌名>',artist:'
 
 test('cross dice and automatic self sources keep their visible exclusion markers in player and manager records',()=>{
  for(const manager of [false,true]){
-  assert.match(render([{...record,selfProvided:true,source:'cross_draw'}],{manager}),/🎲 骰子自帶（不計熱門／常聽）/);
-  assert.match(render([{...record,selfProvided:true,source:'cross_self'}],{manager}),/自帶（不計熱門／常聽）/);
-  assert.doesNotMatch(render([{...record,selfProvided:false,source:'manual'}],{manager}),/不計熱門／常聽/);
+  assert.match(render([{...record,selfProvided:true,source:'cross_draw'}],{manager}),/class="queue-tags">🎲\(不計熱門\/常聽\)/);
+  assert.match(render([{...record,selfProvided:true,source:'cross_self'}],{manager}),/class="queue-tags">自帶\(不計熱門\/常聽\)/);
+  assert.doesNotMatch(render([{...record,selfProvided:false,source:'manual'}],{manager}),/不計熱門/);
  }
 });
 test('player records show complete escaped song, artist, status, request time and personal note without management controls',()=>{

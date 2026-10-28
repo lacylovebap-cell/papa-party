@@ -230,3 +230,4 @@ html #app .action-help::before{content:"i";font:700 12px/1 Georgia,"Times New Ro
 html #app .queue-row .action-help{width:18px!important;min-width:18px!important;max-width:18px;height:18px!important;min-height:18px!important;padding:0!important;margin:0!important;flex:0 0 18px!important;display:inline-grid!important;place-items:center;border-radius:50%!important;box-sizing:border-box}
 html #app .queue-row .action-help::before{font-size:10px}
 [data-theme-v2] button.action-help{background:var(--theme-button-solid);border:1px solid var(--theme-button-solid);color:var(--home-buttonText);box-shadow:none}
+html #app .queue-row .queue-note-open{min-height:20px!important;padding:1px 6px!important;font-size:10.5px!important}
