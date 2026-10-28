@@ -2,7 +2,7 @@
 // All edits stay in this module's memory. The network is used only for:
 // one access check when opening, one hall-theme read when switching to the
 // hall, image uploads on save/publish, and the save/publish write itself.
-import {THEME_GRADIENTS,themeGradientFill,THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
+import {THEME_GRADIENTS,THEME_GRADIENT_DESIGNS,themeGradientPalette,THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
  themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.29-THEME.1';
 import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.29-THEME.1';
 import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.29-THEME.1';
@@ -13,7 +13,8 @@ const h=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 export const THEME_HELP={
  target:'選擇要設計的頁面。主播主題會套用到主播首頁、歌本、玩家頁與主播後台；廳主題只套用到廳首頁。兩者互不覆蓋。',
  base:'選一個你喜歡的顏色（任何顏色都可以）。系統會用它自動搭配整套協調的配色。不需要上傳圖片。',
- smart:'依目前主色與深淺模式，重新產生整套建議配色（包含背景、卡片、按鈕、文字）。會覆蓋你個別微調過的顏色。',
+ smart:'依目前主色與深淺模式重新產生完整配色；若已選擇漸層主題，使用該漸層專屬的整套配色。會覆蓋你個別微調過的顏色。',
+ gradients:'這 30 種不是背景圖片，每一種都包含導覽列、卡片、按鈕、邊框和文字的完整配色。選好後仍可切深淺模式或單獨調色；只有儲存或發布時才寫入設定。',
  mode:'深色：深底亮字；淺色：淺底深字。切換後會自動重新搭配，但保留你手動微調過的顏色。',
  button:'漸層：按鈕主色漸變到第二色；單色：只用按鈕主色。按鈕形狀、大小與圓角都不會改變。',
  logo:'Logo 後方的底色。預設是透明（直接透出導覽列），只有你手動選了顏色才會出現一塊底色；按 ↺ 可恢復透明。Logo 圖案本身不會改變，淺色模式會自動換成深色字版本。',
@@ -42,7 +43,7 @@ export function openThemeStudio(options){
  const pending=new Map();// hash -> prepared image (local, not uploaded)
  const knownUrls=new Map();// hash -> real uploaded url
  const remember=t=>{for(const u of themeImageUrls(t)){const a=themeAsset(u);if(a&&!u.startsWith(LOCAL_HOST))knownUrls.set(a.hash,u);}};
- const ui={target:'streamer',page:'home',device:'mobile',access:null,accessError:'',busy:false,guides:true,status:''};
+ const ui={target:'streamer',page:'home',device:'mobile',access:null,accessError:'',busy:false,guides:true,gradientsOpen:false,status:''};
  const targets={streamer:makeTarget(settings?.theme||null,settings?.themeDraft||null,room.id,false),hall:null};
  remember(settings?.theme);remember(settings?.themeDraft);
  function makeTarget(published,draft,owner,hall){
@@ -94,6 +95,10 @@ export function openThemeStudio(options){
    +slider('divider.length','長短',d.length,0,100,'','%')+slider('divider.thickness','粗細',d.thickness,1,6,'','px')+slider('divider.opacity','顯示程度',d.opacity,0,100,'','%')
    +`<button type="button" class="ts-btn ts-ghost" data-divider-reset>分隔線恢復預設</button></div>`;
  }
+ function gradientSelector(t){
+  if(!ui.gradientsOpen)return '';
+  return `<div class="ts-gradient-grid" role="group" aria-label="30 種漸層完整配色">${THEME_GRADIENTS.map(x=>`<button type="button" class="ts-gradient-card ${t.gradient===x.id?'on':''}" data-gradient-choice="${x.id}" aria-pressed="${t.gradient===x.id}"><i aria-hidden="true" style="background:linear-gradient(115deg,${x.colors.join(',')})"></i><span>${x.name}<small>${THEME_GRADIENT_DESIGNS[x.id].mode==='dark'?'預設深色':'預設淺色'} · 完整主題</small></span></button>`).join('')}</div>`;
+ }
  function decorBlock(){
   const t=current().working,dis=!can('images');
   return `<div class="ts-img-row"><label class="ts-btn ts-file ${dis||t.decor.length>=THEME_DECOR_LIMIT?'disabled':''}">＋ 新增裝飾圖片<input type="file" accept="image/png,image/webp" data-upload="decor" ${dis||t.decor.length>=THEME_DECOR_LIMIT?'disabled':''}></label><span class="ts-hint">最多 ${THEME_DECOR_LIMIT} 張；建議 800 × 800 px 透明 PNG／WebP</span></div>`
@@ -112,8 +117,7 @@ export function openThemeStudio(options){
   <fieldset class="ts-fieldset" ${basic?'':'disabled'}>
   <section class="ts-section"><h3>2. 主色 ${help('base')}</h3><div class="ts-row"><input type="color" value="${t.base}" data-base-color aria-label="主色"><input class="ts-hex" value="${t.base.toUpperCase()}" maxlength="7" data-base-hex aria-label="HEX 色碼"><button type="button" class="ts-btn ts-main" data-ts="smart">✨ 一鍵智慧配色</button>${help('smart')}</div>
    <div class="ts-swatches">${THEME_SWATCHES.map(c=>`<button type="button" data-swatch="${c}" style="background:${c}" aria-label="${c}" class="${c===t.base?'on':''}"></button>`).join('')}</div>
-   <p class="ts-label">快速配色範本</p><div class="ts-templates">${THEME_TEMPLATES.map(x=>`<button type="button" data-template="${x.id}"><i style="background:${x.base}"></i>${x.name}<small>${x.mode==='dark'?'深色':'淺色'}</small></button>`).join('')}</div></section>
-  <section class="ts-section"><h3>背景漸層（選用）</h3><p class="ts-hint">保留原本配色與圖片設定。選擇後以柔和漸層顯示背景；關閉即可恢復原背景。沿用下方儲存／發布操作。</p><div class="ts-templates"><button type="button" data-gradient="" aria-pressed="${!t.gradient}">關閉漸層<small>恢復原背景</small></button>${THEME_GRADIENTS.map(x=>`<button type="button" data-gradient="${x.id}" aria-pressed="${t.gradient===x.id}"><i style="background:${themeGradientFill({...t,gradient:x.id})}"></i>${x.name}${t.gradient===x.id?' ✓':''}</button>`).join('')}</div></section>
+   <p class="ts-label">快速配色範本 ${help('gradients')}</p><div class="ts-templates">${THEME_TEMPLATES.map(x=>`<button type="button" data-template="${x.id}"><i style="background:${x.base}"></i>${x.name}<small>${x.mode==='dark'?'深色':'淺色'}</small></button>`).join('')}<button type="button" data-gradient-toggle class="${ui.gradientsOpen?'on':''}" aria-expanded="${ui.gradientsOpen}"><i style="background:linear-gradient(135deg,#7546b8,#df9cae,#318c94)"></i>🌈 更多漸層<small>30 種完整配色</small></button></div>${gradientSelector(t)}</section>
   <section class="ts-section"><h3>3. 模式與按鈕</h3><div class="ts-row"><span class="ts-label">深淺模式 ${help('mode')}</span><div class="ts-seg"><button type="button" data-mode="dark" class="${t.mode==='dark'?'on':''}">🌙 深色</button><button type="button" data-mode="light" class="${t.mode==='light'?'on':''}">☀️ 淺色</button></div></div>
    <div class="ts-row"><span class="ts-label">按鈕樣式 ${help('button')}</span><div class="ts-seg"><button type="button" data-btnstyle="gradient" class="${t.button==='gradient'?'on':''}">漸層</button><button type="button" data-btnstyle="solid" class="${t.button==='solid'?'on':''}">單色</button></div></div></section>
   <section class="ts-section"><h3>4. 自動配色展示與個別微調 ${help('colors')}</h3><div class="ts-palette">${THEME_COLOR_KEYS.map(k=>`<div class="ts-color"><input type="color" value="${t.colors[k]}" data-color="${k}" aria-label="${h(THEME_COLOR_LABELS[k])}"><span>${h(THEME_COLOR_LABELS[k])}${k==='logo'?help('logo'):k==='panel'?help('panel'):''}<small>${k==='logo'&&!tg.manual.has(k)?'透明（選色後才有底色）':t.colors[k].toUpperCase()}${tg.manual.has(k)?' ・手動':''}</small></span>${tg.manual.has(k)?`<button type="button" class="ts-reset" data-color-auto="${k}" title="回到自動配色" aria-label="${h(THEME_COLOR_LABELS[k])}回到自動配色">↺</button>`:''}</div>`).join('')}</div>
@@ -241,7 +245,7 @@ export function openThemeStudio(options){
  // ---------- state changes ----------
  function markDirty(render=true){const tg=current();tg.dirty=true;tg.reset=false;if(render)renderControlsSoon();syncActions();}
  function regenerate(all){
-  const tg=current(),t=tg.working,auto=themeSmartPalette(t.base,t.mode);
+  const tg=current(),t=tg.working,auto=(t.gradient?themeGradientPalette(t.gradient,t.mode)?.colors:null)||themeSmartPalette(t.base,t.mode);
   if(all)tg.manual.clear();
   for(const k of THEME_COLOR_KEYS)if(!tg.manual.has(k))t.colors[k]=auto[k];
   t.manual=[...tg.manual];
@@ -255,8 +259,8 @@ export function openThemeStudio(options){
  root.addEventListener('input',e=>{
   const el=e.target,tg=current(),t=tg.working;
   if(el.matches('[data-path]')){setPath(el.dataset.path,el.value);const out=el.closest('.ts-slider')?.querySelector('output');if(out)out.textContent=el.value+(el.dataset.unit??'%');markDirty(false);schedule();return;}
-  if(el.matches('[data-base-color]')){t.base=el.value.toLowerCase();regenerate(false);$('[data-base-hex]').value=t.base.toUpperCase();markDirty(false);schedule();renderControlsSoon();return;}
-  if(el.matches('[data-base-hex]')){const v=el.value.trim();if(/^#?[0-9a-f]{6}$/i.test(v)){t.base=('#'+v.replace('#','')).toLowerCase();regenerate(false);markDirty(false);schedule();renderControlsSoon();}return;}
+  if(el.matches('[data-base-color]')){delete t.gradient;t.base=el.value.toLowerCase();regenerate(false);$('[data-base-hex]').value=t.base.toUpperCase();markDirty(false);schedule();renderControlsSoon();return;}
+  if(el.matches('[data-base-hex]')){const v=el.value.trim();if(/^#?[0-9a-f]{6}$/i.test(v)){delete t.gradient;t.base=('#'+v.replace('#','')).toLowerCase();regenerate(false);markDirty(false);schedule();renderControlsSoon();}return;}
   if(el.matches('[data-decor-motion]')){const d=t.decor[Number(el.dataset.decorMotion)];if(d){if(el.value==='none')delete d.motion;else d.motion=el.value;}markDirty();schedule();return;}
   if(el.matches('[data-divider-color]')){t.divider={...(t.divider||{}),color:el.value.toLowerCase()};markDirty(false);schedule();renderControlsSoon();return;}
   if(el.matches('[data-color]')){t.colors[el.dataset.color]=el.value.toLowerCase();tg.manual.add(el.dataset.color);t.manual=[...tg.manual];markDirty(false);schedule();renderControlsSoon();return;}
@@ -295,14 +299,17 @@ export function openThemeStudio(options){
   if(el.dataset.page){ui.page=el.dataset.page;renderPageTabs();renderPage();return;}
   if(el.dataset.pageJump){ui.page=el.dataset.pageJump;renderPageTabs();renderPage();return;}
   if(el.dataset.tsDevice){ui.device=el.dataset.tsDevice;root.querySelectorAll('[data-ts-device]').forEach(b=>b.classList.toggle('on',b===el));sizeFrame();return;}
-  if(el.hasAttribute('data-gradient')){if(THEME_GRADIENTS.some(p=>p.id===el.dataset.gradient))t.gradient=el.dataset.gradient;else delete t.gradient;markDirty();schedule();return;}
+   if(el.hasAttribute('data-gradient-toggle')){ui.gradientsOpen=!ui.gradientsOpen;renderControls();return;}
+   if(el.dataset.gradientChoice){const d=themeGradientPalette(el.dataset.gradientChoice);if(!d)return;
+    t.gradient=el.dataset.gradientChoice;t.base=d.base;t.mode=d.mode;t.button='gradient';
+    tg.manual.clear();t.manual=[];t.colors={...d.colors};markDirty();schedule();return;}
   if(el.dataset.swatch){delete t.gradient;t.base=el.dataset.swatch;regenerate(false);markDirty();schedule();return;}
   if(el.dataset.template){delete t.gradient;const x=THEME_TEMPLATES.find(x=>x.id===el.dataset.template);t.base=x.base;t.mode=x.mode;regenerate(true);markDirty();schedule();return;}
   if(el.dataset.mode){t.mode=el.dataset.mode;regenerate(false);markDirty();schedule();return;}
   if(el.dataset.btnstyle){t.button=el.dataset.btnstyle;markDirty();schedule();return;}
   if(el.matches('[data-divider-follow]')){if(t.divider){const {color,...rest}=t.divider;t.divider=rest;}markDirty();schedule();return;}
   if(el.matches('[data-divider-reset]')){delete t.divider;markDirty();schedule();return;}
-  if(el.dataset.colorAuto){tg.manual.delete(el.dataset.colorAuto);t.manual=[...tg.manual];t.colors[el.dataset.colorAuto]=themeSmartPalette(t.base,t.mode)[el.dataset.colorAuto];markDirty();schedule();return;}
+  if(el.dataset.colorAuto){tg.manual.delete(el.dataset.colorAuto);t.manual=[...tg.manual];t.colors[el.dataset.colorAuto]=((t.gradient?themeGradientPalette(t.gradient,t.mode)?.colors:null)||themeSmartPalette(t.base,t.mode))[el.dataset.colorAuto];markDirty();schedule();return;}
   if(el.dataset.remove){const role=el.dataset.remove;if(role==='banner'){const {url,...rest}=t.images.banner||{};t.images.banner=rest;}else delete t.images[role];markDirty();renderPage();return;}
   if(el.dataset.decorRemove!==undefined){t.decor.splice(Number(el.dataset.decorRemove),1);markDirty();renderPage();return;}
   if(el.dataset.decorReset!==undefined){const d=t.decor[Number(el.dataset.decorReset)];if(d){d.x=50;d.y=20;d.size=18;}markDirty();schedule();return;}
