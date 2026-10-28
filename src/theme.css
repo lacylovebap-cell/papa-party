@@ -233,7 +233,25 @@ html #app .queue-row .action-help::before{font-size:10px}
 html #app .queue-row .queue-note-open{min-height:20px!important;padding:1px 6px!important;font-size:10.5px!important}
 
 /* Transient decoration only: the original medal, colours and frame remain intact. */
-.medal-replay{font:inherit;font-size:11px;min-height:32px;padding:5px 8px;max-width:100%;white-space:normal}
+/* Icon-only replay and help sit together, outside the card content flow.
+   Fixed block/inline sizes prevent the global button theme from stretching them. */
+.medal-row{position:relative}
+.medal-row .medal-help,.medal-row .medal-replay{
+ position:absolute;top:7px;display:grid;place-items:center;
+ box-sizing:border-box;inline-size:28px!important;block-size:28px!important;
+ min-width:28px!important;max-width:28px!important;min-height:28px!important;max-height:28px!important;
+ padding:0!important;margin:0;border-radius:50%!important;line-height:1!important;
+ font-size:14px;font-weight:500;flex:none;white-space:nowrap;z-index:2;
+ color:var(--text,#f4edf9);background:var(--panel,#20192a);
+ border:1px solid var(--line,#5a4771);box-shadow:none;transform:none;
+}
+.medal-row .medal-help{right:7px}
+.medal-row .medal-replay{right:41px;font-size:12px;padding-left:1px!important}
+.medal-row .medal-help:focus-visible,.medal-row .medal-replay:focus-visible{outline:2px solid var(--blue,#a886cc);outline-offset:2px}
+[data-theme-v2] .medal-row .medal-help,[data-theme-v2] .medal-row .medal-replay{
+ background:var(--home-panel);border-color:var(--home-line);color:var(--home-text)
+}
+
 .medal-celebrate{animation:medal-reveal 1100ms ease-out}
 .medal-fx{position:absolute;inset:3px;border-radius:inherit;pointer-events:none;animation:medal-glow 1100ms ease-out}
 .medal-fx i{position:absolute;left:calc(15% + var(--spark)*23%);top:calc(12% + var(--spark)*14%);width:7px;height:7px;background:currentColor;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:medal-spark 1000ms ease-out both;animation-delay:calc(var(--spark)*25ms)}
