@@ -176,3 +176,46 @@ test('player codes are unique per Space; removing a player stops the login; hall
  assert.equal(byPresident.status,200,JSON.stringify(byPresident.body));
  assert.equal(host.spaceCreated,false);
 });
+
+test('visitors and the president open a new Space room by its name alone; the website picker lists only open Spaces',async t=>{
+ const f=await nativeFixture(t);
+ const fairy=await f.provision({name:'仙女',slug:'fairy',password:'fairy-pass-1'});
+ let portal=await f.call({op:'portalDirectory'});
+ assert.equal(portal.status,200);assert.ok(portal.body.spaces.some(s=>s.id==='space-001'&&s.kind==='hall'&&s.streamers.some(r=>r.slug==='papa')),'聲瑪 is listed as a hall');
+ assert.ok(!portal.body.spaces.some(s=>s.id===fairy.spaceId),'a Space that is not open is not listed');
+ assert.equal((await f.call({op:'read',streamer:'fairy'})).status,400,'not open: not served');
+ assert.equal((await f.setSpaceStatus(fairy.spaceId,'restore')).status,200);
+ portal=await f.call({op:'portalDirectory'});
+ const listed=portal.body.spaces.find(s=>s.id===fairy.spaceId);
+ assert.deepEqual(listed,{id:fairy.spaceId,name:'仙女',kind:'independent',streamers:[{slug:'fairy',name:'仙女'}]});
+ assert.deepEqual(Object.keys(portal.body.spaces[0]).sort(),['id','kind','name','streamers'],'names only');
+ const visitor=await f.call({op:'read',streamer:'fairy'});
+ assert.equal(visitor.status,200,JSON.stringify(visitor.body));assert.equal(visitor.body.state.currentStreamer.spaceId,fairy.spaceId);
+ const president=await f.call({op:'read',streamer:'fairy'},f.president.token);
+ assert.equal(president.status,200,JSON.stringify(president.body));assert.equal(president.body.state.currentStreamer.id,fairy.streamerId);
+ assert.equal((await f.call({op:'read',streamer:'papa'})).status,200,'聲瑪 visitors unchanged');
+});
+
+test('device login works for a new Space streamer and her player; messages say they open in the next stage',async t=>{
+ const f=await nativeFixture(t);
+ const fairy=await openFairy(f);
+ const device=async(token)=>{const start=await f.call({op:'deviceStart',token,installationId:crypto.randomUUID(),platform:'web',appVersion:'space-foundation-1008',streamer:'fairy'});
+  assert.equal(start.status,200,JSON.stringify(start.body));const r=await f.call({op:'deviceRefresh',sessionId:start.body.sessionId,refreshToken:start.body.refreshToken});assert.equal(r.status,200);return r.body.token;};
+ const manager=await device(fairy.token);
+ let view=(await f.call({op:'read',streamer:'fairy'},manager)).body.state;
+ await f.call({op:'mutate',streamer:'fairy',revision:view.revision,action:{type:'song',data:{title:'仙女的歌',artist:'仙女'}}},manager);
+ view=(await f.call({op:'read',streamer:'fairy'},manager)).body.state;
+ const logins=await f.call({op:'spacePlayerLogins',streamer:'fairy'},manager);
+ assert.deepEqual(logins.body,{logins:[],canManage:true});
+ const created=await f.call({op:'spacePlayerCreate',streamer:'fairy',revision:view.revision,name:'小粉絲',loginCode:'fan-1',password:'fan-pass-1',ids:'tt-1'},manager);
+ assert.equal(created.status,200,JSON.stringify(created.body));
+ assert.deepEqual((await f.call({op:'spacePlayerLogins',streamer:'fairy'},manager)).body.logins,[{playerId:created.body.playerId,loginCode:'fan-1',enabled:true}]);
+ const login=await f.call({op:'spacePlayerLogin',streamer:'fairy',loginCode:'fan-1',password:'fan-pass-1'});
+ const player=await device(login.body.token);
+ const own=await f.call({op:'read',streamer:'fairy'},player);
+ assert.equal(own.status,200);assert.equal(own.body.sessionIdentity.spaceId,fairy.spaceId);assert.equal(own.body.sessionIdentity.playerId,created.body.playerId);
+ const request=await f.call({op:'mutate',streamer:'fairy',revision:own.body.state.revision,operationId:crypto.randomUUID(),action:{type:'request',data:{songId:view.songs[0].songId,kind:'live',giftConfirmed:true}}},player);
+ assert.equal(request.status,200,JSON.stringify(request.body));
+ const notices=await f.call({op:'messageCenterCounts',streamer:'fairy',management:true},manager);
+ assert.equal(notices.status,400);assert.match(notices.body.error,/下一階段開放/);
+});
