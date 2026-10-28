@@ -26,7 +26,7 @@ test('cross dice and automatic self sources keep their visible exclusion markers
 test('player records show complete escaped song, artist, status, request time and personal note without management controls',()=>{
  const html=render([{...record,requestNote:'請唱 <script> & 完整備註'}],{songs:[{songId:'s',artist:'原歌手 <A>'}]});
  assert.match(html,/queue-player-view/);assert.match(html,/歷史 &lt;歌名&gt;/);assert.match(html,/原歌手 &lt;A&gt;/);assert.match(html,/已準備好.*現點.*2026-10-01T00:00:00Z/s);
- assert.match(html,/請唱 &lt;script&gt; &amp; 完整備註/);assert.match(html,/queue-own-cancel/);assert.doesNotMatch(html,/queue-controls|data-queue-select|queueOp|我的名字|<script>/);
+ assert.match(html,/請唱 &lt;script&gt; &amp; 完整備註/);assert.match(html,/queue-own-cancel/);assert.doesNotMatch(html,/queue-controls|data-queue-select|queueOp|<script>/);assert.match(html,/queue-meta-who.*2026-10-01T00:00:00Z.*我的名字/s);
 });
 test('completed history uses performed time for ordering and display, preserves snapshot artists and never shows cancel',()=>{
  const html=render([{...record,id:'older',title:'先唱',status:'completed',artist:'原快照歌手',completedAt:'2026-10-10T00:00:00Z'},
@@ -39,8 +39,8 @@ test('another player pending record cannot expose the own cancel action',()=>{
 });
 test('manager records retain checkbox, primary completion and separate expandable secondary actions',()=>{
  const html=render([record],{manager:true});assert.match(html,/queue-manager-view/);assert.match(html,/data-queue-select="q"/);
- assert.match(html,/queue-primary.*完成演唱/s);assert.match(html,/<details class="queue-more"><summary>更多<\/summary><div class="queue-more-content">/);
- for(const action of ['editQueue','stage','recordTime','move'])assert.match(html,new RegExp('data-act="'+action+'"'));
+ assert.match(html,/queue-primary.*>完成</s);assert.match(html,/<details class="queue-more"><summary>更多<\/summary><div class="queue-more-content">/);
+ for(const action of ['editQueue','stage','move'])assert.match(html,new RegExp('data-act="'+action+'"'));assert.doesNotMatch(html,/data-act="recordTime"/);
  assert.doesNotMatch(html,/cancelOwn/);
 });
 

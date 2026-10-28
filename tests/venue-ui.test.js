@@ -72,8 +72,8 @@ test('stored records filter by current pool while song and performance histories
 
 test('history uses its saved venue and exposes the consumed pool only in details',()=>{
  const u=harness({radio_enabled:true,current_space:'shengma'});u.state.queue.push({id:'q',songId:'s',playerId:'p',title:'原本的歌曲',artist:'歌手',kind:'saved',status:'completed',venue:'radio',consumed_storage_pool:'shengma',at});
- const html=u.run('queueRows(state.queue,true,true)');assert.match(html,/提歌 · .* · 📻 電台/);assert.match(html,/<details class="queue-more">.*扣存歌來源：聲瑪/s);
- delete u.state.queue[0].venue;const legacy=u.run('queueRows(state.queue,true,true)');assert.doesNotMatch(legacy,/提歌 · .* · 📻 電台/);assert.doesNotMatch(legacy,/提歌 · .* · 聲瑪/);
+ const html=u.run('queueRows(state.queue,true,true)');assert.match(html,/提歌 · 📻 電台/);assert.match(html,/<details class="queue-more">.*扣存歌來源：聲瑪/s);
+ delete u.state.queue[0].venue;const legacy=u.run('queueRows(state.queue,true,true)');assert.doesNotMatch(legacy,/提歌 · 📻 電台/);assert.doesNotMatch(legacy,/提歌 · 聲瑪/);
 });
 
 test('proxy player hints use available credits after reservations and follow the explicit venue',()=>{
