@@ -71,3 +71,16 @@
 [data-theme-v2] .empty,[data-theme-v2] .manual,[data-theme-v2] .status-note,[data-theme-v2] .preparation-note,[data-theme-v2] .number{color:var(--theme-muted)}
 [data-theme-v2] .song small,[data-theme-v2] label{color:var(--home-text)}
 [data-theme-v2] details>summary{border-color:var(--home-line)}
+/* Header menu (☰), its section labels and links follow the streamer's theme. */
+[data-theme-v2] .compact-main-menu[open]>.header-actions,[data-theme-v2] .header-menu[open]>.header-actions,[data-theme-v2] .lobby-tools-panel{background:var(--home-panel)!important;border-color:var(--home-line)!important;color:var(--home-text)}
+[data-theme-v2] .compact-main-menu h3{color:var(--theme-muted)}
+[data-theme-v2] .compact-menu-items>button,[data-theme-v2] .compact-menu-items>a,[data-theme-v2] .compact-menu-pair>button,[data-theme-v2] .compact-menu-pair>a,[data-theme-v2] .header-actions>a.lobby-button{background:var(--theme-soft);border-color:var(--home-line)!important;color:var(--home-text)}
+[data-theme-v2] .compact-menu-items>.primary,[data-theme-v2] .compact-menu-items>a.primary{background:var(--home-button);color:var(--home-buttonText)}
+[data-theme-v2] .header-menu>summary,[data-theme-v2] .compact-main-menu>summary,[data-theme-v2] .lobby-tools>summary{border-color:var(--home-line);color:var(--home-text)}
+/* Hall lobby: streamer chips and 現點／提歌 links follow the hall theme. */
+[data-theme-v2] .lobby-page .common-streamer>a,[data-theme-v2].lobby-page .common-streamer>a{background:var(--home-button);border-color:var(--theme-button-solid);color:var(--home-buttonText)}
+[data-theme-v2] .lobby-page .common-streamer>a:hover,[data-theme-v2].lobby-page .common-streamer>a:hover{border-color:var(--home-accent);filter:brightness(1.12)}
+[data-theme-v2] a.lobby-button{background:var(--theme-button-soft);border-color:var(--home-line);color:var(--home-text)}
+[data-theme-v2] a.lobby-button:hover{border-color:var(--home-accent)}
+[data-theme-v2] .lobby-page .common-variant,[data-theme-v2].lobby-page .common-variant{border-color:var(--home-line)}
+[data-theme-v2] .pagination .page-jump input{background:var(--theme-input)}

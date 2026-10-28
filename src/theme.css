@@ -192,3 +192,31 @@ dialog .dialog-head button{flex:0 0 auto;min-width:34px;min-height:34px}
 .medal-evidence{padding:.75rem;border:1px solid var(--line);border-radius:12px;margin-top:.75rem;font-size:.85rem;line-height:1.65;overflow-wrap:anywhere}.medal-evidence h4{margin:0}.medal-evidence-song{border-top:1px solid var(--line);padding:.7rem 0}.medal-evidence-song small{display:block}.medal-evidence .error{white-space:normal}.medal-room-record>button{margin:.5rem 0}[data-medal-evidence-panel] .pagination{flex-wrap:wrap;font-size:.75rem}[data-medal-evidence-panel] input{max-width:4rem}
 
 .medal-revoke{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line,#40344b)}.medal-revoke label{display:grid;gap:6px}.medal-revoke textarea{width:100%;box-sizing:border-box;min-height:64px}.medal-revoke [role=status]{white-space:pre-line;overflow-wrap:anywhere}
+/* 2026-10-28 logo: a real transparent file (no black box, no blend trick), a bit
+   smaller so the header takes less height. Light themes use the dark-ink version. */
+html .brand-logo,html .header-inner .brand-logo,html .lobby-page .header-inner .brand-logo{background:url('../assets/pa-party-logo.webp?v=1028') center/contain no-repeat!important;mix-blend-mode:normal!important;width:84px!important;height:70px!important}
+html[data-theme-v2=light] .brand-logo{background-image:url('../assets/pa-party-logo-light.webp?v=1028')!important}
+@media(max-width:650px){html .brand-logo,html .header-inner .brand-logo,html .lobby-page .header-inner .brand-logo{width:72px!important;height:60px!important}}
+@media(max-width:380px){html .brand-logo,html .header-inner .brand-logo,html .lobby-page .header-inner .brand-logo{width:60px!important;height:50px!important}}
+/* Desktop: the hourly 0/2 count sits right after its text instead of drifting to the middle of the banner. */
+@media(min-width:701px){html .hero-overlay .hour{grid-template-columns:max-content max-content;justify-content:start}}
+/* 10.28 layout pass (all streamers): one button height scale, and real gaps
+   between neighbouring buttons, inputs and help icons so nothing touches. */
+html #app button:not(.photo-media-button):not(.action-help){min-height:32px;line-height:1.2}
+html #app button.tiny:not(.photo-media-button){min-height:30px;padding:5px 11px;font-size:12px}
+html #app .action-help{width:26px;height:26px;min-height:26px;padding:0;border-radius:50%;flex:0 0 26px;display:inline-grid;place-items:center;font-size:13px;line-height:1}
+html #app .queue-action-hint{gap:6px;vertical-align:middle}
+html #app .queue-add{min-height:30px;padding:5px 12px;font-size:12px}
+html #app .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+html #app .actions:empty{display:none}
+html #app .queue-bulk>button{margin:8px 8px 0 0}
+html #app .card>button+button,html #app .card>button+.queue-action-hint,html #app .card>.queue-action-hint+button,html #app .card>.queue-action-hint+.queue-action-hint{margin-left:8px}
+html #app .card>button,html #app .card>.queue-action-hint{margin-top:4px;margin-bottom:4px}
+html #app .pagination{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+html #app .pagination .page-jump{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+html #app .actions+.toolbar,html #app .actions+.song-search-toolbar{margin-top:10px}
+html #app .tabs{gap:6px;flex-wrap:wrap}
+html #app .tabs button{min-height:30px;padding:5px 10px}
+html #app .song .actions:has([data-act=editLedger]){max-width:220px;justify-content:flex-end;gap:6px}
+html #app .actions>button:not(.tiny),html #app .card>button:not(.tiny),html #app .card>.queue-action-hint>button:not(.tiny):not(.action-help){font-size:12px;padding:6px 12px}
+html #app .song-more>summary,html #app .queue-more>summary{min-height:30px;min-width:46px;display:inline-flex;align-items:center;justify-content:center;padding:4px 10px;box-sizing:border-box}

@@ -3,10 +3,10 @@
 // one access check when opening, one hall-theme read when switching to the
 // hall, image uploads on save/publish, and the save/publish write itself.
 import {THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
- themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.28-THEME.6';
-import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.28-THEME.6';
-import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-THEME.6';
-import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-THEME.6';
+ themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.28-UI.1';
+import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.28-UI.1';
+import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-UI.1';
+import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-UI.1';
 
 const LOCAL_HOST='https://local.preview';
 const h=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -16,7 +16,7 @@ export const THEME_HELP={
  smart:'依目前主色與深淺模式，重新產生整套建議配色（包含背景、卡片、按鈕、文字）。會覆蓋你個別微調過的顏色。',
  mode:'深色：深底亮字；淺色：淺底深字。切換後會自動重新搭配，但保留你手動微調過的顏色。',
  button:'漸層：按鈕主色漸變到第二色；單色：只用按鈕主色。按鈕形狀、大小與圓角都不會改變。',
- logo:'Logo 後方的底色。Logo 圖案本身不會改變。Logo 是發光混合效果，底色太淺會讓 Logo 變淡，建議使用深色。',
+ logo:'Logo 後方的底色。預設是透明（直接透出導覽列），只有你手動選了顏色才會出現一塊底色；按 ↺ 可恢復透明。Logo 圖案本身不會改變，淺色模式會自動換成深色字版本。',
  panel:'所有卡片的底色。沒有上傳卡片底圖時，卡片就顯示這個純色。',
  colors:'可以個別修改任一顏色，其他顏色不會被重置。按 ↺ 可以讓該顏色回到自動配色。',
  background:'整個頁面最底層的圖片，主播首頁、歌本、後台都會看到。不上傳就用純色底色。可拖曳小框中的圓點決定圖片焦點。',
@@ -115,8 +115,8 @@ export function openThemeStudio(options){
    <p class="ts-label">快速配色範本</p><div class="ts-templates">${THEME_TEMPLATES.map(x=>`<button type="button" data-template="${x.id}"><i style="background:${x.base}"></i>${x.name}<small>${x.mode==='dark'?'深色':'淺色'}</small></button>`).join('')}</div></section>
   <section class="ts-section"><h3>3. 模式與按鈕</h3><div class="ts-row"><span class="ts-label">深淺模式 ${help('mode')}</span><div class="ts-seg"><button type="button" data-mode="dark" class="${t.mode==='dark'?'on':''}">🌙 深色</button><button type="button" data-mode="light" class="${t.mode==='light'?'on':''}">☀️ 淺色</button></div></div>
    <div class="ts-row"><span class="ts-label">按鈕樣式 ${help('button')}</span><div class="ts-seg"><button type="button" data-btnstyle="gradient" class="${t.button==='gradient'?'on':''}">漸層</button><button type="button" data-btnstyle="solid" class="${t.button==='solid'?'on':''}">單色</button></div></div></section>
-  <section class="ts-section"><h3>4. 自動配色展示與個別微調 ${help('colors')}</h3><div class="ts-palette">${THEME_COLOR_KEYS.map(k=>`<div class="ts-color"><input type="color" value="${t.colors[k]}" data-color="${k}" aria-label="${h(THEME_COLOR_LABELS[k])}"><span>${h(THEME_COLOR_LABELS[k])}${k==='logo'?help('logo'):k==='panel'?help('panel'):''}<small>${t.colors[k].toUpperCase()}${tg.manual.has(k)?' ・手動':''}</small></span>${tg.manual.has(k)?`<button type="button" class="ts-reset" data-color-auto="${k}" title="回到自動配色" aria-label="${h(THEME_COLOR_LABELS[k])}回到自動配色">↺</button>`:''}</div>`).join('')}</div>
-   ${themeLuminance(t.colors.logo)>.35?'<p class="ts-warn">Logo 區底色偏淺，Logo 可能看不清楚，建議改深一點。</p>':''}
+  <section class="ts-section"><h3>4. 自動配色展示與個別微調 ${help('colors')}</h3><div class="ts-palette">${THEME_COLOR_KEYS.map(k=>`<div class="ts-color"><input type="color" value="${t.colors[k]}" data-color="${k}" aria-label="${h(THEME_COLOR_LABELS[k])}"><span>${h(THEME_COLOR_LABELS[k])}${k==='logo'?help('logo'):k==='panel'?help('panel'):''}<small>${k==='logo'&&!tg.manual.has(k)?'透明（選色後才有底色）':t.colors[k].toUpperCase()}${tg.manual.has(k)?' ・手動':''}</small></span>${tg.manual.has(k)?`<button type="button" class="ts-reset" data-color-auto="${k}" title="回到自動配色" aria-label="${h(THEME_COLOR_LABELS[k])}回到自動配色">↺</button>`:''}</div>`).join('')}</div>
+   
    <p class="ts-hint">文字對比：${report.map(r=>`<span class="${r.ok?'ok':'bad'}">${h(r.label)} ${r.ratio}:1</span>`).join('、')}${bad.length?'<br>⚠️ 有項目對比不足，文字可能不易閱讀。':''}</p></section>
   </fieldset>
   <fieldset class="ts-fieldset" ${basic?'':'disabled'}>

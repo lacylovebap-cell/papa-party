@@ -193,7 +193,9 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
  return {
   '--home-background':c.background,'--home-panel':c.panel,'--home-line':c.line,'--home-button':themeButtonFill(t),'--home-buttonText':c.buttonText,
   '--home-accent':c.accent,'--home-secondary':c.button2,'--home-glow':themeAlpha(c.accent,.14),'--home-text':c.text,'--home-panelText':c.text,
-  '--theme-title':c.title,'--theme-nav':c.nav,'--theme-logo':c.logo,'--theme-button-solid':c.button,'--theme-muted':themeAlpha(c.text,.78),
+  '--theme-title':c.title,'--theme-nav':c.nav,
+  // The logo area stays transparent unless the streamer picked a colour by hand.
+  '--theme-logo':(t.manual||[]).includes('logo')?c.logo:'transparent','--theme-button-solid':c.button,'--theme-muted':themeAlpha(c.text,.78),
   // Opaque on purpose: the browser's own dropdown list cannot show a see-through colour
   // and falls back to a light grey, so this is the panel colour pre-darkened by 28%.
   '--theme-input':t.mode==='light'?'#ffffff':themeMix(c.panel,'#000000',.28),'--theme-soft':themeAlpha(c.line,t.mode==='light'?.35:.4),
