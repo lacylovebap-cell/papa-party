@@ -44,7 +44,7 @@ president-only management ops (`platformSpacePricing`, `platformSpacePricingSave
 `20261029100000_space_pricing.sql` (applied before the Edge). Rollback: `party-api-10.29-THEME.1.js` at commit
 `901a9f5c109d57b16ad24d494896e3a3b14b9c9f` (v70); that Edge never reads the 'pricing' record.
 
-10.29-SPACE.1 = PRICE.2 + new Spaces open for operation: visitors and the president resolve a new Space room by name,
+10.29-SPACE.1 (deployed 2026-10-29 as v72, commit `799b53e`) = PRICE.2 + new Spaces open for operation: visitors and the president resolve a new Space room by name,
 the read shortcut serves open Spaces, `portalDirectory` (open Spaces with names and room slugs only), and new-Space
 player logins (`spacePlayerLogin`, `spacePlayerCreate`, `spacePlayerAccess`, `spacePlayerLogins`). Needs migrations
 `20261029120000_space_activation.sql` and `20261029120100_space_player_logins.sql` (applied before the Edge).
