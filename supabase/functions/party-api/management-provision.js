@@ -21,6 +21,14 @@ export const MANAGEMENT_PROVISION_MESSAGES={
  OPERATION_CONFLICT:'這筆操作內容已變更，請關閉視窗後重新操作',
  MANAGEMENT_PAYLOAD_INVALID:'管理資料格式不正確',
  MANAGEMENT_QUERY_INVALID:'管理查詢格式不正確',
+ SPACE_PROVISIONING_REQUIRED:'請先建立主播與可登入的帳號，才能開放營運',
+ SPACE_PLAYER_CODE_TAKEN:'這個玩家登入代碼已有人使用，請換一個',
+ SPACE_PLAYER_CODE_INVALID:'玩家登入代碼請用 2～40 個小寫英文、數字、- 或 _',
+ SPACE_PLAYER_PASSWORD_INVALID:'密碼需為 4～72 個字元',
+ SPACE_PLAYER_ACTOR_INVALID:'只有獨立主播或總裁可以管理此空間的玩家',
+ SPACE_PLAYER_SCOPE_INVALID:'此空間尚未開放營運',
+ SPACE_PLAYER_TARGET_INVALID:'找不到此玩家',
+ PLAYER_ARCHIVE_PENDING_QUEUE:'這位玩家還有待播歌曲，請先處理再刪除',
 };
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 const SLUG=/^[a-z0-9][a-z0-9-]{0,39}$/;
@@ -29,6 +37,13 @@ const name=(value,max=100)=>typeof value==='string'&&value.trim().length>0&&valu
 const optionalText=(value,max)=>value===undefined||value===null||typeof value==='string'&&value.length<=max&&!/[\u0000-\u0008\u000b-\u001f\u007f]/u.test(value);
 const page=value=>Number.isSafeInteger(value)&&value>=1&&value<=100000;
 const query=value=>typeof value==='string'&&value.length<=100;
+// A new Space starts with a blank plan: no prices, save-song plans or card values
+// copied from 聲瑪. The five card slots stay because the current settings model
+// requires them; their values are zero until the Space sets its own.
+export function blankRoomSettings(defaults){
+ const tiers=(Array.isArray(defaults?.tiers)?defaults.tiers:[]).map(tier=>({name:tier.name,fee:0,price:0,months:0}));
+ return {status:'空閒中',hourlyLimit:0,opening:'',audition:0,livePrice:0,liveDouble:0,crownDouble:0,tiers,plans:[],tags:[],manual:''};
+}
 export function validPassword(value){
  if(value===undefined||value===null||value==='')return null;
  if(typeof value!=='string'||value.length<4||new TextEncoder().encode(value).length>72||/[\u0000-\u001f\u007f]/u.test(value))throw Error('密碼需為 4～72 個字元，且不可包含控制字元');
@@ -70,11 +85,11 @@ export function createManagementProvision({api,defaults,adminUser=null,uuid=()=>
    if(b.mode==='independent'){
     if(!name(b.spaceName))throw Error('請填獨立主播空間名稱（最多 100 字）');
     if(b.spaceId!==undefined)throw Error('獨立主播不需要選擇所屬廳');
-    payload.spaceName=b.spaceName.trim();payload.settings={...structuredClone(defaults),tags:[]};
+    payload.spaceName=b.spaceName.trim();payload.settings=blankRoomSettings(defaults);
    }else{
     if(!id(b.spaceId))throw Error('請先選擇空間');
     payload.spaceId=b.spaceId;
-    if(!editing)payload.settings={...structuredClone(defaults),tags:[]};
+    if(!editing)payload.settings=b.spaceId==='space-001'?{...structuredClone(defaults),tags:[]}:blankRoomSettings(defaults);
     if(b.expectedRevision!==undefined){if(!Number.isSafeInteger(b.expectedRevision)||b.expectedRevision<0)throw Error('管理操作格式不正確');payload.expectedRevision=b.expectedRevision;}
    }
    return rpc('papa_management_provision_streamer',{subject,operation:op,payload,password:pw,auth_user:adminUser||null});
