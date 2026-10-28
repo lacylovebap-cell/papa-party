@@ -198,3 +198,14 @@ test('theme comparisons and image reference sets',()=>{
  assert.ok(!themeSame(null,{base:'#ff0000'}));
  assert.deepEqual(themeImageUrls({base:'#000000',images:{card:{url:asset()}},decor:[{url:asset('papa','s','e')}]}),[asset(),asset('papa','s','e')]);
 });
+
+test('quota divider: length, thickness, colour and opacity are stored compactly and survive the server reducer',async()=>{
+ const {themeDividerVariables,themeDividerValue}=await import('../src/theme-engine.js');
+ const t=themeNormalize({base:'#ff0000',divider:{color:'#FFFFFF',length:40,thickness:9,opacity:-5,junk:1}});
+ assert.deepEqual(t.divider,{color:'#ffffff',length:40,thickness:6,opacity:0},'clamped, lower-cased, unknown keys dropped');
+ assert.equal(themeNormalize({base:'#ff0000',divider:{length:100,thickness:1,opacity:55}}).divider,undefined,'defaults are not stored');
+ assert.deepEqual(themeDividerVariables(t),{'--theme-divider-color':'rgba(255,255,255,0)','--theme-divider-length':'40%','--theme-divider-size':'6px'});
+ assert.equal(themeDividerValue({base:'#ff0000'}).color,themeNormalize({base:'#ff0000'}).colors.line,'no colour follows the border colour');
+ let s=room();s=mutate(s,{type:'settings',streamer:'papa',data:{theme:{base:'#ff0000',divider:{length:30,opacity:80}}}},{role:'admin'},'2026-10-28T00:00:00.000Z');
+ assert.deepEqual(scopeState(s,'papa').settings.theme.divider,{length:30,opacity:80});
+});

@@ -28,6 +28,10 @@ const themeHexPattern=/^#[0-9a-f]{6}$/i;
 // Only the platform's own content-addressed theme objects are accepted.
 const themeAssetPattern=/^https:\/\/[a-z0-9.-]+\/storage\/v1\/object\/public\/papa-photos\/themes\/(s|h)\/([A-Za-z0-9_-]{1,200})\/([a-f0-9]{64})\.webp$/;
 // The hall card default (22%) matches how the hall page already shows streamer images.
+// Thin line above the hourly quota inside the homepage banner. No colour means
+// it follows the border colour; length is a percentage of the text column.
+export const THEME_DIVIDER_DEFAULTS={length:100,thickness:1,opacity:55};
+const themeDividerRanges={length:[0,100],thickness:[1,6],opacity:[0,100]};
 export const THEME_IMAGE_DEFAULTS={
  background:{x:50,y:50,opacity:100,mask:35},
  banner:{x:60,y:35,opacity:100,mask:85,maskWidth:45,maskPosition:20,maskFeather:55,hallX:50,hallY:35,hallOpacity:22},
@@ -109,6 +113,8 @@ export function themeContrastReport(theme){
 }
 
 // ---------- schema ----------
+export function themeDividerValue(theme){const t=themeNormalize(theme);return {...THEME_DIVIDER_DEFAULTS,...(t.divider||{}),color:t.divider?.color||t.colors.line,follows:!t.divider?.color};}
+export function themeDividerVariables(theme){const d=themeDividerValue(theme);return {'--theme-divider-color':themeAlpha(d.color,d.opacity/100),'--theme-divider-length':d.length+'%','--theme-divider-size':d.thickness+'px'};}
 export function themeDefault(){return {v:THEME_VERSION,base:'#8b5cf6',mode:'dark',button:'gradient',colors:themeSmartPalette('#8b5cf6','dark'),images:{},decor:[]};}
 export function themeAsset(url){const m=typeof url==='string'&&url.length<=600?url.match(themeAssetPattern):null;return m?{kind:m[1],owner:m[2],hash:m[3]}:null;}
 const themeNumber=(value,[min,max],fallback)=>{const n=Number(value);return Number.isFinite(n)?Math.round(Math.max(min,Math.min(max,n))):fallback;};
@@ -132,7 +138,10 @@ export function themeNormalize(input,{hall=false}={}){
  const decor=(Array.isArray(v.decor)?v.decor:[]).filter(d=>d&&themeAsset(d.url)).slice(0,THEME_DECOR_LIMIT).map(d=>({url:d.url,x:themeNumber(d.x,[0,100],50),y:themeNumber(d.y,[0,100],20),size:themeNumber(d.size,[4,60],18),opacity:themeNumber(d.opacity,[0,100],100)}));
  // Colours the user tuned by hand survive a base/mode change until the next one-click palette.
  const manual=[...new Set((Array.isArray(v.manual)?v.manual:[]).filter(k=>THEME_COLOR_KEYS.includes(k)))];
- return {v:THEME_VERSION,base,mode,button:v.button==='solid'?'solid':'gradient',colors,images,decor,...(manual.length?{manual}:{})};
+ const divider={},dv=v.divider&&typeof v.divider==='object'&&!Array.isArray(v.divider)?v.divider:{};
+ if(themeHexPattern.test(dv.color||''))divider.color=dv.color.toLowerCase();
+ for(const [k,range] of Object.entries(themeDividerRanges)){const n=themeNumber(dv[k],range,THEME_DIVIDER_DEFAULTS[k]);if(n!==THEME_DIVIDER_DEFAULTS[k])divider[k]=n;}
+ return {v:THEME_VERSION,base,mode,button:v.button==='solid'?'solid':'gradient',colors,images,decor,...(Object.keys(divider).length?{divider}:{}),...(manual.length?{manual}:{})};
 }
 // Strict, used before any save: rejects malformed input instead of guessing.
 export function themeValidate(value,{hall=false,owner=null}={}){
@@ -184,6 +193,7 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
   '--theme-input':t.mode==='light'?'#ffffff':themeAlpha('#000000',.28),'--theme-soft':themeAlpha(c.line,t.mode==='light'?.35:.4),
   '--theme-card-fill':card?.url?themeLayeredBackground(c.panel,card,'card',resolve(card.url)):c.panel,
   '--theme-banner-mask':themeBannerMask(t),
+  ...themeDividerVariables(t),
   '--theme-scheme':t.mode
  };
 }

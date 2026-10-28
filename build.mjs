@@ -10,8 +10,8 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 fs.writeFileSync(path.join(out,'index.html'),html);
 const appHtml=fs.readFileSync(path.join(root,'v2.html'),'utf8');
 for(const file of ['preview.html','v2.html'])fs.writeFileSync(path.join(out,file),appHtml);
-fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'10.28-THEME.2',backendVersion:'10.28-THEME.1',builtAt:new Date().toISOString()}));
-console.log('Build 10.28-THEME.2 complete: static site in dist');
+fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'10.28-THEME.3',backendVersion:'10.28-THEME.3',builtAt:new Date().toISOString()}));
+console.log('Build 10.28-THEME.3 complete: static site in dist');
 
 fs.copyFileSync(path.join(root,'lobby.html'),path.join(out,'lobby.html'));
 for(const file of ['app.html','404.html','sw.js','manifest.webmanifest','CNAME'])fs.copyFileSync(path.join(root,file),path.join(out,file));

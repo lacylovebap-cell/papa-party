@@ -3,10 +3,10 @@
 // one access check when opening, one hall-theme read when switching to the
 // hall, image uploads on save/publish, and the save/publish write itself.
 import {THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
- themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance} from './theme-engine.js?v=10.28-THEME.1';
-import {themeApply,themeBannerImageStyle,themeDecorHtml} from './theme-render.js?v=10.28-THEME.1';
-import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-THEME.1';
-import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-THEME.1';
+ themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue} from './theme-engine.js?v=10.28-THEME.3';
+import {themeApply,themeBannerImageStyle,themeDecorHtml} from './theme-render.js?v=10.28-THEME.3';
+import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-THEME.3';
+import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-THEME.3';
 
 const LOCAL_HOST='https://local.preview';
 const h=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -28,6 +28,7 @@ export const THEME_HELP={
  maskWidth:'遮罩寬度：遮罩覆蓋範圍的寬窄（以橫幅寬度的百分比計算，手機和電腦都會等比例套用）。',
  maskPosition:'遮罩位置：把遮罩主要覆蓋的區域往左或往右移。0% 在最左、100% 在最右。也可以直接拖曳預覽中的中央控制線。',
  maskFeather:'遮罩羽化：遮罩邊緣的柔和程度。數值低邊界較明顯，數值高過渡較自然。',
+ divider:'首頁橫幅裡「本小時提歌額度」上方的細線。可調整長短（以文字欄寬度的百分比計算，手機和電腦等比例）、粗細、顏色與顯示程度；顯示程度 0% 就是隱藏。不選顏色時跟隨「邊框顏色」。',
  hallCard:'同一張橫幅圖也會顯示在廳首頁的主播卡片。卡片比例不同，所以可以另外調整焦點與顯示程度，不需要再上傳一次圖片，也不會改變你的主播首頁橫幅。',
  draft:'儲存草稿：保存目前設定，但玩家仍看到上一次發布的版本。下次打開編輯器會從草稿繼續。',
  publish:'發布主題：正式套用到玩家看得到的頁面。同一位主播的首頁、歌本、後台會一起換成新主題。',
@@ -66,7 +67,7 @@ export function openThemeStudio(options){
 
  // ---------- controls ----------
  const help=key=>`<button type="button" class="ts-help" data-help="${key}" aria-label="說明">?</button>`;
- const slider=(path,label,value,min=0,max=100,helpKey='',unit='%',disabled=false)=>`<label class="ts-slider"><span>${h(label)} ${helpKey?help(helpKey):''}<output>${value}${unit}</output></span><input type="range" min="${min}" max="${max}" value="${value}" data-path="${path}" ${disabled?'disabled':''}></label>`;
+ const slider=(path,label,value,min=0,max=100,helpKey='',unit='%',disabled=false)=>`<label class="ts-slider"><span>${h(label)} ${helpKey?help(helpKey):''}<output>${value}${unit}</output></span><input type="range" min="${min}" max="${max}" value="${value}" data-path="${path}" data-unit="${unit}" ${disabled?'disabled':''}></label>`;
  function locked(text){return `<p class="ts-locked">🔒 ${h(text||THEME_LOCKED_MESSAGE)}</p>`;}
  function imageBlock(role){
   const t=current().working,img=themeImageValue(t.images[role],role),has=!!t.images[role]?.url,spec=THEME_IMAGE_ROLES[role],dis=!can('images');
@@ -85,6 +86,12 @@ export function openThemeStudio(options){
     +slider('images.banner.hallOpacity','卡片圖片顯示程度',img.hallOpacity,0,100,'opacity')+`<button type="button" class="ts-btn ts-ghost" data-page-jump="hallcard">預覽廳內主播卡片</button></div>`;
   }
   return html;
+ }
+ function dividerBlock(){
+  const d=themeDividerValue(current().working);
+  return `<div class="ts-sub"><b>額度上方分隔線 ${help('divider')}</b><div class="ts-row"><span class="ts-label">顏色</span><input type="color" value="${d.color}" data-divider-color aria-label="分隔線顏色"><span class="ts-hint">${d.follows?'目前跟隨邊框顏色':'自訂顏色'}</span>${d.follows?'':'<button type="button" class="ts-btn ts-ghost" data-divider-follow>跟隨邊框色</button>'}</div>`
+   +slider('divider.length','長短',d.length,0,100,'','%')+slider('divider.thickness','粗細',d.thickness,1,6,'','px')+slider('divider.opacity','顯示程度',d.opacity,0,100,'','%')
+   +`<button type="button" class="ts-btn ts-ghost" data-divider-reset>分隔線恢復預設</button></div>`;
  }
  function decorBlock(){
   const t=current().working,dis=!can('images');
@@ -113,7 +120,7 @@ export function openThemeStudio(options){
   </fieldset>
   <fieldset class="ts-fieldset" ${basic?'':'disabled'}>
   <section class="ts-section"><h3>5. 整頁背景圖片 ${help('background')}</h3>${images?'':locked()}${imageBlock('background')}</section>
-  <section class="ts-section"><h3>6. ${ui.target==='hall'?'廳首頁':'首頁'}橫幅 ${help('banner')}</h3>${images?'':locked()}${imageBlock('banner')}</section>
+  <section class="ts-section"><h3>6. ${ui.target==='hall'?'廳首頁':'首頁'}橫幅 ${help('banner')}</h3>${images?'':locked()}${imageBlock('banner')}${ui.target==='streamer'?dividerBlock():''}</section>
   <section class="ts-section"><h3>7. 統一卡片底圖 ${help('card')}</h3>${images?'':locked()}${imageBlock('card')}</section>
   <section class="ts-section"><h3>8. 裝飾圖片 ${help('decor')}</h3>${images?'':locked()}${decorBlock()}</section>
   </fieldset>
@@ -238,12 +245,14 @@ export function openThemeStudio(options){
   const t=current().working,parts=path.split('.'),n=Number(value);
   if(parts[0]==='images'){ensureImage(parts[1])[parts[2]]=n;}
   else if(parts[0]==='decor'){const d=t.decor[Number(parts[1])];if(d)d[parts[2]]=n;}
+  else if(parts[0]==='divider'){t.divider={...(t.divider||{}),[parts[1]]:n};}
  }
  root.addEventListener('input',e=>{
   const el=e.target,tg=current(),t=tg.working;
-  if(el.matches('[data-path]')){setPath(el.dataset.path,el.value);const out=el.closest('.ts-slider')?.querySelector('output');if(out)out.textContent=el.value+'%';markDirty(false);schedule();return;}
+  if(el.matches('[data-path]')){setPath(el.dataset.path,el.value);const out=el.closest('.ts-slider')?.querySelector('output');if(out)out.textContent=el.value+(el.dataset.unit??'%');markDirty(false);schedule();return;}
   if(el.matches('[data-base-color]')){t.base=el.value.toLowerCase();regenerate(false);$('[data-base-hex]').value=t.base.toUpperCase();markDirty(false);schedule();renderControlsSoon();return;}
   if(el.matches('[data-base-hex]')){const v=el.value.trim();if(/^#?[0-9a-f]{6}$/i.test(v)){t.base=('#'+v.replace('#','')).toLowerCase();regenerate(false);markDirty(false);schedule();renderControlsSoon();}return;}
+  if(el.matches('[data-divider-color]')){t.divider={...(t.divider||{}),color:el.value.toLowerCase()};markDirty(false);schedule();renderControlsSoon();return;}
   if(el.matches('[data-color]')){t.colors[el.dataset.color]=el.value.toLowerCase();tg.manual.add(el.dataset.color);t.manual=[...tg.manual];markDirty(false);schedule();renderControlsSoon();return;}
  });
  root.addEventListener('change',async e=>{
@@ -284,6 +293,8 @@ export function openThemeStudio(options){
   if(el.dataset.template){const x=THEME_TEMPLATES.find(x=>x.id===el.dataset.template);t.base=x.base;t.mode=x.mode;regenerate(true);markDirty();schedule();return;}
   if(el.dataset.mode){t.mode=el.dataset.mode;regenerate(false);markDirty();schedule();return;}
   if(el.dataset.btnstyle){t.button=el.dataset.btnstyle;markDirty();schedule();return;}
+  if(el.matches('[data-divider-follow]')){if(t.divider){const {color,...rest}=t.divider;t.divider=rest;}markDirty();schedule();return;}
+  if(el.matches('[data-divider-reset]')){delete t.divider;markDirty();schedule();return;}
   if(el.dataset.colorAuto){tg.manual.delete(el.dataset.colorAuto);t.manual=[...tg.manual];t.colors[el.dataset.colorAuto]=themeSmartPalette(t.base,t.mode)[el.dataset.colorAuto];markDirty();schedule();return;}
   if(el.dataset.remove){const role=el.dataset.remove;if(role==='banner'){const {url,...rest}=t.images.banner||{};t.images.banner=rest;}else delete t.images[role];markDirty();renderPage();return;}
   if(el.dataset.decorRemove!==undefined){t.decor.splice(Number(el.dataset.decorRemove),1);markDirty();renderPage();return;}

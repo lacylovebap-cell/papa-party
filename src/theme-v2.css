@@ -26,7 +26,10 @@
 [data-theme-v2] .hero-overlay h2,[data-theme-v2] .hero-overlay .now-playing strong{color:var(--theme-title)}
 [data-theme-v2] .hero-overlay .status-note,[data-theme-v2] .hero-overlay .now-playing,[data-theme-v2] .hero-overlay p{color:var(--home-text)}
 [data-theme-v2] .hero-overlay .hour small{color:var(--theme-muted)}
-[data-theme-v2] .hero-overlay .hour{border-top-color:var(--home-line)}
+/* Divider above the hourly quota: drawn as its own layer so its length,
+   thickness, colour and opacity change without moving the text. */
+[data-theme-v2] .hero-overlay .hour{position:relative;border-top:0}
+[data-theme-v2] .hero-overlay .hour:before{content:'';position:absolute;left:0;top:0;width:var(--theme-divider-length,100%);height:var(--theme-divider-size,1px);background:var(--theme-divider-color,var(--home-line));pointer-events:none}
 [data-theme-v2] .header-menu .header-actions,[data-theme-v2] .admin-more-options{background:var(--home-panel);border-color:var(--home-line)}
 /* Decorations: positioned in percent of the homepage, never intercept taps. */
 .theme-home-host{position:relative}
