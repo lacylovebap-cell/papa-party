@@ -31,7 +31,8 @@ test('price guide and crown guide are short: per-slot slip, plan list, and plain
  const guide=text(priceGuide(shengma));
  assert.match(guide,/一般現點，每 1 首 歌手 2,990 雙費 500/);
  assert.match(guide,/2 首 2 首 歌手 5,555 雙費 990/);assert.match(guide,/🏅 金牌歌單 歌手 22,887/);assert.doesNotMatch(guide,/一般 2 首/);assert.match(guide,/半首歌要「唱兩次」或「搭配另一首半首歌」/);
- const crown=text(crownGuide(shengma,DEFAULTS.tiers,{openingExtra:18188}));
+ const crown=text(crownGuide(shengma));
+ assert.ok(crown.indexOf('金卡')<crown.indexOf('至尊卡'),'cheapest card first, as approved');
  assert.match(crown,/👑 金卡 1 個月 辦卡 歌手 55,599 雙費 18,188 冠後每首 歌手 4,200 雙費 500/);
  assert.match(crown,/👑 至尊卡 永久/);
  assert.match(crown,/只能現點、現場唱，不能使用提歌、不能使用存歌/);
@@ -43,4 +44,17 @@ test('no gift-price checkbox remains anywhere players request songs; requests st
  assert.doesNotMatch(app,/我已確認禮物價格|我已確認換歌後的現點禮物價格|已了解每首現點需等待主播確認禮物|已了解每位主播的現點需等待確認禮物/);
  assert.doesNotMatch(app,/f\.has\('gift'\)|data\.has\('gift'\)|f\.has\('giftConfirmed'\)/);
  assert.ok((app.match(/giftConfirmed:true/g)||[]).length>=4);
+});
+
+test('crown guide follows each card\'s own opening fees, the hall billing mode, and says so when a hall has no cards',()=>{
+ const hall=normalizePricing({mode:'single',singleFee:'hall',names:{singer:'歌姬',host:'主持人',hall:'廳主'},unit:'星鑽',perUnit:{singer:800,host:0,hall:100},
+  tiers:[{id:'t1',name:'皇冠',fee:9000,price:1600,host:0,hall:700,months:2},{id:'t2',name:'銀冠',fee:3000,price:900,host:0,hall:300,months:0}]});
+ const guide=text(crownGuide(hall));
+ assert.match(guide,/👑 銀冠 永久 辦卡 歌姬 3,000 單費 300 冠後每首 歌姬 900 單費 100/);
+ assert.match(guide,/👑 皇冠 2 個月 辦卡 歌姬 9,000 單費 700/);
+ assert.match(guide,/單費：給廳主。單位：星鑽。/);
+ assert.match(text(crownGuide(normalizePricing({mode:'none',perUnit:{singer:1}}))),/這個廳目前沒有開放冠歌卡/);
+ const split=normalizePricing({mode:'double',perUnit:{singer:1000,host:200,hall:200},tiers:[{id:'t1',name:'金',fee:5000,price:1500,host:900,hall:600,months:1}]});
+ const g=text(crownGuide(split));
+ assert.match(g,/辦卡 主播 5,000 主持 900 廳主號 600/,'different opening fees are shown by name, not merged into 雙費');
 });

@@ -60,3 +60,4 @@
 /* Keeps the 點歌教學 entry clear of the note field under it. */
 .pf-help-row{margin:2px 0 16px}
 @media(prefers-reduced-motion:reduce){.pf-toggle::before{transition:none}}
+.pf-empty{margin:0;font-size:13px;color:var(--pf-muted)}

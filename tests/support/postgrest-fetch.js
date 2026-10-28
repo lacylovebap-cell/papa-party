@@ -100,9 +100,15 @@ export function createPostgrestFetch(db,{baseUrl='https://example.supabase.co',l
   if(method==='DELETE'){await db.query(`delete from public."${name}"${where}`,params);return {status:204,empty:true};}
   return {status:405,json:{code:'PGRST117',message:'method not allowed'}};
  }
- return async function postgrestFetch(input,init={}){
+ // The database stand-in has one connection; real PostgREST serves parallel
+ // requests on a pool. Queue requests so parallel Edge reads behave the same.
+ let queue=Promise.resolve();
+ return function postgrestFetch(input,init={}){
   const href=String(input);
   if(!href.startsWith(baseUrl+'/rest/v1/'))return passthrough(href,init);
+  const run=queue.then(()=>serve(href,init));queue=run.catch(()=>{});return run;
+ };
+ async function serve(href,init){
   const url=new URL(href),method=(init.method||'GET').toUpperCase(),path=url.pathname.slice('/rest/v1/'.length);
   let result;
   try{
@@ -115,5 +121,5 @@ export function createPostgrestFetch(db,{baseUrl='https://example.supabase.co',l
   const text=result.empty?'':JSON.stringify(result.json);
   if(log&&result.status>=400)log({error:true,status:result.status,path:path+url.search,detail:result.json});
   return {ok:result.status>=200&&result.status<300,status:result.status,url:href,headers:{get:()=>'application/json'},text:async()=>text,json:async()=>JSON.parse(text)};
- };
+ }
 }
