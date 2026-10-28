@@ -22,7 +22,7 @@ import {createChat} from './chat.js?v=10.20-WEB.1';
 import {requestSourceLabel} from './request-source.js?v=10.20-WEB.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=10.20-WEB.1';
 import {openHomeEditor} from './home-editor.js?v=10.20-WEB.1';
-import {themeApply,themeClear,themeBannerImageStyle,themeBannerUrl,themeDecorHtml} from './theme-render.js?v=10.28-THEME.5';
+import {themeApply,themeClear,themeBannerImageStyle,themeBannerUrl,themeDecorHtml,themeDecorMotion} from './theme-render.js?v=10.28-THEME.6';
 import {streamerName,streamerText,streamerDestination,publicStreamerDestination,pageLocation,pageDestination} from './streamer-navigation.js?v=10.21-WEB.3';
 import {publicPageDestination} from './public-route-location.js?v=10.20-WEB.1';
 import {readPublicRouteContext,publicApplicationHref,publicApplicationPage,createPublicLinkClient} from './public-links.js';
@@ -692,8 +692,8 @@ function editHome(){openHomeEditor({home:state.settings.home,room:state.currentS
 // A published theme (首頁主題設計) wins; otherwise the earlier home colour settings apply unchanged.
 function applyHomeTheme(){const root=document.documentElement;if(state.settings.theme){themeApply(root,state.settings.theme);return;}themeClear(root);if(!state.settings.home){delete root.dataset.homeTheme;return;}root.dataset.homeTheme='custom';for(const [k,v] of Object.entries(themePalette(state.settings.home.color,state.settings.home.themeColors)))root.style.setProperty('--home-'+k,v);}
 // Decorations only on the streamer homepage; other pages inherit colours and images only.
-function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme,home=!['admin','common-book','book','center','gallery'].includes(route);if(!app)return;app.querySelector(':scope>.theme-decor-layer')?.remove();const html=home&&theme?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html)app.insertAdjacentHTML('beforeend',html);}
-async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=10.28-THEME.5',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=10.28-THEME.5');}
+function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme,home=!['admin','common-book','book','center','gallery'].includes(route);if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=home&&theme?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html)app.insertAdjacentHTML('beforeend',html);themeDecorMotion(document,html?theme:null,{host:app});}
+async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=10.28-THEME.6',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=10.28-THEME.6');}
 async function openThemeDesigner(){
  if(demo||draft)throw Error('首頁主題設計請在正式同步模式使用');if(!admin)throw Error('請先登入管理');
  const {openThemeStudio}=await loadThemeStudio();const room=state.currentStreamer,space=state.streamers.find(r=>r.id===room.id)?.spaceId||room.spaceId||'space-001';
@@ -704,7 +704,7 @@ async function openThemeDesigner(){
 }
 async function openThemePlans(){
  if(!isSuperAdmin())throw Error('僅限 PA Party總裁');
- const {THEME_PLANS,THEME_STREAMER_FEATURES,THEME_HALL_FEATURES,THEME_FEATURE_LABELS}=await import('./theme-access.js?v=10.28-THEME.5');
+ const {THEME_PLANS,THEME_STREAMER_FEATURES,THEME_HALL_FEATURES,THEME_FEATURE_LABELS}=await import('./theme-access.js?v=10.28-THEME.6');
  const r=await api({op:'themePlans',streamer:state.currentStreamer.id,management:true}),plan=r.plan||{},checks=(name,keys,on)=>keys.map(k=>`<label class="check-row"><input type="checkbox" name="${name}" value="${k}" ${on.includes(k)?'checked':''}> ${h(THEME_FEATURE_LABELS[k])}</label>`).join('');
  modal('會員方案與主題授權・'+state.currentStreamer.display_name,`<p class="muted">由總裁手動設定；不顯示、不儲存任何價格。主題功能目前生效：${r.effective.length?r.effective.map(k=>h(THEME_FEATURE_LABELS[k])).join('、'):'未開放'}</p>
  <label>會員方案<select name="plan"><option value="" ${plan.plan?'':'selected'} disabled>尚未設定（主題功能不開放）</option>${THEME_PLANS.map(([id,label])=>`<option value="${id}" ${plan.plan===id?'selected':''}>${h(label)}</option>`).join('')}</select></label>

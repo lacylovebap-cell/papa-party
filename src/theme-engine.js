@@ -23,6 +23,9 @@ export const THEME_IMAGE_ROLES={
  decor:{label:'裝飾圖片',max:800,targetKB:150,source:'800 × 800 px'}
 };
 export const THEME_DECOR_LIMIT=6;
+// How a decoration moves. All of them run in the browser only: no extra
+// download, no database write while scrolling or tapping.
+export const THEME_DECOR_MOTIONS={none:'不動',fixed:'固定在螢幕上',follow:'捲動時慢慢跟上',tap:'點擊位置冒出來',float:'原地輕輕浮動'};
 export const THEME_MAX_BYTES=8192;
 const themeHexPattern=/^#[0-9a-f]{6}$/i;
 // Only the platform's own content-addressed theme objects are accepted.
@@ -136,7 +139,7 @@ export function themeNormalize(input,{hall=false}={}){
  for(const key of THEME_COLOR_KEYS)colors[key]=themeHexPattern.test(v.colors?.[key]||'')?v.colors[key].toLowerCase():auto[key];
  const images={};
  for(const role of ['background','banner','card']){const image=themeImage(role,v.images?.[role],hall);if(image)images[role]=image;}
- const decor=(Array.isArray(v.decor)?v.decor:[]).filter(d=>d&&themeAsset(d.url)).slice(0,THEME_DECOR_LIMIT).map(d=>({url:d.url,x:themeNumber(d.x,[0,100],50),y:themeNumber(d.y,[0,100],20),size:themeNumber(d.size,[4,60],18),opacity:themeNumber(d.opacity,[0,100],100)}));
+ const decor=(Array.isArray(v.decor)?v.decor:[]).filter(d=>d&&themeAsset(d.url)).slice(0,THEME_DECOR_LIMIT).map(d=>({url:d.url,x:themeNumber(d.x,[0,100],50),y:themeNumber(d.y,[0,100],20),size:themeNumber(d.size,[4,60],18),opacity:themeNumber(d.opacity,[0,100],100),...(Object.hasOwn(THEME_DECOR_MOTIONS,d.motion)&&d.motion!=='none'?{motion:d.motion}:{})}));
  // Colours the user tuned by hand survive a base/mode change until the next one-click palette.
  const manual=[...new Set((Array.isArray(v.manual)?v.manual:[]).filter(k=>THEME_COLOR_KEYS.includes(k)))];
  const divider={},dv=v.divider&&typeof v.divider==='object'&&!Array.isArray(v.divider)?v.divider:{};

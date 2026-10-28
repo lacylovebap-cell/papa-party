@@ -48,6 +48,12 @@
 .theme-home-host{position:relative}
 .theme-decor-layer{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
 .theme-decor{position:absolute;height:auto;transform:translate(-50%,-50%);user-select:none;-webkit-user-drag:none;max-width:none}
+.theme-decor-screen{position:fixed}
+.theme-decor-float{animation:theme-decor-float 3.4s ease-in-out infinite alternate}
+@keyframes theme-decor-float{from{transform:translate(-50%,-50%)}to{transform:translate(-50%,calc(-50% - 10px))}}
+.theme-decor-pop{animation:theme-decor-pop .95s ease-out forwards;opacity:0}
+@keyframes theme-decor-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}25%{opacity:var(--decor-opacity,1);transform:translate(-50%,-50%) scale(1.05)}100%{opacity:0;transform:translate(-50%,calc(-50% - 28px)) scale(.9)}}
+@media (prefers-reduced-motion:reduce){.theme-decor-float,.theme-decor-pop{animation:none}}
 .theme-decor-layer.editable{z-index:6}
 .theme-decor-layer.editable .theme-decor{pointer-events:auto;cursor:grab;outline:1px dashed #ffffff99;outline-offset:2px;touch-action:none}
 /* Hall homepage banner (lobby). Same layer order as the streamer banner. */

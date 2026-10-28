@@ -3,10 +3,10 @@
 // one access check when opening, one hall-theme read when switching to the
 // hall, image uploads on save/publish, and the save/publish write itself.
 import {THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
- themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue} from './theme-engine.js?v=10.28-THEME.5';
-import {themeApply,themeBannerImageStyle,themeDecorHtml} from './theme-render.js?v=10.28-THEME.5';
-import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-THEME.5';
-import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-THEME.5';
+ themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.28-THEME.6';
+import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.28-THEME.6';
+import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-THEME.6';
+import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-THEME.6';
 
 const LOCAL_HOST='https://local.preview';
 const h=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -28,6 +28,7 @@ export const THEME_HELP={
  maskWidth:'遮罩寬度：遮罩覆蓋範圍的寬窄（以橫幅寬度的百分比計算，手機和電腦都會等比例套用）。',
  maskPosition:'遮罩位置：把遮罩主要覆蓋的區域往左或往右移。0% 在最左、100% 在最右。也可以直接拖曳預覽中的中央控制線。',
  maskFeather:'遮罩羽化：遮罩邊緣的柔和程度。數值低邊界較明顯，數值高過渡較自然。',
+ decorMotion:'不動：留在首頁原位。固定在螢幕上：捲動時一直停在畫面同一處。捲動時慢慢跟上：捲動時稍微落後再飄回原位。點擊位置冒出來：在頁面任何地方點一下，就在那裡短暫冒出再淡出，不會擋住按鈕。原地輕輕浮動：留在原位上下漂浮。全部只在瀏覽器裡運作，不會多耗流量或資料庫；手機若開啟「減少動態效果」會自動停止動畫。',
  divider:'首頁橫幅裡「本小時提歌額度」上方的細線。可調整長短（以文字欄寬度的百分比計算，手機和電腦等比例）、粗細、顏色與顯示程度；顯示程度 0% 就是隱藏。不選顏色時跟隨「邊框顏色」。',
  hallCard:'同一張橫幅圖也會顯示在廳首頁的主播卡片。卡片比例不同，所以可以另外調整焦點與顯示程度，不需要再上傳一次圖片，也不會改變你的主播首頁橫幅。',
  draft:'儲存草稿：保存目前設定，但玩家仍看到上一次發布的版本。下次打開編輯器會從草稿繼續。',
@@ -96,7 +97,7 @@ export function openThemeStudio(options){
  function decorBlock(){
   const t=current().working,dis=!can('images');
   return `<div class="ts-img-row"><label class="ts-btn ts-file ${dis||t.decor.length>=THEME_DECOR_LIMIT?'disabled':''}">＋ 新增裝飾圖片<input type="file" accept="image/png,image/webp" data-upload="decor" ${dis||t.decor.length>=THEME_DECOR_LIMIT?'disabled':''}></label><span class="ts-hint">最多 ${THEME_DECOR_LIMIT} 張；建議 800 × 800 px 透明 PNG／WebP</span></div>`
-   +t.decor.map((d,i)=>{const prepared=d.url.startsWith(LOCAL_HOST)?pending.get(themeAsset(d.url)?.hash):null;return `<div class="ts-decor-item"><img src="${h(resolve(d.url))}" alt=""><div class="ts-grow">${prepared?`<p class="ts-hint">✅ 已壓縮：${prepared.width}×${prepared.height}，${themeKB(prepared.originalBytes)} → <b>${themeKB(prepared.bytes)}</b></p>`:''}${slider(`decor.${i}.size`,'大小',d.size,4,60,'','%',dis)}${slider(`decor.${i}.opacity`,'顯示程度',d.opacity,0,100,'opacity','%',dis)}</div><div class="ts-col"><button type="button" class="ts-btn ts-ghost" data-decor-reset="${i}">重設位置</button><button type="button" class="ts-btn ts-ghost" data-decor-remove="${i}">移除</button></div></div>`;}).join('')
+   +t.decor.map((d,i)=>{const prepared=d.url.startsWith(LOCAL_HOST)?pending.get(themeAsset(d.url)?.hash):null;return `<div class="ts-decor-item"><img src="${h(resolve(d.url))}" alt=""><div class="ts-grow">${prepared?`<p class="ts-hint">✅ 已壓縮：${prepared.width}×${prepared.height}，${themeKB(prepared.originalBytes)} → <b>${themeKB(prepared.bytes)}</b></p>`:''}<label class="ts-motion"><span>動態 ${help('decorMotion')}</span><select data-decor-motion="${i}" ${dis?'disabled':''}>${Object.entries(THEME_DECOR_MOTIONS).map(([k,label])=>`<option value="${k}" ${(d.motion||'none')===k?'selected':''}>${label}</option>`).join('')}</select></label>${d.motion==='tap'?'<p class="ts-hint">不用拖曳位置：在左側預覽任意處點一下，就會在點的位置冒出來。</p>':d.motion==='fixed'||d.motion==='follow'?'<p class="ts-hint">位置以螢幕畫面計算，捲動時仍在畫面上。</p>':''}${slider(`decor.${i}.size`,'大小',d.size,4,60,'','%',dis)}${slider(`decor.${i}.opacity`,'顯示程度',d.opacity,0,100,'opacity','%',dis)}</div><div class="ts-col">${d.motion==='tap'?'':`<button type="button" class="ts-btn ts-ghost" data-decor-reset="${i}">重設位置</button>`}<button type="button" class="ts-btn ts-ghost" data-decor-remove="${i}">移除</button></div></div>`;}).join('')
    +(t.decor.length?'<p class="ts-hint">在左側預覽的主播首頁直接拖曳裝飾圖片來移動位置。</p>':'');
  }
  function renderControls(){
@@ -183,9 +184,12 @@ export function openThemeStudio(options){
   const hallImg=doc.querySelector('[data-hall-img]');if(hallImg)hallImg.style.cssText=t?themeBannerImageStyle(t,{hallCard:true}):'';
   const decorHost=doc.querySelector('[data-decor-host]');
   if(decorHost){
-   const items=t?t.decor:[],imgs=decorHost.querySelectorAll('.theme-decor');
-   if(imgs.length!==items.length||[...imgs].some((im,i)=>im.dataset.url!==items[i].url)){decorHost.innerHTML=t?themeDecorHtml(t,{resolve,editable:true,escape:h}):'';decorHost.querySelectorAll('.theme-decor').forEach((im,i)=>im.dataset.url=items[i].url);}
-   else items.forEach((d,i)=>{imgs[i].style.left=d.x+'%';imgs[i].style.top=d.y+'%';imgs[i].style.width=`clamp(36px,${d.size}%,${Math.round(d.size*9)}px)`;imgs[i].style.opacity=d.opacity/100;});
+   const items=t?t.decor:[];
+   // Rebuild only when the set of pictures or their motion changes; otherwise
+   // move the existing images so sliders never reload anything.
+   const sig=items.map(d=>d.url+'|'+(d.motion||'none')).join(',');
+   if(decorHost.dataset.sig!==sig){decorHost.dataset.sig=sig;decorHost.innerHTML=t?themeDecorHtml(t,{resolve,editable:true,escape:h}):'';themeDecorMotion(doc,t,{resolve,host:decorHost});}
+   else{const byIndex=new Map([...decorHost.querySelectorAll('.theme-decor[data-decor-index]')].map(im=>[Number(im.dataset.decorIndex),im]));items.forEach((d,i)=>{const im=byIndex.get(i);if(!im)return;im.style.left=d.x+'%';im.style.top=d.y+'%';im.style.width=themeDecorWidth(d);im.style.opacity=d.opacity/100;});}
   }
   const guides=doc.querySelector('[data-guides-host]');
   if(guides){
@@ -211,7 +215,7 @@ export function openThemeStudio(options){
    const t=current().working;if(current().reset||!can('basic'))return;
    const guide=e.target.closest('[data-guide]'),decor=e.target.closest('.theme-decor'),bannerImg=e.target.closest('[data-banner-img]'),hallImg=e.target.closest('.ts-hallcard');
    if(guide){const host=guide.parentElement.parentElement.getBoundingClientRect();drag={kind:'guide',which:guide.dataset.guide,host};}
-   else if(decor&&can('images')){const host=doc.querySelector('[data-home-host]').getBoundingClientRect();drag={kind:'decor',index:Number(decor.dataset.decorIndex),host};}
+   else if(decor&&can('images')&&decor.dataset.decorIndex!==undefined){const screen=decor.closest('.theme-decor-screen'),win=doc.defaultView,host=screen?{left:0,top:0,width:win.innerWidth,height:win.innerHeight}:doc.querySelector('[data-home-host]').getBoundingClientRect();drag={kind:'decor',index:Number(decor.dataset.decorIndex),host};}
    else if(bannerImg){const r=bannerImg.getBoundingClientRect();drag={kind:'focus',role:'banner',x:e.clientX,y:e.clientY,r,start:{...themeImageValue(t.images.banner,'banner')}};}
    else if(hallImg&&ui.target==='streamer'){const r=hallImg.getBoundingClientRect();drag={kind:'hall',x:e.clientX,y:e.clientY,r,start:{...themeImageValue(t.images.banner,'banner')}};}
    if(drag){e.preventDefault();e.target.setPointerCapture?.(e.pointerId);}
@@ -252,6 +256,7 @@ export function openThemeStudio(options){
   if(el.matches('[data-path]')){setPath(el.dataset.path,el.value);const out=el.closest('.ts-slider')?.querySelector('output');if(out)out.textContent=el.value+(el.dataset.unit??'%');markDirty(false);schedule();return;}
   if(el.matches('[data-base-color]')){t.base=el.value.toLowerCase();regenerate(false);$('[data-base-hex]').value=t.base.toUpperCase();markDirty(false);schedule();renderControlsSoon();return;}
   if(el.matches('[data-base-hex]')){const v=el.value.trim();if(/^#?[0-9a-f]{6}$/i.test(v)){t.base=('#'+v.replace('#','')).toLowerCase();regenerate(false);markDirty(false);schedule();renderControlsSoon();}return;}
+  if(el.matches('[data-decor-motion]')){const d=t.decor[Number(el.dataset.decorMotion)];if(d){if(el.value==='none')delete d.motion;else d.motion=el.value;}markDirty();schedule();return;}
   if(el.matches('[data-divider-color]')){t.divider={...(t.divider||{}),color:el.value.toLowerCase()};markDirty(false);schedule();renderControlsSoon();return;}
   if(el.matches('[data-color]')){t.colors[el.dataset.color]=el.value.toLowerCase();tg.manual.add(el.dataset.color);t.manual=[...tg.manual];markDirty(false);schedule();renderControlsSoon();return;}
  });

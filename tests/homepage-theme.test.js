@@ -220,3 +220,12 @@ test('buttons follow the theme: toggles get an opaque tint of the button colour'
  assert.match(v['--theme-button-soft'],/^#[0-9a-f]{6}$/);
  assert.equal(v['--home-button'],'linear-gradient(135deg,#6a4f7d,#070317)');
 });
+
+test('decoration motion is one optional word per decoration and survives the server reducer',async()=>{
+ const {THEME_DECOR_MOTIONS}=await import('../src/theme-engine.js');
+ assert.deepEqual(Object.keys(THEME_DECOR_MOTIONS),['none','fixed','follow','tap','float']);
+ const n=themeNormalize({base:'#000000',decor:[{url:asset(),motion:'tap'},{url:asset('papa','s','b'),motion:'none'},{url:asset('papa','s','c'),motion:'teleport'}]});
+ assert.equal(n.decor[0].motion,'tap');assert.equal('motion' in n.decor[1],false);assert.equal('motion' in n.decor[2],false);
+ let s=room();s=mutate(s,{type:'settings',streamer:'papa',data:{theme:{base:'#000000',decor:[{url:asset(),motion:'follow',x:10,y:90}]}}},{role:'admin'},'2026-10-28T00:00:00.000Z');
+ assert.equal(scopeState(s,'papa').settings.theme.decor[0].motion,'follow');
+});

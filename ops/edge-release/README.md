@@ -1,6 +1,6 @@
 # Edge Function release files
 
-`party-api-10.28-THEME.<n>.js` files are the exact party-api bundles for each 10.28 theme release (latest: THEME.3)
+`party-api-10.28-THEME.<n>.js` files are the exact party-api bundles for each 10.28 theme release (latest: THEME.6)
 (`node build-edge.mjs`, then TypeScript types stripped with `bun build --no-bundle`).
 It was deployed through the Supabase MCP tool, which takes file contents inline; the
 bundle is too large for that, so the deployed function is a two-file entry that

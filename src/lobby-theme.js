@@ -1,13 +1,13 @@
 // Hall homepage theme. One small public read, cached on the device for five
 // minutes so repeated visits reuse it; no polling and no Realtime channel.
-import {themeNormalize} from './theme-engine.js?v=10.28-THEME.5';
-import {themeApply,themeClear,themeBannerImageStyle,themeDecorHtml} from './theme-render.js?v=10.28-THEME.5';
+import {themeNormalize} from './theme-engine.js?v=10.28-THEME.6';
+import {themeApply,themeClear,themeBannerImageStyle,themeDecorHtml,themeDecorMotion} from './theme-render.js?v=10.28-THEME.6';
 
 const LOBBY_THEME_TTL=5*60*1000;
 const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function renderLobbyTheme(document,theme,{hallName=''}={}){
  const root=document.documentElement,main=document.querySelector('main'),intro=document.querySelector('.lobby-intro');
- document.querySelector('.theme-hall-banner')?.remove();main?.querySelector(':scope>.theme-decor-layer')?.remove();
+ document.querySelector('.theme-hall-banner')?.remove();main?.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());themeDecorMotion(document,null);
  if(intro)intro.hidden=false;
  if(!theme){themeClear(root);delete root.dataset.homeTheme;main?.classList.remove('theme-home-host');return;}
  const t=themeNormalize(theme,{hall:true});themeApply(root,t,{hall:true});
@@ -19,7 +19,7 @@ export function renderLobbyTheme(document,theme,{hallName=''}={}){
   intro.querySelector('h1')?.setAttribute('hidden','');intro.querySelector('p.muted')?.setAttribute('hidden','');
  }else intro?.querySelectorAll('[hidden]').forEach(el=>el.removeAttribute('hidden'));
  const decor=themeDecorHtml(t,{escape});
- main?.classList.toggle('theme-home-host',!!decor);if(decor)main.insertAdjacentHTML('beforeend',decor);
+ main?.classList.toggle('theme-home-host',!!decor);if(decor){main.insertAdjacentHTML('beforeend',decor);themeDecorMotion(document,t,{host:main});}
 }
 export async function installLobbyTheme({api,spaceId,document,storage=globalThis.localStorage,now=()=>Date.now(),hallName=''}){
  const key='pa-hall-theme:'+spaceId;let cached=null;

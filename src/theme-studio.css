@@ -77,3 +77,6 @@ html.ts-open,html.ts-open body{overflow:hidden}
 }
 .ts-root .ts-help-pop p{margin:0;padding-right:22px}
 .ts-root.ts-root .ts-help-close{position:absolute;top:4px;right:4px;width:26px;height:26px;padding:0;border:0;background:transparent;font-size:14px;line-height:26px}
+.ts-root .ts-motion{display:flex;align-items:center;gap:8px;font-size:12px;color:#c4b8d6;margin:4px 0}
+.ts-root .ts-motion span{display:inline-flex;align-items:center;gap:4px}
+.ts-root .ts-motion select{padding:5px 8px;flex:1;min-width:0}
