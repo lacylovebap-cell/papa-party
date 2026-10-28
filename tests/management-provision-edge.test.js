@@ -102,3 +102,35 @@ test('bundled Edge dispatches provisioning ops only for verified presidents and 
  const edge=fs.readFileSync('supabase/functions/party-api/index.ts','utf8');
  assert.match(edge,/Object\.assign\(messages,MANAGEMENT_PROVISION_MESSAGES\)/);
 });
+
+test('streamer login in a new (suspended) Space explains that operations are not open yet; unknown, deleted and Space-less codes stay "not found"',async()=>{
+ const out=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'papa-edge-')),'bundle.txt');
+ execFileSync(process.execPath,['build-edge.mjs'],{env:{...process.env,PAPA_EDGE_BUNDLE_OUT:out}});
+ const source=fs.readFileSync(out,'utf8').replace(/^import webpush .*;\r?\n/m,'const webpush={};');
+ let handler;const context=vm.createContext({URL,crypto,structuredClone,TextEncoder,TextDecoder,console,Date,Response,fetch:async()=>{throw Error('no network');},
+  Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://example.supabase.co':k==='PAPA_ADMIN_USER_ID'?'admin-user':'test'},serve:h=>handler=h}});
+ vm.runInContext(stripTypeScriptTypes(source),context);
+ const calls=[];
+ context.stubApi=async(path,body)=>{
+  calls.push(path);
+  if(path.startsWith('/rest/v1/rpc/papa_streamer_directory'))return [];
+  if(path.startsWith('/rest/v1/papa_v2_entities?kind=eq.meta'))return [{streamers:[{id:'room-new',slug:'new-star'},{id:'room-gone',slug:'gone-star'},{id:'room-orphan',slug:'orphan-star'},{id:'room-deleted-space',slug:'deleted-space-star'}]}];
+  if(path.includes('papa_space_streamers?streamer_id=eq.room-new&'))return [{space_id:'space-new'}];
+  if(path.includes('papa_space_streamers?streamer_id=eq.room-deleted-space&'))return [{space_id:'space-deleted'}];
+  if(path.includes('papa_space_streamers?'))return [];
+  if(path.startsWith('/rest/v1/papa_spaces?id=eq.space-new&')&&path.includes('deleted_at=is.null'))return [{id:'space-new'}];
+  if(path.startsWith('/rest/v1/papa_spaces?'))return [];
+  throw Error('unexpected '+path);
+ };
+ vm.runInContext('api=stubApi;',context);
+ const call=async body=>{const r=await handler({method:'POST',json:async()=>body});return {status:r.status,body:await r.json()};};
+ for(const code of ['new-star','room-new']){
+  const r=await call({op:'streamerLogin',streamer:code,password:'whatever-1'});
+  assert.equal(r.status,400);assert.match(r.body.error,/營運功能尚未開放/);
+ }
+ for(const code of ['nobody','gone-star','orphan-star','deleted-space-star','']){
+  const r=await call({op:'streamerLogin',streamer:code,password:'whatever-1'});
+  assert.equal(r.status,400);assert.doesNotMatch(r.body.error,/尚未開放/,code);
+ }
+ assert.ok(!calls.some(p=>p.includes('papa_manager_login')),'the credential check is never reached for a Space that is not open');
+});
