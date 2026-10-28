@@ -45,7 +45,7 @@ test('manager pending queue displays a request note safely as text within origin
   selectedQueue:new Set(),song:()=>({hasLyrics:false}),clock:()=> '2026-10-09T01:00:00Z',
   paginate:rows=>({rows,nav:''}),session:{playerId:'P1'},playerName:()=> 'Player',statusName:{},time:()=> '時間',
   venuePolicyHistoryVenue:()=>null,venuePolicyConsumedPool:()=> 'shengma',venueName:()=> '',button:label=>'<button>'+label+'</button>'
- });vm.runInContext(escaping+'\n'+line('function queueRows('),ctx);ctx.q=q;
- const html=vm.runInContext('queueRows([q],true,true)',ctx);assert.match(html,/class="queue-request-note"/);assert.match(html,/&lt;script&gt;alert\(1\)&lt;\/script&gt;&amp;/);assert.doesNotMatch(html,/<script>/);
- delete q.requestNote;assert.doesNotMatch(vm.runInContext('queueRows([q],true,true)',ctx),/queue-request-note/);
+ });vm.runInContext(escaping+'\n'+['function queueSourceShort(','function queueTags(','function queueNoteLine(','function queueRows('].map(line).join('\n'),ctx);ctx.q=q;
+ const html=vm.runInContext('queueRows([q],true,true)',ctx);assert.match(html,/class="queue-note-line"/);assert.match(html,/&lt;script&gt;alert\(1\)&lt;\/script&gt;&amp;/);assert.doesNotMatch(html,/<script>/);
+ delete q.requestNote;assert.doesNotMatch(vm.runInContext('queueRows([q],true,true)',ctx),/queue-note-line/);
 });
