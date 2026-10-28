@@ -22,7 +22,7 @@ export function stamp(t=Date.now()){return new Date(t).toISOString();}
 // New requests require acknowledgment; missing flags preserve existing queues.
 export const queueConfirmed=q=>q.status==='waiting'&&q.awaitingAcknowledgment!==true;
 export const queuePrepared=q=>queueConfirmed(q)&&q.awaitingPreparation!==true;
-export function queuePreparation(q,t=stamp()){if(q.awaitingAcknowledgment)return q.kind==='saved'?'已收到你的提歌囉，正在等待主播回應':'等待主播確認禮物';if(q.awaitingPreparation)return '已確認，等待設定準備時間';if(q.preparationEndsAt){const remaining=Math.max(0,Math.ceil((timeValue(q.preparationEndsAt)-timeValue(t))/60000));return remaining?'準備中 · 約 '+remaining+' 分鐘':'已準備好';}return '已準備好';}
+export function queuePreparation(q,t=stamp()){if(q.awaitingAcknowledgment)return q.kind==='saved'?'收到提歌，等待回應':'等待確認禮物';if(q.awaitingPreparation)return '已確認，等待設定準備時間';if(q.preparationEndsAt){const remaining=Math.max(0,Math.ceil((timeValue(q.preparationEndsAt)-timeValue(t))/60000));return remaining?'準備中 · 約 '+remaining+' 分鐘':'已準備好';}return '已準備好';}
 export function timeValue(x){if(typeof x==='number')return x;if(!x)return NaN; if(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}[ T]\d/.test(x)&&!/(Z|[+-]\d\d:\d\d)$/.test(x)){const m=x.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);return Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]-8,+m[5],+(m[6]||0));}return Date.parse(x);}
 export const hourKey=t=>Math.floor(timeValue(t)/3600000);
 export const queueCrossedHour=(q,at)=>Number.isFinite(timeValue(q.quota_original_at||q.at))&&hourKey(at)>hourKey(q.quota_original_at||q.at);
