@@ -1,6 +1,6 @@
 # 10.29-PRICE.2｜各廳自己的計價設定（計價規格第 2 批）
 
-狀態：程式已修改、測試通過、截圖已準備；**尚未部署，等使用者核准**。規格：專案文件 `claude/pricing-integration-spec-20261027.md`；盤點與分批計畫：Claude Docs「PA Party 新計價規格｜第一階段盤點與實作計畫」。
+狀態：使用者 2026-10-29 03:06 看過截圖後核准上線（「上線」）。規格：專案文件 `claude/pricing-integration-spec-20261027.md`；盤點與分批計畫：Claude Docs「PA Party 新計價規格｜第一階段盤點與實作計畫」。
 
 ## 改了什麼
 - **一個廳（或獨立主播）一份價目**：存在既有的 `papa_space_policies`（`policy_key='pricing'`），內容：計費方式（雙費／單費給誰／無雙費）、三方稱呼、禮物單位、一般每首三方金額、存歌方案（名稱、首數、三方金額、現點可否套用）、優惠方式（自動套最划算／固定原價）、冠歌卡（依等級排序；辦卡三方金額、冠後每首、期限月數）。每日換場時間沿用 `papa_spaces.accounting_rollover_hour`（帳務、勳章早就讀這個欄位）。
@@ -17,8 +17,8 @@
 - 寫入後，聲瑪主播在自己後台不能再改現點價、雙費、存歌方案、冠歌卡（規格第 14 節：需經廳管理員／總裁）；改價請到管理中心「價目設定」。廳管理員入口與審核中心在後續批次。
 
 ## 版本
-- 前端 `10.29-PRICE.2`（`app.js?v=10.29-PRICE.2`；core、pricing-engine、pricing-ui、pricing-ui.css、platform-management.js／.css、新檔 space-pricing-editor.js 同版號）。
-- Edge `10.29-PRICE.2`（`releaseInfo.pricingEngine:2, hallPricing:1`），發布檔 `ops/edge-release/party-api-10.29-PRICE.2.js`。
+- 前端 `10.29-PRICE.2`（`app.js?v=10.29-PRICE.2`；core、pricing-engine、pricing-ui、pricing-ui.css、platform-management.js／.css、新檔 space-pricing-editor.js 同版號）。上線前合併了另一個對話剛上線的 10.29-THEME.1（漸層與勳章動畫）；core.js 的所有引用（app、room-draft、room-import、state-patch、player-bulk-tools，以及 operation-recovery）統一為 10.29-PRICE.2，維持同一個模組實體。
+- Edge `10.29-PRICE.2`（`releaseInfo.pricingEngine:2, hallPricing:1`，保留 THEME.1 的 `themeGradients`），發布檔 `ops/edge-release/party-api-10.29-PRICE.2.js`。
 - 資料庫：migration `supabase/migrations/20261029100000_space_pricing.sql`（只新增兩個函式：讀取、儲存價目；不改任何既有表、資料或函式）＋聲瑪資料 `ops/space-pricing-shengma-seed-20261029.sql`。
 
 ## 上線順序（需使用者核准）
@@ -32,11 +32,11 @@
 - `tests/space-pricing.test.js`：Edge 模組（只限總裁、先驗證再寫）、SQL（版本衝突、重送、操作紀錄不可改、非總裁／已刪除空間拒絕）、真實 Edge＋完整資料庫（有價目用價目、沒有用舊欄位、讀取時帶給玩家）、冠歌卡從價目來、聲瑪資料 SQL 只跑一次且價格被改過就停止。
 - `tests/space-pricing-editor.test.js`：開啟後直接儲存不改任何數字、切換計費方式只去掉該方式不收的費用、新增／移動／刪除。
 - 測試環境的 PostgREST 替身改為依序處理請求（正式 PostgREST 本來就能同時處理），讓並行讀取可以測試。
-- 全套測試與 main `e66e6ce` 比對（見交付說明）。
+- 全套測試：合併 THEME.1 後 1,762 項，與 main 比對沒有新增失敗（其餘約 225 項為環境性、main 同樣失敗）。
 
 ## 回復
-- Edge：重新部署 v69（commit `e66e6ce` 的 `party-api-10.29-PRICE.1.js`），它不讀廳級價目，價格立即回到主播欄位。
-- 前端：main 還原到 `e66e6ce`。
+- Edge：重新部署 v70（commit `901a9f5` 的 `party-api-10.29-THEME.1.js`），它不讀廳級價目，價格立即回到主播欄位。
+- 前端：main 還原到 `901a9f5`（10.29-THEME.1）。
 - 資料庫（可不動）：`ops/space-pricing-rollback-20261029.sql` 會先列出所有廳級價目再移除、刪掉兩個函式；操作紀錄保留。
 
 ## 尚未做（後續批次）

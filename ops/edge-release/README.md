@@ -35,3 +35,11 @@ comment lines and add `if (!webpush) throw Error("web-push loader missing");` af
 This procedure reproduces `party-api-10.28-THEME.3.js` byte for byte.
 
 10.29-PRICE.1 = ADMIN.5 + the shared pricing engine (three-party fees per slot, cheapest legal plan combination, lone half songs refused) + the QUEUE.1 Core waiting texts. Rollback: `party-api-10.28-ADMIN.5.js` at commit `c937c0ade545da5e057173f0e9302fb67a506b10`.
+
+10.29-THEME.1 (another session, commit `901a9f5`) = PRICE.1 + optional gradient presets.
+
+10.29-PRICE.2 = THEME.1 + hall pricing: the room's `papa_space_policies` 'pricing' record is read alongside every
+room snapshot (`s.hallPricing`, never stored back) and drives request pricing, guides and crown cards; two
+president-only management ops (`platformSpacePricing`, `platformSpacePricingSave`). Needs migration
+`20261029100000_space_pricing.sql` (applied before the Edge). Rollback: `party-api-10.29-THEME.1.js` at commit
+`901a9f5c109d57b16ad24d494896e3a3b14b9c9f` (v70); that Edge never reads the 'pricing' record.
