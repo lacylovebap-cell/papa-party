@@ -80,3 +80,13 @@ html.ts-open,html.ts-open body{overflow:hidden}
 .ts-root .ts-motion{display:flex;align-items:center;gap:8px;font-size:12px;color:#c4b8d6;margin:4px 0}
 .ts-root .ts-motion span{display:inline-flex;align-items:center;gap:4px}
 .ts-root .ts-motion select{padding:5px 8px;flex:1;min-width:0}
+
+/* The 30 curated gradients expand only on request beneath quick presets. */
+.ts-root .ts-gradient-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0 3px}
+.ts-root.ts-root .ts-gradient-card{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:7px;min-width:0;text-align:left}
+.ts-root .ts-gradient-card i{display:block;width:100%;height:32px;border:1px solid #ffffff28;border-radius:7px}
+.ts-root .ts-gradient-card span{display:block;min-width:0;font-size:12px;overflow-wrap:anywhere}
+.ts-root .ts-gradient-card small{display:block;color:#afa1bd;font-size:10px}
+.ts-root.ts-root .ts-gradient-card.on{border-color:#dfb1f5;box-shadow:inset 0 0 0 1px #dfb1f5}
+.ts-root.ts-root .ts-templates button[data-gradient-toggle].on{border-color:#dfb1f5}
+@media(max-width:540px){.ts-root .ts-gradient-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
