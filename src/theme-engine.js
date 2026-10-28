@@ -311,7 +311,11 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
  };
 }
 export function themePageLayer(theme,{resolve=u=>u}={}){
- const t=themeNormalize(theme),bg=t.images.background;
- if(t.gradient)return themeGradientFill(t);
- return bg?.url?themeLayeredBackground(t.colors.background,bg,'background',resolve(bg.url)):'';
+ const t=themeNormalize(theme),bg=t.images.background,gradient=t.gradient?themeGradientFill(t):'';
+ if(!bg?.url)return gradient;
+ const layered=themeLayeredBackground(t.colors.background,bg,'background',resolve(bg.url));
+ // An uploaded picture stays available with a preset: image above gradient,
+ // rather than silently disappearing when the streamer chooses a theme.
+ return gradient&&layered.endsWith(','+t.colors.background)
+  ?layered.slice(0,-t.colors.background.length)+gradient:layered;
 }
