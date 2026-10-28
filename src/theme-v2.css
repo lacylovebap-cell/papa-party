@@ -17,6 +17,8 @@
 [data-theme-v2] button.primary,[data-theme-v2] button.active,[data-theme-v2] .tabs button.active{background:var(--home-button);border-color:var(--theme-button-solid);color:var(--home-buttonText)}
 [data-theme-v2] button:hover{border-color:var(--home-accent)}
 [data-theme-v2] input,[data-theme-v2] select,[data-theme-v2] textarea{background:var(--theme-input);color:var(--home-text);border-color:var(--home-line)}
+/* The open dropdown list is drawn by the browser; give its rows the same solid colours. */
+[data-theme-v2] select option,[data-theme-v2] select optgroup{background-color:var(--theme-input);color:var(--home-text)}
 [data-theme-v2] a{color:var(--home-accent)}
 [data-theme-v2] .tag,[data-theme-v2] .notice,[data-theme-v2] .stat{background:var(--home-glow);color:var(--home-text)}
 [data-theme-v2] .song{border-color:var(--home-line)}
