@@ -14,7 +14,7 @@ export const THEME_TEMPLATES=[
  {id:'star-blue',name:'星藍',base:'#3b82f6',mode:'dark'},
  {id:'milk-tea',name:'奶茶',base:'#b98b62',mode:'light'}
 ];
-// Optional background overlay; existing palette and image values remain untouched.
+// Thirty coordinated gradients: the editor applies a whole palette, not just a background image.
 export const THEME_GRADIENTS=[
  {"id":"violet-dream","name":"紫藤夢境","colors":["#7546b8","#b16fb9","#df9cae"]},
  {"id":"lavender-moon","name":"薰衣草月光","colors":["#494b86","#9983c4","#d0b5d9"]},
@@ -47,13 +47,67 @@ export const THEME_GRADIENTS=[
  {"id":"obsidian","name":"黑曜流光","colors":["#242733","#49485d","#786779"]},
  {"id":"neon","name":"霓虹夜遊","colors":["#343175","#854782","#bd6d8f"]}
 ];
+/* Curated theme recipes. Each gradient has its own button pair and accent.
+   The existing eleven theme colour keys remain unchanged, so saved themes,
+   Cloud's editor, drafts, hall themes and API validation stay compatible. */
+export const THEME_GRADIENT_DESIGNS=Object.freeze(Object.fromEntries([
+ ["violet-dream","dark","#9a6bce","#9659c7","#d78bac","#e6b7e9"],
+ ["lavender-moon","dark","#8989c8","#6764b3","#bb8bcb","#d7c5ff"],
+ ["rose-mist","light","#b95178","#a43e69","#d7778c","#972d5d"],
+ ["peach-cloud","light","#e5876e","#be625d","#ed9c76","#9b4a44"],
+ ["sakura","light","#cc7e9e","#b45b86","#df91aa","#a04276"],
+ ["berry","dark","#a64e75","#a0467f","#dd78a2","#f6acd2"],
+ ["midnight","dark","#4c4ca5","#424ba5","#8274c2","#b4b9ff"],
+ ["blue-hour","dark","#4776a8","#376baf","#699bc8","#b7d6ff"],
+ ["aurora","dark","#368e91","#248f88","#6b77b8","#99ede5"],
+ ["ocean","dark","#318c94","#247e87","#64b2ac","#9df3e8"],
+ ["glacier","light","#6dabc6","#347c9e","#69a4bd","#2c6d89"],
+ ["rain","light","#7f9fb2","#497d94","#86aab7","#346c80"],
+ ["mint","light","#65a68a","#287f70","#74ad8d","#236958"],
+ ["jade","dark","#2c8f7b","#217d6d","#58a99b","#a3edcf"],
+ ["moss","dark","#80996b","#62824e","#aab47e","#cce3b1"],
+ ["spring","light","#91ae67","#63894d","#a2b874","#4f7440"],
+ ["matcha","light","#9da86f","#74824d","#a9b982","#617044"],
+ ["olive","dark","#8c926a","#747c4c","#b1a16a","#d2dbaa"],
+ ["sunset","dark","#dc7858","#bc514b","#f09c66","#ffd0a7"],
+ ["apricot","light","#d8a26f","#a66e4c","#d99e65","#925834"],
+ ["coral","light","#d1847f","#af5b70","#e1a47e","#935361"],
+ ["honey","dark","#c99958","#ab732c","#dca65c","#ffda92"],
+ ["maple","dark","#ae7453","#944d44","#c1875c","#f5b68c"],
+ ["sand","light","#b99a7a","#8e6c4f","#bd9673","#74563e"],
+ ["tea","light","#b59a8b","#977269","#c4a08d","#77564c"],
+ ["cocoa","dark","#906b64","#94625e","#b49378","#eac4b6"],
+ ["champagne","light","#c2a18a","#9b746c","#caa896","#87645f"],
+ ["pearl","light","#a0a7b5","#66788e","#a8a2c4","#55667b"],
+ ["obsidian","dark","#737188","#595575","#8f7897","#d3c7dc"],
+ ["neon","dark","#854782","#7d48ba","#d16ba3","#f1a1df"]
+].map(([id,mode,base,button,button2,accent])=>[id,{mode,base,button,button2,accent}])));
+
+export function themeGradientPalette(id,requestedMode){
+ const preset=THEME_GRADIENTS.find(x=>x.id===id),design=THEME_GRADIENT_DESIGNS[id];
+ if(!preset||!design)return null;
+ const mode=requestedMode==='dark'||requestedMode==='light'?requestedMode:design.mode;
+ const dark=mode==='dark',original=themeSmartPalette(design.base,mode),p={...original};
+ // Individually curated stops softly tint the UI surfaces, not just the page.
+ p.background=themeMix(original.background,preset.colors[0],dark?.14:.075);
+ p.nav=themeMix(original.nav,preset.colors[1],dark?.08:.045);
+ p.logo=themeMix(original.logo,preset.colors[0],dark?.12:.05);
+ p.panel=themeMix(original.panel,preset.colors[2],dark?.10:.05);
+ p.line=themeMix(original.line,preset.colors[1],dark?.35:.24);
+ Object.assign(p,themeFitButtons(design.button,design.button2));
+ p.accent=themeEnsureContrast(design.accent,p.panel,3);
+ p.title=themeEnsureContrast(themeEnsureContrast(original.title,p.panel,7),p.background,7);
+ p.text=themeEnsureContrast(themeEnsureContrast(original.text,p.panel,4.5),p.background,4.5);
+ return {base:design.base,mode,colors:p};
+}
+
 export function themeGradientColors(theme){
  const t=themeNormalize(theme),preset=THEME_GRADIENTS.find(p=>p.id===t.gradient);
  if(!preset)return [];
  // Blend into the existing background to preserve the chosen dark/light palette.
  return preset.colors.map(color=>{
-  let amount=.22;
-  const readable=bg=>['text','title'].every(k=>themeContrast(t.colors[k],bg)>=Math.min(4.5,themeContrast(t.colors[k],t.colors.background)));
+  let amount=t.mode==='light'?.28:.43;
+  const readable=bg=>['text','title'].every(k=>themeContrast(t.colors[k],bg)>=4.5);
   while(amount>0&&!readable(themeMix(t.colors.background,color,amount)))amount=Math.max(0,amount-.01);
   return themeMix(t.colors.background,color,amount);
  });
@@ -183,7 +237,7 @@ function themeImage(role,input,hall){
 // Lenient: turns anything into a safe, complete-enough theme (defaults omitted).
 export function themeNormalize(input,{hall=false}={}){
  const v=input&&typeof input==='object'&&!Array.isArray(input)?input:{},base=themeHexPattern.test(v.base||'')?v.base.toLowerCase():'#8b5cf6',mode=v.mode==='light'?'light':'dark';
- const auto=themeSmartPalette(base,mode),colors={};
+ const auto=(v.gradient?themeGradientPalette(v.gradient,mode):null)?.colors||themeSmartPalette(base,mode),colors={};
  for(const key of THEME_COLOR_KEYS)colors[key]=themeHexPattern.test(v.colors?.[key]||'')?v.colors[key].toLowerCase():auto[key];
  const images={};
  for(const role of ['background','banner','card']){const image=themeImage(role,v.images?.[role],hall);if(image)images[role]=image;}
@@ -257,7 +311,11 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
  };
 }
 export function themePageLayer(theme,{resolve=u=>u}={}){
- const t=themeNormalize(theme),bg=t.images.background;
- if(t.gradient)return themeGradientFill(t);
- return bg?.url?themeLayeredBackground(t.colors.background,bg,'background',resolve(bg.url)):'';
+ const t=themeNormalize(theme),bg=t.images.background,gradient=t.gradient?themeGradientFill(t):'';
+ if(!bg?.url)return gradient;
+ const layered=themeLayeredBackground(t.colors.background,bg,'background',resolve(bg.url));
+ // An uploaded picture stays available with a preset: image above gradient,
+ // rather than silently disappearing when the streamer chooses a theme.
+ return gradient&&layered.endsWith(','+t.colors.background)
+  ?layered.slice(0,-t.colors.background.length)+gradient:layered;
 }
