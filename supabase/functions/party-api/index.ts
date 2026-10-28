@@ -275,7 +275,9 @@ async function mutateStreamerRegistry(b:any,who:any,t:string){
  return {state:{revision:next.revision,schemaVersion:3,streamers:rows,currentStreamer:rows.find((r:any)=>r.id===room)},now:t,ready:true};
 }
 // Chat, board and notices need room metadata, not the full song/history snapshot.
-async function loadCommunicationState(allowedSpace:string|null='space-001',requestedRoom:string|null=null){
+// Space hints from the page (only used when the caller has no signed-in Space).
+const spaceHint=(value:any)=>typeof value==='string'&&/^[A-Za-z0-9][A-Za-z0-9_-]{0,199}$/.test(value)?value:null;
+async function loadCommunicationState(allowedSpace:string|null='space-001',requestedRoom:string|null=null,allowNative=false){
  let streamers=await api('/rest/v1/rpc/'+(allowedSpace===null?'papa_streamer_directory':'papa_streamer_directory_in_space'),allowedSpace===null?{}:{chosen_space:allowedSpace});
  if(!Array.isArray(streamers))throw Error('找不到主播設定');
  if(requestedRoom){
@@ -283,8 +285,9 @@ async function loadCommunicationState(allowedSpace:string|null='space-001',reque
   if(!room)throw Error('找不到主播');
   const roomSpace=room.spaceId||'space-001';
   if(allowedSpace!==null&&roomSpace!==allowedSpace)throw Error('找不到主播');
-  // Selected-Space metadata is ready, but activation awaits all downstream paths.
-  if(roomSpace!=='space-001')throw Error('此 Space 的資料頁尚未開放');
+  // Business pages of an open Space are served; its message centre, private
+  // chat and board open in a later batch, so communication paths stay closed.
+  if(roomSpace!=='space-001'&&!allowNative)throw Error('這個空間的訊息中心、私訊與留言板將在下一階段開放');
   streamers=streamers.filter((r:any)=>(r.spaceId||'space-001')===roomSpace);
  }
  return {...empty(),schemaVersion:3,streamers,streamerSettings:{}};
@@ -692,6 +695,14 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   return respond({version:1,scope:{spaceId:space,streamerId:room.id,playerId:player},rows,totalDefinitions:result.totalDefinitions,unlocked:result.unlocked});
  }
  if(b.op==='roomSyncHead')return respond(await roomSyncHead(b,who));
+ // The website's 管理登入／玩家登入 picker: open Spaces and their open rooms, names only.
+ if(b.op==='portalDirectory'){
+  const [rooms,spaces]=await Promise.all([api('/rest/v1/rpc/papa_streamer_directory',{}),api('/rest/v1/papa_spaces?status=eq.active&deleted_at=is.null&select=id,display_name,tenant_kind&order=display_name')]);
+  const list=(Array.isArray(spaces)?spaces:[]).map((space:any)=>({id:space.id,name:space.display_name,kind:space.tenant_kind==='independent'?'independent':'hall',
+   streamers:(Array.isArray(rooms)?rooms:[]).filter((room:any)=>room.spaceId===space.id&&room.active!==false).map((room:any)=>({slug:room.slug,name:room.display_name}))}))
+   .filter((space:any)=>space.streamers.length);
+  return respond({spaces:list});
+ }
  if(b.op==='entryLegacyRooms'){
   const rooms=await api('/rest/v1/rpc/papa_streamer_directory_in_space',{chosen_space:'space-001'});
   return respond({rooms:rooms.map((room:any)=>({id:room.id,slug:room.slug,display_name:room.display_name}))});
@@ -1063,7 +1074,11 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
   const room=await managerRoom(who,b.streamer),space=room.spaceId||'space-001';
   if(space==='space-001')throw Error('聲瑪的玩家請使用原本的玩家管理');
   const context={role:who.role,account_id:who.accountId,space_id:space,streamer_id:room.id,actor_streamer_id:who.role==='streamer_admin'?who.streamer_id:null};
-  if(b.op==='spacePlayerLogins')return respond({logins:await api('/rest/v1/rpc/papa_space_player_logins',{actor_context:context,requested_room:room.id})});
+  if(b.op==='spacePlayerLogins'){
+   // Hall streamers see their players but cannot manage their logins (yet).
+   try{return respond({logins:await api('/rest/v1/rpc/papa_space_player_logins',{actor_context:context,requested_room:room.id}),canManage:true});}
+   catch(error:any){if(error?.message===MANAGEMENT_PROVISION_MESSAGES.SPACE_PLAYER_ACTOR_INVALID)return respond({logins:[],canManage:false});throw error;}
+  }
   const code=typeof b.loginCode==='string'?b.loginCode.trim().toLowerCase():undefined;
   if(code!==undefined&&!/^[a-z0-9][a-z0-9_-]{1,39}$/.test(code))throw Error('玩家登入代碼請用 2～40 個小寫英文、數字、- 或 _');
   const password=b.password===undefined||b.password===null||b.password===''?null:b.password;
@@ -1121,7 +1136,7 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
  if(b.op==='read'&&(b.accountingDay===undefined||b.accountingDay===accountingDay(t,Number.isInteger(b.accountingRolloverHour)&&b.accountingRolloverHour>=0&&b.accountingRolloverHour<24?b.accountingRolloverHour:19))&&Number.isInteger(b.revision)&&b.revision>=0&&b.signatures&&typeof b.signatures==='object'&&!Array.isArray(b.signatures)&&Object.keys(b.signatures).length){
   const [row]=await api('/rest/v1/papa_v2_revision?id=eq.1&select=revision&limit=1');
   if(row&&Number(row.revision)===b.revision){
-   const comm=await loadCommunicationState(isSuper(who)?null:who?.spaceId||'space-001',b.streamer||'papa').catch(()=>null);
+   const comm=await loadCommunicationState(isSuper(who)?null:who?.spaceId||spaceHint(b.spaceId)||'space-001',b.streamer||'papa',true).catch(()=>null);
    if(comm){const room=scopeState(comm,b.streamer||'papa').currentStreamer;requireRoom(who,room.id);if(!room.active&&!isManager(who))throw Error('主播頁暫未開放');return respond({state:{},now:t,ready:true});}
   }
  }
@@ -1149,7 +1164,16 @@ Deno.serve(async req=>{const operationAttempt={started:false};let receiptedReque
  const roomWriteScoped=roomImport||b.op==='publish'||b.op==='mutate'&&!roomScoped&&scopedRoomMutationAction(b.action);
  // The legacy whole-platform snapshot stays a 聲瑪 (space-001) path. Any other
  // open Space is served only through Space-scoped snapshots and native commits.
- const businessSpace=draftScope?.spaceId||who?.spaceId||(typeof b.spaceId==='string'&&b.spaceId&&b.spaceId.length<=200?b.spaceId:'space-001');
+ let businessSpace=draftScope?.spaceId||who?.spaceId||spaceHint(b.spaceId);
+ // A visitor (or the president) opening a room page without a Space hint: use
+ // the room's own open Space; the client sends the hint on every later request.
+ if(!businessSpace){
+  businessSpace='space-001';
+  if((!who||isSuper(who))&&b.op==='read'&&typeof b.streamer==='string'&&b.streamer&&b.streamer!=='papa'){
+   const rooms=await api('/rest/v1/rpc/papa_streamer_directory',{}),room=Array.isArray(rooms)?rooms.find((r:any)=>r.slug===b.streamer||r.id===b.streamer):null;
+   if(room?.spaceId)businessSpace=room.spaceId;
+  }
+ }
  if(businessSpace!=='space-001'&&!(['read','failedRequest'].includes(b.op)||roomScoped||roomWriteScoped))throw Error('此 Space 的資料頁尚未開放');
  const selectedWriteSongs=roomWriteScoped&&b.action?.type==='song'&&typeof b.action?.data?.songId==='string'&&!b.action.data.remove?[b.action.data.songId]:[];
  const actionPlayer=b.op==='mutate'&&(b.action?.data?.player_id??b.action?.data?.playerId);
