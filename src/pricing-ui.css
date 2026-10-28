@@ -6,8 +6,10 @@
 .pf-reveal{border:1px solid var(--pf-line);border-radius:14px;margin:12px 0;overflow:hidden}
 .pf-reveal summary{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;list-style:none;user-select:none}
 .pf-reveal summary::-webkit-details-marker{display:none}
-.pf-reveal summary::after{content:'';margin-left:auto;width:7px;height:7px;border-right:2px solid var(--pf-accent);border-bottom:2px solid var(--pf-accent);transform:rotate(45deg) translateY(-2px);transition:transform .18s ease}
-.pf-reveal[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.pf-toggle{margin-left:auto;flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--pf-soft);border:1px solid var(--pf-line);display:inline-flex;align-items:center;justify-content:center}
+.pf-toggle::before{content:'';width:7px;height:7px;border-right:2px solid var(--pf-accent);border-bottom:2px solid var(--pf-accent);transform:translateY(-2px) rotate(45deg);transition:transform .18s ease}
+.pf-reveal[open] .pf-toggle::before{transform:translateY(2px) rotate(-135deg)}
+.pf-reveal summary:hover .pf-toggle{border-color:var(--pf-accent)}
 .pf-reveal summary:focus-visible{outline:2px solid var(--pf-accent);outline-offset:-2px;border-radius:13px}
 .pf-reveal-title{font-weight:700;color:var(--pf-title)}
 .pf-hint{font-size:11px;color:var(--pf-muted);background:var(--pf-soft);border-radius:999px;padding:2px 9px;white-space:nowrap}
@@ -27,7 +29,9 @@
 .pf-guide .pf-ticket .pf-figure b{font-size:24px}
 .pf-heading{margin:20px 0 8px;font-size:14px}
 .pf-plans,.pf-tiers,.pf-rules{list-style:none;margin:0;padding:0}
-.pf-plan{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--pf-line)}
+.pf-plan{display:grid;grid-template-columns:auto 1fr 148px;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--pf-line)}
+.pf-plan .pf-figures{flex-wrap:nowrap}
+.pf-plan .pf-figure:first-child{width:76px}
 .pf-plan:last-child{border-bottom:0}
 .pf-coin{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--pf-accent);color:var(--pf-accent);font-weight:800;font-size:15px;line-height:1;font-variant-numeric:tabular-nums}
 .pf-coin small{font-size:9px;font-weight:600;color:inherit;margin-top:1px}
@@ -48,10 +52,11 @@
 @media(max-width:520px){
  .pf-tier{grid-template-columns:1fr 1fr;column-gap:14px}
  .pf-tier-name{grid-column:1/-1;flex-direction:row;align-items:baseline;gap:8px}
- .pf-plan{gap:10px}
- .pf-plan .pf-figure{padding:0 8px}
+ .pf-plan{gap:10px;grid-template-columns:auto 1fr 140px}
+ .pf-plan .pf-figure{padding:0 10px}
+ .pf-plan .pf-figure:first-child{width:72px}
  .pf-figure b{font-size:18px}
 }
 /* Keeps the 點歌教學 entry clear of the note field under it. */
 .pf-help-row{margin:2px 0 16px}
-@media(prefers-reduced-motion:reduce){.pf-reveal summary::after{transition:none}}
+@media(prefers-reduced-motion:reduce){.pf-toggle::before{transition:none}}

@@ -2,7 +2,7 @@
 // HTML builders (no DOM, no network) so the dialogs, the price guide and the
 // crown guide all say the same short thing, in the Space's own words, and the
 // page's theme colours style them through pricing-ui.css.
-import {formatGift,quoteSummary,PRICING_NOTE} from './pricing-engine.js?v=10.29-PRICE.2';
+import {formatGift,quoteSummary,PRICING_NOTE} from './pricing-engine.js?v=10.29-PRICE.1';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -32,14 +32,17 @@ export function giftTicket(pricing,row,{caption=''}={}){
 export function giftReveal(pricing,quote,{units=quote.units,showUnits=false,open=false}={}){
  const summary=quote.pieces?.length||quote.source==='crown'?quoteSummary(pricing,quote):'';
  const hints=[showUnits&&units!==1?'占 '+units+' 首':'',quote.source==='crown'?'冠歌價格':summary?'已套用優惠':''].filter(Boolean);
- return `<details class="pf-reveal"${open?' open':''}><summary><span class="pf-reveal-title">🎁 查看禮物值</span>${hints.length?`<span class="pf-hint">${hints.map(esc).join('，')}</span>`:''}</summary>`
+ return `<details class="pf-reveal"${open?' open':''}><summary><span class="pf-reveal-title">🎁 查看禮物值</span>${hints.length?`<span class="pf-hint">${hints.map(esc).join('，')}</span>`:''}<span class="pf-toggle" aria-hidden="true"></span></summary>`
   +giftTicket(pricing,quote,{caption:summary})
   +`<p class="pf-note">${pricing.unit?'單位：'+esc(pricing.unit)+'。':''}${esc(PRICING_NOTE)}</p></details>`;
 }
 
+// The price list drops the word 一般 from plan names (user request 2026-10-29).
+const planLabel=name=>String(name).replace(/一般\s*/g,'').trim()||String(name);
+
 /** 點歌教學・價目表 */
 export function priceGuide(pricing,{policyNote=true}={}){
- const plans=pricing.plans.map(plan=>`<li class="pf-plan"><span class="pf-coin" aria-label="${plan.units} 首">${plan.units}<small>首</small></span><span class="pf-plan-name">${esc(plan.name)}</span><span class="pf-figures">${figures(pricing,plan)}</span></li>`).join('');
+ const plans=pricing.plans.map(plan=>`<li class="pf-plan"><span class="pf-coin" aria-label="${plan.units} 首">${plan.units}<small>首</small></span><span class="pf-plan-name">${esc(planLabel(plan.name))}</span><span class="pf-figures">${figures(pricing,plan)}</span></li>`).join('');
  const rules=['歌曲占幾首，每一方都乘上首數。',
   ...(pricing.plans.length&&policyNote&&pricing.policy!=='fixed'?['一首歌占多首時，自動挑最划算的方案組合。']:[]),
   '半首歌要「唱兩次」或「搭配另一首半首歌」，合成 1 首計價。',
@@ -60,7 +63,7 @@ export function crownGuide(pricing,tiers,{openingExtra=0}={}){
   +`<div class="pf-tier-cell"><span class="pf-tier-label">冠後每首</span><span class="pf-figures">${line(after(tier))}</span></div></li>`).join('');
  return `<div class="pf-guide"><ul class="pf-tiers">${rows}</ul>`
   +`<ul class="pf-rules"><li>選歌曲、選卡別、送出辦卡禮物，確認後生效。</li>`
-  +`<li>冠歌期間，其他玩家點這首只能現點：不能提歌、不能用存歌，現場點、現場唱。</li>`
+  +`<li>冠歌期間，其他玩家點這首只能現點、現場唱，不能使用提歌、不能使用存歌。</li>`
   +`<li>冠歌主人照一般規則。</li>`
   +`<li>${explain?esc(explain)+'。':''}${pricing.unit?'單位：'+esc(pricing.unit)+'。':''}${esc(PRICING_NOTE)}</li></ul></div>`;
 }

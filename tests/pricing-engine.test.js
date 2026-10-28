@@ -33,7 +33,7 @@ test('聲瑪 automatically picks the cheapest legal plan combination by the thre
  }
  // A plan's own values are never multiplied again (spec 5.2).
  assert.equal(quoteLive(shengma,{units:2}).host,990);
- assert.match(quoteSummary(shengma,quoteLive(shengma,{units:4})),/自動套用最優惠方案：一般 3 首 ＋ 一般 1 首/);
+ assert.match(quoteSummary(shengma,quoteLive(shengma,{units:4})),/自動套用最優惠方案：3 首 ＋ 一般 1 首/);
 });
 
 test('a crowned song: other players pay the crown price for the singer, host and hall stay at the normal per-slot values, no discounts (spec 7.4)',()=>{

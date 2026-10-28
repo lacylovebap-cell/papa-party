@@ -1,6 +1,6 @@
 # Edge Function release files
 
-`party-api-10.28-THEME.<n>.js` / `party-api-10.28-ADMIN.<n>.js` files are the exact party-api bundles for each 10.28 release (ADMIN.1 = THEME.3 plus platform management accounts and safe deletion; ADMIN.2 = ADMIN.1 plus THEME.4–THEME.6: quota divider, opaque dropdowns, themed buttons, decoration motion; ADMIN.4 = ADMIN.2 plus a corrected streamer-login message for streamers in a not-yet-open new Space; CANCEL.1 = ADMIN.4 plus one unified song cancellation with a recorded `cancel_settlement`, an archive-only history operation and two-sided cancel notices)
+`party-api-10.28-THEME.<n>.js` / `party-api-10.28-ADMIN.<n>.js` / `party-api-10.29-PRICE.<n>.js` files are the exact party-api bundles for each 10.28 release (ADMIN.1 = THEME.3 plus platform management accounts and safe deletion; ADMIN.2 = ADMIN.1 plus THEME.4–THEME.6: quota divider, opaque dropdowns, themed buttons, decoration motion; ADMIN.4 = ADMIN.2 plus a corrected streamer-login message for streamers in a not-yet-open new Space; CANCEL.1 = ADMIN.4 plus one unified song cancellation with a recorded `cancel_settlement`, an archive-only history operation and two-sided cancel notices)
 (`node build-edge.mjs`, then TypeScript types stripped with `bun build --no-bundle`).
 It was deployed through the Supabase MCP tool, which takes file contents inline; the
 bundle is too large for that, so the deployed function is a two-file entry that
@@ -33,3 +33,5 @@ Regenerate a release file: `node build-edge.mjs`, replace the `import webpush fr
 line with `const webpush = globalThis.__papaPartyWebpush;`, run `bun build --no-bundle`, prepend the two
 comment lines and add `if (!webpush) throw Error("web-push loader missing");` after the webpush line.
 This procedure reproduces `party-api-10.28-THEME.3.js` byte for byte.
+
+10.29-PRICE.1 = ADMIN.5 + the shared pricing engine (three-party fees per slot, cheapest legal plan combination, lone half songs refused) + the QUEUE.1 Core waiting texts. Rollback: `party-api-10.28-ADMIN.5.js` at commit `c937c0ade545da5e057173f0e9302fb67a506b10`.

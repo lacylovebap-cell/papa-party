@@ -147,7 +147,8 @@ export function quoteLines(pricing,quote){
 export function quoteSummary(pricing,quote){
  if(quote.source==='crown')return '冠歌價格';
  const plans=quote.pieces.filter(p=>p.kind==='plan');
- const parts=quote.pieces.map(p=>(p.kind==='plan'?p.name:'一般 '+p.units+' 首')+(p.count>1?' × '+p.count:''));
+ // Plan names drop 一般 (user 2026-10-29); single slots at the ordinary price stay 一般.
+ const parts=quote.pieces.map(p=>(p.kind==='plan'?String(p.name).replace(/一般\s*/g,'').trim()||p.name:'一般 '+p.units+' 首')+(p.count>1?' × '+p.count:''));
  const prefix=quote.card?quote.card+'｜':'';
  return plans.length?prefix+'自動套用最優惠方案：'+parts.join(' ＋ '):prefix+(quote.units===1?'一般價格':'一般價格（每首 × '+quote.units+'）');
 }

@@ -21,7 +21,7 @@ test('聲瑪 shows one 雙費 figure explained once; single-fee and singer-only 
 test('gift values stay folded until the player opens 查看禮物值, and carry the reference note',()=>{
  const html=giftReveal(shengma,quoteLive(shengma,{units:2}));
  assert.match(html,/^<details class="pf-reveal">/);assert.doesNotMatch(html,/<details[^>]* open/);
- assert.match(text(html),/查看禮物值 已套用優惠 自動套用最優惠方案：一般 2 首 歌手 5,555 雙費 990 雙費：2號位主持、聲瑪樂團各 990/);
+ assert.match(text(html),/查看禮物值 已套用優惠 自動套用最優惠方案：2 首 歌手 5,555 雙費 990 雙費：2號位主持、聲瑪樂團各 990/);
  assert.match(text(html),/單位：探鑽。以上數值僅供參考，最終以實際狀況為主。/);
  assert.match(giftReveal(shengma,quoteLive(shengma,{units:1}),{open:true}),/<details class="pf-reveal" open>/);
  assert.match(text(giftReveal(shengma,quoteLive(shengma,{units:1,crown:{playerId:'x',price:4200}}))),/冠歌價格 冠歌價格 歌手 4,200 雙費 500/);
@@ -30,11 +30,11 @@ test('gift values stay folded until the player opens 查看禮物值, and carry 
 test('price guide and crown guide are short: per-slot slip, plan list, and plain rules',()=>{
  const guide=text(priceGuide(shengma));
  assert.match(guide,/一般現點，每 1 首 歌手 2,990 雙費 500/);
- assert.match(guide,/2 首 一般 2 首 歌手 5,555 雙費 990/);assert.match(guide,/半首歌要「唱兩次」或「搭配另一首半首歌」/);
+ assert.match(guide,/2 首 2 首 歌手 5,555 雙費 990/);assert.match(guide,/🏅 金牌歌單 歌手 22,887/);assert.doesNotMatch(guide,/一般 2 首/);assert.match(guide,/半首歌要「唱兩次」或「搭配另一首半首歌」/);
  const crown=text(crownGuide(shengma,DEFAULTS.tiers,{openingExtra:18188}));
  assert.match(crown,/👑 金卡 1 個月 辦卡 歌手 55,599 雙費 18,188 冠後每首 歌手 4,200 雙費 500/);
  assert.match(crown,/👑 至尊卡 永久/);
- assert.match(crown,/只能現點：不能提歌、不能用存歌，現場點、現場唱/);
+ assert.match(crown,/只能現點、現場唱，不能使用提歌、不能使用存歌/);
  assert.doesNotMatch(crown,/給2號位主持 18,188/,'no per-party wording in every row');
 });
 
