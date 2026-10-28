@@ -17,7 +17,11 @@ const managementPermissionBundle='const {managerPermissionRequirement}=(()=>{'+r
 const managementSessionBundle='const {readManagementSession}=(()=>{'+read('supabase/functions/party-api/management-session.js').replace(/^export /gm,'')+';return {readManagementSession};})();\n';
 const themeApiBundle='const {createThemeApi}=(()=>{'+read('supabase/functions/party-api/theme-api.js').replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'')+';return {createThemeApi};})();\n';
 const managementRpcBundle='const {managementRpcRequest}=(()=>{'+read('supabase/functions/party-api/management-rpc.js').replace(/^export /gm,'')+';return {managementRpcRequest};})();\n';
-const bundled=themeApiBundle+managementRpcBundle+managementSessionBundle+managementPermissionBundle+badgeBundle+lobbyImages+'\n'+publicRouteBundle+publicAppHomesBundle+code.replace(/^import .*from '\.\/(?:badge-state|lobby-images|public-routes|pwa-homes|management-session|management-rpc|theme-api).js';\r?\n/gm,'');
+const managementProvisionBundle='const {createManagementProvision,MANAGEMENT_PROVISION_MESSAGES}=(()=>{'+read('supabase/functions/party-api/management-provision.js').replace(/^export /gm,'')+';return {createManagementProvision,MANAGEMENT_PROVISION_MESSAGES};})();\n';
+const bundled=managementProvisionBundle+themeApiBundle+managementRpcBundle+managementSessionBundle+managementPermissionBundle+badgeBundle+lobbyImages+'\n'+publicRouteBundle+publicAppHomesBundle+code.replace(/^import .*from '\.\/(?:badge-state|lobby-images|public-routes|pwa-homes|management-session|management-rpc|management-provision|theme-api).js';\r?\n/gm,'');
+// PAPA_EDGE_BUNDLE_OUT lets isolated tests build without sharing the release file.
+const bundleOut=process.env.PAPA_EDGE_BUNDLE_OUT;
+if(bundleOut){fs.writeFileSync(bundleOut,bundled);console.log('Edge bundle written to '+bundleOut);process.exit(0);}
 fs.writeFileSync(new URL('deploy-function.txt',root),bundled);
 fs.writeFileSync(new URL('deploy-function.html',root),'<meta charset="utf-8"><pre>'+bundled.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>');
 console.log('Notification edge bundle created');
