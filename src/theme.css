@@ -150,7 +150,7 @@ dialog .dialog-head button{flex:0 0 auto;min-width:34px;min-height:34px}
 .header-tools .header-notice{grid-column:auto;grid-row:auto}
 .login-status:empty{display:none}
 .home-bottom-pair{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
-.home-accounting{box-sizing:border-box;align-self:stretch;width:100%;height:100%;border:1px solid var(--line);border-radius:18px;background:#16131c;padding:16px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:0}
+.home-accounting{box-sizing:border-box;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:0;padding:4px 0 0}
 .home-accounting-values{display:grid;gap:7px;width:min(100%,180px)}
 .home-accounting-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--panel,#211a2c);border:1px solid var(--line);border-radius:10px;padding:9px 12px;text-align:center;white-space:nowrap;font-size:13px;line-height:1.4}
 .home-accounting-item strong{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}.home-accounting-item strong span{font-size:13px;font-weight:500}

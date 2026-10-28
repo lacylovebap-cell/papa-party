@@ -23,10 +23,11 @@ test('today UI rejects a previous-show aggregate only at Taipei 19:00 without re
 
 test('home uses compact authoritative cards while queue keeps centered plain text without lifetime balances',()=>{
  const code=app.split(/\r?\n/).filter(line=>line.startsWith('function statsHtml(')||line.startsWith('function homeAccounting(')).join('\n');
- const ctx=vm.createContext({state:{summary:{rolloverHour:19}},accountingDay,accountingRollover,h:String,blank:()=>'',clock:()=> '2026-10-12T16:00:00Z'});
+ const ctx=vm.createContext({state:{summary:{rolloverHour:19}},accountingDay,accountingRollover,h:String,blank:()=>'',clock:()=> '2026-10-12T16:00:00Z',card:(title,body)=>'<section class="card "><div class="section-head"><h2>'+title+'</h2></div>'+body+'</section>'});
  vm.runInContext(code,ctx);let html=ctx.homeAccounting({received:5,stored:2,sung:5,saved:379});
  assert.equal((html.match(/class="home-accounting-item"/g)||[]).length,3);assert.match(html,/收到新歌<\/span><strong>5/);assert.match(html,/存歌<\/span><strong>2/);assert.match(html,/已唱<\/span><strong>5/);
- assert.doesNotMatch(html,/class="stat"|class="card /);
+ // 2026-10-28: same card frame and title as the other homepage cards (user request).
+ assert.doesNotMatch(html,/class="stat"/);assert.match(html,/^<section class="card "><div class="section-head"><h2>🌙 本晚回顧<\/h2>/);
  const queue=ctx.statsHtml({received:5,stored:2,sung:5,saved:379});
  assert.match(queue,/收到新歌 5 首 ｜ 存歌 2 首 ｜ 已唱 5 首/);assert.doesNotMatch(queue,/class="stat"/);
  assert.ok(!html.includes('379'));assert.ok(html.includes('19:00 換場'));

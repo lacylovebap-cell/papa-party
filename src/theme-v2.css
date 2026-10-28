@@ -33,6 +33,8 @@
 [data-theme-v2] a{color:var(--home-accent)}
 [data-theme-v2] .tag,[data-theme-v2] .notice,[data-theme-v2] .stat{background:var(--home-glow);color:var(--home-text)}
 [data-theme-v2] .song{border-color:var(--home-line)}
+[data-theme-v2] .home-accounting-item{background:var(--home-glow);border-color:var(--home-line);color:var(--home-text)}
+[data-theme-v2] .home-accounting-item strong{color:var(--theme-title)}
 /* Banner: panel colour, then the picture, then the adjustable mask band, then text. */
 [data-theme-v2] .integrated-hero{background:var(--home-panel);border-color:var(--home-line)}
 [data-theme-v2] .integrated-hero:after{background:var(--theme-banner-mask)}
