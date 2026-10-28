@@ -11,11 +11,22 @@
 [data-theme-v2] .muted,[data-theme-v2] .subtle,[data-theme-v2] small{color:var(--theme-muted)}
 [data-theme-v2] .card{background:var(--theme-card-fill);border-color:var(--home-line);color:var(--home-text)}
 [data-theme-v2] .crown,[data-theme-v2] .medal-row,[data-theme-v2] .fate,[data-theme-v2] .admin-banner,[data-theme-v2] dialog{background:var(--home-panel);border-color:var(--home-line);color:var(--home-text)}
-[data-theme-v2] button{border-color:var(--home-line);color:var(--home-text);background:var(--theme-soft)}
 /* Status colours are semantic; on light pages they are deepened for contrast. */
 [data-theme-v2=light] .state-label{filter:brightness(.62) saturate(1.5)}
-[data-theme-v2] button.primary,[data-theme-v2] button.active,[data-theme-v2] .tabs button.active{background:var(--home-button);border-color:var(--theme-button-solid);color:var(--home-buttonText)}
-[data-theme-v2] button:hover{border-color:var(--home-accent)}
+/* Buttons follow the theme's button setting (shape and size unchanged).
+   Action buttons: full button colour. Toggles: the selected one is full, the
+   others a light tint, so the current choice stays visible. */
+[data-theme-v2] button{background:var(--home-button);border-color:var(--theme-button-solid);color:var(--home-buttonText)}
+[data-theme-v2] .tabs button,[data-theme-v2] button[data-act=adminTab],[data-theme-v2] button[data-act=subtab],[data-theme-v2] button[data-act=status],[data-theme-v2] button[data-act=venue],[data-theme-v2] button[data-act=queueMode],[data-theme-v2] button[data-act=practiceMode],[data-theme-v2] button[data-act=playersMode],[data-theme-v2] button[data-act=songVisibilityMode],[data-theme-v2] button[data-act=songCatalogStatus],[data-theme-v2] button[data-act=catalogSection],[data-theme-v2] button[data-act=catalogInactive],[data-theme-v2] button[data-act=catalogMembership],[data-theme-v2] button[data-act=sharedMembership],[data-theme-v2] button[data-act=medalView],[data-theme-v2] button[data-act=medalRanking],[data-theme-v2] button[data-act=galleryFilter],[data-theme-v2] button[data-act=nativePlayerBatchRow],[data-theme-v2] button[data-act=nativePlayerSelect],[data-theme-v2] button[aria-pressed=false],[data-theme-v2] button[aria-selected=false]{background:var(--theme-button-soft);border-color:var(--home-line);color:var(--home-text)}
+[data-theme-v2] button.primary,[data-theme-v2] button.active,[data-theme-v2] .tabs button.active,[data-theme-v2] button[aria-pressed=true],[data-theme-v2] button[aria-selected=true]{background:var(--home-button);border-color:var(--theme-button-solid);color:var(--home-buttonText)}
+/* The queue "add" button had a fixed lavender colour with !important. */
+[data-theme-v2] .queue-add{background:var(--home-button)!important;border-color:var(--theme-button-solid)!important;color:var(--home-buttonText)!important}
+/* Kept as they are: header icons, close/cancel, warnings, image buttons. */
+[data-theme-v2] header button:not(.primary):not(.active):not(.brand),[data-theme-v2] button[data-act=close],[data-theme-v2] button.danger{background:var(--theme-soft);border-color:var(--home-line);color:var(--home-text)}
+[data-theme-v2] button.danger{color:#f299ab}
+[data-theme-v2] .photo-media-button{background:transparent;border:0}
+[data-theme-v2] button:hover:not(:disabled){border-color:var(--home-accent);filter:brightness(1.12)}
+[data-theme-v2] button:disabled{opacity:.5}
 [data-theme-v2] input,[data-theme-v2] select,[data-theme-v2] textarea{background:var(--theme-input);color:var(--home-text);border-color:var(--home-line)}
 /* The open dropdown list is drawn by the browser; give its rows the same solid colours. */
 [data-theme-v2] select option,[data-theme-v2] select optgroup{background-color:var(--theme-input);color:var(--home-text)}

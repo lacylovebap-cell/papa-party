@@ -214,3 +214,9 @@ test('form fields use an opaque background so the browser dropdown list stays da
  for(const base of ['#8b5cf6','#ff0000','#000000'])for(const mode of ['dark','light'])
   assert.match(themeCssVariables({base,mode})['--theme-input'],/^#[0-9a-f]{6}$/,base+mode);
 });
+
+test('buttons follow the theme: toggles get an opaque tint of the button colour',()=>{
+ const v=themeCssVariables({base:'#8b5cf6',mode:'dark',colors:{button:'#6a4f7d',button2:'#070317',buttonText:'#fafafa'}});
+ assert.match(v['--theme-button-soft'],/^#[0-9a-f]{6}$/);
+ assert.equal(v['--home-button'],'linear-gradient(135deg,#6a4f7d,#070317)');
+});

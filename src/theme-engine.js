@@ -194,6 +194,8 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
   // Opaque on purpose: the browser's own dropdown list cannot show a see-through colour
   // and falls back to a light grey, so this is the panel colour pre-darkened by 28%.
   '--theme-input':t.mode==='light'?'#ffffff':themeMix(c.panel,'#000000',.28),'--theme-soft':themeAlpha(c.line,t.mode==='light'?.35:.4),
+  // Unselected toggles: a light tint of the chosen button colour on the card colour.
+  '--theme-button-soft':themeMix(c.panel,c.button,t.mode==='light'?.16:.3),
   '--theme-card-fill':card?.url?themeLayeredBackground(c.panel,card,'card',resolve(card.url)):c.panel,
   '--theme-banner-mask':themeBannerMask(t),
   ...themeDividerVariables(t),
