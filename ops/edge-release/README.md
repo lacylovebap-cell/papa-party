@@ -1,6 +1,6 @@
 # Edge Function release files
 
-`party-api-10.28-THEME.<n>.js` / `party-api-10.28-ADMIN.<n>.js` files are the exact party-api bundles for each 10.28 release (ADMIN.1 = THEME.3 plus platform management accounts and safe deletion; ADMIN.2 = ADMIN.1 plus THEME.4–THEME.6: quota divider, opaque dropdowns, themed buttons, decoration motion; ADMIN.4 = ADMIN.2 plus a corrected streamer-login message for streamers in a not-yet-open new Space)
+`party-api-10.28-THEME.<n>.js` / `party-api-10.28-ADMIN.<n>.js` files are the exact party-api bundles for each 10.28 release (ADMIN.1 = THEME.3 plus platform management accounts and safe deletion; ADMIN.2 = ADMIN.1 plus THEME.4–THEME.6: quota divider, opaque dropdowns, themed buttons, decoration motion; ADMIN.4 = ADMIN.2 plus a corrected streamer-login message for streamers in a not-yet-open new Space; CANCEL.1 = ADMIN.4 plus one unified song cancellation with a recorded `cancel_settlement`, an archive-only history operation and two-sided cancel notices)
 (`node build-edge.mjs`, then TypeScript types stripped with `bun build --no-bundle`).
 It was deployed through the Supabase MCP tool, which takes file contents inline; the
 bundle is too large for that, so the deployed function is a two-file entry that
@@ -25,7 +25,7 @@ Normal CLI deploys (`supabase functions deploy party-api`) keep working as befor
 and replace this entry with the regular source.
 
 Rollback: redeploy the same two-file entry pointing at the previous pinned release file
-(for ADMIN.4 that is `party-api-10.28-ADMIN.2.js` at commit `7ca045de2a05e1e071472545684a3b2e97414fb9`; for ADMIN.1 it was `party-api-10.28-THEME.3.js` at commit `68960b1676e2a880406b3d604a6c4f45ed0f22b0`).
+(for CANCEL.1 that is `party-api-10.28-ADMIN.4.js` at commit `615dc9e`; for ADMIN.4 that is `party-api-10.28-ADMIN.2.js` at commit `7ca045de2a05e1e071472545684a3b2e97414fb9`; for ADMIN.1 it was `party-api-10.28-THEME.3.js` at commit `68960b1676e2a880406b3d604a6c4f45ed0f22b0`).
 The matching database change (`20261028041500_management_accounts_and_deletion.sql`) is additive and
 needs no rollback for the Edge to go back; see `ops/management-accounts-rollback-20261028.sql`.
 

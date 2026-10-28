@@ -70,23 +70,83 @@ function voidReceiptAllocation(s,source,t){
  requireThat(!queues.some(q=>q.status==='completed'||q.completedAt),'已完成演唱的收歌須使用可追溯更正，不能直接撤銷');
  const ids=new Set(queues.map(q=>q.id));
  requireThat(!source.allocation_id||queues.length,'原分配來源不完整，請先核對');
- for(const q of queues){if(['pending','waiting'].includes(q.status))cancelQueue(s,q,t);if(q.status==='stored'){q.status='cancelled';q.cancelledAt=t;}q.receipt_voided_at=t;}
+ for(const q of queues){if(['pending','waiting'].includes(q.status))cancelQueue(s,q,t,undefined,'receipt-void');if(q.status==='stored'){q.status='cancelled';q.cancelledAt=t;}q.receipt_voided_at=t;}
  const linked=s.ledger.filter(l=>l.id!==source.id&&!l.reversal_of&&!l.voided_at&&(l.source_transaction_id===source.id||source.allocation_id&&l.allocation_id===source.allocation_id));
  requireThat(linked.every(l=>l.playerId===source.playerId&&venuePolicyLedgerPool(l)===venuePolicyLedgerPool(source)&&ids.has(l.queueId)&&['return','adjustment'].includes(l.allocationSettlement)),'關聯結算不完整，請先核對');
  for(const row of [source,...linked]){log(s,row.playerId,-row.amount,'撤銷：'+row.note,t,{reversal_of:row.id,reversal_source_transaction_id:source.id,accounting_kind:'reversal',conversion:true,excludeStats:true,test:row.test,storage_pool:venuePolicyLedgerPool(row)});row.voided_at=t;row.reversal_id=s.ledger.at(-1).id;if(row!==source)row.void_source_transaction_id=source.id;}
  requireThat(venuePolicyAvailableCredits(s,source.playerId,venuePolicyLedgerPool(source))>=0,'可用存歌不足，不能撤銷已使用額度');
 }
-function cancelQueue(s,q,t,playerId){
+// One cancellation path for every unsung row, whatever button started it. The
+// settlement snapshot records what this cancellation actually released, once.
+function cancelQueue(s,q,t,playerId,via='cancel'){
  requireThat(['pending','waiting'].includes(q.status),'這筆已結束');
+ requireThat(!q.cancel_settlement,'這首已取消');
+ const cost=queueCost(q),base={version:1,at:t,via,cost};let settlement=null,pool=null;
+ if(q.kind==='saved'){
+  const at=quotaTime(q),split=new Map();if(at)savedQuota(s,at,q.playerId,split);const share=split.get(q.id)||{common:0,personal:0};
+  pool=venuePolicyConsumedPool(q);settlement={...base,kind:'saved-reservation',credits:cost,storage_pool:pool,quota_hour:at?hourKey(at):null,quota_common:share.common,quota_personal:share.personal};
+ }else if(reservationAllocation(q)){pool=allocationPool(q);settlement={...base,kind:'allocation-reservation',credits:cost,storage_pool:pool,source_transaction_id:q.source_transaction_id||null};}
+ else if(allocated(q))pool=allocationPool(q);
+ const before=pool&&q.playerId?venuePolicyAvailableCredits(s,q.playerId,pool):null;
  returnAllocation(s,q,t);q.status='cancelled';q.cancelledAt=t;
  if(playerId)q.cancelled_by=playerId;
+ if(allocated(q)&&!reservationAllocation(q)){
+  const row=s.ledger.find(l=>l.queueId===q.id&&l.allocationSettlement==='return'&&!l.voided_at);
+  settlement=row?{...base,kind:'allocation-return',credits:Number(row.amount),storage_pool:pool,ledger_id:row.id}:{...base,kind:'allocation-return',credits:0,storage_pool:pool,ledger_id:null,unverified:true};
+ }
+ settlement??={...base,kind:'none',credits:0};
+ if(before!==null)Object.assign(settlement,{available_before:before,available_after:venuePolicyAvailableCredits(s,q.playerId,pool)});
+ q.cancel_settlement=settlement;
 }
-function deleteQueue(s,q,t){
- if(['pending','waiting'].includes(q.status)){cancelQueue(s,q,t);return;}
+function deleteQueue(s,q,t,via='delete'){
+ if(['pending','waiting'].includes(q.status)){cancelQueue(s,q,t,undefined,via);return;}
  // Old allocated terminal rows were already protected.
  if(allocated(q)&&!reservationAllocation(q))return;
  // Archive is presentation only. Completion, source and debit remain facts.
  q.archived_at??=t;
+}
+// Archiving history never settles anything: no ledger row, status or debit changes.
+function archiveQueue(s,q,t){
+ requireThat(['completed','cancelled','stored'].includes(q.status),'尚未演唱的歌曲請使用「取消歌曲」');
+ q.archived_at??=t;
+}
+// Read-only view of what a cancellation released. Old rows are inferred only from
+// facts that prove the result; anything else stays "review" and is never backfilled.
+export function cancelRecovery(s,q){
+ if(q?.status!=='cancelled')return null;
+ const ledger=s?.ledger||[],linked=ledger.filter(l=>l.queueId===q.id),st=q.cancel_settlement;
+ const review=reason=>({state:'review',credits:null,kind:st?.kind||null,reason});
+ if(st&&typeof st==='object'){
+  if(st.kind==='allocation-return'){
+   const row=ledger.find(l=>l.id===st.ledger_id);
+   if(st.unverified||!row||row.voided_at||row.queueId!==q.id||Number(row.amount)!==Number(st.credits))return review('找不到對應回補紀錄');
+   return {state:'restored',credits:Number(st.credits),kind:st.kind,storage_pool:st.storage_pool,ledger_id:row.id};
+  }
+  if(['saved-reservation','allocation-reservation'].includes(st.kind)&&Number(st.credits)>0){
+   if(linked.some(l=>!l.voided_at&&!l.reversal_of))return review('取消後仍有關聯扣歌紀錄');
+   return {state:'restored',credits:Number(st.credits),kind:st.kind,storage_pool:st.storage_pool,quota_common:st.quota_common,quota_personal:st.quota_personal,available_before:st.available_before,available_after:st.available_after};
+  }
+  if(st.kind==='none')return linked.length?review('有未預期的存歌紀錄'):{state:'none',credits:0,kind:'none'};
+  return review('結算紀錄不完整');
+ }
+ if(q.receipt_voided_at)return review('原收歌已撤銷');
+ if(q.kind==='saved'){
+  if(linked.length)return review('有關聯存歌紀錄');
+  return {state:'restored',credits:queueCost(q),kind:'saved-reservation',storage_pool:venuePolicyConsumedPool(q),legacy:true};
+ }
+ if(reservationAllocation(q)){
+  if(linked.length)return review('有關聯存歌紀錄');
+  return {state:'restored',credits:queueCost(q),kind:'allocation-reservation',storage_pool:allocationPool(q),legacy:true};
+ }
+ if(allocated(q)){
+  const returns=linked.filter(l=>l.allocationSettlement==='return'),live=returns.filter(l=>!l.voided_at);
+  if(!q.allocationReturnedAt||returns.length!==1||live.length!==1)return review(returns.length>1?'重複回補紀錄':'找不到回補紀錄');
+  const amount=Number(live[0].amount);
+  if(!(amount>0)||q.allocationReturnedCredits!=null&&Number(q.allocationReturnedCredits)!==amount)return review('回補首數不一致');
+  return {state:'restored',credits:amount,kind:'allocation-return',storage_pool:venuePolicyLedgerPool(live[0]),ledger_id:live[0].id,legacy:true};
+ }
+ if(linked.length)return review('有未預期的存歌紀錄');
+ return {state:'none',credits:0,kind:'none'};
 }
 
 function editQueue(s,q,p,t,quoteAt){
@@ -143,7 +203,7 @@ function mutateRoom(source,action,actor,t=stamp()){
  if(!['request','wish','self','cancelOwn','replaceOwn'].includes(a.type))requireThat(admin,'請先登入管理');
  if(['request','wish','self','cancelOwn','replaceOwn'].includes(a.type))requirePlayer(s,actor?.playerId);
  switch(a.type){
- case 'cancelOwn':{const q=s.queue.find(x=>x.id===payload.id);requireThat(q&&q.playerId===actor.playerId,'只能取消自己的點歌');cancelQueue(s,q,t,actor.playerId);break;}
+ case 'cancelOwn':{const q=s.queue.find(x=>x.id===payload.id);requireThat(q&&q.playerId===actor.playerId,'只能取消自己的點歌');cancelQueue(s,q,t,actor.playerId,'own');break;}
  case 'replaceOwn':{
   const quote=ownQueueReplacementQuote(s,payload,actor,t),q=s.queue.find(row=>row.id===payload.id);
   const performances=row=>JSON.stringify((row.items||[{songId:row.songId,performances:1}]).map(item=>[item.songId,item.performances||1]));
@@ -159,8 +219,9 @@ function mutateRoom(source,action,actor,t=stamp()){
  case 'streamerDraw':{const item=s.songs.find(x=>x.songId===payload.songId);requireThat(item&&!item.hidden&&!item.deleted&&item.active!==false&&!item.disabled&&item.available!==false,'找不到可用歌曲');s.queue.push({id:uid(),songId:item.songId,title:item.title,artist:item.artist,playerId:null,venue:venuePolicyRequestVenue(s),kind:'self',source:'streamer_draw',selfProvided:true,creditCost:0,status:'waiting',at:t,acceptedAt:t,stage:'⏳ 等待中',items:[{songId:item.songId,title:item.title,artist:item.artist,performances:1}]});break;}
  case 'onBehalf':{const proxy={role:'admin',playerId:payload.playerId,loginId:''};const at=validTime(payload.effective_at||payload.at||t,t);let next=mutateRoom(s,{type:'request',data:payload},proxy,at);const q=next.queue.at(-1);q.recordedAt=payload.at?at:null;q.createdAt=t;q.created_at=t;q.effective_at=at;q.note=String(payload.note||'').trim().slice(0,1000);if(payload.completed){q.awaitingAcknowledgment=false;setPreparation(q,0,at);if(q.kind==='live')next=mutateRoom(next,{type:'queue',data:{id:q.id,operation:'approve',preparationMinutes:0}},actor,at);next=mutateRoom(next,{type:'queue',data:{id:q.id,operation:'complete'}},actor,at);}return next;}
  case 'request':{const p=requirePlayer(s,actor.playerId),song=s.songs.find(x=>x.songId===payload.songId);requireThat(!p.archived,'玩家已封存，請先恢復玩家再新增點歌');requireThat(song&&(admin||!song.hidden)&&!song.deleted&&!song.disabled&&song.active!==false&&song.available!==false,'找不到歌曲');if(!admin&&payload.pairSongId){const pair=s.songs.find(x=>x.songId===payload.pairSongId);requireThat(pair&&!pair.hidden&&!pair.deleted&&!pair.disabled&&pair.active!==false&&pair.available!==false,'搭配歌曲目前未開放');}requireThat(admin||s.settings.status!=='暫停點歌',(s.currentStreamer?.display_name||'主播')+'休息一下，等等再來 ♡');requireThat(['saved','live'].includes(payload.kind),'請選提歌或現點');const requestNote=payload.requestNote===undefined?'':requestNoteText(payload.requestNote);const c=crownFor(s,song.songId,t),other=c&&c.playerId!==p.playerId;requireThat(!other||payload.kind==='live','這首是冠歌，請依卡別現點 👑');const quote=quoteSong(s,song.songId,payload,p.playerId,t),venueOptions={venue:payload.venue,allowOverride:admin};let venueSnapshot={venue:venuePolicyRequestVenue(s,venueOptions)};if(payload.kind==='saved'){requireThat(admin||canRequestSaved(s,t,quote.creditCost,p.playerId),'本小時剩餘提歌額度不足，請改用現點或下個小時再提歌。');try{venueSnapshot=venuePolicySavedSnapshot(s,p.playerId,quote.creditCost,venueOptions);}catch(error){if(error.message==='可用存歌不足，請先核對玩家餘額')throw Error('存歌袋空空，風吹進去都有回音。');throw error;}}else requireThat(payload.giftConfirmed===true,'請先確認現點禮物價格');const q={...quote,...venueSnapshot,...(requestNote?{requestNote}:{}),id:uid(),songId:song.songId,playerId:p.playerId,loginId:actor.loginId||'',title:song.title,artist:song.artist,kind:payload.kind,...requestSource(payload,{playerSide:!admin}),status:payload.kind==='saved'?'waiting':'pending',awaitingAcknowledgment:true,awaitingPreparation:true,at:t,acceptedAt:payload.kind==='saved'?t:null,stage:'⏳ 等待中',test:!!p.test,...requestFees(s,c,p.playerId,quote.creditCost),crownId:other?c.id:null};s.queue.push(q);break;}
- case 'queue':{const q=s.queue.find(q=>q.id===payload.id);requireThat(q,'找不到紀錄');const pending=q.status==='pending',waiting=q.status==='waiting';switch(payload.operation){case 'correctDuplicate':{const canonical=s.queue.find(row=>row.id===payload.canonicalQueueId);requireThat(q.status==='completed'&&canonical?.status==='completed'&&canonical.id!==q.id&&canonical.playerId===q.playerId&&canonical.songId===q.songId&&!canonical.performance_duplicate_of&&!s.queue.some(row=>row.performance_duplicate_of===q.id),'請核對同一次演唱的主紀錄');requireThat(!q.performance_duplicate_of||q.performance_duplicate_of===canonical.id,'已有更正關聯');q.performance_duplicate_of=canonical.id;q.performance_corrected_at??=t;q.performance_correction_reason='同一次演唱重登';break;}case 'acknowledge':case 'approve':{requireThat(pending||waiting&&q.awaitingAcknowledgment,'這筆已確認或已結束');q.status='waiting';if(pending)q.acceptedAt=validTime(payload.effective_at||t,t);q.awaitingAcknowledgment=false;q.acknowledgedAt=t;if(payload.preparationMinutes===undefined){q.awaitingPreparation=true;}else setPreparation(q,payload.preparationMinutes,t);break;}case 'complete':{const completed=validTime(payload.effective_at||q.recordedAt||t,t);requireThat(waiting,'先確認禮物，再完成演唱');requireThat(queuePrepared(q),'請先確認收到並設定準備時間');if(payload.carryOver!==undefined)carryQueueQuota(q,completed,payload.carryOver,t);if(q.kind==='saved'||reservationAllocation(q)){const storage_pool=reservationAllocation(q)?allocationPool(q):venuePolicyConsumedPool(q);requireThat(venuePolicyAvailableCredits(s,q.playerId,storage_pool,{excludeQueueId:q.id})>=queueCost(q),'存歌不足，請先核對玩家餘額');log(s,q.playerId,-queueCost(q),'完成演唱：'+q.title,completed,{queueId:q.id,performance_id:q.id,source_transaction_id:q.source_transaction_id||null,allocation_id:q.allocation_id||null,allocationSettlement:reservationAllocation(q)?'consume':undefined,accounting_kind:'consumption',test:q.test,storage_pool,venue:venuePolicyHistoryVenue(q)});const debit=s.ledger.at(-1);debit.settlement_id=debit.id;q.performance_id=q.id;q.settlement_id=debit.id;}q.status='completed';q.completedAt=completed;q.completion_created_at=t;q.effective_at=completed;break;}case 'cancel':cancelQueue(s,q,validTime(payload.effective_at||t,t));break;case 'edit':editQueue(s,q,payload,t);break;case 'store':requireThat(waiting&&q.kind==='live','僅已確認、未演唱現點可轉存');requireThat(queueConfirmed(q),'請先確認禮物');q.status='stored';q.storedAt=validTime(payload.effective_at||t,t);if(allocated(q))returnAllocation(s,q,q.storedAt);else log(s,q.playerId,q.creditCost||1,'現點未唱轉存歌：'+q.title,q.storedAt,{queueId:q.id,test:q.test,conversion:true,storage_pool:venuePolicyHistoryVenue(q)??'shengma'});break;case 'delete':deleteQueue(s,q,t);break;case 'stage':requireThat(queueConfirmed(q),'請先確認收到');setPreparation(q,payload.preparationMinutes,t);break;case 'move':{const indexes=s.queue.map((q,i)=>q.status==='waiting'?i:-1).filter(i=>i>=0),i=indexes.indexOf(s.queue.indexOf(q)),j=indexes[i+(payload.direction<0?-1:1)];if(i>=0&&j!==undefined)[s.queue[indexes[i]],s.queue[j]]=[s.queue[j],s.queue[indexes[i]]];break;}default:throw new Error('未知操作');}break;}
- case 'queueBulkDelete':{const ids=list(payload.ids);requireThat(ids.length&&ids.every(id=>s.queue.some(q=>q.id===id)),'所選紀錄已異動');for(const id of ids)deleteQueue(s,s.queue.find(q=>q.id===id),t);break;}
+ case 'queue':{const q=s.queue.find(q=>q.id===payload.id);requireThat(q,'找不到紀錄');const pending=q.status==='pending',waiting=q.status==='waiting';switch(payload.operation){case 'correctDuplicate':{const canonical=s.queue.find(row=>row.id===payload.canonicalQueueId);requireThat(q.status==='completed'&&canonical?.status==='completed'&&canonical.id!==q.id&&canonical.playerId===q.playerId&&canonical.songId===q.songId&&!canonical.performance_duplicate_of&&!s.queue.some(row=>row.performance_duplicate_of===q.id),'請核對同一次演唱的主紀錄');requireThat(!q.performance_duplicate_of||q.performance_duplicate_of===canonical.id,'已有更正關聯');q.performance_duplicate_of=canonical.id;q.performance_corrected_at??=t;q.performance_correction_reason='同一次演唱重登';break;}case 'acknowledge':case 'approve':{requireThat(pending||waiting&&q.awaitingAcknowledgment,'這筆已確認或已結束');q.status='waiting';if(pending)q.acceptedAt=validTime(payload.effective_at||t,t);q.awaitingAcknowledgment=false;q.acknowledgedAt=t;if(payload.preparationMinutes===undefined){q.awaitingPreparation=true;}else setPreparation(q,payload.preparationMinutes,t);break;}case 'complete':{const completed=validTime(payload.effective_at||q.recordedAt||t,t);requireThat(waiting,'先確認禮物，再完成演唱');requireThat(queuePrepared(q),'請先確認收到並設定準備時間');if(payload.carryOver!==undefined)carryQueueQuota(q,completed,payload.carryOver,t);if(q.kind==='saved'||reservationAllocation(q)){const storage_pool=reservationAllocation(q)?allocationPool(q):venuePolicyConsumedPool(q);requireThat(venuePolicyAvailableCredits(s,q.playerId,storage_pool,{excludeQueueId:q.id})>=queueCost(q),'存歌不足，請先核對玩家餘額');log(s,q.playerId,-queueCost(q),'完成演唱：'+q.title,completed,{queueId:q.id,performance_id:q.id,source_transaction_id:q.source_transaction_id||null,allocation_id:q.allocation_id||null,allocationSettlement:reservationAllocation(q)?'consume':undefined,accounting_kind:'consumption',test:q.test,storage_pool,venue:venuePolicyHistoryVenue(q)});const debit=s.ledger.at(-1);debit.settlement_id=debit.id;q.performance_id=q.id;q.settlement_id=debit.id;}q.status='completed';q.completedAt=completed;q.completion_created_at=t;q.effective_at=completed;break;}case 'cancel':cancelQueue(s,q,validTime(payload.effective_at||t,t),undefined,'cancel');break;case 'archive':archiveQueue(s,q,t);break;case 'edit':editQueue(s,q,payload,t);break;case 'store':requireThat(waiting&&q.kind==='live','僅已確認、未演唱現點可轉存');requireThat(queueConfirmed(q),'請先確認禮物');q.status='stored';q.storedAt=validTime(payload.effective_at||t,t);if(allocated(q))returnAllocation(s,q,q.storedAt);else log(s,q.playerId,q.creditCost||1,'現點未唱轉存歌：'+q.title,q.storedAt,{queueId:q.id,test:q.test,conversion:true,storage_pool:venuePolicyHistoryVenue(q)??'shengma'});break;case 'delete':deleteQueue(s,q,t);break;case 'stage':requireThat(queueConfirmed(q),'請先確認收到');setPreparation(q,payload.preparationMinutes,t);break;case 'move':{const indexes=s.queue.map((q,i)=>q.status==='waiting'?i:-1).filter(i=>i>=0),i=indexes.indexOf(s.queue.indexOf(q)),j=indexes[i+(payload.direction<0?-1:1)];if(i>=0&&j!==undefined)[s.queue[indexes[i]],s.queue[j]]=[s.queue[j],s.queue[indexes[i]]];break;}default:throw new Error('未知操作');}break;}
+ case 'queueBulkDelete':{const ids=list(payload.ids);requireThat(ids.length&&ids.every(id=>s.queue.some(q=>q.id===id)),'所選紀錄已異動');for(const id of ids)deleteQueue(s,s.queue.find(q=>q.id===id),t,'bulk');break;}
+ case 'queueBulkArchive':{const ids=list(payload.ids);requireThat(ids.length&&ids.every(id=>s.queue.some(q=>q.id===id)),'所選紀錄已異動');const rows=ids.map(id=>s.queue.find(q=>q.id===id));requireThat(rows.every(q=>['completed','cancelled','stored'].includes(q.status)),'尚未演唱的歌曲請使用「取消歌曲」');for(const q of rows)archiveQueue(s,q,t);break;}
  case 'player':{const old=s.players.find(x=>x.playerId===payload.playerId),ids=list(payload.ids).filter(x=>x!=='未知');requireThat(String(payload.name||'').trim(),'請填玩家名稱');requireThat(!s.players.some(p=>p!==old&&p.ids.some(id=>ids.includes(id))),'這個平台 ID 已綁定其他玩家');const p={...old,playerId:old?.playerId||uid(),...(!old?{createdAt:t}:{}),name:String(payload.name).trim(),ids,names:list([...(old?.names||[]),old?.name,...list(payload.names),payload.name].filter(Boolean)),note:String(payload.note||''),password:String(payload.password??old?.password??''),certification:String(payload.certification||''),test:!!payload.test};if(old)Object.assign(old,p);else{s.players.push(p);const amount=creditNumber(payload.balance||0,true);if(amount)log(s,p.playerId,amount,'初始存歌',t,{test:p.test,openingBalance:true});}break;}
  case 'self':{const p=requirePlayer(s,actor.playerId);if(payload.name?.trim()){p.names=list([...p.names,p.name,payload.name.trim()]);p.name=payload.name.trim();}if(payload.password!==undefined){requireThat(!p.password||payload.currentPassword===p.password,'目前密碼不正確');requireThat(!payload.password||payload.password.length>=4,'密碼至少 4 個字');p.password=payload.password;}break;}
  case 'ledger':{
@@ -254,14 +315,14 @@ export function matchesSong(song,query='',tags=[]){const songTags=newPracticeSon
 export function creditNumber(value,zero=false,negative=false){const n=Number(value);requireThat(Number.isFinite(n)&&Number.isSafeInteger(n*2)&&n<1000000&&(negative||n>=(zero?0:0.5)),'首數請用 0.5 的倍數');return n;}
 // Charge hourly capacity from each request's saved quote, not today's song price or row count.
 export const quotaTime=q=>q.quota_effective_at||q.at;
-export function savedQuota(s,t,playerId=null){
+export function savedQuota(s,t,playerId=null,capture=null){
  const roomId=s.currentStreamer?.id||'papa',caps=new Map((s.extraQuotas||[]).filter(x=>x.streamer_id===roomId&&x.enabled&&Number.isSafeInteger(x.extra_quota)&&x.extra_quota>0).map(x=>[x.player_id,x.extra_quota]));
  const usage=new Map();let used=0,reserved=0;
  const rows=s.queue.filter(q=>queueUsesQuota(q)&&['completed','pending','waiting'].includes(q.status)&&quotaTime(q)&&hourKey(quotaTime(q))===hourKey(t)&&(!q.streamer_id||q.streamer_id===roomId))
   .sort((a,b)=>timeValue(quotaTime(a))-timeValue(quotaTime(b)));
  for(const q of rows){const old=usage.get(q.playerId)||{used:0,reserved:0},spent=old.used+old.reserved,cost=Number(q.creditCost??1);
   const common=Math.min(cost,Math.max(0,Number(s.settings.hourlyLimit)-used-reserved)),personal=Math.min(cost-common,Math.max(0,(caps.get(q.playerId)||0)-spent));
-  if(q.status==='completed'){used+=cost-personal;old.used+=personal;}else {reserved+=cost-personal;old.reserved+=personal;}usage.set(q.playerId,old);
+  if(q.status==='completed'){used+=cost-personal;old.used+=personal;}else {reserved+=cost-personal;old.reserved+=personal;}usage.set(q.playerId,old);capture?.set(q.id,{common:cost-personal,personal});
  }
  const mine=usage.get(playerId)||{used:0,reserved:0},extraQuota=caps.get(playerId)||0,personalUsed=Math.min(extraQuota,mine.used+mine.reserved),extraRemaining=Math.max(0,extraQuota-personalUsed),commonRemaining=Math.max(0,Number(s.settings.hourlyLimit)-used-reserved);
  return {used,reserved,commonRemaining,extraQuota,personalUsed,extraRemaining,totalRemaining:commonRemaining+extraRemaining};

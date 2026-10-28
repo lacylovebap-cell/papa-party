@@ -124,3 +124,4 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
 
 /* One-time device setup: no header reflow, no business overlay. */
 .notice-first-setup{position:fixed;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:80;display:flex;flex-wrap:wrap;gap:8px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:12px;background:#21192d;border:1px solid #78608e;border-radius:12px;box-shadow:0 8px 24px #0006}.notice-first-setup button{min-height:44px;white-space:normal}.notice-first-setup button:first-child{flex:1}
+.cancel-recovery{font-size:10px;font-weight:600;margin-left:3px;white-space:nowrap}.cancel-recovery.restored{color:#79d5b0}.cancel-recovery.review{color:#ffb86b}.cancel-recovery.none{opacity:.75}.queue-cancel-detail{display:block;font-size:11px;line-height:1.45;opacity:.85;overflow-wrap:anywhere;white-space:normal}.queue-cancel-detail.cancel-review{color:#ffb86b;opacity:1}

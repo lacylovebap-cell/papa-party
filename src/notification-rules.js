@@ -12,6 +12,18 @@ export function queueNoticeCurrent(notice,row){
  if(Date.parse(q.preparationStartedAt)>Date.parse(notice.created_at))return false;
  return notice.type!=='ready'||Boolean(q.readyAt)&&q.awaitingAcknowledgment!==true&&q.awaitingPreparation!==true;
 }
+// Cancellation wording comes only from the settlement written in the same commit,
+// so a notice never claims a return the ledger did not make.
+const noticeCredits=n=>{const v=Number(n);return Number.isFinite(v)?String(Math.round(v*2)/2):'0';};
+export function cancelNoticeText(q,player,title){
+ const st=q.cancel_settlement,credits=Number(st?.credits);
+ if(st&&st.kind!=='none'&&!st.unverified&&credits>0){
+  const after=Number.isFinite(Number(st.available_after))?`，目前可用 ${noticeCredits(st.available_after)} 首`:'';
+  return {player:`🎵 點歌已取消｜額度已回補：您點播的${title}已取消，已補回 ${noticeCredits(credits)} 首歌單額度${after}。`,admin:`🎵 歌曲取消通知：玩家《${player}》的${title}已取消，歌單額度 ${noticeCredits(credits)} 首已返還。`};
+ }
+ if(st&&st.kind==='none')return {player:`🎵 點歌已取消：您點播的${title}已取消，這首未使用歌單額度，無額度變動。`,admin:`🎵 歌曲取消通知：玩家《${player}》的${title}已取消，無額度變動。`};
+ return {player:`🎵 點歌已取消：您點播的${title}已取消，額度回補待核對。`,admin:`🎵 歌曲取消通知：玩家《${player}》的${title}已取消，額度回補待核對。`};
+}
 // Only business differences produce notifications. Ordering, timestamps and migration
 // backfills cannot replay old requests. Personal operation feedback remains a toast.
 export function deriveNotices(before,after,context,t=new Date().toISOString()){
@@ -25,7 +37,7 @@ export function deriveNotices(before,after,context,t=new Date().toISOString()){
   const preparationChanged=old.preparationStartedAt!==q.preparationStartedAt||old.stage!==q.stage||old.preparationMinutes!==q.preparationMinutes;
   if(context.role==='player'&&['ownQueueBatch','replaceOwn'].includes(context.action)&&(old.songId!==q.songId||JSON.stringify(old.items)!==JSON.stringify(q.items))){add('__admin__',q.kind==='saved'?'saved':'live',`${player}把《${old.title||'歌曲'}》更換為${title}，請重新確認`,q.id);add(q.playerId,'accepted',`${title}換歌已送出，等待主播重新確認`,q.id);}
   if(old.status!==q.status){
-   if(q.status==='cancelled'){add(context.role==='player'?'__admin__':q.playerId,'cancel',`${player}的${title}已取消`,q.id);}
+   if(q.status==='cancelled'&&q.playerId){const text=cancelNoticeText(q,player,title),toPlayer=()=>add(q.playerId,'cancel',text.player,q.id),toAdmin=()=>add('__admin__','cancel',text.admin,q.id);if(context.role==='player'){toAdmin();toPlayer();}else{toPlayer();toAdmin();}}
    else if(q.status==='completed')add(q.playerId,'completed',`${title}已完成演唱`,q.id);
    else if(q.status==='stored')add(q.playerId,'status',`${title}已轉為存歌`,q.id);
    else if(q.status==='waiting'&&!preparationChanged)add(q.playerId,'accepted',`${title}已確認，加入待播`,q.id);
