@@ -43,3 +43,10 @@ room snapshot (`s.hallPricing`, never stored back) and drives request pricing, g
 president-only management ops (`platformSpacePricing`, `platformSpacePricingSave`). Needs migration
 `20261029100000_space_pricing.sql` (applied before the Edge). Rollback: `party-api-10.29-THEME.1.js` at commit
 `901a9f5c109d57b16ad24d494896e3a3b14b9c9f` (v70); that Edge never reads the 'pricing' record.
+
+10.29-SPACE.1 = PRICE.2 + new Spaces open for operation: visitors and the president resolve a new Space room by name,
+the read shortcut serves open Spaces, `portalDirectory` (open Spaces with names and room slugs only), and new-Space
+player logins (`spacePlayerLogin`, `spacePlayerCreate`, `spacePlayerAccess`, `spacePlayerLogins`). Needs migrations
+`20261029120000_space_activation.sql` and `20261029120100_space_player_logins.sql` (applied before the Edge).
+Rollback: `party-api-10.29-PRICE.2.js` at commit `1a8ab1b89dba93dd2da406b194431415a6b97b87` (v71), then
+`ops/space-operations-rollback-20261029.sql` if the database part must be withdrawn too.

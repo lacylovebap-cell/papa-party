@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {nativeFixture} from './support/native-space-fixture.js';
 
 test('a new independent Space can be activated and its streamer can log in and read her own room',async t=>{
@@ -235,4 +236,28 @@ test('device login works for a new Space streamer and her player; messages say t
  assert.equal(request.status,200,JSON.stringify(request.body));
  const notices=await f.call({op:'messageCenterCounts',streamer:'fairy',management:true},manager);
  assert.equal(notices.status,400);assert.match(notices.body.error,/下一階段開放/);
+});
+
+test('the batch 2 rollback restores production functions, closes new Spaces and keeps 聲瑪 working',async t=>{
+ const f=await nativeFixture(t);
+ const fairy=await fairyWithSong(f);
+ const created=await createPlayer(f,fairy,fairy.view.revision);assert.equal(created.status,200,JSON.stringify(created.body));
+ const player=(await f.call({op:'spacePlayerLogin',streamer:'fairy',loginCode:'fan-1',password:'fan-pass-1'})).body.token;
+ assert.equal((await f.call({op:'read',streamer:'fairy'},player)).status,200);
+ const shengma=await f.fingerprint();
+ await f.db.exec(fs.readFileSync('ops/space-operations-rollback-20261029.sql','utf8'));
+ assert.equal((await f.spaceRow(fairy.spaceId)).status,'suspended');
+ assert.equal((await f.spaceRow('space-001')).status,'active');
+ // Exactly the production definitions before batch 2 (md5 of pg_get_functiondef).
+ const defs=await f.q(`select p.proname,md5(pg_get_functiondef(p.oid)) h from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'
+  and p.proname in ('papa_manage_space','papa_management_streamer_login_status','papa_management_space_readiness','papa_space_center_directory','papa_verified_session_actor') order by 1`);
+ assert.deepEqual(Object.fromEntries(defs.map(r=>[r.proname,r.h])),{papa_manage_space:'59666ca05ce7b4195c8cd99431d0784e',papa_management_space_readiness:'3333dcb0011ed65e2effe5a4874cbc6b',
+  papa_management_streamer_login_status:'ed5d3de095779c586d9cc6102566a837',papa_space_center_directory:'c2c465139fa4add5389e9ae43ba77d7f',papa_verified_session_actor:'02f126acdbd73a8ad73fb1bdf8477259'});
+ assert.deepEqual(await f.q("select proname from pg_proc where proname in ('papa_space_player_scope','papa_space_player_create','papa_space_player_access','papa_space_player_login','papa_space_player_logins')"),[]);
+ assert.equal((await f.q('select count(*)::int n from papa_space_player_credentials'))[0].n,1,'nothing is deleted');
+ assert.equal((await f.call({op:'read',streamer:'fairy'},player)).status,400,'her player session no longer opens anything');
+ const visitor=await f.call({op:'read',streamer:'papa'});assert.equal(visitor.status,200,JSON.stringify(visitor.body));
+ const p1=await f.call({op:'login',streamer:'papa',playerId:'P1',password:'p1-pass'});assert.equal(p1.status,200,JSON.stringify(p1.body));
+ assert.equal((await f.call({op:'read',streamer:'papa'},p1.body.token)).status,200);
+ assert.equal(await f.fingerprint(),shengma,'聲瑪 rows untouched');
 });
