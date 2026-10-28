@@ -26,6 +26,8 @@ function edge(allowRead=false){
   if(path.includes('papa_accounting_summary'))return {day:body.requested_day||'2026-10-13',timezone:'Asia/Taipei',rolloverHour:19,stored:0,scope:{spaceId:body.requested_space,roomId:body.requested_room},received:0,sung:0,saved:0,reserved:0,available:0,revision:7};
   if(path.includes('papa_streamer_directory'))return meta.data.streamers;
   if(path.includes('papa_v2_revision?'))return [{revision:7}];
+  // Hall pricing (10.29-PRICE.2) is read alongside the room snapshot; none here.
+  if(path.includes('papa_space_policies?'))return [];
   if(path.includes('papa_v2_scoped_read_snapshot'))return {revision:7,rows:[{kind:'meta',id:'1',data:{schemaVersion:3,...meta.data}},{kind:'settings',id:'1',data:{}}]};
   if(path.endsWith('/papa_catalog_song_metadata_conditional'))return {spaceId:'space-001',roomId:body.room_id,signature:'a'.repeat(64),unchanged:false,rows:[]};
   if(path.includes('papa_catalog_song_metadata'))return [];
