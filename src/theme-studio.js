@@ -2,10 +2,10 @@
 // All edits stay in this module's memory. The network is used only for:
 // one access check when opening, one hall-theme read when switching to the
 // hall, image uploads on save/publish, and the save/publish write itself.
-import {THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
- themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.28-UI.2';
-import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.28-UI.2';
-import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.28-UI.2';
+import {THEME_GRADIENTS,themeGradientFill,THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
+ themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.29-THEME.1';
+import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.29-THEME.1';
+import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.29-THEME.1';
 import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-UI.2';
 
 const LOCAL_HOST='https://local.preview';
@@ -113,6 +113,7 @@ export function openThemeStudio(options){
   <section class="ts-section"><h3>2. 主色 ${help('base')}</h3><div class="ts-row"><input type="color" value="${t.base}" data-base-color aria-label="主色"><input class="ts-hex" value="${t.base.toUpperCase()}" maxlength="7" data-base-hex aria-label="HEX 色碼"><button type="button" class="ts-btn ts-main" data-ts="smart">✨ 一鍵智慧配色</button>${help('smart')}</div>
    <div class="ts-swatches">${THEME_SWATCHES.map(c=>`<button type="button" data-swatch="${c}" style="background:${c}" aria-label="${c}" class="${c===t.base?'on':''}"></button>`).join('')}</div>
    <p class="ts-label">快速配色範本</p><div class="ts-templates">${THEME_TEMPLATES.map(x=>`<button type="button" data-template="${x.id}"><i style="background:${x.base}"></i>${x.name}<small>${x.mode==='dark'?'深色':'淺色'}</small></button>`).join('')}</div></section>
+  <section class="ts-section"><h3>背景漸層（選用）</h3><p class="ts-hint">保留原本配色與圖片設定。選擇後以柔和漸層顯示背景；關閉即可恢復原背景。沿用下方儲存／發布操作。</p><div class="ts-templates"><button type="button" data-gradient="" aria-pressed="${!t.gradient}">關閉漸層<small>恢復原背景</small></button>${THEME_GRADIENTS.map(x=>`<button type="button" data-gradient="${x.id}" aria-pressed="${t.gradient===x.id}"><i style="background:${themeGradientFill({...t,gradient:x.id})}"></i>${x.name}${t.gradient===x.id?' ✓':''}</button>`).join('')}</div></section>
   <section class="ts-section"><h3>3. 模式與按鈕</h3><div class="ts-row"><span class="ts-label">深淺模式 ${help('mode')}</span><div class="ts-seg"><button type="button" data-mode="dark" class="${t.mode==='dark'?'on':''}">🌙 深色</button><button type="button" data-mode="light" class="${t.mode==='light'?'on':''}">☀️ 淺色</button></div></div>
    <div class="ts-row"><span class="ts-label">按鈕樣式 ${help('button')}</span><div class="ts-seg"><button type="button" data-btnstyle="gradient" class="${t.button==='gradient'?'on':''}">漸層</button><button type="button" data-btnstyle="solid" class="${t.button==='solid'?'on':''}">單色</button></div></div></section>
   <section class="ts-section"><h3>4. 自動配色展示與個別微調 ${help('colors')}</h3><div class="ts-palette">${THEME_COLOR_KEYS.map(k=>`<div class="ts-color"><input type="color" value="${t.colors[k]}" data-color="${k}" aria-label="${h(THEME_COLOR_LABELS[k])}"><span>${h(THEME_COLOR_LABELS[k])}${k==='logo'?help('logo'):k==='panel'?help('panel'):''}<small>${k==='logo'&&!tg.manual.has(k)?'透明（選色後才有底色）':t.colors[k].toUpperCase()}${tg.manual.has(k)?' ・手動':''}</small></span>${tg.manual.has(k)?`<button type="button" class="ts-reset" data-color-auto="${k}" title="回到自動配色" aria-label="${h(THEME_COLOR_LABELS[k])}回到自動配色">↺</button>`:''}</div>`).join('')}</div>
@@ -294,8 +295,9 @@ export function openThemeStudio(options){
   if(el.dataset.page){ui.page=el.dataset.page;renderPageTabs();renderPage();return;}
   if(el.dataset.pageJump){ui.page=el.dataset.pageJump;renderPageTabs();renderPage();return;}
   if(el.dataset.tsDevice){ui.device=el.dataset.tsDevice;root.querySelectorAll('[data-ts-device]').forEach(b=>b.classList.toggle('on',b===el));sizeFrame();return;}
-  if(el.dataset.swatch){t.base=el.dataset.swatch;regenerate(false);markDirty();schedule();return;}
-  if(el.dataset.template){const x=THEME_TEMPLATES.find(x=>x.id===el.dataset.template);t.base=x.base;t.mode=x.mode;regenerate(true);markDirty();schedule();return;}
+  if(el.hasAttribute('data-gradient')){if(THEME_GRADIENTS.some(p=>p.id===el.dataset.gradient))t.gradient=el.dataset.gradient;else delete t.gradient;markDirty();schedule();return;}
+  if(el.dataset.swatch){delete t.gradient;t.base=el.dataset.swatch;regenerate(false);markDirty();schedule();return;}
+  if(el.dataset.template){delete t.gradient;const x=THEME_TEMPLATES.find(x=>x.id===el.dataset.template);t.base=x.base;t.mode=x.mode;regenerate(true);markDirty();schedule();return;}
   if(el.dataset.mode){t.mode=el.dataset.mode;regenerate(false);markDirty();schedule();return;}
   if(el.dataset.btnstyle){t.button=el.dataset.btnstyle;markDirty();schedule();return;}
   if(el.matches('[data-divider-follow]')){if(t.divider){const {color,...rest}=t.divider;t.divider=rest;}markDirty();schedule();return;}

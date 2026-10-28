@@ -14,6 +14,54 @@ export const THEME_TEMPLATES=[
  {id:'star-blue',name:'星藍',base:'#3b82f6',mode:'dark'},
  {id:'milk-tea',name:'奶茶',base:'#b98b62',mode:'light'}
 ];
+// Optional background overlay; existing palette and image values remain untouched.
+export const THEME_GRADIENTS=[
+ {"id":"violet-dream","name":"紫藤夢境","colors":["#7546b8","#b16fb9","#df9cae"]},
+ {"id":"lavender-moon","name":"薰衣草月光","colors":["#494b86","#9983c4","#d0b5d9"]},
+ {"id":"rose-mist","name":"玫瑰薄霧","colors":["#a14a6c","#d08c9d","#efc6b7"]},
+ {"id":"peach-cloud","name":"蜜桃雲朵","colors":["#ef947f","#f4c6ac","#e8c4dc"]},
+ {"id":"sakura","name":"櫻花奶霜","colors":["#d98ba6","#f1c7d5","#f5dfca"]},
+ {"id":"berry","name":"莓果微醺","colors":["#6c284f","#a84e75","#d597a2"]},
+ {"id":"midnight","name":"午夜星河","colors":["#142951","#493c82","#926b9c"]},
+ {"id":"blue-hour","name":"藍調時刻","colors":["#173b62","#396a9c","#7b9ab6"]},
+ {"id":"aurora","name":"極光漫遊","colors":["#164e54","#477794","#8764a4"]},
+ {"id":"ocean","name":"深海珍珠","colors":["#124454","#318c94","#a1c7bc"]},
+ {"id":"glacier","name":"冰川晨曦","colors":["#547e9c","#9bc1ce","#d3dfde"]},
+ {"id":"rain","name":"雨後天空","colors":["#507b92","#92b6ba","#d0d6c1"]},
+ {"id":"mint","name":"薄荷森林","colors":["#296b59","#70a68c","#c5d5ad"]},
+ {"id":"jade","name":"翡翠湖畔","colors":["#185d55","#3a8f7c","#9ac0a3"]},
+ {"id":"moss","name":"苔蘚微光","colors":["#4c674b","#8b9c69","#c9c39a"]},
+ {"id":"spring","name":"春日茶園","colors":["#6a8d55","#b0bc86","#e1d7ad"]},
+ {"id":"matcha","name":"抹茶奶綠","colors":["#7d9067","#b7bf96","#e5ddbd"]},
+ {"id":"olive","name":"橄欖暮色","colors":["#4e5944","#8d895c","#c6ad7f"]},
+ {"id":"sunset","name":"夕陽橘光","colors":["#b75a53","#e99868","#f2c481"]},
+ {"id":"apricot","name":"杏桃奶油","colors":["#d49b6f","#efc79c","#f2e0b9"]},
+ {"id":"coral","name":"珊瑚海岸","colors":["#cc777d","#dfab94","#9dbfb6"]},
+ {"id":"honey","name":"蜂蜜琥珀","colors":["#946337","#c99958","#e9cc8c"]},
+ {"id":"maple","name":"楓葉午後","colors":["#864d43","#b97b56","#d5ac7c"]},
+ {"id":"sand","name":"沙丘暖陽","colors":["#a18469","#c7ad8e","#e2cfb0"]},
+ {"id":"tea","name":"奶茶絲絨","colors":["#897064","#b59a8b","#d9c6b7"]},
+ {"id":"cocoa","name":"可可摩卡","colors":["#4d3c3b","#856962","#b89b85"]},
+ {"id":"champagne","name":"香檳玫瑰","colors":["#ad8d86","#d0b7a0","#e7d9bd"]},
+ {"id":"pearl","name":"珍珠霧灰","colors":["#77808b","#abb1ba","#d4cbd5"]},
+ {"id":"obsidian","name":"黑曜流光","colors":["#242733","#49485d","#786779"]},
+ {"id":"neon","name":"霓虹夜遊","colors":["#343175","#854782","#bd6d8f"]}
+];
+export function themeGradientColors(theme){
+ const t=themeNormalize(theme),preset=THEME_GRADIENTS.find(p=>p.id===t.gradient);
+ if(!preset)return [];
+ // Blend into the existing background to preserve the chosen dark/light palette.
+ return preset.colors.map(color=>{
+  let amount=.22;
+  const readable=bg=>['text','title'].every(k=>themeContrast(t.colors[k],bg)>=Math.min(4.5,themeContrast(t.colors[k],t.colors.background)));
+  while(amount>0&&!readable(themeMix(t.colors.background,color,amount)))amount=Math.max(0,amount-.01);
+  return themeMix(t.colors.background,color,amount);
+ });
+}
+export function themeGradientFill(theme){
+ const colors=themeGradientColors(theme);
+ return colors.length?`linear-gradient(135deg,${colors.join(',')})`:'';
+}
 export const THEME_SWATCHES=['#ff0000','#ff4d8d','#ff8a7a','#f59e0b','#facc15','#84cc16','#2fbf8f','#14b8a6','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef','#b98b62','#64748b'];
 // Recommended source sizes and compression targets per image role.
 export const THEME_IMAGE_ROLES={
@@ -145,12 +193,13 @@ export function themeNormalize(input,{hall=false}={}){
  const divider={},dv=v.divider&&typeof v.divider==='object'&&!Array.isArray(v.divider)?v.divider:{};
  if(themeHexPattern.test(dv.color||''))divider.color=dv.color.toLowerCase();
  for(const [k,range] of Object.entries(themeDividerRanges)){const n=themeNumber(dv[k],range,THEME_DIVIDER_DEFAULTS[k]);if(n!==THEME_DIVIDER_DEFAULTS[k])divider[k]=n;}
- return {v:THEME_VERSION,base,mode,button:v.button==='solid'?'solid':'gradient',colors,images,decor,...(Object.keys(divider).length?{divider}:{}),...(manual.length?{manual}:{})};
+ return {...(THEME_GRADIENTS.some(p=>p.id===v.gradient)?{gradient:v.gradient}:{}),v:THEME_VERSION,base,mode,button:v.button==='solid'?'solid':'gradient',colors,images,decor,...(Object.keys(divider).length?{divider}:{}),...(manual.length?{manual}:{})};
 }
 // Strict, used before any save: rejects malformed input instead of guessing.
 export function themeValidate(value,{hall=false,owner=null}={}){
  if(value===null)return null;
  if(!value||typeof value!=='object'||Array.isArray(value))throw Error('主題設定格式不正確');
+ if(value.gradient!==undefined&&!THEME_GRADIENTS.some(p=>p.id===value.gradient))throw Error('請選有效的漸層配色');
  if(!themeHexPattern.test(value.base||''))throw Error('請選有效的主色');
  if(value.colors!==undefined&&(!value.colors||typeof value.colors!=='object'||Array.isArray(value.colors)||Object.entries(value.colors).some(([k,c])=>!THEME_COLOR_KEYS.includes(k)||!themeHexPattern.test(c))))throw Error('配色請使用有效的六碼色彩');
  const urls=[...['background','banner','card'].map(r=>value.images?.[r]?.url).filter(Boolean),...(Array.isArray(value.decor)?value.decor.map(d=>d?.url):[])];
@@ -209,5 +258,6 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
 }
 export function themePageLayer(theme,{resolve=u=>u}={}){
  const t=themeNormalize(theme),bg=t.images.background;
+ if(t.gradient)return themeGradientFill(t);
  return bg?.url?themeLayeredBackground(t.colors.background,bg,'background',resolve(bg.url)):'';
 }
