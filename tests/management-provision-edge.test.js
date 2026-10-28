@@ -6,7 +6,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {stripTypeScriptTypes} from 'node:module';
-import {createManagementProvision,validPassword,MANAGEMENT_PROVISION_MESSAGES} from '../supabase/functions/party-api/management-provision.js';
+import {createManagementProvision,validPassword,blankRoomSettings,MANAGEMENT_PROVISION_MESSAGES} from '../supabase/functions/party-api/management-provision.js';
 import {DEFAULTS} from '../src/core.js';
 
 const president={role:'super_admin',accountId:'0f4c1a52-6a1d-4d8e-9a4b-1b2c3d4e5f60'};
@@ -27,7 +27,7 @@ test('every provisioning operation rejects non-presidents before any database ca
  assert.equal(calls.length,0);
 });
 
-test('independent provisioning builds one atomic request with Core defaults and keeps the password out of the payload',async()=>{
+test('independent provisioning builds one atomic request with blank settings and keeps the password out of the payload',async()=>{
  const {m,calls}=harness();
  await m.provision({operationId:op,mode:'independent',spaceName:' 仙女 ',descriptor:{display_name:'仙女',slug:'fairy'},password:'fairy-pass-1',loginEnabled:true,accountId:'forged'},president);
  assert.equal(calls.length,1);const {path,args}=calls[0];
@@ -35,7 +35,8 @@ test('independent provisioning builds one atomic request with Core defaults and 
  assert.equal(args.subject,president.accountId);assert.equal(args.operation,op);assert.equal(args.password,'fairy-pass-1');assert.equal(args.auth_user,'admin-user');
  assert.equal(args.payload.spaceName,'仙女');assert.equal(args.payload.mode,'independent');assert.equal(args.payload.loginEnabled,true);
  assert.deepEqual(args.payload.room,{id:'room-uuid',slug:'fairy',display_name:'仙女',home_title:'仙女',subtitle:'',description:'',avatar_url:'',banner_url:'',active:true,created_at:'2026-10-28T00:00:00.000Z',updated_at:'2026-10-28T00:00:00.000Z'});
- assert.deepEqual(args.payload.settings,{...structuredClone(DEFAULTS),tags:[]});
+ assert.deepEqual(args.payload.settings,blankRoomSettings(),'a new Space starts blank, nothing copied from 聲瑪');
+ assert.deepEqual([args.payload.settings.livePrice,args.payload.settings.tiers,args.payload.settings.plans,args.payload.settings.hourlyLimit],[0,[],[],0]);
  assert.ok(!JSON.stringify(args.payload).includes('fairy-pass-1'));assert.ok(!('spaceId' in args.payload));
  await assert.rejects(m.provision({operationId:op,mode:'independent',spaceName:'仙女',spaceId:'hall-1',descriptor:{display_name:'仙女',slug:'fairy'}},president),/不需要選擇所屬廳/);
  await assert.rejects(m.provision({operationId:op,mode:'independent',spaceName:'',descriptor:{display_name:'仙女',slug:'fairy'}},president),/空間名稱/);
@@ -45,7 +46,9 @@ test('independent provisioning builds one atomic request with Core defaults and 
 test('streamer creation, editing and validation: login code rules, password rules and no client-supplied private fields',async()=>{
  const {m,calls}=harness();
  await m.provision({operationId:op,mode:'streamer',spaceId:'hall-1',descriptor:{display_name:'星星',slug:'star',subtitle:'副標'},password:'star-pass',loginEnabled:true},president);
- assert.equal(calls[0].args.payload.spaceId,'hall-1');assert.ok(calls[0].args.payload.settings);
+ assert.equal(calls[0].args.payload.spaceId,'hall-1');assert.deepEqual(calls[0].args.payload.settings,blankRoomSettings());
+ await m.provision({operationId:op,mode:'streamer',spaceId:'space-001',descriptor:{display_name:'聲瑪新人',slug:'sm-new'}},president);
+ assert.deepEqual(calls.at(-1).args.payload.settings,{...structuredClone(DEFAULTS),tags:[]},'聲瑪 keeps its current defaults');calls.pop();
  await m.provision({operationId:op,mode:'streamer',spaceId:'hall-1',descriptor:{id:'existing',display_name:'星星改',slug:'star',active:false},expectedRevision:7},president);
  assert.deepEqual(calls[1].args.payload,{mode:'streamer',room:{id:'existing',slug:'star',display_name:'星星改',home_title:'星星改',subtitle:'',active:false},spaceId:'hall-1',expectedRevision:7});
  assert.equal(calls[1].args.password,null);

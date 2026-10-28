@@ -29,6 +29,12 @@ const name=(value,max=100)=>typeof value==='string'&&value.trim().length>0&&valu
 const optionalText=(value,max)=>value===undefined||value===null||typeof value==='string'&&value.length<=max&&!/[\u0000-\u0008\u000b-\u001f\u007f]/u.test(value);
 const page=value=>Number.isSafeInteger(value)&&value>=1&&value<=100000;
 const query=value=>typeof value==='string'&&value.length<=100;
+// A new (non-聲瑪) Space starts blank (user decision 2026-10-28, pricing spec 2.2):
+// no live price, save-song plans, crown cards or request limit copied from 聲瑪.
+// 聲瑪's own new streamers keep the current 聲瑪 defaults.
+export function blankRoomSettings(){
+ return {status:'空閒中',hourlyLimit:0,opening:'',audition:0,livePrice:0,liveDouble:0,crownDouble:0,tiers:[],plans:[],tags:[],manual:''};
+}
 export function validPassword(value){
  if(value===undefined||value===null||value==='')return null;
  if(typeof value!=='string'||value.length<4||new TextEncoder().encode(value).length>72||/[\u0000-\u001f\u007f]/u.test(value))throw Error('密碼需為 4～72 個字元，且不可包含控制字元');
@@ -70,11 +76,11 @@ export function createManagementProvision({api,defaults,adminUser=null,uuid=()=>
    if(b.mode==='independent'){
     if(!name(b.spaceName))throw Error('請填獨立主播空間名稱（最多 100 字）');
     if(b.spaceId!==undefined)throw Error('獨立主播不需要選擇所屬廳');
-    payload.spaceName=b.spaceName.trim();payload.settings={...structuredClone(defaults),tags:[]};
+    payload.spaceName=b.spaceName.trim();payload.settings=blankRoomSettings();
    }else{
     if(!id(b.spaceId))throw Error('請先選擇空間');
     payload.spaceId=b.spaceId;
-    if(!editing)payload.settings={...structuredClone(defaults),tags:[]};
+    if(!editing)payload.settings=b.spaceId==='space-001'?{...structuredClone(defaults),tags:[]}:blankRoomSettings();
     if(b.expectedRevision!==undefined){if(!Number.isSafeInteger(b.expectedRevision)||b.expectedRevision<0)throw Error('管理操作格式不正確');payload.expectedRevision=b.expectedRevision;}
    }
    return rpc('papa_management_provision_streamer',{subject,operation:op,payload,password:pw,auth_user:adminUser||null});

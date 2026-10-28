@@ -10,7 +10,7 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 fs.writeFileSync(path.join(out,'index.html'),html);
 const appHtml=fs.readFileSync(path.join(root,'v2.html'),'utf8');
 for(const file of ['preview.html','v2.html'])fs.writeFileSync(path.join(out,file),appHtml);
-fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'10.28-UI.2',backendVersion:'10.28-CANCEL.1',builtAt:new Date().toISOString()}));
+fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'10.28-UI.2',backendVersion:'10.28-ADMIN.5',builtAt:new Date().toISOString()}));
 console.log('Build 10.28-UI.2 complete: static site in dist');
 
 fs.copyFileSync(path.join(root,'lobby.html'),path.join(out,'lobby.html'));
