@@ -78,14 +78,23 @@ export const actionHints={
  draft:'建立本機草稿；修改不會同步到正式站，直到你確認正式同步。',
  publish:'核對正式資料版本後將草稿同步，若資料已變動就停止覆蓋。',
  editHome:'調整目前主播首頁外觀、顯示與排序，保留其他主播的設定。',
- queueOp:'依操作更新待播狀態；完成演唱才扣存歌，取消會解除保留額度。'
+ queueOp:'依操作更新待播狀態；完成演唱才扣存歌，取消會解除保留額度。',
+ 'queueOp:approve':'確認已收到現點禮物，這首歌加入待播。',
+ 'queueOp:acknowledge':'確認收到玩家的提歌，接著可設定準備時間。',
+ 'queueOp:complete':'記錄這首已唱完；提歌與分配歌單在這時才正式扣除。',
+ 'queueOp:cancel':'取消這首尚未演唱的歌，依原來源恢復保留的額度，取消紀錄保留。',
+ 'queueOp:archive':'只把這筆歷史收起來；不回補額度，也不改演唱與存歌紀錄。',
+ 'queueOp:store':'已確認但未唱的現點，轉回玩家存歌。',
+ editQueue:'更換歌曲或演唱方式，並修改實際時間與備註。',
+ stage:'設定準備時間；0 分鐘＝已準備好，會通知玩家。',
+ cancelOwn:'取消自己這首尚未演唱的點歌，額度依原來源恢復。'
 };
 export function installActionHints(){
  const popup=document.createElement('div');popup.id='action-hint-popup';popup.className='action-hint-popup';popup.setAttribute('role','tooltip');popup.hidden=true;document.body.append(popup);
  popup.setAttribute('popover','manual');let owner=null;
  const hide=()=>{if(popup.matches?.(':popover-open'))popup.hidePopover();popup.hidden=true;owner=null;};
  const show=el=>{hide();owner=el;popup.textContent=el.dataset.hint;const overlay=el.closest('dialog[open]');(overlay||document.body).append(popup);popup.hidden=false;if(popup.showPopover)popup.showPopover();const r=el.getBoundingClientRect();popup.style.left=Math.max(8,Math.min(r.left,innerWidth-popup.offsetWidth-8))+'px';popup.style.top=Math.max(8,r.bottom+6+popup.offsetHeight>innerHeight-8?r.top-popup.offsetHeight-6:r.bottom+6)+'px';};
- function decorate(root){for(const b of root.querySelectorAll('button[data-act]')){const hint=actionHints[b.dataset.act];if(!hint||b.dataset.hintReady)continue;b.dataset.hintReady='1';b.title=hint;const info=document.createElement('button');info.type='button';info.className='action-help';info.textContent='ⓘ';info.dataset.hint=hint;info.setAttribute('aria-label','說明：'+b.textContent);info.setAttribute('aria-describedby',popup.id);{const wrap=document.createElement('span');wrap.className='queue-action-hint action-target-hint';b.before(wrap);wrap.append(b,info);}info.addEventListener('mouseenter',()=>show(info));info.addEventListener('focus',()=>{if(info.matches(':focus-visible'))show(info);});info.addEventListener('mouseleave',hide);info.addEventListener('blur',hide);info.addEventListener('click',e=>{e.stopPropagation();show(info);});}}
+ function decorate(root){for(const b of root.querySelectorAll('button[data-act]')){const hint=(b.dataset.op&&actionHints[b.dataset.act+':'+b.dataset.op])||actionHints[b.dataset.act];if(!hint||b.dataset.hintReady)continue;b.dataset.hintReady='1';b.title=hint;const info=document.createElement('button');info.type='button';info.className='action-help';info.textContent='ⓘ';info.dataset.hint=hint;info.setAttribute('aria-label','說明：'+b.textContent);info.setAttribute('aria-describedby',popup.id);{const wrap=document.createElement('span');wrap.className='queue-action-hint action-target-hint';b.before(wrap);wrap.append(b,info);}info.addEventListener('mouseenter',()=>show(info));info.addEventListener('focus',()=>{if(info.matches(':focus-visible'))show(info);});info.addEventListener('mouseleave',hide);info.addEventListener('blur',hide);info.addEventListener('click',e=>{e.stopPropagation();show(info);});}}
  decorate(document);new MutationObserver(()=>{if(owner&&!owner.isConnected)hide();decorate(document);}).observe(document.body,{childList:true,subtree:true});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});document.addEventListener('click',e=>{if(!e.target.closest('.action-help'))hide();});
  document.addEventListener('close',hide,true);document.addEventListener('cancel',hide,true);window.addEventListener('resize',hide);document.addEventListener('scroll',hide,true);
