@@ -13,7 +13,9 @@ function fixture(){
  return s;
 }
 function request(s,extra={},index=0,kind='saved',who=player(s)){
- return run(s,'request',{songId:s.songs[index].songId,kind,giftConfirmed:true,...extra},who);
+ // A half song is always requested as a whole slot: here it is sung twice.
+ const song=s.songs[index],pair=Number(song.creditCost)===0.5?{pairSongId:song.songId}:{};
+ return run(s,'request',{songId:song.songId,kind,giftConfirmed:true,...pair,...extra},who);
 }
 const op=(s,id,operation,extra={})=>run(s,'queue',{id,operation,...extra});
 function complete(s,id){

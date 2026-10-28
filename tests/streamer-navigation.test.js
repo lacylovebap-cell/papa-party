@@ -14,8 +14,12 @@ test('template names use current streamer including old default manual; brand re
  assert.equal(streamerText('{streamer}',{display_name:'$&主播'}),'$&主播');
 });
 test('every crown tier uses ordinary request double fee, preserving card-opening fee',()=>{
- const s=empty();for(const tier of TIERS){const crown={...tier,playerId:'owner',double:18188};assert.deepEqual(requestFees(s,crown,'guest'),{price:tier.price,double:500});assert.deepEqual(requestFees(s,crown,'owner'),{price:2990,double:500});assert.equal(crown.double,18188);}
- assert.deepEqual(requestFees(s,null,'guest'),{price:2990,double:500});
+ const s=empty(),pick=f=>({price:f.price,double:f.double,host:f.fees.host,hall:f.fees.hall,source:f.fees.source});
+ for(const tier of TIERS){const crown={...tier,playerId:'owner',double:18188};
+  // Only the singer's value follows the crown; host and hall stay at the ordinary 500 each.
+  assert.deepEqual(pick(requestFees(s,crown,'guest')),{price:tier.price,double:500,host:500,hall:500,source:'crown'});
+  assert.deepEqual(pick(requestFees(s,crown,'owner')),{price:2990,double:500,host:500,hall:500,source:'base'});assert.equal(crown.double,18188);}
+ assert.deepEqual(pick(requestFees(s,null,'guest')),{price:2990,double:500,host:500,hall:500,source:'base'});
 });
 test('new streamer has independent empty business data and a usable template',()=>{
  const s=mutate(empty(),{type:'streamer',data:{slug:'michelle',display_name:'米雪'}},{role:'admin'});const r=scopeState(s,'michelle');assert.equal(r.currentStreamer.home_title,'米雪');assert.equal(r.songs.length,0);assert.equal(r.settings.liveDouble,500);assert.match(streamerText(r.settings.manual,r.currentStreamer),/等米雪確認/);assert.ok(!JSON.stringify(s).includes('password_hash'));

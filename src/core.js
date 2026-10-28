@@ -5,6 +5,7 @@ import {requestSource} from './request-source.js?v=10.19-WEB.1';
 import {newPracticeReorder,newPracticeRanks,NEW_PRACTICE_TAG,isNewPracticeSong,newPracticeSongTags,newPracticeDate,setNewPracticeSong} from './new-practice.js?v=10.19-WEB.1';
 import {venuePolicySettings,venuePolicyRequestVenue,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicyBalance,venuePolicyReservedCredits,venuePolicyAvailableCredits,venuePolicySavedSnapshot} from './venue-policy.js?v=10.19-WEB.1';
 import {cardMediaInput,orderedCards} from './card-media.js?v=10.19-WEB.1';
+import {pricingFromSettings,quoteLive} from './pricing-engine.js?v=10.29-PRICE.1';
 export const TABLES=['players','songs','ledger','queue','crowns','cards','wishes'];
 export const TIERS=[{name:'金卡',fee:55599,price:4200,months:1},{name:'鉑金卡',fee:125000,price:9999,months:1},{name:'鑽石卡',fee:375000,price:18188,months:1},{name:'黑卡',fee:500000,price:27999,months:3},{name:'至尊卡',fee:925000,price:55599,months:0}];
 export const DEFAULTS={status:'空閒中',hourlyLimit:2,opening:'19:00～01:00（可能加班）',audition:387,livePrice:2990,liveDouble:500,crownDouble:18188,tiers:TIERS,plans:[{name:'一般 2 首',amount:2,fee:5555,double:990},{name:'一般 3 首',amount:3,fee:7299,double:1399},{name:'一般 6 首',amount:6,fee:13999,double:2799},{name:'🏅 金牌歌單',amount:10,fee:22887,double:4200}],tags:['嗨歌','傷感','甜歌','怪歌','慢歌'],manual:'1. 先登入玩家，再挑首喜歡的歌 ♡\n2. 提歌扣存歌，每小時有上限。\n3. 現點送出後，等{streamer}確認禮物。\n4. 冠歌主人照一般規則；其他玩家依卡別現點。'};
@@ -38,7 +39,17 @@ export const balance=(s,id,pool=venuePolicySettings(s.settings).current_space)=>
 export const playerSearch=(s,q,includeArchived=false)=>s.players.filter(p=>(includeArchived===true||!p.archived)&&[p.name,p.playerId,...p.ids,...p.names].some(v=>norm(v).includes(norm(q))));
 export const isActive=(c,t)=>!!c.activatedAt&&timeValue(c.activatedAt)<=timeValue(t)&&(!c.expiresAt||timeValue(c.expiresAt)>timeValue(t));
 // Crown.double is the card-opening fee, never the per-request fee.
-export function requestFees(s,c,playerId,cost=1){return {price:(c&&c.playerId!==playerId?Number(c.price):Number(s.settings.livePrice))*cost,double:Number(s.settings.liveDouble??500)};}
+// Live gift values come from the shared pricing engine: singer, host and hall
+// each multiply by the slots the song occupies, a song occupying several slots
+// takes the cheapest legal save-song plan combination, and a crowned song keeps
+// its own crown price. `price` (singer) and `double` (host) stay for older
+// screens; `fees` records every party and the plans used.
+export const roomPricing=s=>pricingFromSettings(s.settings,{shengma:(s.currentStreamer?.spaceId||'space-001')==='space-001'});
+export function requestFees(s,c,playerId,cost=1){
+ const quote=quoteLive(roomPricing(s),{units:Number(cost),crown:c&&c.playerId!==playerId?c:null,playerId});
+ return {price:quote.singer,double:quote.host,fees:{version:1,units:quote.units,singer:quote.singer,host:quote.host,hall:quote.hall,source:quote.source,
+  plans:quote.pieces.map(p=>({kind:p.kind,name:p.name,units:p.units,count:p.count}))}};
+}
 export const crownFor=(s,id,t)=>s.crowns.find(c=>c.songId===id&&isActive(c,t));
 export const songPlays=(s,id)=>s.queue.filter(q=>q.status==='completed'&&!q.test&&!q.selfProvided).reduce((n,q)=>n+(q.items?q.items.filter(i=>i.songId===id).reduce((v,i)=>v+i.performances,0):q.songId===id?1:0),0)+(s.songs.find(x=>x.songId===id)?.playAdjustment||0);
 export const stats=accountingStats;
@@ -343,7 +354,9 @@ export function quoteSong(s,id,payload={},playerId,t=stamp()){
  const song=s.songs.find(x=>x.songId===id);requireThat(song,'找不到歌曲');assertSongSelection(song,payload.expectedSong);if(payload.expectedPair!==undefined)requireThat(!!payload.pairSongId&&validSongSelection(payload.expectedPair),'歌曲資料已更新，請重新選擇');const cost=creditNumber(song.creditCost??1),item=x=>({songId:x.songId,title:x.title,artist:x.artist,creditCost:Number(x.creditCost??1),performances:1});
  if(cost!==0.5)return {creditCost:cost,items:[item(song)]};
  const mode=song.shortMode||'repeat';if(payload.pairSongId===id){requireThat(mode!=='pair','此歌僅可搭配指定半首');assertSongSelection(song,payload.expectedPair);return {creditCost:1,items:[{...item(song),performances:2}]};}if(payload.pairSongId){requireThat(mode==='pair'||mode==='both','這首半首歌設定為唱兩次');const pair=s.songs.find(x=>x.songId===payload.pairSongId);requireThat(pair&&pair.songId!==id&&Number(pair.creditCost)===0.5&&(song.pairSongIds||[]).includes(pair.songId),'請選擇管理員指定的搭配半首歌曲');assertSongSelection(pair,payload.expectedPair);const crown=crownFor(s,pair.songId,t);requireThat(!crown||crown.playerId===playerId,'搭配歌曲有其他玩家的有效冠歌，請另選');return {creditCost:1,items:[item(song),item(pair)]};}
- return {creditCost:0.5,items:[item(song)]};
+ // A half song never goes to the queue on its own (spec 6): sing it twice or
+ // pair it with an allowed half song so the request is one whole slot.
+ throw Error('半首歌不能單獨點，請選「本首唱兩次」或搭配一首半首歌');
 }
 const ROOM_TABLES=TABLES.filter(k=>k!=='players');
 export function upgradePlatform(source){const s=structuredClone(source||empty());if(s.schemaVersion>=3)return s;

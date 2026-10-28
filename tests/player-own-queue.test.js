@@ -48,9 +48,10 @@ test('owner batch is atomic for a room, rejects foreign/finished/hidden/noop/inj
  for(const rows of [[],[{id,operation:'cancel',songId}],[{id,operation:'cancel'},{id,operation:'cancel'}],[{id,operation:'replace',songId,giftConfirmed:'yes'}]])assert.throws(()=>validateOwnQueueBatch(rows));
  const next=applyOwnQueueBatch(s,[{id,operation:'cancel'}],actor,now,'papa');assert.equal(next.queue[0].status,'cancelled');assert.equal(next.queue.length,s.queue.length);assert.deepEqual(next.ledger,s.ledger);
 });
-test('half-song replacement releases reservations and blocks increases that exceed the original hour',()=>{
+test('half-song replacement (sung twice) releases reservations and blocks increases that exceed the original hour',()=>{
  const {s,actor,id}=fixture(),half=s.songs[2].songId;s.songs[0].creditCost=2;s.queue[0].creditCost=2;s.queue[0].items[0].creditCost=2;
- const next=run(s,'replaceOwn',{id,songId:half},actor,now);assert.equal(next.queue[0].creditCost,.5);assert.equal(savedQuota(scopeState(next),at,actor.playerId).reserved,.5);
+ assert.throws(()=>run(s,'replaceOwn',{id,songId:half},actor,now),/半首歌不能單獨點/,'a lone half is never a replacement');
+ const next=run(s,'replaceOwn',{id,songId:half,pairSongId:half},actor,now);assert.equal(next.queue[0].creditCost,1);assert.equal(savedQuota(scopeState(next),at,actor.playerId).reserved,1);
  const full=structuredClone(next);full.streamerSettings.papa.hourlyLimit=1;
  assert.throws(()=>run(full,'replaceOwn',{id,songId:s.songs[0].songId},actor,now),/原小時/);
  const insufficient=structuredClone(s);insufficient.ledger=[];assert.throws(()=>run(insufficient,'replaceOwn',{id,songId:s.songs[1].songId},actor,now),/存歌不足/);
@@ -59,7 +60,7 @@ test('allocated live replacements and cancellation conserve original receipt thr
  let {s,actor}=fixture('live');s.queue=[];s.songs[0].creditCost=2;
  s=run(s,'allocate',{playerId:actor.playerId,total:3,stored:0,items:[{songId:s.songs[0].songId},{songId:s.songs[1].songId}]},admin,at);
  const id=s.queue[0].id,half=s.songs[2].songId,oldBalance=balance(scopeState(s),actor.playerId);
- const next=run(s,'replaceOwn',{id,songId:half,giftConfirmed:true},actor,now);assert.equal(balance(scopeState(next),actor.playerId),oldBalance);assert.equal(next.queue[0].receivedCreditCost,2);
+ const next=run(s,'replaceOwn',{id,songId:half,pairSongId:half,giftConfirmed:true},actor,now);assert.equal(balance(scopeState(next),actor.playerId),oldBalance);assert.equal(next.queue[0].receivedCreditCost,2);
  const cancelled=run(next,'cancelOwn',{id},actor,now);assert.equal(balance(scopeState(cancelled),actor.playerId),oldBalance);
  assert.equal(cancelled.ledger.filter(x=>x.queueId===id&&x.allocationSettlement==='return').length,0);
  assert.throws(()=>run(cancelled,'cancelOwn',{id},actor,now),/已結束/);

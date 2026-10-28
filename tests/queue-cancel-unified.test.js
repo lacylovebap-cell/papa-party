@@ -23,7 +23,8 @@ const cancelBy=(s,id,method)=>method==='player'?run(s,'cancelOwn',{id},player(s)
 
 test('every cancel entry point uses one settlement for 1, 2 and 0.5 song saved requests',()=>{
  for(const [index,cost] of [[0,1],[1,2],[2,0.5]])for(const method of ['cancel','delete','bulk','player']){
-  let s=request(setup(),index);const q=s.queue.at(-1);
+  // A lone half can no longer be requested; 0.5 covers a record made before that rule.
+  let s=request(setup(),cost===0.5?0:index);const q=s.queue.at(-1);if(cost===0.5)q.creditCost=0.5;
   assert.equal(reserved(s),cost);assert.equal(credit(s),10);
   s=cancelBy(s,q.id,method);const row=s.queue.find(x=>x.id===q.id);
   assert.equal(row.status,'cancelled');assert.equal(reserved(s),0);assert.equal(credit(s),10,'saved credits are never debited before completion');

@@ -10,7 +10,7 @@ import {stripTypeScriptTypes} from 'node:module';
 const code=stripTypeScriptTypes('async function handler(){'+block+'}');
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
 const at='2026-10-21T04:00:00Z';
-function setup(){let s=empty();const run=(type,data)=>s=mutate(s,{type,data},{role:'admin'},at);run('player',{name:'Fixture',balance:20});run('settings',{livePrice:1200,liveDouble:300,hourlyLimit:20});for(const cost of [.5,2])run('song',{title:'Song '+cost,artist:'Singer',creditCost:cost});return s;}
+function setup(){let s=empty();const run=(type,data)=>s=mutate(s,{type,data},{role:'admin'},at);run('player',{name:'Fixture',balance:20});run('settings',{livePrice:1200,liveDouble:300,hourlyLimit:20});for(const cost of [1,2])run('song',{title:'Song '+cost,artist:'Singer',creditCost:cost});return s;}
 async function execute(source,b){const reads=[],writes=[];const who={role:'player',accountId:'fixture',playerId:source.players[0].playerId,spaceId:'space-001'};
  const values={b,who,t:at,validateRequestBatch,applyPlayerRequestBatch,respond:x=>x,catalogRoom:async()=>({id:'papa',spaceId:'space-001'}),load:async(...args)=>{reads.push(args);return structuredClone(source);},coreActor:x=>x,catalogSelectionContext:async state=>({state,finish:x=>x}),revisionConflictError:()=>Error('revision mismatch'),commit:async(...args)=>{writes.push(args);return {revision:source.revision+1};},operationProof:()=>{throw Error('Quote must not touch receipts');}};
  const result=await new AsyncFunction(...Object.keys(values),code+';return handler();')(...Object.values(values));return {result,reads,writes};
@@ -19,7 +19,7 @@ test('batch quote uses lean scoped snapshot, preserves source and never writes r
  const source=setup(),before=structuredClone(source),rows=source.songs.map(s=>({songId:s.songId,kind:'live',giftConfirmed:true}));
  const response=await execute(source,{op:'requestBatchQuote',revision:source.revision,jobs:[{streamer:'papa',rows}],operationId:'malicious-receipt'});
  assert.deepEqual(source,before);assert.deepEqual(response.writes,[]);assert.equal(response.reads.length,1);assert.deepEqual(response.reads[0],[true,'papa','space-001',null,source.players[0].playerId]);
- const item=response.result.results[0];assert.equal(item.ok,true,item.error);assert.deepEqual(item.quotes.map(q=>[q.creditCost,q.price,q.double]),[[.5,600,300],[2,2400,300]]);
+ const item=response.result.results[0];assert.equal(item.ok,true,item.error);assert.deepEqual(item.quotes.map(q=>[q.creditCost,q.price,q.double]),[[1,1200,300],[2,2400,600]]);
  const committed=await execute(source,{op:'requestsBatch',revision:source.revision,jobs:[{streamer:'papa',rows}]});assert.equal(committed.writes.length,1);assert.deepEqual(committed.writes[0][1].queue.map(q=>q.price),item.quotes.map(q=>q.price));
 });
 test('quote rejects stale revisions and hidden songs without writes',async()=>{
