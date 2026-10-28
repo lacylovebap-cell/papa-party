@@ -125,13 +125,13 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
 /* One-time device setup: no header reflow, no business overlay. */
 .notice-first-setup{position:fixed;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:80;display:flex;flex-wrap:wrap;gap:8px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:12px;background:#21192d;border:1px solid #78608e;border-radius:12px;box-shadow:0 8px 24px #0006}.notice-first-setup button{min-height:44px;white-space:normal}.notice-first-setup button:first-child{flex:1}
 .cancel-recovery{font-size:10px;font-weight:600;margin-left:3px;white-space:nowrap}.cancel-recovery.restored{color:#79d5b0}.cancel-recovery.review{color:#ffb86b}.cancel-recovery.none{opacity:.75}.queue-cancel-detail{display:block;font-size:11px;line-height:1.45;opacity:.85;overflow-wrap:anywhere;white-space:normal}.queue-cancel-detail.cancel-review{color:#ffb86b;opacity:1}
-/* 10.28-QUEUE.1 queue rows: title, artist, then one line of status · kind · venue · time · player. Font sizes unchanged. */
+/* 10.28-QUEUE.1 queue rows: title / artist / status · kind · venue / time · player. Font sizes of title and artist unchanged; each line stays on one line. */
 .queue-compact .queue-track.queue-stack{display:block}
-.queue-compact .queue-stack .queue-title{display:block;white-space:normal;overflow:visible;text-overflow:clip}
-.queue-compact .queue-stack .queue-artist{display:block!important;margin:2px 0 0!important;white-space:normal}
-.queue-compact .queue-meta.queue-meta-line{white-space:normal;overflow:visible;text-overflow:clip;margin-top:3px}
+.queue-compact .queue-stack .queue-title{display:block}
+.queue-compact .queue-stack .queue-artist{display:block!important;margin:2px 0 0!important}
+.queue-compact .queue-meta.queue-meta-line{display:block!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 .queue-meta-line .queue-player{display:inline!important;font-weight:600}
-.queue-more-content{flex-direction:column;align-items:flex-start}
-.queue-more-group{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.queue-more-content{flex-direction:column;align-items:flex-start;gap:5px!important}
+.queue-more-group{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
 .queue-more-group:empty{display:none}
-.queue-more-end{padding-top:6px;border-top:1px solid var(--line,#3b2d5d);align-self:stretch}
+.queue-more-end{padding-top:5px;border-top:1px solid var(--line,#3b2d5d);align-self:stretch}

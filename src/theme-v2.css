@@ -84,5 +84,3 @@
 [data-theme-v2] a.lobby-button:hover{border-color:var(--home-accent)}
 [data-theme-v2] .lobby-page .common-variant,[data-theme-v2].lobby-page .common-variant{border-color:var(--home-line)}
 [data-theme-v2] .pagination .page-jump input{background:var(--theme-input)}
-/* 10.28-QUEUE.1: the ⓘ help circle uses the flat button colour; a 135° gradient on a circle looked like an off-centre shadow. */
-[data-theme-v2] button.action-help{background:var(--theme-button-solid);border:1px solid var(--theme-button-solid);color:var(--home-buttonText);box-shadow:none}

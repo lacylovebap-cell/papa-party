@@ -220,3 +220,13 @@ html #app .tabs button{min-height:30px;padding:5px 10px}
 html #app .song .actions:has([data-act=editLedger]){max-width:220px;justify-content:flex-end;gap:6px}
 html #app .actions>button:not(.tiny),html #app .card>button:not(.tiny),html #app .card>.queue-action-hint>button:not(.tiny):not(.action-help){font-size:12px;padding:6px 12px}
 html #app .song-more>summary,html #app .queue-more>summary{min-height:30px;min-width:46px;display:inline-flex;align-items:center;justify-content:center;padding:4px 10px;box-sizing:border-box}
+/* 10.28-QUEUE.1 compact queue controls: smaller buttons, bolder text; ⓘ drawn as a centred "i". */
+html #app .queue-row button:not(.action-help),html #app .queue-row .queue-more>summary{min-height:24px!important;height:auto;padding:3px 8px!important;font-size:11px!important;font-weight:600;line-height:1.2!important;border-radius:7px}
+html #app .queue-row .queue-primary button:not(.action-help){padding:4px 10px!important;font-size:12px!important}
+html #app .queue-row .queue-controls{gap:4px}
+html #app .queue-row .queue-action-hint{gap:2px}
+html #app .action-help{font-size:0!important;position:relative}
+html #app .action-help::before{content:"i";font:700 12px/1 Georgia,"Times New Roman",serif;display:block;text-align:center}
+html #app .queue-row .action-help{width:18px!important;min-width:18px!important;max-width:18px;height:18px!important;min-height:18px!important;padding:0!important;margin:0!important;flex:0 0 18px!important;display:inline-grid!important;place-items:center;border-radius:50%!important;box-sizing:border-box}
+html #app .queue-row .action-help::before{font-size:10px}
+[data-theme-v2] button.action-help{background:var(--theme-button-solid);border:1px solid var(--theme-button-solid);color:var(--home-buttonText);box-shadow:none}
