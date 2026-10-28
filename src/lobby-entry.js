@@ -4,7 +4,7 @@ import {API,PUBLISHABLE_KEY} from './config.js?v=10.20-WEB.1';
 import {createPublicLobby,installPublicLobbyLifecycle,lobbyRoomsHtml,lobbySongsHtml,LOBBY_VERSIONS} from './public-lobby.js?v=10.20-WEB.1';
 import {createPublicShare} from './share-dialog.js';
 import {createPublicLinkClient,readPublicRouteContext} from './public-links.js';
-import {installLobbyTheme} from './lobby-theme.js?v=10.28-THEME.3';
+import {installLobbyTheme} from './lobby-theme.js?v=10.28-THEME.5';
 import {lobbyPublicScope,lobbyLoginLocation,lobbyLoginIntent,lobbyLoginPrompt,openLobbyPublicShare} from './lobby-public-share.js';
 const $=s=>document.querySelector(s),escape=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mountUrl=new URL('../',import.meta.url),context=readPublicRouteContext({document,href:location.href,mountUrl});

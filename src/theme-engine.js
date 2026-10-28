@@ -64,6 +64,7 @@ export function themeEnsureContrast(fg,bg,target){
  for(let step=1;step<=40;step++){const next=themeFromHsl(h,s,lighter?Math.min(1,l+step*.025):Math.max(0,l-step*.025));if(themeContrast(next,bg)>=target)return next;}
  return lighter?'#ffffff':'#111111';
 }
+export function themeMix(hex,over,amount){const a=themeRgb(hex),b=themeRgb(over);return themeHex(a.map((n,i)=>n*(1-amount)+b[i]*amount));}
 export function themeShade(hex,delta){const [h,s,l]=themeHsl(hex);return themeFromHsl(h,s,l+delta);}
 export function themeAlpha(hex,alpha){const [r,g,b]=themeRgb(hex);return `rgba(${r},${g},${b},${Math.max(0,Math.min(1,alpha)).toFixed(3).replace(/\.?0+$/,'')||'0'})`;}
 
@@ -190,7 +191,11 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
   '--home-background':c.background,'--home-panel':c.panel,'--home-line':c.line,'--home-button':themeButtonFill(t),'--home-buttonText':c.buttonText,
   '--home-accent':c.accent,'--home-secondary':c.button2,'--home-glow':themeAlpha(c.accent,.14),'--home-text':c.text,'--home-panelText':c.text,
   '--theme-title':c.title,'--theme-nav':c.nav,'--theme-logo':c.logo,'--theme-button-solid':c.button,'--theme-muted':themeAlpha(c.text,.78),
-  '--theme-input':t.mode==='light'?'#ffffff':themeAlpha('#000000',.28),'--theme-soft':themeAlpha(c.line,t.mode==='light'?.35:.4),
+  // Opaque on purpose: the browser's own dropdown list cannot show a see-through colour
+  // and falls back to a light grey, so this is the panel colour pre-darkened by 28%.
+  '--theme-input':t.mode==='light'?'#ffffff':themeMix(c.panel,'#000000',.28),'--theme-soft':themeAlpha(c.line,t.mode==='light'?.35:.4),
+  // Unselected toggles: a light tint of the chosen button colour on the card colour.
+  '--theme-button-soft':themeMix(c.panel,c.button,t.mode==='light'?.16:.3),
   '--theme-card-fill':card?.url?themeLayeredBackground(c.panel,card,'card',resolve(card.url)):c.panel,
   '--theme-banner-mask':themeBannerMask(t),
   ...themeDividerVariables(t),

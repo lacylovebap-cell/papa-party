@@ -209,3 +209,14 @@ test('quota divider: length, thickness, colour and opacity are stored compactly 
  let s=room();s=mutate(s,{type:'settings',streamer:'papa',data:{theme:{base:'#ff0000',divider:{length:30,opacity:80}}}},{role:'admin'},'2026-10-28T00:00:00.000Z');
  assert.deepEqual(scopeState(s,'papa').settings.theme.divider,{length:30,opacity:80});
 });
+
+test('form fields use an opaque background so the browser dropdown list stays dark',()=>{
+ for(const base of ['#8b5cf6','#ff0000','#000000'])for(const mode of ['dark','light'])
+  assert.match(themeCssVariables({base,mode})['--theme-input'],/^#[0-9a-f]{6}$/,base+mode);
+});
+
+test('buttons follow the theme: toggles get an opaque tint of the button colour',()=>{
+ const v=themeCssVariables({base:'#8b5cf6',mode:'dark',colors:{button:'#6a4f7d',button2:'#070317',buttonText:'#fafafa'}});
+ assert.match(v['--theme-button-soft'],/^#[0-9a-f]{6}$/);
+ assert.equal(v['--home-button'],'linear-gradient(135deg,#6a4f7d,#070317)');
+});
