@@ -511,7 +511,7 @@ test('communication directory binds server Space and lightweight manager paths n
  assert.equal(calls.some(c=>c.path.includes('papa_v2_snapshot')),false);
 });
 
-test('president credential/media routing uses canonical directory identity and retains the native activation guard',async()=>{
+test('president credential/media routing uses canonical directory identity; new-Space logins stay in the management centre',async()=>{
  const {context,calls,request}=edge(),old=context.mockApi;
  const legacy={id:'legacy-uuid',slug:'legacy-slug',display_name:'Legacy',active:true,spaceId:'space-001'},native={id:'native-uuid',slug:'native-slug',display_name:'Native',active:true,spaceId:'space-002'};
  context.testActor={role:'super_admin',spaceId:null,accountId:'verified-president'};
@@ -521,8 +521,10 @@ test('president credential/media routing uses canonical directory identity and r
  let uploads=0;context.atob=atob;context.fetch=async()=>{uploads++;return new Response('',{status:200});};
  assert.equal((await request({op:'upload',streamer:legacy.slug,mime:'image/webp',image:'YQ=='})).status,200);assert.equal(uploads,1);
  const count=calls.filter(row=>row.path.endsWith('papa_manage_streamer_login')).length;
- for(const op of ['setStreamerAccount','upload']){const denied=await request({op,streamer:native.slug,password:'fixture-only',mime:'image/webp',image:'YQ=='});assert.equal(denied.status,400);assert.match(denied.data.error,/尚未開放/);}
- assert.equal(uploads,1);assert.equal(calls.filter(row=>row.path.endsWith('papa_manage_streamer_login')).length,count);
+ const denied=await request({op:'setStreamerAccount',streamer:native.slug,password:'fixture-only',enabled:true});assert.equal(denied.status,400);assert.match(denied.data.error,/管理中心/);
+ assert.equal(calls.filter(row=>row.path.endsWith('papa_manage_streamer_login')).length,count,'no legacy login change for a new Space');
+ // Media for an open Space's room is served like any other room (10.29-SPACE.1).
+ assert.equal((await request({op:'upload',streamer:native.slug,mime:'image/webp',image:'YQ=='})).status,200);assert.equal(uploads,2);
 });
 
 test('catalog audit actor is the verified Account and Space, never caller-provided identity',async()=>{

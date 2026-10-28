@@ -12,7 +12,7 @@ const at='2026-10-09T12:30:00Z';
 function harness(settings={}){
  const state={settings:{hourlyLimit:2,...settings},players:[{playerId:'p',name:'玩家'}],songs:[{songId:'s',title:'原本的歌曲',artist:'歌手',creditCost:2}],crowns:[],ledger:[],queue:[]};
  const modals=[],sent=[];
- const ctx=vm.createContext({listSorts:{queueHistory:'newest'},state,session:{playerId:'p'},balance,reservedCredits,queueConfirmed,queuePrepared,queuePreparation,venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot,
+ const ctx=vm.createContext({inNativeSpace:()=>false,listSorts:{queueHistory:'newest'},state,session:{playerId:'p'},balance,reservedCredits,queueConfirmed,queuePrepared,queuePreparation,venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot,
   h:x=>String(x??''),button:(label,action,id='',classes='tiny')=>'<button data-act="'+action+'" data-id="'+id+'" class="'+classes+'">'+label+'</button>',
   select:(name,label,options,value)=>'<label>'+label+'<select name="'+name+'">'+options.map(([id,label])=>'<option value="'+id+'" '+(id===value?'selected':'')+'>'+label+'</option>').join('')+'</select></label>',
   field:(name,label,value='',type='text',extra='')=>'<label>'+label+'<input name="'+name+'" type="'+type+'" value="'+value+'" '+extra+'></label>',

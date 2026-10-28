@@ -26,7 +26,7 @@ function fixture(href='https://paparty.app/pa',{context=info(),room=rooms[0],adm
  const location={href};Object.defineProperties(location,{origin:{get:()=>new URL(location.href).origin},search:{get:()=>new URL(location.href).search},pathname:{get:()=>new URL(location.href).pathname}});
  const history={state:null,pushState(_state,_title,url){stack.splice(++position);stack.push(url);location.href=url;},replaceState(_state,_title,url){stack[position]=url;location.href=url;}};
  const initial=publicApplicationPage(href,context,'https://paparty.app/');
- c=vm.createContext({URL,URLSearchParams,publicApplicationHref,publicApplicationPage,publicPageDestination,pageLocation,pageDestination,publicStreamerDestination,location,history,
+ c=vm.createContext({inNativeSpace:()=>false,nativeNoticesOff:()=>false,URL,URLSearchParams,publicApplicationHref,publicApplicationPage,publicPageDestination,pageLocation,pageDestination,publicStreamerDestination,location,history,
   publicRouteContext:context,spaceMount:'https://paparty.app/',state:{currentStreamer:room,streamers:rooms,players:[]},streamerSlug:context?.streamerSlug||new URL(href).searchParams.get('streamer')||'papa',
   route:initial.route,tab:initial.tab,subtab:initial.subtab,selectedPlayer:initial.selectedPlayer,queueHistory:initial.queueHistory,admin,session,entryPending,demo:false,draft:null,deviceLogin:null,
   publicLinks:{info:async target=>{calls.info.push(plain(target));return lookup(target);},shareUrl:value=>'https://paparty.app'+value.canonicalPath,invalidate(){}},
@@ -54,7 +54,7 @@ test('actual pretty bootstrap partitions only room preferences and restores the 
  data.set('papa-v2-'+roomStorageKey('draft',{spaceId:'space-Q',streamerSlug:'michelle'}),JSON.stringify({id:'correct-private-draft'}));
  data.set('papa-v2-adminTab-papa',JSON.stringify('ledger'));data.set('papa-v2-draft-papa',JSON.stringify({id:'wrong-draft'}));
  const document={querySelector:()=>({textContent:JSON.stringify(record)})},href='https://paparty.app/qq.MICHELLE/admin?streamer=wrong&spaceId=wrong';
- const c=vm.createContext({URL,URLSearchParams,spaceMount:'https://paparty.app/',location:{href,search:new URL(href).search,pathname:new URL(href).pathname},deviceLogin:null,
+ const c=vm.createContext({inNativeSpace:()=>false,nativeNoticesOff:()=>false,URL,URLSearchParams,spaceMount:'https://paparty.app/',location:{href,search:new URL(href).search,pathname:new URL(href).pathname},deviceLogin:null,
   readPublicRouteContext:options=>readPublicRouteContext({...options,document}),publicApplicationHref,publicApplicationPage,roomStorageKey,empty:()=>({}),
   localStorage:{getItem:key=>{reads.push(key);return data.get(key)||null;},setItem:(key,value)=>written.push({key,value})}
  });

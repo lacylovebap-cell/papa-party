@@ -7,7 +7,7 @@ const source=fs.readFileSync('src/app.js','utf8');
 const apiSource=source.slice(source.indexOf('async function api(body){'),source.indexOf('\nfunction syncReadIdentity()'));
 function fixture(){
  const sent=[];const session={role:'player',accountId:'player',token:'player:existing'};
- const context={session,admin:null,streamerSlug:'alice',API:'https://example.test',PUBLISHABLE_KEY:'public',signatures:{},route:'center',state:{revision:1},offset:0,selectedPlayer:null,
+ const context={nativeRoomSpace:()=>null,session,admin:null,streamerSlug:'alice',API:'https://example.test',PUBLISHABLE_KEY:'public',signatures:{},route:'center',state:{revision:1},offset:0,selectedPlayer:null,
   isAdmin:()=>false,syncReadIdentity:()=> 'stable',supportsOperationReceipt:()=>false,managerSessionExpired:()=>false,acceptSessionIdentity(){},timeValue:Date.parse,webApiFailure:(_status,data)=>Error(data.error),fetch:async(_url,options)=>{sent.push(JSON.parse(options.body));return {ok:true,json:async()=>({version:1})};}};
  vm.createContext(context);context.call=vm.runInContext('('+apiSource+')',context);
  return {context,sent,session};

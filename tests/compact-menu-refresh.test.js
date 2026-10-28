@@ -9,7 +9,7 @@ const managementSource=source.split('\n').find(line=>line.startsWith('const mana
 function fixture({player=true,manager=null,president=false}={}){
  let generation=0,decoratedGeneration=-1,calls=0,wide=false,change;
  const header={set innerHTML(value){this.html=value;generation++;},get innerHTML(){return this.html;}};
- const context=vm.createContext({document:{},window:{matchMedia:()=>({matches:wide})},route:'home',demo:false,
+ const context=vm.createContext({inNativeSpace:()=>false,nativeNoticesOff:()=>false,document:{},window:{matchMedia:()=>({matches:wide})},route:'home',demo:false,
   me:()=>player?({name:'測試'}):null,session:player?{loginId:'test'}:null,admin:manager,h:String,button:(label,act)=>`<button data-act="${act}">${label}</button>`,
   $:()=>header,state:{streamers:[{id:'r1',slug:'papa',display_name:'怕怕',active:true}]},streamerSlug:'papa',
   hostName:()=> '怕怕',isAdmin:()=>!!manager,isSuperAdmin:()=>manager?.role==='super_admin',entryMembershipCount:0,

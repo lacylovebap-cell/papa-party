@@ -7107,7 +7107,9 @@ Deno.serve(async (req) => {
     if (b.op === "setStreamerAccount") {
       if (!isSuper(who))
         throw Error("僅限 PA Party總裁");
-      const room = (await managerRoom(who, b.streamer || "papa")).id;
+      const target = await managerRoom(who, b.streamer || "papa"), room = target.id;
+      if ((target.spaceId || "space-001") !== "space-001")
+        throw Error("新空間的主播登入尚未開放在這裡設定，請到管理中心設定");
       if (b.password != null && typeof b.password !== "string")
         throw Error("密碼格式不正確");
       const result = await api("/rest/v1/rpc/papa_manage_streamer_login", { room, password: b.password || null, active: b.enabled === true, auth_user: ADMIN || null });

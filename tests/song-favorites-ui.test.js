@@ -10,7 +10,7 @@ function ui(){
  const calls=[],view={page:0,rows:[{songId:'S1',title:'Not previously requested',artist:'Singer',tags:[]}],total:1,loading:false,error:null,flags:{S1:true},pendingSongIds:[]};
  const state={settings:{},players:[{playerId:'P1',name:'Owner',ids:[],names:[]},{playerId:'P2',name:'Other',ids:[],names:[]}],songs:[{songId:'S1',plays:7}],queue:[],crowns:[],cards:[],wishes:[],ledger:[]};
  const nodes=Array.from({length:70},(_,i)=>({dataset:{id:'S'+i},setAttribute(key,value){this[key]=value;}}));
- const context=vm.createContext({state,session:{accountId:'A1',playerId:'P1'},selectedFavorites:new Set(),selectedFavoriteRows:new Map(),favoriteSelectionIdentity:'',route:'center',subtab:'favorites',demo:false,
+ const context=vm.createContext({inNativeSpace:()=>false,state,session:{accountId:'A1',playerId:'P1'},selectedFavorites:new Set(),selectedFavoriteRows:new Map(),favoriteSelectionIdentity:'',route:'center',subtab:'favorites',demo:false,
   songFavorites:{state:()=>view,loadFlags:async ids=>calls.push({flags:ids}),load:async options=>calls.push({load:options}),setFavorite:async(songId,favorite)=>{calls.push({songId,favorite});return {songId,favorite,changed:true};}},
   document:{querySelectorAll:()=>nodes},h:x=>String(x??''),blank:x=>'<p>'+x+'</p>',say:()=>'',clock:()=>'',plays:s=>s.plays||0,crownFor:()=>null,song:id=>state.songs.find(s=>s.songId===id),
   button:(label,action,id='',cls='',extra='')=>'<button data-act="'+action+'" data-id="'+id+'" '+extra+'>'+label+'</button>',toast:x=>calls.push({toast:x}),loginDialog:async()=>calls.push({login:true})});

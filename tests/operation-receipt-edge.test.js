@@ -151,9 +151,9 @@ test('legacy receipt adapter retains its exact RPC payload and omits native acto
  assert.equal(request.path,'/rest/v1/rpc/papa_operation_receipt');
  assert.deepEqual(Object.keys(request.body).sort(),['requested_actor','requested_operation','requested_room','requested_space']);
 });
-test('native business handler remains closed while the receipt dependency is prepared',async()=>{
+test('an actor from another Space cannot look up or write receipts of a 聲瑪 room',async()=>{
  const f=fixture();f.native();const result=await f.invoke({op:'operationReceipt',operationId,intent:{op:'mutate',action}});
- assert.equal(result.status,400);assert.match(result.body.error,/資料頁尚未開放/);
+ assert.equal(result.status,400);assert.match(result.body.error,/找不到主播|資料頁尚未開放/);
  assert.equal(f.requests.some(r=>r.path.endsWith('/papa_native_operation_receipt')||r.path.endsWith('/papa_operation_receipt')),false);
  assert.equal(f.writes(),0);assert.equal(f.pushes(),0);
 });
