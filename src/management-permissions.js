@@ -3,7 +3,7 @@
 // cannot accidentally become available to a narrowly delegated account.
 const songs=new Set(['songSearch','catalogTemplates','catalogConfirmed','catalogCandidates','catalogCandidate','catalogReview','catalogAction','catalogLink','catalogUnlink','catalogReport','catalogLyrics','lyrics','songLyrics','newPracticePage','favoriteAudience']);
 const reports=new Set(['events','activityPage','listeningHistoryPage']);
-const accountOnly=new Set(['deviceRegister','deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences','nativePushRegister','nativePushDisable','changeManagerPassword','platformManagementSession','platformManagementDetail','platformManageSpace','platformManagementDirectory','platformManagementDependencies','platformStreamerSave','platformDirectory','spaces','spaceResolve','spaceEntry']);
+const accountOnly=new Set(['deviceRegister','deviceRefresh','deviceLogout','deviceSwitchSpace','deviceSpacePreferences','nativePushRegister','nativePushDisable','changeManagerPassword','platformManagementSession','platformManagementDetail','platformManageSpace','platformManagementDirectory','platformManagementDependencies','platformStreamerSave','platformDirectory','spaces','spaceResolve','spaceEntry','publicHallTheme','hallThemeEdit','hallThemeSave']);
 const songActions=new Set(['song','songsBulk','restoreSongEdits','lyrics','newPracticeSet','newPracticeOrder','songOrder','wishAdmin']);
 const queueActions=new Set(['queue','onBehalf','streamerDraw','queueOrder']);
 const playerActions=new Set(['player','ledger','allocate','extraQuota','crown','card']);
