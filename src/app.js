@@ -24,7 +24,7 @@ import {createChat} from './chat.js?v=10.20-WEB.1';
 import {requestSourceLabel} from './request-source.js?v=10.20-WEB.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=10.20-WEB.1';
 import {openHomeEditor} from './home-editor.js?v=10.20-WEB.1';
-import {themeApply,themeClear,themeBannerImageStyle,themeBannerUrl,themeDecorHtml,themeDecorMotion} from './theme-render.js?v=10.29-THEME.1';
+import {themeApply,themeClear,themeBannerImageStyle,themeBannerUrl,themeDecorHtml,themeDecorMotion} from './theme-render.js?v=10.29-THEME.2';
 import {streamerName,streamerText,streamerDestination,publicStreamerDestination,pageLocation,pageDestination} from './streamer-navigation.js?v=10.21-WEB.3';
 import {publicPageDestination} from './public-route-location.js?v=10.20-WEB.1';
 import {readPublicRouteContext,publicApplicationHref,publicApplicationPage,createPublicLinkClient} from './public-links.js';
@@ -46,8 +46,8 @@ import {createWebSpaceEntry} from './web-space-entry.js?v=10.20-WEB.1&pwa=1';
 import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.20-WEB.1&pwa=1';
 import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.20-WEB.1';
 import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.20-WEB.1';
-import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.29-THEME.1';
-import {createMedalManagement} from './medal-management.js?v=10.29-THEME.1';
+import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.29-THEME.2';
+import {createMedalManagement} from './medal-management.js?v=10.29-THEME.2';
 import {roomPricing,roomRollover,queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,requestFees,reservedCredits,reservedHour,savedQuota,songSelection,cancelRecovery} from './core.js?v=10.29-SPACE.1';
 import {formatGift} from './pricing-engine.js?v=10.29-SPACE.1';
 import {feeColumns,giftReveal,priceGuide,crownGuide} from './pricing-ui.js?v=10.29-SPACE.1';
@@ -736,7 +736,7 @@ function editHome(){openHomeEditor({home:state.settings.home,room:state.currentS
 function applyHomeTheme(){const root=document.documentElement;if(state.settings.theme){themeApply(root,state.settings.theme);return;}themeClear(root);if(!state.settings.home){delete root.dataset.homeTheme;return;}root.dataset.homeTheme='custom';for(const [k,v] of Object.entries(themePalette(state.settings.home.color,state.settings.home.themeColors)))root.style.setProperty('--home-'+k,v);}
 // Decorations only on the streamer homepage; other pages inherit colours and images only.
 function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme,home=!['admin','common-book','book','center','gallery'].includes(route);if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=home&&theme?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html)app.insertAdjacentHTML('beforeend',html);themeDecorMotion(document,html?theme:null,{host:app});}
-async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=10.28-UI.2',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=10.29-THEME.1');}
+async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=10.29-THEME.2',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=10.29-THEME.2');}
 async function openThemeDesigner(){
  if(demo||draft)throw Error('首頁主題設計請在正式同步模式使用');if(!admin)throw Error('請先登入管理');
  const {openThemeStudio}=await loadThemeStudio();const room=state.currentStreamer,space=state.streamers.find(r=>r.id===room.id)?.spaceId||room.spaceId||'space-001';
