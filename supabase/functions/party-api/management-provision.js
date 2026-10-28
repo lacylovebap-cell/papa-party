@@ -21,6 +21,14 @@ export const MANAGEMENT_PROVISION_MESSAGES={
  OPERATION_CONFLICT:'這筆操作內容已變更，請關閉視窗後重新操作',
  MANAGEMENT_PAYLOAD_INVALID:'管理資料格式不正確',
  MANAGEMENT_QUERY_INVALID:'管理查詢格式不正確',
+ SPACE_PROVISIONING_REQUIRED:'請先建立主播與可登入的帳號，才能開放營運',
+ SPACE_PLAYER_CODE_TAKEN:'這個玩家登入代碼已有人使用，請換一個',
+ SPACE_PLAYER_CODE_INVALID:'玩家登入代碼請用 2～40 個小寫英文、數字、- 或 _',
+ SPACE_PLAYER_PASSWORD_INVALID:'密碼需為 4～72 個字元',
+ SPACE_PLAYER_ACTOR_INVALID:'只有獨立主播或總裁可以管理此空間的玩家',
+ SPACE_PLAYER_SCOPE_INVALID:'此空間尚未開放營運',
+ SPACE_PLAYER_TARGET_INVALID:'找不到此玩家',
+ PLAYER_ARCHIVE_PENDING_QUEUE:'這位玩家還有待播歌曲，請先處理再刪除',
 };
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 const SLUG=/^[a-z0-9][a-z0-9-]{0,39}$/;
