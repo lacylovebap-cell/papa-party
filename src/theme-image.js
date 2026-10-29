@@ -1,7 +1,7 @@
 // Browser-side image preparation: resize per role, encode WebP (alpha kept),
 // and step quality down only until the role's target size is met. Nothing is
 // uploaded here; the editor previews the compressed blob locally.
-import {THEME_IMAGE_ROLES} from './theme-engine.js?v=10.29-THEME.2';
+import {THEME_IMAGE_ROLES} from './theme-engine.js?v=10.29-BANNER.1';
 
 // Hard ceilings mirror the Edge upload limits.
 export const THEME_UPLOAD_LIMIT={background:900*1024,banner:800*1024,card:600*1024,decor:500*1024};

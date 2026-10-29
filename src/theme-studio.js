@@ -2,9 +2,9 @@
 // All edits stay in this module's memory. The network is used only for:
 // one access check when opening, one hall-theme read when switching to the
 // hall, image uploads on save/publish, and the save/publish write itself.
-import {THEME_GRADIENTS,THEME_GRADIENT_DESIGNS,themeGradientPalette,THEME_COLOR_KEYS,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
- themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.29-THEME.2';
-import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.29-THEME.2';
+import {THEME_GRADIENTS,THEME_GRADIENT_DESIGNS,themeGradientPalette,THEME_COLOR_KEYS,THEME_BANNER_COLOR_KEYS,themeColorValue,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
+ themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.29-BANNER.1';
+import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.29-BANNER.1';
 import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.29-THEME.2';
 import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-UI.2';
 
@@ -25,7 +25,7 @@ export const THEME_HELP={
  card:'所有一般卡片（搜尋歌本、新練歌曲、公告等）共用的一張底圖。不上傳就是純色卡片。',
  decor:'透明貼圖或插畫（建議 PNG／WebP 透明背景），可在預覽中直接拖曳位置。只顯示在首頁，不會擋住點歌、搜尋或登入按鈕。',
  opacity:'圖片顯示程度：0% 完全透明、50% 半透明、100% 完全顯示。只影響圖片本身，文字與按鈕不會變透明。',
- mask:'遮罩深淺：在圖片上蓋一層與頁面底色相同的顏色，數值越高圖片越暗（淺色模式越淡），文字越清楚。和透明度是兩支不同的滑桿。',
+ mask:'遮罩深淺：在圖片上蓋一層可自訂顏色的遮罩（未自訂時跟隨頁面底色），數值越高圖片越暗（淺色模式越淡），文字越清楚。和透明度是兩支不同的滑桿。',
  maskWidth:'遮罩寬度：遮罩覆蓋範圍的寬窄（以橫幅寬度的百分比計算，手機和電腦都會等比例套用）。',
  maskPosition:'遮罩位置：把遮罩主要覆蓋的區域往左或往右移。0% 在最左、100% 在最右。也可以直接拖曳預覽中的中央控制線。',
  maskFeather:'遮罩羽化：遮罩邊緣的柔和程度。數值低邊界較明顯，數值高過渡較自然。',
@@ -120,7 +120,7 @@ export function openThemeStudio(options){
    <p class="ts-label">快速配色範本 ${help('gradients')}</p><div class="ts-templates">${THEME_TEMPLATES.map(x=>`<button type="button" data-template="${x.id}"><i style="background:${x.base}"></i>${x.name}<small>${x.mode==='dark'?'深色':'淺色'}</small></button>`).join('')}<button type="button" data-gradient-toggle class="${ui.gradientsOpen?'on':''}" aria-expanded="${ui.gradientsOpen}"><i style="background:linear-gradient(135deg,#7546b8,#df9cae,#318c94)"></i>🌈 更多漸層<small>30 種完整配色</small></button></div>${gradientSelector(t)}</section>
   <section class="ts-section"><h3>3. 模式與按鈕</h3><div class="ts-row"><span class="ts-label">深淺模式 ${help('mode')}</span><div class="ts-seg"><button type="button" data-mode="dark" class="${t.mode==='dark'?'on':''}">🌙 深色</button><button type="button" data-mode="light" class="${t.mode==='light'?'on':''}">☀️ 淺色</button></div></div>
    <div class="ts-row"><span class="ts-label">按鈕樣式 ${help('button')}</span><div class="ts-seg"><button type="button" data-btnstyle="gradient" class="${t.button==='gradient'?'on':''}">漸層</button><button type="button" data-btnstyle="solid" class="${t.button==='solid'?'on':''}">單色</button></div></div></section>
-  <section class="ts-section"><h3>4. 自動配色展示與個別微調 ${help('colors')}</h3><div class="ts-palette">${THEME_COLOR_KEYS.map(k=>`<div class="ts-color"><input type="color" value="${t.colors[k]}" data-color="${k}" aria-label="${h(THEME_COLOR_LABELS[k])}"><span>${h(THEME_COLOR_LABELS[k])}${k==='logo'?help('logo'):k==='panel'?help('panel'):''}<small>${k==='logo'&&!tg.manual.has(k)?'透明（選色後才有底色）':t.colors[k].toUpperCase()}${tg.manual.has(k)?' ・手動':''}</small></span>${tg.manual.has(k)?`<button type="button" class="ts-reset" data-color-auto="${k}" title="回到自動配色" aria-label="${h(THEME_COLOR_LABELS[k])}回到自動配色">↺</button>`:''}</div>`).join('')}</div>
+  <section class="ts-section"><h3>4. 自動配色展示與個別微調 ${help('colors')}</h3><div class="ts-palette">${[...THEME_COLOR_KEYS,...THEME_BANNER_COLOR_KEYS].map(k=>`<div class="ts-color"><input type="color" value="${themeColorValue(t,k)}" data-color="${k}" aria-label="${h(THEME_COLOR_LABELS[k])}"><span>${h(THEME_COLOR_LABELS[k])}${k==='logo'?help('logo'):k==='panel'?help('panel'):''}<small>${k==='logo'&&!tg.manual.has(k)?'透明（選色後才有底色）':themeColorValue(t,k).toUpperCase()}${tg.manual.has(k)?' ・手動':''}</small></span>${tg.manual.has(k)?`<button type="button" class="ts-reset" data-color-auto="${k}" title="回到自動配色" aria-label="${h(THEME_COLOR_LABELS[k])}回到自動配色">↺</button>`:''}</div>`).join('')}</div>
    
    <p class="ts-hint">文字對比：${report.map(r=>`<span class="${r.ok?'ok':'bad'}">${h(r.label)} ${r.ratio}:1</span>`).join('、')}${bad.length?'<br>⚠️ 有項目對比不足，文字可能不易閱讀。':''}</p></section>
   </fieldset>
@@ -246,7 +246,7 @@ export function openThemeStudio(options){
  function markDirty(render=true){const tg=current();tg.dirty=true;tg.reset=false;if(render)renderControlsSoon();syncActions();}
  function regenerate(all){
   const tg=current(),t=tg.working,auto=(t.gradient?themeGradientPalette(t.gradient,t.mode)?.colors:null)||themeSmartPalette(t.base,t.mode);
-  if(all)tg.manual.clear();
+  if(all){tg.manual.clear();for(const k of THEME_BANNER_COLOR_KEYS)delete t.colors[k];}
   for(const k of THEME_COLOR_KEYS)if(!tg.manual.has(k))t.colors[k]=auto[k];
   t.manual=[...tg.manual];
  }
@@ -309,7 +309,7 @@ export function openThemeStudio(options){
   if(el.dataset.btnstyle){t.button=el.dataset.btnstyle;markDirty();schedule();return;}
   if(el.matches('[data-divider-follow]')){if(t.divider){const {color,...rest}=t.divider;t.divider=rest;}markDirty();schedule();return;}
   if(el.matches('[data-divider-reset]')){delete t.divider;markDirty();schedule();return;}
-  if(el.dataset.colorAuto){tg.manual.delete(el.dataset.colorAuto);t.manual=[...tg.manual];t.colors[el.dataset.colorAuto]=((t.gradient?themeGradientPalette(t.gradient,t.mode)?.colors:null)||themeSmartPalette(t.base,t.mode))[el.dataset.colorAuto];markDirty();schedule();return;}
+  if(el.dataset.colorAuto){tg.manual.delete(el.dataset.colorAuto);t.manual=[...tg.manual];if(THEME_BANNER_COLOR_KEYS.includes(el.dataset.colorAuto))delete t.colors[el.dataset.colorAuto];else t.colors[el.dataset.colorAuto]=((t.gradient?themeGradientPalette(t.gradient,t.mode)?.colors:null)||themeSmartPalette(t.base,t.mode))[el.dataset.colorAuto];markDirty();schedule();return;}
   if(el.dataset.remove){const role=el.dataset.remove;if(role==='banner'){const {url,...rest}=t.images.banner||{};t.images.banner=rest;}else delete t.images[role];markDirty();renderPage();return;}
   if(el.dataset.decorRemove!==undefined){t.decor.splice(Number(el.dataset.decorRemove),1);markDirty();renderPage();return;}
   if(el.dataset.decorReset!==undefined){const d=t.decor[Number(el.dataset.decorReset)];if(d){d.x=50;d.y=20;d.size=18;}markDirty();schedule();return;}

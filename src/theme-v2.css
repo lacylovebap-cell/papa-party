@@ -38,9 +38,9 @@
 /* Banner: panel colour, then the picture, then the adjustable mask band, then text. */
 [data-theme-v2] .integrated-hero{background:var(--home-panel);border-color:var(--home-line)}
 [data-theme-v2] .integrated-hero:after{background:var(--theme-banner-mask)}
-[data-theme-v2] .hero-overlay h2,[data-theme-v2] .hero-overlay .now-playing strong{color:var(--theme-title)}
-[data-theme-v2] .hero-overlay .status-note,[data-theme-v2] .hero-overlay .now-playing,[data-theme-v2] .hero-overlay p{color:var(--home-text)}
-[data-theme-v2] .hero-overlay .hour small{color:var(--theme-muted)}
+[data-theme-v2] .hero-overlay h2,[data-theme-v2] .hero-overlay .now-playing strong{color:var(--theme-banner-title,var(--theme-title))}
+[data-theme-v2] .hero-overlay .status-note,[data-theme-v2] .hero-overlay .now-playing,[data-theme-v2] .hero-overlay p{color:var(--theme-banner-text,var(--home-text))}
+[data-theme-v2] .hero-overlay .hour small{color:var(--theme-banner-muted,var(--theme-muted))}
 /* Divider above the hourly quota: drawn as its own layer so its length,
    thickness, colour and opacity change without moving the text. */
 [data-theme-v2] .hero-overlay .hour{position:relative;border-top:0}
@@ -84,3 +84,7 @@
 [data-theme-v2] a.lobby-button:hover{border-color:var(--home-accent)}
 [data-theme-v2] .lobby-page .common-variant,[data-theme-v2].lobby-page .common-variant{border-color:var(--home-line)}
 [data-theme-v2] .pagination .page-jump input{background:var(--theme-input)}
+
+[data-theme-v2] .hero-overlay .hour strong{color:var(--theme-banner-quota,var(--home-text))}
+[data-theme-v2] .theme-hall-banner-text h1{color:var(--theme-banner-title,var(--theme-title))}
+[data-theme-v2] .theme-hall-banner-text p{color:var(--theme-banner-muted,var(--theme-muted))}

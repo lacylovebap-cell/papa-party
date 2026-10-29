@@ -6,7 +6,9 @@
 
 export const THEME_VERSION=1;
 export const THEME_COLOR_KEYS=['background','nav','logo','panel','line','button','button2','buttonText','title','text','accent'];
-export const THEME_COLOR_LABELS={background:'頁面底色',nav:'頂部導覽列',logo:'Logo 區底色',panel:'卡片底色',line:'邊框顏色',button:'按鈕主色',button2:'按鈕漸層第二色',buttonText:'按鈕文字',title:'標題文字',text:'一般說明文字',accent:'強調色'};
+export const THEME_BANNER_COLOR_KEYS=['bannerMask','bannerTitle','bannerText'];
+export function themeColorValue(theme,key){return theme.colors[key]||theme.colors[{bannerMask:'background',bannerTitle:'title',bannerText:'text'}[key]];}
+export const THEME_COLOR_LABELS={background:'頁面底色',nav:'頂部導覽列',logo:'Logo 區底色',panel:'卡片底色',line:'邊框顏色',button:'按鈕主色',button2:'按鈕漸層第二色',buttonText:'按鈕文字',title:'一般標題文字',text:'一般說明文字',bannerMask:'橫幅遮罩顏色',bannerTitle:'橫幅標題文字',bannerText:'橫幅說明文字',accent:'強調色'};
 export const THEME_TEMPLATES=[
  {id:'violet-night',name:'紫夜',base:'#8b5cf6',mode:'dark'},
  {id:'peach',name:'蜜桃',base:'#ff8a7a',mode:'light'},
@@ -239,11 +241,12 @@ export function themeNormalize(input,{hall=false}={}){
  const v=input&&typeof input==='object'&&!Array.isArray(input)?input:{},base=themeHexPattern.test(v.base||'')?v.base.toLowerCase():'#8b5cf6',mode=v.mode==='light'?'light':'dark';
  const auto=(v.gradient?themeGradientPalette(v.gradient,mode):null)?.colors||themeSmartPalette(base,mode),colors={};
  for(const key of THEME_COLOR_KEYS)colors[key]=themeHexPattern.test(v.colors?.[key]||'')?v.colors[key].toLowerCase():auto[key];
+ for(const key of THEME_BANNER_COLOR_KEYS)if(themeHexPattern.test(v.colors?.[key]||''))colors[key]=v.colors[key].toLowerCase();
  const images={};
  for(const role of ['background','banner','card']){const image=themeImage(role,v.images?.[role],hall);if(image)images[role]=image;}
  const decor=(Array.isArray(v.decor)?v.decor:[]).filter(d=>d&&themeAsset(d.url)).slice(0,THEME_DECOR_LIMIT).map(d=>({url:d.url,x:themeNumber(d.x,[0,100],50),y:themeNumber(d.y,[0,100],20),size:themeNumber(d.size,[4,60],18),opacity:themeNumber(d.opacity,[0,100],100),...(Object.hasOwn(THEME_DECOR_MOTIONS,d.motion)&&d.motion!=='none'?{motion:d.motion}:{})}));
  // Colours the user tuned by hand survive a base/mode change until the next one-click palette.
- const manual=[...new Set((Array.isArray(v.manual)?v.manual:[]).filter(k=>THEME_COLOR_KEYS.includes(k)))];
+ const manual=[...new Set((Array.isArray(v.manual)?v.manual:[]).filter(k=>[...THEME_COLOR_KEYS,...THEME_BANNER_COLOR_KEYS].includes(k)))];
  const divider={},dv=v.divider&&typeof v.divider==='object'&&!Array.isArray(v.divider)?v.divider:{};
  if(themeHexPattern.test(dv.color||''))divider.color=dv.color.toLowerCase();
  for(const [k,range] of Object.entries(themeDividerRanges)){const n=themeNumber(dv[k],range,THEME_DIVIDER_DEFAULTS[k]);if(n!==THEME_DIVIDER_DEFAULTS[k])divider[k]=n;}
@@ -255,7 +258,7 @@ export function themeValidate(value,{hall=false,owner=null}={}){
  if(!value||typeof value!=='object'||Array.isArray(value))throw Error('主題設定格式不正確');
  if(value.gradient!==undefined&&!THEME_GRADIENTS.some(p=>p.id===value.gradient))throw Error('請選有效的漸層配色');
  if(!themeHexPattern.test(value.base||''))throw Error('請選有效的主色');
- if(value.colors!==undefined&&(!value.colors||typeof value.colors!=='object'||Array.isArray(value.colors)||Object.entries(value.colors).some(([k,c])=>!THEME_COLOR_KEYS.includes(k)||!themeHexPattern.test(c))))throw Error('配色請使用有效的六碼色彩');
+ if(value.colors!==undefined&&(!value.colors||typeof value.colors!=='object'||Array.isArray(value.colors)||Object.entries(value.colors).some(([k,c])=>![...THEME_COLOR_KEYS,...THEME_BANNER_COLOR_KEYS].includes(k)||!themeHexPattern.test(c))))throw Error('配色請使用有效的六碼色彩');
  const urls=[...['background','banner','card'].map(r=>value.images?.[r]?.url).filter(Boolean),...(Array.isArray(value.decor)?value.decor.map(d=>d?.url):[])];
  if(Array.isArray(value.decor)&&value.decor.length>THEME_DECOR_LIMIT)throw Error('裝飾圖片最多 '+THEME_DECOR_LIMIT+' 張');
  for(const url of urls){const asset=themeAsset(url);if(!asset)throw Error('圖片尚未上傳完成，請重新選擇圖片');if(asset.kind!==(hall?'h':'s')||owner!==null&&asset.owner!==owner)throw Error('圖片不屬於目前的主播或廳，請重新上傳');}
@@ -271,7 +274,7 @@ export function themeSame(a,b){return JSON.stringify(a?themeNormalize(a):null)==
 export function themeImageValue(image,role){return {...THEME_IMAGE_DEFAULTS[role],...(image||{})};}
 // Band mask: solid between the band edges, feathered ramps outside them.
 export function themeBannerMask(theme,banner){
- const t=themeNormalize(theme),b=themeImageValue(banner??t.images.banner,'banner'),color=t.colors.background,alpha=b.mask/100;
+ const t=themeNormalize(theme),b=themeImageValue(banner??t.images.banner,'banner'),color=themeColorValue(t,'bannerMask'),alpha=b.mask/100;
  if(alpha<=0||b.maskWidth<=0)return 'none';
  const half=b.maskWidth/2,ramp=b.maskFeather/100*35,p=b.maskPosition;
  const stops=[[p-half-ramp,0],[p-half,alpha],[p+half,alpha],[p+half+ramp,0]].map(([at,a])=>`${themeAlpha(color,a)} ${Math.round(at*10)/10}%`);
@@ -296,6 +299,7 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
  return {
   '--home-background':c.background,'--home-panel':c.panel,'--home-line':c.line,'--home-button':themeButtonFill(t),'--home-buttonText':c.buttonText,
   '--home-accent':c.accent,'--home-secondary':c.button2,'--home-glow':themeAlpha(c.accent,.14),'--home-text':c.text,'--home-panelText':c.text,
+  '--theme-banner-title':themeColorValue(t,'bannerTitle'),'--theme-banner-text':themeColorValue(t,'bannerText'),'--theme-banner-muted':c.bannerText||themeAlpha(c.text,.78),'--theme-banner-quota':c.bannerTitle||c.text,
   '--theme-title':c.title,'--theme-nav':c.nav,
   // The logo area stays transparent unless the streamer picked a colour by hand.
   '--theme-logo':(t.manual||[]).includes('logo')?c.logo:'transparent','--theme-button-solid':c.button,'--theme-muted':themeAlpha(c.text,.78),

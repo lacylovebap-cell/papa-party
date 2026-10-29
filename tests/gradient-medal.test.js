@@ -10,7 +10,7 @@ test('legacy theme normalization, variables and backgrounds are byte-equivalent;
  assert.equal(THEME_GRADIENTS.length,30);assert.equal(new Set(THEME_GRADIENTS.map(p=>p.id)).size,30);
  for(const preset of THEME_TEMPLATES)for(const mode of ['dark','light']){
   const value={base:preset.base,mode,manual:['logo'],colors:{logo:'#345678'},images:{background:{url:'https://db.example.co/storage/v1/object/public/papa-photos/themes/s/papa/'+ 'a'.repeat(64)+'.webp',opacity:63}},divider:{length:40}};
-  const t=themeNormalize(value);assert.deepEqual(t,old.themeNormalize(value));assert.deepEqual(themeCssVariables(t),old.themeCssVariables(t));assert.equal(themePageLayer(t),old.themePageLayer(t));
+  const t=themeNormalize(value);assert.deepEqual(t,old.themeNormalize(value));assert.deepEqual(themeCssVariables(t),{...old.themeCssVariables(t),'--theme-banner-title':t.colors.title,'--theme-banner-text':t.colors.text,'--theme-banner-muted':old.themeCssVariables(t)['--theme-muted'],'--theme-banner-quota':t.colors.text});assert.equal(themePageLayer(t),old.themePageLayer(t));
   for(const gradient of THEME_GRADIENTS){const selected=themeValidate({...t,gradient:gradient.id});assert.equal(selected.gradient,gradient.id);assert.match(themePageLayer(selected),/^linear-gradient/);assert.deepEqual(themeCssVariables(selected),themeCssVariables(t));delete selected.gradient;assert.deepEqual(selected,t);assert.equal(themePageLayer(selected),old.themePageLayer(t));}
  }
  assert.throws(()=>themeValidate({...themeNormalize(),gradient:'url(evil)'}));

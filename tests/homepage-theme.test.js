@@ -238,3 +238,15 @@ test('iPhone fallback: theme images use a bundled WebP encoder only when the can
   assert.match(src, /import\('\.\/vendor\/webp-enc\/webp_enc\.js'\)/);
   assert.doesNotMatch(src, /請改用新版 Chrome/);
 });
+
+ test('independent banner colours survive validation and leave global colours unchanged',()=>{
+ const before=themeNormalize({base:'#8b5cf6',mode:'light'});
+ const custom=themeValidate({...before,colors:{...before.colors,bannerMask:'#123456',bannerTitle:'#ffffff',bannerText:'#ffccaa'},manual:['bannerMask','bannerTitle','bannerText']});
+ assert.equal(custom.colors.title,before.colors.title);assert.equal(custom.colors.text,before.colors.text);assert.equal(custom.colors.background,before.colors.background);
+ assert.deepEqual(themeValidate(JSON.parse(JSON.stringify(custom))),custom);
+ assert.match(themeBannerMask(custom),/rgba\(18,52,86,/);
+ assert.equal(themeCssVariables(custom)['--theme-banner-title'],'#ffffff');assert.equal(themeCssVariables(custom)['--theme-banner-text'],'#ffccaa');
+ assert.throws(()=>themeValidate({...before,colors:{bannerMask:'url(evil)'}}));
+ for(const k of ['bannerMask','bannerTitle','bannerText'])delete custom.colors[k];
+ assert.equal(themeBannerMask(custom),themeBannerMask(before));
+ });
