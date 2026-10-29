@@ -165,3 +165,9 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
 .catalog-compact-toolbar>select,.catalog-compact-toolbar>.catalog-membership-tabs{order:0!important}
 .catalog-compact-toolbar:has(#catalog-review-version)>select{flex:1 1 0;width:0;max-width:none}
 @media(max-width:420px){.pagination.catalog-pagination>span{order:1;flex:1 0 100%;text-align:center}.pagination.catalog-pagination>label:has([data-catalog-size]){order:2}}
+
+.catalog-language-selection-row{display:flex;flex:1 0 100%;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.catalog-language-selection-row>select{flex:0 0 auto;width:auto;max-width:100%;min-width:0;margin:0;padding:6px 4px;font-size:11px}
+.catalog-compact-toolbar .catalog-language-selection-row>.catalog-selection-row{flex:0 1 auto;gap:4px}
+.catalog-language-selection-row .catalog-selection-row button{font-size:11px!important;padding:6px!important}
+.catalog-language-selection-row .catalog-selection-row small{font-size:10px}
