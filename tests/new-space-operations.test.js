@@ -261,3 +261,18 @@ test('the batch 2 rollback restores production functions, closes new Spaces and 
  assert.equal((await f.call({op:'read',streamer:'papa'},p1.body.token)).status,200);
  assert.equal(await f.fingerprint(),shengma,'聲瑪 rows untouched');
 });
+
+test('page data says whether the Space is a hall or an independent streamer (no lookup for 聲瑪)',async t=>{
+ const f=await nativeFixture(t);
+ const fairy=await fairyWithSong(f);
+ const own=await f.call({op:'read',streamer:'fairy'},fairy.token);assert.equal(own.status,200,JSON.stringify(own.body));
+ assert.equal(own.body.state.spaceKind,'independent');
+ const visitor=await f.call({op:'read',streamer:'fairy'});assert.equal(visitor.body.state.spaceKind,'independent');
+ const shengma=await f.call({op:'read',streamer:'papa'});assert.equal(shengma.status,200);assert.equal(shengma.body.state.spaceKind,'hall');
+ const hall=await f.call({op:'platformManageSpace',operationId:crypto.randomUUID(),action:'create',payload:{name:'星光廳',kind:'hall'}},f.president.token);
+ assert.equal(hall.status,200,JSON.stringify(hall.body));
+ await f.provision({mode:'streamer',spaceId:hall.body.id,name:'星星',slug:'star',password:'star-pass-1'});
+ assert.equal((await f.setSpaceStatus(hall.body.id,'restore')).status,200);
+ const star=await f.call({op:'read',streamer:'star'});assert.equal(star.status,200,JSON.stringify(star.body));assert.equal(star.body.state.spaceKind,'hall','a new hall keeps 共同歌本');
+ assert.equal((await f.call({op:'releaseInfo'})).body.spaceKind,1);
+});
