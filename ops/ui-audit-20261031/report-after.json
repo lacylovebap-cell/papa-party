@@ -71,11 +71,71 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -128,11 +188,71 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -241,11 +361,71 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -298,11 +478,71 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .",
+    "b": "button「歷史」 in .active",
+    "gap": 6
    }
   ]
  },
@@ -335,6 +575,42 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .active",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「語言篩選設定」 in .tiny",
     "b": "button「說明：語言篩選設定」 in .action-help",
@@ -348,14 +624,88 @@
   "name": "後台・玩家",
   "count": 35,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 320,
   "name": "後台・玩家詳情",
   "count": 28,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 320,
@@ -363,6 +713,42 @@
   "count": 43,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「完成演唱」 in .primary",
@@ -386,6 +772,42 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .active",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「分配」 in .tiny",
     "b": "button「說明：分配」 in .action-help",
@@ -400,6 +822,42 @@
   "count": 40,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .active",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .active",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「選取目前結果」 in .tiny",
@@ -428,14 +886,88 @@
   "name": "後台・冠歌",
   "count": 24,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 320,
   "name": "後台・卡片",
   "count": 16,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 320,
@@ -443,6 +975,42 @@
   "count": 22,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「時間」 in .tiny",
@@ -457,14 +1025,88 @@
   "name": "後台・統計",
   "count": 16,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 320,
   "name": "後台・勳章管理",
   "count": 15,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 320,
@@ -472,6 +1114,42 @@
   "count": 30,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「開始草稿測試」 in .tiny",
@@ -501,6 +1179,42 @@
   "count": 30,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「開始草稿測試」 in .tiny",
@@ -667,11 +1381,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -714,6 +1482,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -724,11 +1498,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -827,6 +1655,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -837,11 +1671,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -884,6 +1772,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -894,11 +1788,71 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .",
+    "b": "button「歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -931,6 +1885,36 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .active",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「語言篩選設定」 in .tiny",
     "b": "button「說明：語言篩選設定」 in .action-help",
@@ -944,14 +1928,76 @@
   "name": "後台・玩家",
   "count": 35,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 390,
   "name": "後台・玩家詳情",
   "count": 28,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 390,
@@ -959,6 +2005,36 @@
   "count": 43,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「完成演唱」 in .primary",
@@ -982,6 +2058,36 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .active",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「分配」 in .tiny",
     "b": "button「說明：分配」 in .action-help",
@@ -996,6 +2102,36 @@
   "count": 40,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .active",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「選取目前結果」 in .tiny",
@@ -1024,14 +2160,76 @@
   "name": "後台・冠歌",
   "count": 24,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 390,
   "name": "後台・卡片",
   "count": 16,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 390,
@@ -1039,6 +2237,36 @@
   "count": 22,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「時間」 in .tiny",
@@ -1053,14 +2281,76 @@
   "name": "後台・統計",
   "count": 16,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 390,
   "name": "後台・勳章管理",
   "count": 15,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 390,
@@ -1068,6 +2358,36 @@
   "count": 30,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「開始草稿測試」 in .tiny",
@@ -1097,6 +2417,36 @@
   "count": 30,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「開始草稿測試」 in .tiny",
@@ -1263,11 +2613,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -1310,6 +2714,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -1320,11 +2730,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -1430,6 +2894,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -1440,11 +2910,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -1487,6 +3011,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -1497,11 +3027,71 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .",
+    "b": "button「歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -1534,6 +3124,36 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .active",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「語言篩選設定」 in .tiny",
     "b": "button「說明：語言篩選設定」 in .action-help",
@@ -1547,14 +3167,76 @@
   "name": "後台・玩家",
   "count": 35,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 768,
   "name": "後台・玩家詳情",
   "count": 28,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 768,
@@ -1562,6 +3244,36 @@
   "count": 43,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「完成演唱」 in .primary",
@@ -1585,6 +3297,36 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .active",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「分配」 in .tiny",
     "b": "button「說明：分配」 in .action-help",
@@ -1599,6 +3341,36 @@
   "count": 40,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .active",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「選取目前結果」 in .tiny",
@@ -1627,14 +3399,76 @@
   "name": "後台・冠歌",
   "count": 24,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 768,
   "name": "後台・卡片",
   "count": 16,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 768,
@@ -1642,6 +3476,36 @@
   "count": 22,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「時間」 in .tiny",
@@ -1656,14 +3520,76 @@
   "name": "後台・統計",
   "count": 16,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 768,
   "name": "後台・勳章管理",
   "count": 15,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 768,
@@ -1671,6 +3597,36 @@
   "count": 30,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「開始草稿測試」 in .tiny",
@@ -1700,6 +3656,36 @@
   "count": 30,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「開始草稿測試」 in .tiny",
@@ -1866,11 +3852,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -1913,6 +3953,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -1923,11 +3969,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -2033,6 +4133,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -2043,11 +4149,65 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
    },
    {
     "kind": "緊湊例外",
@@ -2090,6 +4250,12 @@
     "b": "summary「更多」 in .queue-more",
     "gap": 4,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -2100,11 +4266,71 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「＋ 加入待播歌曲」 in .tiny",
     "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
     "gap": 6,
     "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .",
+    "b": "button「歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
    }
   ]
  },
@@ -2137,6 +4363,36 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .active",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「語言篩選設定」 in .tiny",
     "b": "button「說明：語言篩選設定」 in .action-help",
@@ -2150,14 +4406,76 @@
   "name": "後台・玩家",
   "count": 35,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 1280,
   "name": "後台・玩家詳情",
   "count": 28,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 1280,
@@ -2165,6 +4483,36 @@
   "count": 43,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「完成演唱」 in .primary",
@@ -2188,6 +4536,36 @@
   "docOverflow": 0,
   "issues": [
    {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .active",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
     "kind": "緊湊例外",
     "a": "button「分配」 in .tiny",
     "b": "button「說明：分配」 in .action-help",
@@ -2202,6 +4580,36 @@
   "count": 40,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .active",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「選取目前結果」 in .tiny",
@@ -2230,14 +4638,76 @@
   "name": "後台・冠歌",
   "count": 24,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 1280,
   "name": "後台・卡片",
   "count": 16,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 1280,
@@ -2245,6 +4715,36 @@
   "count": 22,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「時間」 in .tiny",
@@ -2259,14 +4759,76 @@
   "name": "後台・統計",
   "count": 16,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 1280,
   "name": "後台・勳章管理",
   "count": 15,
   "docOverflow": 0,
-  "issues": []
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
  },
  {
   "w": 1280,
@@ -2274,6 +4836,36 @@
   "count": 30,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「開始草稿測試」 in .tiny",
@@ -2303,6 +4895,36 @@
   "count": 30,
   "docOverflow": 0,
   "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
    {
     "kind": "緊湊例外",
     "a": "button「開始草稿測試」 in .tiny",

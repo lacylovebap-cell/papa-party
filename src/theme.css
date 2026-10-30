@@ -269,9 +269,9 @@ html #app .queue-row .queue-note-open{min-height:20px!important;padding:1px 6px!
    - an ⓘ help circle sits 6px after the button it explains (2px inside queue rows);
    - queue rows (approved 10.28-QUEUE.1/2) use 4px between their own small controls;
    - the medal card ! and ▶ icons keep their fixed 6px pair inside the card corner. */
-html :is(#app,#header,dialog,.lobby-page) :is(.actions,.dialog-actions,.pagination,.medal-filters,.medal-room-switch,.live-shortcuts,.queue-live-tools,.own-queue-toolbar,.batch-toolbar,.song-catalog-options,.catalog-membership-tabs,.song-create-actions,.toolbar){gap:8px;flex-wrap:wrap}
+html :is(#app,#header,dialog,.lobby-page) :is(.actions,.dialog-actions,.pagination,.medal-filters,.medal-room-switch,.own-queue-toolbar,.batch-toolbar,.song-catalog-options,.catalog-membership-tabs,.song-create-actions,.toolbar){gap:8px;flex-wrap:wrap}
 html :is(#app,dialog,.lobby-page) .tabs{gap:8px;flex-wrap:wrap}
-html :is(#app,dialog) :is(.player-center-tabs,.admin-section-tabs){gap:8px}
+html :is(#app,dialog) .player-center-tabs{gap:8px}
 html :is(#app,dialog) .player-center-tabs{flex-wrap:nowrap}
 html :is(#app,dialog,.lobby-page) .pagination .page-jump{gap:8px}
 html :is(#app,dialog,.lobby-page) .queue-action-hint{gap:6px}
@@ -281,8 +281,6 @@ html #header .header-tools{gap:8px}
 .medal-room-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
 .medal-room-list>button{margin:0;max-width:100%;white-space:normal;text-align:left}
 .medal-room-switch{margin:0 0 8px}
-/* Phone width: six admin tabs no longer fit in one row without clipping 「共同曲庫」. */
-@media(max-width:420px){html #app .admin-section-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}html #app .admin-section-tabs:has(>.admin-more-tabs[open]){margin-bottom:184px}}
 /* 10.31 spacing pass: containers that set their own smaller gap (some with !important). */
 html :is(#app,dialog,.lobby-page) .pagination,html :is(#app,dialog,.lobby-page) .pagination.catalog-pagination,html .notice-center-footer .pagination{gap:8px!important;flex-wrap:wrap}
 html :is(#app,dialog,.lobby-page) .pagination>.page-jump,html :is(#app,dialog) .pagination.catalog-pagination>.page-jump{gap:6px!important}
@@ -300,3 +298,8 @@ html #app .catalog-language-selection-row,html #app .catalog-compact-toolbar .ca
 @media(max-width:360px){html .lobby-page .lobby-header-actions a{padding:5px 7px;font-size:11px}html .lobby-page .lobby-header-actions{gap:8px}}
 @media(max-width:340px){html .lobby-page .header-inner{grid-template-columns:auto minmax(0,1fr) auto!important;column-gap:8px}html .lobby-page .lobby-header-actions{justify-self:center}html .lobby-page .lobby-header-actions a{padding:4px 6px}}
 html :is(#app,dialog) .medal-filters>input[type=search]{flex:1 1 150px;width:auto;min-width:0}
+/* 使用者 10/31 決定：主播後台「待播」頁維持原本排版，不套用本次間距調整。 */
+html #app .card:has(.queue-heading) .tabs{gap:6px}
+html #app .card:has(.queue-heading) .pagination{gap:6px!important}
+html #app .card:has(.queue-heading) .pagination .page-jump{gap:4px}
+html #app .admin-section-tabs{gap:6px}
