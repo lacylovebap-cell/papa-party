@@ -1,0 +1,7052 @@
+[
+ {
+  "w": 320,
+  "name": "官網入口（index）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "相貼",
+    "a": "button「歌本搜尋」 in .tabs",
+    "b": "button「骰子抽歌」 in .tabs",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「骰子抽歌」 in .tabs",
+    "b": "button「共同歌本」 in .tabs",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「共同歌本」 in .tabs",
+    "b": "button「待播管理」 in .tabs",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .demo-button",
+    "b": "button「現點」 in .demo-button",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "聲瑪大廳（lobby）",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "相貼",
+    "a": "a「PA • PARTY」 in .brand",
+    "b": "a「回官網」 in .lobby-header-actions",
+    "gap": 1.5
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「回官網」 in .lobby-header-actions",
+    "b": "a「玩家登入」 in .lobby-header-actions",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「玩家登入」 in .lobby-header-actions",
+    "b": "a「管理登入」 in .lobby-header-actions",
+    "gap": 4
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "首頁（玩家）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "歌本",
+  "count": 54,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "☰ 選單",
+  "count": 44,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「歌本」 in .tiny",
+    "b": "a「聲瑪大廳」 in .lobby-button",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「聲瑪大廳」 in .lobby-button",
+    "b": "button「共同歌本」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「分享」 in .tiny",
+    "b": "button「留言板」 in .compact-menu-items",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「玩家登入」 in .tiny",
+    "b": "a「主播登入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "玩家登入彈窗",
+  "count": 2,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "主播登入彈窗",
+  "count": 0,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・待播",
+  "count": 40,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・待播「更多」",
+  "count": 50,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「歌詞」 in .tiny",
+    "b": "button「說明：歌詞」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：歌詞」 in .action-help",
+    "b": "button「編輯換歌」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「編輯換歌」 in .tiny",
+    "b": "button「說明：編輯換歌」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：編輯換歌」 in .action-help",
+    "b": "button「準備時間」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「準備時間」 in .tiny",
+    "b": "button「說明：準備時間」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：準備時間」 in .action-help",
+    "b": "button「上移」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「下移」 in .tiny",
+    "b": "button「取消」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「取消」 in .tiny",
+    "b": "button「說明：取消」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・待播批次操作",
+  "count": 43,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・待播歷史",
+  "count": 33,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .",
+    "b": "button「歷史」 in .active",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "加入待播歌曲彈窗",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 3,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "編輯換歌彈窗",
+  "count": 7,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・歌本",
+  "count": 115,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .active",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「＋新增歌曲」 in .primary",
+    "b": "button「批量匯入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「批量匯入」 in .tiny",
+    "b": "button「新練設定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「語言篩選設定」 in .tiny",
+    "b": "button「說明：語言篩選設定」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「歌曲」 in .active",
+    "b": "button「隱藏歌曲」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「全部」 in .tiny",
+    "b": "button「已綁定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「已綁定」 in .tiny",
+    "b": "button「未綁定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「查看收藏玩家」 in .tiny",
+    "b": "button「編輯」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・玩家",
+  "count": 26,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「本主播有存歌的玩家」 in .tiny",
+    "b": "button「全部玩家」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「搜尋」 in .tiny",
+    "b": "button「新增玩家」 in .tiny",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・玩家詳情",
+  "count": 25,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「基本資料」 in .active",
+    "b": "button「點歌歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「點歌歷史」 in .",
+    "b": "button「勳章」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「勳章」 in .",
+    "b": "button「冠歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「卡片」 in .",
+    "b": "button「許願」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「許願」 in .",
+    "b": "button「存歌」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・玩家點歌歷史",
+  "count": 41,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「基本資料」 in .",
+    "b": "button「點歌歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「點歌歷史」 in .active",
+    "b": "button「勳章」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「勳章」 in .",
+    "b": "button「冠歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「卡片」 in .",
+    "b": "button「許願」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「許願」 in .",
+    "b": "button「存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・存歌",
+  "count": 27,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .active",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「編輯」 in .tiny",
+    "b": "button「分配」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「分配」 in .tiny",
+    "b": "button「說明：分配」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：分配」 in .action-help",
+    "b": "button「撤銷」 in .tiny",
+    "gap": 5,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・共同曲庫",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .active",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .active",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「版本關係」 in .active",
+    "b": "button「我的問題回報」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「全部」 in .tiny",
+    "b": "button「尚未加入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「尚未加入」 in .tiny",
+    "b": "button「已在我的歌本」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「第一頁」 in .tiny",
+    "b": "button「上一頁」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .page-jump",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 4
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・冠歌",
+  "count": 22,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「新增冠歌」 in .tiny",
+    "b": "button「批量匯入」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「批量匯入」 in .tiny",
+    "b": "button「如何冠歌？」 in .tiny",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・卡片",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・許願池",
+  "count": 20,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「處理」 in .tiny",
+    "b": "button「時間」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「時間」 in .tiny",
+    "b": "button「說明：時間」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・統計",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・勳章管理",
+  "count": 13,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・設定",
+  "count": 21,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "文字被裁切",
+    "a": "button「共同曲庫」 in .",
+    "scroll": 50,
+    "client": 44
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "設定・首頁主題設計",
+  "count": 0,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "勳章・我的勳章（目前／其他主播）",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .active",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "相貼",
+    "a": "button「目前主播」 in .!",
+    "b": "button「其他主播」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「怕怕 · 30 枚」 in .tiny",
+    "b": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "b": "button「咪醬 · 24 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "b": "button「風間駿 · 21 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「咪醬 · 24 枚」 in .tiny",
+    "b": "button「風間駿 · 21 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「咪醬 · 24 枚」 in .tiny",
+    "b": "button「樹兒 · 18 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「風間駿 · 21 枚」 in .tiny",
+    "b": "button「小楓 · 15 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「樹兒 · 18 枚」 in .tiny",
+    "b": "button「小楓 · 15 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "勳章・主播勳章榜",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .active",
+    "b": "button「全站勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "勳章・全站：擁有最多位主播",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "勳章・全站：跨主播累積勳章",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "勳章彈窗・各主播勳章",
+  "count": 11,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "上下相貼",
+    "a": "button「怕怕 · 30 枚」 in .",
+    "b": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "b": "button「咪醬 · 24 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "b": "button「風間駿 · 21 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「咪醬 · 24 枚」 in .",
+    "b": "button「風間駿 · 21 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「咪醬 · 24 枚」 in .",
+    "b": "button「樹兒 · 18 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「風間駿 · 21 枚」 in .",
+    "b": "button「小楓 · 15 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「樹兒 · 18 枚」 in .",
+    "b": "button「小楓 · 15 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「公開勳章頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「上一頁」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「上一頁」 in .",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "勳章彈窗・公開勳章",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「今日第一麥說明」 in .medal-help",
+    "b": "button「重播今日第一麥解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「夜貓點唱機說明」 in .medal-help",
+    "b": "button「重播夜貓點唱機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「嗨歌製造機說明」 in .medal-help",
+    "b": "button「重播嗨歌製造機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「失戀專業戶說明」 in .medal-help",
+    "b": "button「重播失戀專業戶解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "官網入口（index）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "相貼",
+    "a": "button「歌本搜尋」 in .tabs",
+    "b": "button「骰子抽歌」 in .tabs",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「骰子抽歌」 in .tabs",
+    "b": "button「共同歌本」 in .tabs",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「共同歌本」 in .tabs",
+    "b": "button「待播管理」 in .tabs",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「待播管理」 in .tabs",
+    "b": "button「勳章互動」 in .tabs",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .demo-button",
+    "b": "button「現點」 in .demo-button",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "聲瑪大廳（lobby）",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "a「回官網」 in .lobby-header-actions",
+    "b": "a「玩家登入」 in .lobby-header-actions",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「玩家登入」 in .lobby-header-actions",
+    "b": "a「管理登入」 in .lobby-header-actions",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "首頁（玩家）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "歌本",
+  "count": 54,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "☰ 選單",
+  "count": 44,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「歌本」 in .tiny",
+    "b": "a「聲瑪大廳」 in .lobby-button",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「聲瑪大廳」 in .lobby-button",
+    "b": "button「共同歌本」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「分享」 in .tiny",
+    "b": "button「留言板」 in .compact-menu-items",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「玩家登入」 in .tiny",
+    "b": "a「主播登入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "玩家登入彈窗",
+  "count": 2,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "主播登入彈窗",
+  "count": 0,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・待播",
+  "count": 40,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・待播「更多」",
+  "count": 50,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「歌詞」 in .tiny",
+    "b": "button「說明：歌詞」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：歌詞」 in .action-help",
+    "b": "button「編輯換歌」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「編輯換歌」 in .tiny",
+    "b": "button「說明：編輯換歌」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：編輯換歌」 in .action-help",
+    "b": "button「準備時間」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「準備時間」 in .tiny",
+    "b": "button「說明：準備時間」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：準備時間」 in .action-help",
+    "b": "button「上移」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「上移」 in .tiny",
+    "b": "button「下移」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「取消」 in .tiny",
+    "b": "button「說明：取消」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・待播批次操作",
+  "count": 43,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・待播歷史",
+  "count": 33,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .",
+    "b": "button「歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "加入待播歌曲彈窗",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 3,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "編輯換歌彈窗",
+  "count": 7,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・歌本",
+  "count": 115,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .active",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「＋新增歌曲」 in .primary",
+    "b": "button「批量匯入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「批量匯入」 in .tiny",
+    "b": "button「新練設定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「語言篩選設定」 in .tiny",
+    "b": "button「說明：語言篩選設定」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「歌曲」 in .active",
+    "b": "button「隱藏歌曲」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「全部」 in .tiny",
+    "b": "button「已綁定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「已綁定」 in .tiny",
+    "b": "button「未綁定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「查看收藏玩家」 in .tiny",
+    "b": "button「編輯」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・玩家",
+  "count": 26,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「本主播有存歌的玩家」 in .tiny",
+    "b": "button「全部玩家」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「搜尋」 in .tiny",
+    "b": "button「新增玩家」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・玩家詳情",
+  "count": 25,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「基本資料」 in .active",
+    "b": "button「點歌歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「點歌歷史」 in .",
+    "b": "button「勳章」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「勳章」 in .",
+    "b": "button「冠歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「冠歌」 in .",
+    "b": "button「卡片」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「許願」 in .",
+    "b": "button「存歌」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・玩家點歌歷史",
+  "count": 41,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「基本資料」 in .",
+    "b": "button「點歌歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「點歌歷史」 in .active",
+    "b": "button「勳章」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「勳章」 in .",
+    "b": "button「冠歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「冠歌」 in .",
+    "b": "button「卡片」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「許願」 in .",
+    "b": "button「存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・存歌",
+  "count": 27,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .active",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「編輯」 in .tiny",
+    "b": "button「分配」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「分配」 in .tiny",
+    "b": "button「說明：分配」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：分配」 in .action-help",
+    "b": "button「撤銷」 in .tiny",
+    "gap": 5,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・共同曲庫",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .active",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「版本關係」 in .active",
+    "b": "button「我的問題回報」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「全部」 in .tiny",
+    "b": "button「尚未加入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「尚未加入」 in .tiny",
+    "b": "button「已在我的歌本」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「第一頁」 in .tiny",
+    "b": "button「上一頁」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .page-jump",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「下一頁」 in .tiny",
+    "b": "button「最後一頁」 in .tiny",
+    "gap": 4
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・冠歌",
+  "count": 22,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「新增冠歌」 in .tiny",
+    "b": "button「批量匯入」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「批量匯入」 in .tiny",
+    "b": "button「如何冠歌？」 in .tiny",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・卡片",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・許願池",
+  "count": 20,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「處理」 in .tiny",
+    "b": "button「時間」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「時間」 in .tiny",
+    "b": "button「說明：時間」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・統計",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・勳章管理",
+  "count": 13,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・設定",
+  "count": 21,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "select「切換主播」 in .header-streamer",
+    "b": "button「訊息中心」 in .notice-bell",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「訊息中心」 in .notice-bell",
+    "b": "summary「開啟選單」 in .header-menu",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "設定・首頁主題設計",
+  "count": 0,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "勳章・我的勳章（目前／其他主播）",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .active",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "相貼",
+    "a": "button「目前主播」 in .!",
+    "b": "button「其他主播」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「怕怕 · 30 枚」 in .tiny",
+    "b": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「怕怕 · 30 枚」 in .tiny",
+    "b": "button「咪醬 · 24 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "b": "button「風間駿 · 21 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "b": "button「樹兒 · 18 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「咪醬 · 24 枚」 in .tiny",
+    "b": "button「風間駿 · 21 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「咪醬 · 24 枚」 in .tiny",
+    "b": "button「小楓 · 15 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「風間駿 · 21 枚」 in .tiny",
+    "b": "button「樹兒 · 18 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "勳章・主播勳章榜",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .active",
+    "b": "button「全站勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "勳章・全站：擁有最多位主播",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "勳章・全站：跨主播累積勳章",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "勳章彈窗・各主播勳章",
+  "count": 11,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "相貼",
+    "a": "button「怕怕 · 30 枚」 in .",
+    "b": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「怕怕 · 30 枚」 in .",
+    "b": "button「咪醬 · 24 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "b": "button「風間駿 · 21 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "b": "button「樹兒 · 18 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「咪醬 · 24 枚」 in .",
+    "b": "button「風間駿 · 21 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「咪醬 · 24 枚」 in .",
+    "b": "button「小楓 · 15 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「風間駿 · 21 枚」 in .",
+    "b": "button「樹兒 · 18 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「公開勳章頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「上一頁」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「上一頁」 in .",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "勳章彈窗・公開勳章",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「今日第一麥說明」 in .medal-help",
+    "b": "button「重播今日第一麥解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「夜貓點唱機說明」 in .medal-help",
+    "b": "button「重播夜貓點唱機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「嗨歌製造機說明」 in .medal-help",
+    "b": "button「重播嗨歌製造機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「失戀專業戶說明」 in .medal-help",
+    "b": "button「重播失戀專業戶解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "官網入口（index）",
+  "count": 41,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「歌本搜尋」 in .tabs",
+    "b": "button「骰子抽歌」 in .tabs",
+    "gap": 3
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「骰子抽歌」 in .tabs",
+    "b": "button「共同歌本」 in .tabs",
+    "gap": 3
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同歌本」 in .tabs",
+    "b": "button「待播管理」 in .tabs",
+    "gap": 3
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播管理」 in .tabs",
+    "b": "button「勳章互動」 in .tabs",
+    "gap": 3
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .demo-button",
+    "b": "button「現點」 in .demo-button",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "聲瑪大廳（lobby）",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "a「回官網」 in .lobby-header-actions",
+    "b": "a「玩家登入」 in .lobby-header-actions",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「玩家登入」 in .lobby-header-actions",
+    "b": "a「管理登入」 in .lobby-header-actions",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「搜尋主播」 in .toolbar",
+    "b": "button「搜尋」 in .toolbar",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「搜尋歌名或歌手」 in .toolbar",
+    "b": "button「搜尋」 in .toolbar",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "首頁（玩家）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "歌本",
+  "count": 54,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "☰ 選單",
+  "count": 44,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「歌本」 in .tiny",
+    "b": "a「聲瑪大廳」 in .lobby-button",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「聲瑪大廳」 in .lobby-button",
+    "b": "button「共同歌本」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「分享」 in .tiny",
+    "b": "button「留言板」 in .compact-menu-items",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「玩家登入」 in .tiny",
+    "b": "a「主播登入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "玩家登入彈窗",
+  "count": 2,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "主播登入彈窗",
+  "count": 0,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・待播",
+  "count": 40,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・待播「更多」",
+  "count": 50,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「歌詞」 in .tiny",
+    "b": "button「說明：歌詞」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：歌詞」 in .action-help",
+    "b": "button「編輯換歌」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「編輯換歌」 in .tiny",
+    "b": "button「說明：編輯換歌」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：編輯換歌」 in .action-help",
+    "b": "button「準備時間」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「準備時間」 in .tiny",
+    "b": "button「說明：準備時間」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：準備時間」 in .action-help",
+    "b": "button「上移」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「上移」 in .tiny",
+    "b": "button「下移」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「下移」 in .tiny",
+    "b": "button「取消」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「取消」 in .tiny",
+    "b": "button「說明：取消」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・待播批次操作",
+  "count": 43,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・待播歷史",
+  "count": 33,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .",
+    "b": "button「歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "加入待播歌曲彈窗",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 3,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「取消」 in .actions",
+    "b": "button「儲存」 in .primary",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "編輯換歌彈窗",
+  "count": 7,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「取消」 in .actions",
+    "b": "button「儲存」 in .primary",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・歌本",
+  "count": 115,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .active",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「＋新增歌曲」 in .primary",
+    "b": "button「批量匯入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「批量匯入」 in .tiny",
+    "b": "button「新練設定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「新練設定」 in .tiny",
+    "b": "button「語言篩選設定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「語言篩選設定」 in .tiny",
+    "b": "button「說明：語言篩選設定」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「歌曲」 in .active",
+    "b": "button「隱藏歌曲」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「全部」 in .tiny",
+    "b": "button「已綁定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「已綁定」 in .tiny",
+    "b": "button「未綁定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・玩家",
+  "count": 26,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「本主播有存歌的玩家」 in .tiny",
+    "b": "button「全部玩家」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「搜尋玩家」 in .toolbar",
+    "b": "button「搜尋」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「搜尋」 in .tiny",
+    "b": "button「新增玩家」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・玩家詳情",
+  "count": 25,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「基本資料」 in .active",
+    "b": "button「點歌歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「點歌歷史」 in .",
+    "b": "button「勳章」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「勳章」 in .",
+    "b": "button「冠歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「冠歌」 in .",
+    "b": "button「卡片」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「卡片」 in .",
+    "b": "button「許願」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「許願」 in .",
+    "b": "button「存歌」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・玩家點歌歷史",
+  "count": 41,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「基本資料」 in .",
+    "b": "button「點歌歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「點歌歷史」 in .active",
+    "b": "button「勳章」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「勳章」 in .",
+    "b": "button「冠歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「冠歌」 in .",
+    "b": "button「卡片」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「卡片」 in .",
+    "b": "button「許願」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「許願」 in .",
+    "b": "button「存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・存歌",
+  "count": 27,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .active",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「存歌玩家搜尋」 in .toolbar",
+    "b": "button「新增存歌」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「編輯」 in .tiny",
+    "b": "button「分配」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「分配」 in .tiny",
+    "b": "button「說明：分配」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：分配」 in .action-help",
+    "b": "button「撤銷」 in .tiny",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・共同曲庫",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .active",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「版本關係」 in .active",
+    "b": "button「我的問題回報」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「全部」 in .tiny",
+    "b": "button「尚未加入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「尚未加入」 in .tiny",
+    "b": "button「已在我的歌本」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「第一頁」 in .tiny",
+    "b": "button「上一頁」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「下一頁」 in .tiny",
+    "b": "button「最後一頁」 in .tiny",
+    "gap": 4
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・冠歌",
+  "count": 22,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「新增冠歌」 in .tiny",
+    "b": "button「批量匯入」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「批量匯入」 in .tiny",
+    "b": "button「如何冠歌？」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「編輯／生效」 in .tiny",
+    "b": "button「時間」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・卡片",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・許願池",
+  "count": 20,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「時間」 in .tiny",
+    "b": "button「說明：時間」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・統計",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・勳章管理",
+  "count": 13,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・設定",
+  "count": 21,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "設定・首頁主題設計",
+  "count": 0,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "勳章・我的勳章（目前／其他主播）",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .active",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "相貼",
+    "a": "button「目前主播」 in .!",
+    "b": "button「其他主播」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「怕怕 · 30 枚」 in .tiny",
+    "b": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "b": "button「咪醬 · 24 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「咪醬 · 24 枚」 in .tiny",
+    "b": "button「風間駿 · 21 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「風間駿 · 21 枚」 in .tiny",
+    "b": "button「樹兒 · 18 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「樹兒 · 18 枚」 in .tiny",
+    "b": "button「小楓 · 15 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "勳章・主播勳章榜",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .active",
+    "b": "button「全站勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "勳章・全站：擁有最多位主播",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "勳章・全站：跨主播累積勳章",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "勳章彈窗・各主播勳章",
+  "count": 11,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "相貼",
+    "a": "button「怕怕 · 30 枚」 in .",
+    "b": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「怕怕 · 30 枚」 in .",
+    "b": "button「小楓 · 15 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "b": "button「咪醬 · 24 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「咪醬 · 24 枚」 in .",
+    "b": "button「風間駿 · 21 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「風間駿 · 21 枚」 in .",
+    "b": "button「樹兒 · 18 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「公開勳章頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「上一頁」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「上一頁」 in .",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "勳章彈窗・公開勳章",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「今日第一麥說明」 in .medal-help",
+    "b": "button「重播今日第一麥解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「夜貓點唱機說明」 in .medal-help",
+    "b": "button「重播夜貓點唱機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「嗨歌製造機說明」 in .medal-help",
+    "b": "button「重播嗨歌製造機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「失戀專業戶說明」 in .medal-help",
+    "b": "button「重播失戀專業戶解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "官網入口（index）",
+  "count": 41,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「歌本搜尋」 in .tabs",
+    "b": "button「骰子抽歌」 in .tabs",
+    "gap": 3
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「骰子抽歌」 in .tabs",
+    "b": "button「共同歌本」 in .tabs",
+    "gap": 3
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同歌本」 in .tabs",
+    "b": "button「待播管理」 in .tabs",
+    "gap": 3
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播管理」 in .tabs",
+    "b": "button「勳章互動」 in .tabs",
+    "gap": 3
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .demo-button",
+    "b": "button「現點」 in .demo-button",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "聲瑪大廳（lobby）",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "a「回官網」 in .lobby-header-actions",
+    "b": "a「玩家登入」 in .lobby-header-actions",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「玩家登入」 in .lobby-header-actions",
+    "b": "a「管理登入」 in .lobby-header-actions",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「搜尋主播」 in .toolbar",
+    "b": "button「搜尋」 in .toolbar",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「搜尋歌名或歌手」 in .toolbar",
+    "b": "button「搜尋」 in .toolbar",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "首頁（玩家）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "歌本",
+  "count": 54,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "☰ 選單",
+  "count": 44,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「歌本」 in .tiny",
+    "b": "a「聲瑪大廳」 in .lobby-button",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "a「聲瑪大廳」 in .lobby-button",
+    "b": "button「共同歌本」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「分享」 in .tiny",
+    "b": "button「留言板」 in .compact-menu-items",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「玩家登入」 in .tiny",
+    "b": "a「主播登入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「提歌」 in .tiny",
+    "b": "button「現點」 in .tiny",
+    "gap": 5
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "玩家登入彈窗",
+  "count": 2,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "主播登入彈窗",
+  "count": 0,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・待播",
+  "count": 40,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・待播「更多」",
+  "count": 50,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「歌詞」 in .tiny",
+    "b": "button「說明：歌詞」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：歌詞」 in .action-help",
+    "b": "button「編輯換歌」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「編輯換歌」 in .tiny",
+    "b": "button「說明：編輯換歌」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：編輯換歌」 in .action-help",
+    "b": "button「準備時間」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「準備時間」 in .tiny",
+    "b": "button「說明：準備時間」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：準備時間」 in .action-help",
+    "b": "button「上移」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「上移」 in .tiny",
+    "b": "button「下移」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「下移」 in .tiny",
+    "b": "button「取消」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「取消」 in .tiny",
+    "b": "button「說明：取消」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・待播批次操作",
+  "count": 43,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .active",
+    "b": "button「歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・待播歷史",
+  "count": 33,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .active",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「空閒」 in .tiny",
+    "b": "button「忙碌」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「忙碌」 in .tiny",
+    "b": "button「準備」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「準備」 in .tiny",
+    "b": "button「暫停」 in .tiny",
+    "gap": 5
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「待播」 in .",
+    "b": "button「歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "加入待播歌曲彈窗",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 3,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「取消」 in .actions",
+    "b": "button「儲存」 in .primary",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "編輯換歌彈窗",
+  "count": 7,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「取消」 in .actions",
+    "b": "button「儲存」 in .primary",
+    "gap": 7
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・歌本",
+  "count": 115,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .active",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「＋新增歌曲」 in .primary",
+    "b": "button「批量匯入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「批量匯入」 in .tiny",
+    "b": "button「新練設定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「新練設定」 in .tiny",
+    "b": "button「語言篩選設定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「語言篩選設定」 in .tiny",
+    "b": "button「說明：語言篩選設定」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「歌曲」 in .active",
+    "b": "button「隱藏歌曲」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「全部」 in .tiny",
+    "b": "button「已綁定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「已綁定」 in .tiny",
+    "b": "button「未綁定」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・玩家",
+  "count": 26,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「本主播有存歌的玩家」 in .tiny",
+    "b": "button「全部玩家」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「搜尋玩家」 in .toolbar",
+    "b": "button「搜尋」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「搜尋」 in .tiny",
+    "b": "button「新增玩家」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・玩家詳情",
+  "count": 25,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「基本資料」 in .active",
+    "b": "button「點歌歷史」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「點歌歷史」 in .",
+    "b": "button「勳章」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「勳章」 in .",
+    "b": "button「冠歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「冠歌」 in .",
+    "b": "button「卡片」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「卡片」 in .",
+    "b": "button「許願」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「許願」 in .",
+    "b": "button「存歌」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・玩家點歌歷史",
+  "count": 41,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .active",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「基本資料」 in .",
+    "b": "button「點歌歷史」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「點歌歷史」 in .active",
+    "b": "button「勳章」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「勳章」 in .",
+    "b": "button「冠歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「冠歌」 in .",
+    "b": "button「卡片」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「卡片」 in .",
+    "b": "button「許願」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「許願」 in .",
+    "b": "button「存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・存歌",
+  "count": 27,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .active",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「存歌玩家搜尋」 in .toolbar",
+    "b": "button「新增存歌」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「編輯」 in .tiny",
+    "b": "button「分配」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「分配」 in .tiny",
+    "b": "button「說明：分配」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：分配」 in .action-help",
+    "b": "button「撤銷」 in .tiny",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・共同曲庫",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .active",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「版本關係」 in .active",
+    "b": "button「我的問題回報」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「全部」 in .tiny",
+    "b": "button「尚未加入」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「尚未加入」 in .tiny",
+    "b": "button「已在我的歌本」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「第一頁」 in .tiny",
+    "b": "button「上一頁」 in .tiny",
+    "gap": 4
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「下一頁」 in .tiny",
+    "b": "button「最後一頁」 in .tiny",
+    "gap": 4
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・冠歌",
+  "count": 22,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「新增冠歌」 in .tiny",
+    "b": "button「批量匯入」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「批量匯入」 in .tiny",
+    "b": "button「如何冠歌？」 in .tiny",
+    "gap": 7
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「編輯／生效」 in .tiny",
+    "b": "button「時間」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・卡片",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・許願池",
+  "count": 20,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「時間」 in .tiny",
+    "b": "button「說明：時間」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .tiny",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・統計",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・勳章管理",
+  "count": 13,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・設定",
+  "count": 21,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「🎤 待播」 in .",
+    "b": "button「🎵 歌本」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「🎵 歌本」 in .",
+    "b": "button「👤 玩家」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「👤 玩家」 in .",
+    "b": "button「💾 存歌」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「💾 存歌」 in .",
+    "b": "button「共同曲庫」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「共同曲庫」 in .",
+    "b": "summary「更多」 in .admin-more-tabs",
+    "gap": 6
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "設定・首頁主題設計",
+  "count": 0,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "勳章・我的勳章（目前／其他主播）",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .active",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "相貼",
+    "a": "button「目前主播」 in .!",
+    "b": "button「其他主播」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「怕怕 · 30 枚」 in .tiny",
+    "b": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .tiny",
+    "b": "button「咪醬 · 24 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「咪醬 · 24 枚」 in .tiny",
+    "b": "button「風間駿 · 21 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「風間駿 · 21 枚」 in .tiny",
+    "b": "button「樹兒 · 18 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「樹兒 · 18 枚」 in .tiny",
+    "b": "button「小楓 · 15 枚」 in .tiny",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "勳章・主播勳章榜",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .active",
+    "b": "button「全站勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "勳章・全站：擁有最多位主播",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "勳章・全站：跨主播累積勳章",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "間距不足",
+    "a": "button「我的勳章」 in .",
+    "b": "button「主播勳章榜」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「主播勳章榜」 in .",
+    "b": "button「全站勳章榜」 in .active",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「勳章列表頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "勳章彈窗・各主播勳章",
+  "count": 11,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "相貼",
+    "a": "button「怕怕 · 30 枚」 in .",
+    "b": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "上下相貼",
+    "a": "button「怕怕 · 30 枚」 in .",
+    "b": "button「小楓 · 15 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「米雪（長名稱測試主播） · 27 枚」 in .",
+    "b": "button「咪醬 · 24 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「咪醬 · 24 枚」 in .",
+    "b": "button「風間駿 · 21 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "相貼",
+    "a": "button「風間駿 · 21 枚」 in .",
+    "b": "button「樹兒 · 18 枚」 in .",
+    "gap": 0
+   },
+   {
+    "kind": "間距不足",
+    "a": "input「公開勳章頁碼」 in .pagination",
+    "b": "button「跳頁」 in .tiny",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「跳頁」 in .tiny",
+    "b": "button「上一頁」 in .",
+    "gap": 6
+   },
+   {
+    "kind": "間距不足",
+    "a": "button「上一頁」 in .",
+    "b": "button「下一頁」 in .",
+    "gap": 6
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "勳章彈窗・公開勳章",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「今日第一麥說明」 in .medal-help",
+    "b": "button「重播今日第一麥解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「夜貓點唱機說明」 in .medal-help",
+    "b": "button「重播夜貓點唱機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「嗨歌製造機說明」 in .medal-help",
+    "b": "button「重播嗨歌製造機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「失戀專業戶說明」 in .medal-help",
+    "b": "button「重播失戀專業戶解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   }
+  ]
+ }
+]

@@ -1,0 +1,2400 @@
+[
+ {
+  "w": 320,
+  "name": "官網入口（index）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "聲瑪大廳（lobby）",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "首頁（玩家）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "歌本",
+  "count": 54,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "☰ 選單",
+  "count": 44,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "玩家登入彈窗",
+  "count": 2,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "主播登入彈窗",
+  "count": 5,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・待播",
+  "count": 42,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・待播「更多」",
+  "count": 52,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「歌詞」 in .tiny",
+    "b": "button「說明：歌詞」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：歌詞」 in .action-help",
+    "b": "button「編輯換歌」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「編輯換歌」 in .tiny",
+    "b": "button「說明：編輯換歌」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：編輯換歌」 in .action-help",
+    "b": "button「準備時間」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「準備時間」 in .tiny",
+    "b": "button「說明：準備時間」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：準備時間」 in .action-help",
+    "b": "button「上移」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「下移」 in .tiny",
+    "b": "button「取消」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「取消」 in .tiny",
+    "b": "button「說明：取消」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・待播批次操作",
+  "count": 45,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・待播歷史",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "加入待播歌曲彈窗",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "編輯換歌彈窗",
+  "count": 7,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・歌本",
+  "count": 117,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「語言篩選設定」 in .tiny",
+    "b": "button「說明：語言篩選設定」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・玩家",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・玩家詳情",
+  "count": 28,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・玩家點歌歷史",
+  "count": 43,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・存歌",
+  "count": 29,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「分配」 in .tiny",
+    "b": "button「說明：分配」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・共同曲庫",
+  "count": 40,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「選取目前結果」 in .tiny",
+    "b": "button「說明：選取目前結果」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「批次通過單筆待審」 in .",
+    "b": "button「說明：批次通過單筆待審」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「人工指定同一首」 in .",
+    "b": "button「說明：人工指定同一首」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・冠歌",
+  "count": 24,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・卡片",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・許願池",
+  "count": 22,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「時間」 in .tiny",
+    "b": "button「說明：時間」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "後台・統計",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・勳章管理",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "後台・設定",
+  "count": 30,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「開始草稿測試」 in .tiny",
+    "b": "button「說明：開始草稿測試」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「掃描既有歌本候選」 in .tiny",
+    "b": "button「說明：掃描既有歌本候選」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "設定・首頁主題設計",
+  "count": 30,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「開始草稿測試」 in .tiny",
+    "b": "button「說明：開始草稿測試」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「掃描既有歌本候選」 in .tiny",
+    "b": "button「說明：掃描既有歌本候選」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 320,
+  "name": "勳章・我的勳章（目前／其他主播）",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "勳章・主播勳章榜",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "勳章・全站：擁有最多位主播",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "勳章・全站：跨主播累積勳章",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "勳章彈窗・各主播勳章",
+  "count": 11,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 320,
+  "name": "勳章彈窗・公開勳章",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「今日第一麥說明」 in .medal-help",
+    "b": "button「重播今日第一麥解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「夜貓點唱機說明」 in .medal-help",
+    "b": "button「重播夜貓點唱機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「嗨歌製造機說明」 in .medal-help",
+    "b": "button「重播嗨歌製造機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「失戀專業戶說明」 in .medal-help",
+    "b": "button「重播失戀專業戶解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "官網入口（index）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "聲瑪大廳（lobby）",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "首頁（玩家）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "歌本",
+  "count": 54,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "☰ 選單",
+  "count": 44,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "玩家登入彈窗",
+  "count": 2,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "主播登入彈窗",
+  "count": 5,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・待播",
+  "count": 42,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・待播「更多」",
+  "count": 52,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「歌詞」 in .tiny",
+    "b": "button「說明：歌詞」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：歌詞」 in .action-help",
+    "b": "button「編輯換歌」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「編輯換歌」 in .tiny",
+    "b": "button「說明：編輯換歌」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：編輯換歌」 in .action-help",
+    "b": "button「準備時間」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「準備時間」 in .tiny",
+    "b": "button「說明：準備時間」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：準備時間」 in .action-help",
+    "b": "button「上移」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「上移」 in .tiny",
+    "b": "button「下移」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「取消」 in .tiny",
+    "b": "button「說明：取消」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・待播批次操作",
+  "count": 45,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・待播歷史",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "加入待播歌曲彈窗",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "編輯換歌彈窗",
+  "count": 7,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・歌本",
+  "count": 117,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「語言篩選設定」 in .tiny",
+    "b": "button「說明：語言篩選設定」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・玩家",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・玩家詳情",
+  "count": 28,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・玩家點歌歷史",
+  "count": 43,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・存歌",
+  "count": 29,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「分配」 in .tiny",
+    "b": "button「說明：分配」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・共同曲庫",
+  "count": 40,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「選取目前結果」 in .tiny",
+    "b": "button「說明：選取目前結果」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「批次通過單筆待審」 in .",
+    "b": "button「說明：批次通過單筆待審」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「人工指定同一首」 in .",
+    "b": "button「說明：人工指定同一首」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・冠歌",
+  "count": 24,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・卡片",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・許願池",
+  "count": 22,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「時間」 in .tiny",
+    "b": "button「說明：時間」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "後台・統計",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・勳章管理",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "後台・設定",
+  "count": 30,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「開始草稿測試」 in .tiny",
+    "b": "button「說明：開始草稿測試」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「掃描既有歌本候選」 in .tiny",
+    "b": "button「說明：掃描既有歌本候選」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "設定・首頁主題設計",
+  "count": 30,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「開始草稿測試」 in .tiny",
+    "b": "button「說明：開始草稿測試」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「掃描既有歌本候選」 in .tiny",
+    "b": "button「說明：掃描既有歌本候選」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 390,
+  "name": "勳章・我的勳章（目前／其他主播）",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "勳章・主播勳章榜",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "勳章・全站：擁有最多位主播",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "勳章・全站：跨主播累積勳章",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "勳章彈窗・各主播勳章",
+  "count": 11,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 390,
+  "name": "勳章彈窗・公開勳章",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「今日第一麥說明」 in .medal-help",
+    "b": "button「重播今日第一麥解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「夜貓點唱機說明」 in .medal-help",
+    "b": "button「重播夜貓點唱機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「嗨歌製造機說明」 in .medal-help",
+    "b": "button「重播嗨歌製造機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「失戀專業戶說明」 in .medal-help",
+    "b": "button「重播失戀專業戶解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "官網入口（index）",
+  "count": 41,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "聲瑪大廳（lobby）",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "首頁（玩家）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "歌本",
+  "count": 54,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "☰ 選單",
+  "count": 44,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "玩家登入彈窗",
+  "count": 2,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "主播登入彈窗",
+  "count": 5,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・待播",
+  "count": 42,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・待播「更多」",
+  "count": 52,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「歌詞」 in .tiny",
+    "b": "button「說明：歌詞」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：歌詞」 in .action-help",
+    "b": "button「編輯換歌」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「編輯換歌」 in .tiny",
+    "b": "button「說明：編輯換歌」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：編輯換歌」 in .action-help",
+    "b": "button「準備時間」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「準備時間」 in .tiny",
+    "b": "button「說明：準備時間」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：準備時間」 in .action-help",
+    "b": "button「上移」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「上移」 in .tiny",
+    "b": "button「下移」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「下移」 in .tiny",
+    "b": "button「取消」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「取消」 in .tiny",
+    "b": "button「說明：取消」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・待播批次操作",
+  "count": 45,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・待播歷史",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "加入待播歌曲彈窗",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "編輯換歌彈窗",
+  "count": 7,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・歌本",
+  "count": 117,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「語言篩選設定」 in .tiny",
+    "b": "button「說明：語言篩選設定」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・玩家",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・玩家詳情",
+  "count": 28,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・玩家點歌歷史",
+  "count": 43,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・存歌",
+  "count": 29,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「分配」 in .tiny",
+    "b": "button「說明：分配」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・共同曲庫",
+  "count": 40,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「選取目前結果」 in .tiny",
+    "b": "button「說明：選取目前結果」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「批次通過單筆待審」 in .",
+    "b": "button「說明：批次通過單筆待審」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「人工指定同一首」 in .",
+    "b": "button「說明：人工指定同一首」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・冠歌",
+  "count": 24,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・卡片",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・許願池",
+  "count": 22,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「時間」 in .tiny",
+    "b": "button「說明：時間」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "後台・統計",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・勳章管理",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "後台・設定",
+  "count": 30,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「開始草稿測試」 in .tiny",
+    "b": "button「說明：開始草稿測試」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「掃描既有歌本候選」 in .tiny",
+    "b": "button「說明：掃描既有歌本候選」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "設定・首頁主題設計",
+  "count": 30,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「開始草稿測試」 in .tiny",
+    "b": "button「說明：開始草稿測試」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「掃描既有歌本候選」 in .tiny",
+    "b": "button「說明：掃描既有歌本候選」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 768,
+  "name": "勳章・我的勳章（目前／其他主播）",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "勳章・主播勳章榜",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "勳章・全站：擁有最多位主播",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "勳章・全站：跨主播累積勳章",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "勳章彈窗・各主播勳章",
+  "count": 11,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 768,
+  "name": "勳章彈窗・公開勳章",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「今日第一麥說明」 in .medal-help",
+    "b": "button「重播今日第一麥解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「夜貓點唱機說明」 in .medal-help",
+    "b": "button「重播夜貓點唱機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「嗨歌製造機說明」 in .medal-help",
+    "b": "button「重播嗨歌製造機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「失戀專業戶說明」 in .medal-help",
+    "b": "button「重播失戀專業戶解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "官網入口（index）",
+  "count": 41,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "聲瑪大廳（lobby）",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "首頁（玩家）",
+  "count": 36,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "歌本",
+  "count": 54,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "☰ 選單",
+  "count": 44,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "玩家登入彈窗",
+  "count": 2,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "主播登入彈窗",
+  "count": 5,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・待播",
+  "count": 42,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・待播「更多」",
+  "count": 52,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「歌詞」 in .tiny",
+    "b": "button「說明：歌詞」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：歌詞」 in .action-help",
+    "b": "button「編輯換歌」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「編輯換歌」 in .tiny",
+    "b": "button「說明：編輯換歌」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：編輯換歌」 in .action-help",
+    "b": "button「準備時間」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「準備時間」 in .tiny",
+    "b": "button「說明：準備時間」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：準備時間」 in .action-help",
+    "b": "button「上移」 in .tiny",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「上移」 in .tiny",
+    "b": "button「下移」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「下移」 in .tiny",
+    "b": "button「取消」 in .tiny",
+    "gap": 4,
+    "rule": "待播列緊湊"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「取消」 in .tiny",
+    "b": "button「說明：取消」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・待播批次操作",
+  "count": 45,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認收到」 in .primary",
+    "b": "button「說明：收到」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：收到」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「確認禮物」 in .primary",
+    "b": "button「說明：確認」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：確認」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・待播歷史",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「＋ 加入待播歌曲」 in .tiny",
+    "b": "button「說明：＋ 加入待播歌曲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "加入待播歌曲彈窗",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「抽一首」 in .tiny",
+    "b": "button「說明：🎲」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "編輯換歌彈窗",
+  "count": 7,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・歌本",
+  "count": 117,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「語言篩選設定」 in .tiny",
+    "b": "button「說明：語言篩選設定」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・玩家",
+  "count": 35,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・玩家詳情",
+  "count": 28,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・玩家點歌歷史",
+  "count": 43,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「完成演唱」 in .primary",
+    "b": "button「說明：完成」 in .action-help",
+    "gap": 2,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「說明：完成」 in .action-help",
+    "b": "summary「更多」 in .queue-more",
+    "gap": 4,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・存歌",
+  "count": 29,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「分配」 in .tiny",
+    "b": "button「說明：分配」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・共同曲庫",
+  "count": 40,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「選取目前結果」 in .tiny",
+    "b": "button「說明：選取目前結果」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「批次通過單筆待審」 in .",
+    "b": "button「說明：批次通過單筆待審」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「人工指定同一首」 in .",
+    "b": "button「說明：人工指定同一首」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・冠歌",
+  "count": 24,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・卡片",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・許願池",
+  "count": 22,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「時間」 in .tiny",
+    "b": "button「說明：時間」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "後台・統計",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・勳章管理",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "後台・設定",
+  "count": 30,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「開始草稿測試」 in .tiny",
+    "b": "button「說明：開始草稿測試」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「掃描既有歌本候選」 in .tiny",
+    "b": "button「說明：掃描既有歌本候選」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "設定・首頁主題設計",
+  "count": 30,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「開始草稿測試」 in .tiny",
+    "b": "button「說明：開始草稿測試」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「自訂首頁」 in .primary",
+    "b": "button「說明：自訂首頁」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「掃描既有歌本候選」 in .tiny",
+    "b": "button「說明：掃描既有歌本候選」 in .action-help",
+    "gap": 6,
+    "rule": "ⓘ 說明圓圈"
+   }
+  ]
+ },
+ {
+  "w": 1280,
+  "name": "勳章・我的勳章（目前／其他主播）",
+  "count": 15,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "勳章・主播勳章榜",
+  "count": 16,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "勳章・全站：擁有最多位主播",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "勳章・全站：跨主播累積勳章",
+  "count": 19,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "勳章彈窗・各主播勳章",
+  "count": 11,
+  "docOverflow": 0,
+  "issues": []
+ },
+ {
+  "w": 1280,
+  "name": "勳章彈窗・公開勳章",
+  "count": 14,
+  "docOverflow": 0,
+  "issues": [
+   {
+    "kind": "緊湊例外",
+    "a": "button「今日第一麥說明」 in .medal-help",
+    "b": "button「重播今日第一麥解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「夜貓點唱機說明」 in .medal-help",
+    "b": "button「重播夜貓點唱機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「嗨歌製造機說明」 in .medal-help",
+    "b": "button「重播嗨歌製造機解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   },
+   {
+    "kind": "緊湊例外",
+    "a": "button「失戀專業戶說明」 in .medal-help",
+    "b": "button「重播失戀專業戶解鎖動畫」 in .medal-replay",
+    "gap": 6,
+    "rule": "勳章 ! ▶ 圖示"
+   }
+  ]
+ }
+]
