@@ -3,9 +3,9 @@
 // one access check when opening, one hall-theme read when switching to the
 // hall, image uploads on save/publish, and the save/publish write itself.
 import {THEME_GRADIENTS,THEME_GRADIENT_DESIGNS,themeGradientPalette,THEME_COLOR_KEYS,THEME_BANNER_COLOR_KEYS,themeColorValue,THEME_COLOR_LABELS,THEME_TEMPLATES,THEME_SWATCHES,THEME_IMAGE_ROLES,THEME_IMAGE_DEFAULTS,THEME_DECOR_LIMIT,
- themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.29-BANNER.1';
-import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.29-BANNER.1';
-import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.29-THEME.2';
+ themeSmartPalette,themeNormalize,themeValidate,themeContrastReport,themeAsset,themeImageValue,themeSame,themeImageUrls,themeLuminance,themeDividerValue,THEME_DECOR_MOTIONS} from './theme-engine.js?v=10.31-THEME.1';
+import {themeApply,themeBannerImageStyle,themeDecorHtml,themeDecorMotion,themeDecorWidth} from './theme-render.js?v=10.31-THEME.1';
+import {themeCompressImage,themeBlobBase64,themeKB} from './theme-image.js?v=10.31-THEME.1';
 import {THEME_LOCKED_MESSAGE} from './theme-access.js?v=10.28-UI.2';
 
 const LOCAL_HOST='https://local.preview';
@@ -23,7 +23,8 @@ export const THEME_HELP={
  background:'整個頁面最底層的圖片，主播首頁、歌本、後台都會看到。不上傳就用純色底色。可拖曳小框中的圓點決定圖片焦點。',
  banner:'首頁最上方的橫幅圖。不上傳就沿用原本的主圖。可拖曳預覽中的圖片或小框圓點，調整顯示焦點。',
  card:'所有一般卡片（搜尋歌本、新練歌曲、公告等）共用的一張底圖。不上傳就是純色卡片。',
- decor:'透明貼圖或插畫（建議 PNG／WebP 透明背景），可在預覽中直接拖曳位置。只顯示在首頁，不會擋住點歌、搜尋或登入按鈕。',
+ cardAlpha:'卡片透明度：卡片背景（底色與底圖）的不透明程度。100% 完全不透明（原本外觀），50% 半透明，0% 完全透明、直接看到整頁背景。只影響卡片背景，卡片裡的文字、按鈕、輸入框與勳章都保持清楚。沒有上傳卡片底圖也可以使用。',
+ decor:'透明貼圖或插畫（建議 PNG／WebP 透明背景），可在預覽中直接拖曳位置。會顯示在主播首頁、歌本、主播後台與玩家中心（同一套主題的頁面都會出現），不會擋住點歌、搜尋或登入按鈕。',
  opacity:'圖片顯示程度：0% 完全透明、50% 半透明、100% 完全顯示。只影響圖片本身，文字與按鈕不會變透明。',
  mask:'遮罩深淺：在圖片上蓋一層可自訂顏色的遮罩（未自訂時跟隨頁面底色），數值越高圖片越暗（淺色模式越淡），文字越清楚。和透明度是兩支不同的滑桿。',
  maskWidth:'遮罩寬度：遮罩覆蓋範圍的寬窄（以橫幅寬度的百分比計算，手機和電腦都會等比例套用）。',
@@ -127,7 +128,7 @@ export function openThemeStudio(options){
   <fieldset class="ts-fieldset" ${basic?'':'disabled'}>
   <section class="ts-section"><h3>5. 整頁背景圖片 ${help('background')}</h3>${images?'':locked()}${imageBlock('background')}</section>
   <section class="ts-section"><h3>6. ${ui.target==='hall'?'廳首頁':'首頁'}橫幅 ${help('banner')}</h3>${images?'':locked()}${imageBlock('banner')}${ui.target==='streamer'?dividerBlock():''}</section>
-  <section class="ts-section"><h3>7. 統一卡片底圖 ${help('card')}</h3>${images?'':locked()}${imageBlock('card')}</section>
+  <section class="ts-section"><h3>7. 統一卡片底圖 ${help('card')}</h3>${images?'':locked()}${imageBlock('card')}${slider('cardAlpha','卡片透明度',current().working.cardAlpha??100,0,100,'cardAlpha','%',!can('basic'))}<p class="ts-hint">100% 維持原本實心卡片；數值越低，越能透出後方整頁背景。文字、按鈕與輸入框不會變淡；背景圖很花時，建議 40% 以上或提高整頁背景遮罩，文字比較好讀。</p></section>
   <section class="ts-section"><h3>8. 裝飾圖片 ${help('decor')}</h3>${images?'':locked()}${decorBlock()}</section>
   </fieldset>
   <section class="ts-section"><h3>9. 儲存與發布</h3><p class="ts-hint">儲存草稿 ${help('draft')}　發布主題 ${help('publish')}　還原預設 ${help('reset')}</p>
@@ -169,8 +170,8 @@ export function openThemeStudio(options){
    <div class="home-module wide"><section class="card wide"><div class="section-head"><h2>✨ 新練歌曲</h2><button type="button" class="tiny">查看更多</button></div>${songList(3)}</section></div>
    <div class="home-module"><section class="card"><div class="section-head"><h2>🎲 今天聽什麼？</h2></div><div class="fate">完全交給命運 🎲</div></section></div>
    <div class="home-module"><section class="card"><div class="section-head"><h2>💾 我的存歌</h2></div><div class="stat">登入後，幫你打開存歌袋 ♡</div><button type="button" class="primary">玩家登入</button></section></div><div data-decor-host></div></div>`;
-  else if(ui.page==='book')main=`<section class="card wide"><div class="section-head"><h2>📖 ${name}的歌本</h2></div><div class="toolbar"><input placeholder="搜尋歌名、歌手"><button type="button" class="primary">搜尋</button></div><p><span class="tag">抒情</span> <span class="tag">台語</span> <span class="tag">英文</span></p>${songList(6)}</section>`;
-  else if(ui.page==='admin')main=`<div class="admin-banner"><b>🔐 ${name}的管理後台</b><div class="actions"><button type="button" class="tiny">回${name}首頁</button><button type="button" class="tiny">登出管理</button></div></div><div class="tabs admin-section-tabs"><button type="button" class="tiny active">待播</button><button type="button" class="tiny">歌曲</button><button type="button" class="tiny">玩家</button><button type="button" class="tiny">設定</button></div><section class="card"><h3>待播管理</h3><p class="muted">目前待播 2 首</p>${songList(2)}<div class="actions"><button type="button" class="primary">完成演唱</button><button type="button">準備中</button></div></section>`;
+  else if(ui.page==='book')main=`<section class="card wide"><div class="section-head"><h2>📖 ${name}的歌本</h2></div><div class="toolbar"><input placeholder="搜尋歌名、歌手"><button type="button" class="primary">搜尋</button></div><p><span class="tag">抒情</span> <span class="tag">台語</span> <span class="tag">英文</span></p>${songList(6)}</section><div data-decor-host></div>`;
+  else if(ui.page==='admin')main=`<div class="admin-banner"><b>🔐 ${name}的管理後台</b><div class="actions"><button type="button" class="tiny">回${name}首頁</button><button type="button" class="tiny">登出管理</button></div></div><div class="tabs admin-section-tabs"><button type="button" class="tiny active">待播</button><button type="button" class="tiny">歌曲</button><button type="button" class="tiny">玩家</button><button type="button" class="tiny">設定</button></div><section class="card"><h3>待播管理</h3><p class="muted">目前待播 2 首</p>${songList(2)}<div class="actions"><button type="button" class="primary">完成演唱</button><button type="button">準備中</button></div></section><div data-decor-host></div>`;
   else if(ui.page==='hallcard')main=`<p class="ts-pv-tip" style="font-size:12px;opacity:.8">廳首頁的主播卡片（拖曳圖片可調整這裡的裁切，不會影響主播首頁橫幅）</p><div class="lobby-rooms">${[room.display_name,...streamerNames.filter(n=>n!==room.display_name).slice(0,3)].map((n,i)=>`<a class="lobby-room ${i?'':'ts-hallcard'}">${i===0&&src?`<img class="lobby-room-image" data-hall-img src="${h(src)}" alt="">`:''}<span aria-hidden="true">🎤</span><strong>${h(n)}</strong><small>進入主播首頁 →</small></a>`).join('')}</div>`;
   else main=`<div class="theme-home-host" data-home-host>${src?`<section class="theme-hall-banner"><img data-banner-img src="${h(src)}" alt=""><div class="theme-hall-banner-text"><h1>${h(hallName)}大廳</h1><p class="muted">選一位主播，或找一首想聽的歌。</p></div><div data-guides-host></div></section>`:`<section class="lobby-intro"><h1>${h(hallName)}大廳</h1><p class="muted">選一位主播，或找一首想聽的歌。</p></section>`}
    <section class="card"><h2>找主播</h2><div class="toolbar"><input placeholder="輸入主播名稱"><button type="button">搜尋</button></div><div class="lobby-rooms">${(streamerNames.length?streamerNames:['主播 A','主播 B','主播 C']).slice(0,6).map(n=>`<a class="lobby-room"><span aria-hidden="true">🎤</span><strong>${h(n)}</strong><small>進入主播首頁 →</small></a>`).join('')}</div></section>
@@ -193,7 +194,7 @@ export function openThemeStudio(options){
    // Rebuild only when the set of pictures or their motion changes; otherwise
    // move the existing images so sliders never reload anything.
    const sig=items.map(d=>d.url+'|'+(d.motion||'none')).join(',');
-   if(decorHost.dataset.sig!==sig){decorHost.dataset.sig=sig;decorHost.innerHTML=t?themeDecorHtml(t,{resolve,editable:true,escape:h}):'';themeDecorMotion(doc,t,{resolve,host:decorHost});}
+   if(decorHost.dataset.sig!==sig){decorHost.dataset.sig=sig;decorHost.innerHTML=t?themeDecorHtml(t,{resolve,editable:['home','hall'].includes(ui.page),escape:h}):'';themeDecorMotion(doc,t,{resolve,host:decorHost});}
    else{const byIndex=new Map([...decorHost.querySelectorAll('.theme-decor[data-decor-index]')].map(im=>[Number(im.dataset.decorIndex),im]));items.forEach((d,i)=>{const im=byIndex.get(i);if(!im)return;im.style.left=d.x+'%';im.style.top=d.y+'%';im.style.width=themeDecorWidth(d);im.style.opacity=d.opacity/100;});}
   }
   const guides=doc.querySelector('[data-guides-host]');
@@ -255,6 +256,7 @@ export function openThemeStudio(options){
   if(parts[0]==='images'){ensureImage(parts[1])[parts[2]]=n;}
   else if(parts[0]==='decor'){const d=t.decor[Number(parts[1])];if(d)d[parts[2]]=n;}
   else if(parts[0]==='divider'){t.divider={...(t.divider||{}),[parts[1]]:n};}
+  else if(parts[0]==='cardAlpha'){if(n>=100)delete t.cardAlpha;else t.cardAlpha=n;}
  }
  root.addEventListener('input',e=>{
   const el=e.target,tg=current(),t=tg.working;

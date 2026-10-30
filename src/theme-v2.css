@@ -88,3 +88,8 @@
 [data-theme-v2] .hero-overlay .hour strong{color:var(--theme-banner-quota,var(--home-text))}
 [data-theme-v2] .theme-hall-banner-text h1{color:var(--theme-banner-title,var(--theme-title))}
 [data-theme-v2] .theme-hall-banner-text p{color:var(--theme-banner-muted,var(--theme-muted))}
+/* 10.31-THEME card transparency: the card background (colour + card image) moves
+   to its own layer and fades; the card's text, buttons and inputs stay opaque.
+   Only active when the theme sets cardAlpha below 100 (root data attribute). */
+[data-theme-v2][data-theme-card-alpha] .card{background:transparent;position:relative;isolation:isolate}
+[data-theme-v2][data-theme-card-alpha] .card::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--theme-card-fill);opacity:var(--theme-card-alpha,1);z-index:-1;pointer-events:none}
