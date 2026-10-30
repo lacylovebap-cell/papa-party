@@ -90,7 +90,7 @@
   - 新增 `medalRoomSwitch()`：「目前主播／其他主播」放進同一個有間距的按鈕組，並標示目前所在的一邊。
   - `paintMedalCollection()`（我的勳章 → 其他主播清單）與 `showMedalPlayer()`（各主播勳章彈窗）：主播按鈕包進 `.medal-room-list`，不再直接串接。
   - `showOwnMedalRoom()`、勳章篩選重繪、錯誤時的「返回目前主播」：同樣改用按鈕組。
-- `src/theme.css` 末段「10.31 spacing pass」：把間距規則從只限 `#app` 擴到 `#header`、所有 `dialog`、聲瑪大廳；
+- `src/theme.css` 末段「10.31 spacing pass」（勳章排行榜搜尋框與「搜尋」維持同一排）：把間距規則從只限 `#app` 擴到 `#header`、所有 `dialog`、聲瑪大廳；
   修正分頁列（原本 `gap:6px!important`／曲庫 4px）、歌曲列提歌／現點、歌本／存歌列按鈕、冠歌卡按鈕、☰ 選單、聲瑪大廳頁首；
   手機寬度（≤420px）後台六個分頁改兩排三欄，「共同曲庫」不再被切字；320px 聲瑪大廳頁首 LOGO 不再壓到「回官網」。
 - `index.html`（官網入口內嵌樣式）：功能切換膠囊與示範「提歌／現點」按鈕改 8px。

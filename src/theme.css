@@ -299,3 +299,4 @@ html :is(#app,dialog) .song .actions{gap:8px!important}
 html #app .catalog-language-selection-row,html #app .catalog-compact-toolbar .catalog-language-selection-row>.catalog-selection-row{gap:8px}
 @media(max-width:360px){html .lobby-page .lobby-header-actions a{padding:5px 7px;font-size:11px}html .lobby-page .lobby-header-actions{gap:8px}}
 @media(max-width:340px){html .lobby-page .header-inner{grid-template-columns:auto minmax(0,1fr) auto!important;column-gap:8px}html .lobby-page .lobby-header-actions{justify-self:center}html .lobby-page .lobby-header-actions a{padding:4px 6px}}
+html :is(#app,dialog) .medal-filters>input[type=search]{flex:1 1 150px;width:auto;min-width:0}
