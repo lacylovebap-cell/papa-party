@@ -303,3 +303,39 @@ html #app .card:has(.queue-heading) .tabs{gap:6px}
 html #app .card:has(.queue-heading) .pagination{gap:6px!important}
 html #app .card:has(.queue-heading) .pagination .page-jump{gap:4px}
 html #app .admin-section-tabs{gap:6px}
+/* Player center navigation (10.31): 總覽｜點歌歷史｜我的最愛｜勳章｜更多▾, one even row at every width.
+   The 更多 list floats over the content and never pushes the page down. */
+html #app .player-center-nav{display:grid!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;overflow:visible!important;position:relative;padding-bottom:8px}
+html #app .player-center-nav>button,html #app .player-more-tabs>summary{min-width:0;min-height:36px;padding:6px 4px;font-size:clamp(11px,3.1vw,13px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+html #app .player-more-tabs{position:relative;min-width:0}
+html #app .player-more-tabs>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;height:100%;box-sizing:border-box;border:1px solid transparent;border-radius:10px;background:transparent;color:inherit}
+html #app .player-more-tabs>summary::-webkit-details-marker{display:none}
+html #app .player-more-tabs.active>summary{background:color-mix(in srgb,var(--home-accent,#785397) 30%,transparent);border-color:var(--home-accent,#785397);font-weight:600}
+html #app .player-more-options{position:absolute;right:0;top:calc(100% + 6px);z-index:40;display:grid;gap:6px;width:max(150px,100%);padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--home-panel,#19141f);box-shadow:0 10px 26px #0007}
+html #app .player-more-options>button{width:100%;min-height:38px;margin:0;text-align:left;padding:6px 12px}
+[data-theme-v2] .player-more-options{background:var(--home-panel);border-color:var(--home-line)}
+[data-theme-v2] .player-more-tabs>summary{background:var(--theme-button-soft);border-color:transparent;color:var(--home-text)}
+[data-theme-v2] .player-more-tabs.active>summary{background:var(--home-button);border-color:var(--theme-button-solid);color:var(--home-buttonText)}
+/* 存歌紀錄 under 點歌歷史 */
+html #app .player-history{margin-top:4px;scroll-margin-top:140px}
+html #app .player-ledger-balance{margin:10px 0}
+html #app .player-history-tabs,html #app .player-ledger-filter{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0 10px;padding:0;border:0}
+html #app .player-history-tabs>button,html #app .player-ledger-filter>button{min-width:0;white-space:nowrap}
+html #app .player-ledger-filter{max-width:360px}
+html #app .player-ledger-filter>button{min-height:30px;font-size:12px}
+html #app .player-history-all>.song{border-bottom:1px solid var(--line)}
+@media(min-width:700px){html #app .player-center-nav{max-width:600px}}
+html #app .queue-ledger-delta{margin-left:auto;align-self:center;flex:0 0 auto;padding-left:10px;font-weight:700;font-size:14px;white-space:nowrap}
+html #app .player-ledger-row .info{display:grid;gap:2px}
+html #app .player-ledger-row .info small{display:block}
+/* Compact balance line: 目前剩餘存歌 …… 19 首 */
+html #app .player-ledger-balance{display:flex!important;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px!important;margin:6px 0 8px;min-height:0;text-align:left;font-size:13px}
+html #app .player-ledger-balance b{display:inline!important;margin:0!important;font-size:18px!important;line-height:1.3}
+html #app .player-history-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* 點歌歷史 rows: two lines on the left (title · kind / time), amount on the right */
+html #app .player-record-row{display:flex;align-items:center;gap:12px;padding:10px 6px;border-bottom:1px solid var(--line)}
+html #app .player-record-row .info{flex:1 1 auto;min-width:0;display:grid;gap:3px}
+html #app .player-record-title{font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+html #app .player-record-title small{font-size:12px;font-weight:400;color:var(--muted)}
+html #app .player-record-time{font-size:12px;color:var(--muted)}
+html #app .player-record-amount{flex:0 0 auto;font-weight:700;font-size:15px;white-space:nowrap}

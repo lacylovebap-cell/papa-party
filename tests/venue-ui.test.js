@@ -7,7 +7,7 @@ import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venueP
 
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8').split(/\r?\n/);
 const take=prefix=>{const value=source.find(line=>line.startsWith(prefix));assert.ok(value,prefix);return value;};
-const functions=['function sortControl(','const venueName=','function venueSelector(','function venueSwitch(','function storedBalanceHtml(','function ledgerRows(','function queueSourceShort(','function queueTags(','function queueNoteLine(','function queueRows(','function updateProxyCredits(','async function requestSong(','function editVenue(','function settingsHtml('].map(take).join('\n');
+const functions=['function sortControl(','const venueName=','function venueSelector(','function venueSwitch(','function storedBalanceHtml(','function ledgerRows(','function ledgerItemHtml(','function playerLedgerItemHtml(','function ledgerSongName(','function queueSourceShort(','function queueTags(','function queueNoteLine(','function queueRows(','function updateProxyCredits(','async function requestSong(','function editVenue(','function settingsHtml('].map(take).join('\n');
 const at='2026-10-09T12:30:00Z';
 function harness(settings={}){
  const state={settings:{hourlyLimit:2,...settings},players:[{playerId:'p',name:'玩家'}],songs:[{songId:'s',title:'原本的歌曲',artist:'歌手',creditCost:2}],crowns:[],ledger:[],queue:[]};

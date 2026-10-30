@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
-const prefixes=['function favoritesIdentity(','function favoriteButton(','function syncFavoriteButtons(','function loadVisibleFavoriteFlags(','function favoritesPanelHtml(','function loadFavorites(','async function setSongFavorite(','function songRows(','function playerTabs('];
+const prefixes=['function favoritesIdentity(','function favoriteButton(','function syncFavoriteButtons(','function loadVisibleFavoriteFlags(','function favoritesPanelHtml(','function loadFavorites(','async function setSongFavorite(','function songRows(','function playerTabs(','function playerCenterNav('];
 const functions=prefixes.map(prefix=>source.split(/\r?\n/).find(line=>line.startsWith(prefix))).join('\n');
 function ui(){
  const calls=[],view={page:0,rows:[{songId:'S1',title:'Not previously requested',artist:'Singer',tags:[]}],total:1,loading:false,error:null,flags:{S1:true},pendingSongIds:[]};

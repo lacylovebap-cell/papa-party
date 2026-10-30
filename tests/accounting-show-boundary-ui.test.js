@@ -34,7 +34,7 @@ test('home uses compact authoritative cards while queue keeps centered plain tex
  ctx.state.summary.rolloverHour=0;html=ctx.homeAccounting({received:0,stored:0,sung:0});assert.ok(html.includes('2026-10-13 場'));assert.ok(html.includes('00:00 換場'));
 });
 test('only voided history is labelled as record-only; ordinary settlements have no technical preservation label',()=>{
- const code=app.split(/\r?\n/).find(line=>line.startsWith('function ledgerRows('));
+ const code=['function ledgerRows(','function ledgerItemHtml(','function playerLedgerItemHtml(','function ledgerSongName('].map(prefix=>app.split(/\r?\n/).find(line=>line.startsWith(prefix))).join('\n');
  const ctx=vm.createContext({state:{settings:{},ledger:[{id:'old',playerId:'p',amount:3,note:'原收歌',at:'2026-10-12T11:00Z',voided_at:'2026-10-12T12:00Z'},{id:'return',playerId:'p',amount:1,note:'取消待播',at:'2026-10-12T11:10Z',queueId:'q',allocationSettlement:'return'}]},venuePolicySettings,venuePolicyLedgerPool,ledgerQuery:'',paginate:rows=>({rows,nav:''}),timeValue:Date.parse,time:x=>x,h:x=>x,playerName:()=>'',venueSwitch:()=>'',button:()=>'',blank:()=>''});
  vm.runInContext(code,ctx);const html=ctx.ledgerRows('p',true);
  assert.equal(html.split('僅保留紀錄').length-1,1);assert.ok(!html.includes('保留原始紀錄'));

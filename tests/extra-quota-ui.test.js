@@ -14,7 +14,7 @@ function ui(){
  const context=vm.createContext({inNativeSpace:()=>false,state,sent,draft:null,demo:false,Date,Object,Number,Map,timeValue,stamp,hourKey,savedQuota,offset:0,subtab:'overview',session:{playerId:'P1'},clock:()=>now,isAdmin:()=>manager,hostName:()=> '怕怕',balance:()=>10,me:()=>state.players[0],say:()=>'',blank:()=>'',time:x=>x,
   centerWaitingHtml:()=>'',storedBalanceHtml:()=> '10 首',listeningOverviewHtml:()=>'',isSuperAdmin:()=>false,song:()=>null,button:(label,action)=>'<button data-act="'+action+'">'+label+'</button>',modal:(title,html,submit)=>captured={title,html,submit},dispatch:async(type,data)=>sent.push({type,data})});
  const escapeLine=line('const $=');vm.runInContext('const '+escapeLine.slice(escapeLine.indexOf('h=')),context);
- vm.runInContext(['const field=','const area=','const check=','const dateInput=','const isoInput='].map(line).join('\n')+'\n'+takeFunction('editExtraQuota')+'\n'+takeFunction('recordTime')+'\n'+line('function hour(){')+'\n'+line('function playerTabs('),context);
+ vm.runInContext(['const field=','const area=','const check=','const dateInput=','const isoInput='].map(line).join('\n')+'\n'+takeFunction('editExtraQuota')+'\n'+takeFunction('recordTime')+'\n'+line('function hour(){')+'\n'+line('function playerTabs(')+'\n'+line('function playerCenterNav('),context);
  return {context,state,sent,run:source=>vm.runInContext(source,context),setManager:value=>manager=value,get modal(){return captured;}};
 }
 test('history time button opens a real editor and submits business time without credit, song or player edits',async()=>{
