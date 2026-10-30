@@ -1,7 +1,7 @@
 // Hall homepage theme. One small public read, cached on the device for five
 // minutes so repeated visits reuse it; no polling and no Realtime channel.
-import {themeNormalize} from './theme-engine.js?v=10.29-BANNER.1';
-import {themeApply,themeClear,themeBannerImageStyle,themeDecorHtml,themeDecorMotion} from './theme-render.js?v=10.29-BANNER.1';
+import {themeNormalize} from './theme-engine.js?v=10.31-THEME.1';
+import {themeApply,themeClear,themeBannerImageStyle,themeDecorHtml,themeDecorMotion} from './theme-render.js?v=10.31-THEME.1';
 
 const LOBBY_THEME_TTL=5*60*1000;
 const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

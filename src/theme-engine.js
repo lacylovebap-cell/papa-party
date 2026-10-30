@@ -137,6 +137,9 @@ const themeAssetPattern=/^https:\/\/[a-z0-9.-]+\/storage\/v1\/object\/public\/pa
 // The hall card default (22%) matches how the hall page already shows streamer images.
 // Thin line above the hourly quota inside the homepage banner. No colour means
 // it follows the border colour; length is a percentage of the text column.
+// Card background opacity (0–100). Only the card's background layer fades; text,
+// buttons and inputs stay fully opaque. 100 = the original solid card (not stored).
+export const THEME_CARD_ALPHA_DEFAULT=100;
 export const THEME_DIVIDER_DEFAULTS={length:100,thickness:1,opacity:55};
 const themeDividerRanges={length:[0,100],thickness:[1,6],opacity:[0,100]};
 export const THEME_IMAGE_DEFAULTS={
@@ -250,7 +253,8 @@ export function themeNormalize(input,{hall=false}={}){
  const divider={},dv=v.divider&&typeof v.divider==='object'&&!Array.isArray(v.divider)?v.divider:{};
  if(themeHexPattern.test(dv.color||''))divider.color=dv.color.toLowerCase();
  for(const [k,range] of Object.entries(themeDividerRanges)){const n=themeNumber(dv[k],range,THEME_DIVIDER_DEFAULTS[k]);if(n!==THEME_DIVIDER_DEFAULTS[k])divider[k]=n;}
- return {...(THEME_GRADIENTS.some(p=>p.id===v.gradient)?{gradient:v.gradient}:{}),v:THEME_VERSION,base,mode,button:v.button==='solid'?'solid':'gradient',colors,images,decor,...(Object.keys(divider).length?{divider}:{}),...(manual.length?{manual}:{})};
+ const cardAlpha=themeNumber(v.cardAlpha,[0,100],THEME_CARD_ALPHA_DEFAULT);
+ return {...(THEME_GRADIENTS.some(p=>p.id===v.gradient)?{gradient:v.gradient}:{}),v:THEME_VERSION,base,mode,button:v.button==='solid'?'solid':'gradient',colors,images,decor,...(Object.keys(divider).length?{divider}:{}),...(manual.length?{manual}:{}),...(cardAlpha!==THEME_CARD_ALPHA_DEFAULT?{cardAlpha}:{})};
 }
 // Strict, used before any save: rejects malformed input instead of guessing.
 export function themeValidate(value,{hall=false,owner=null}={}){
@@ -309,6 +313,7 @@ export function themeCssVariables(theme,{resolve=u=>u}={}){
   // Unselected toggles: a light tint of the chosen button colour on the card colour.
   '--theme-button-soft':themeMix(c.panel,c.button,t.mode==='light'?.16:.3),
   '--theme-card-fill':card?.url?themeLayeredBackground(c.panel,card,'card',resolve(card.url)):c.panel,
+  '--theme-card-alpha':String((t.cardAlpha??THEME_CARD_ALPHA_DEFAULT)/100),
   '--theme-banner-mask':themeBannerMask(t),
   ...themeDividerVariables(t),
   '--theme-scheme':t.mode

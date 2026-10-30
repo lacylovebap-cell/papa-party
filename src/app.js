@@ -7,7 +7,7 @@ import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
 import {streamerWriteData} from './streamer-write-data.js';
 import {appStartButton,updateAppStart} from './pwa-start-ui.js?v=10.20-PWA.1';
-import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.29-SPACE.1';
+import {supportsOperationReceipt,sendReceiptedOperation} from './operation-recovery.js?v=10.31-THEME.1';
 import {accountingDay,accountingRollover} from './accounting.js?v=10.20-WEB.1';
 import {installPageJumps} from './ui-page-jumps.js?v=10.20-WEB.1';
 import {createWebAppInstall} from './web-app-install.js?v=10.20-WEB.1';
@@ -24,14 +24,14 @@ import {createChat} from './chat.js?v=10.20-WEB.1';
 import {requestSourceLabel} from './request-source.js?v=10.20-WEB.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=10.20-WEB.1';
 import {openHomeEditor} from './home-editor.js?v=10.20-WEB.1';
-import {themeApply,themeClear,themeBannerImageStyle,themeBannerUrl,themeDecorHtml,themeDecorMotion} from './theme-render.js?v=10.29-BANNER.1';
+import {themeApply,themeClear,themeBannerImageStyle,themeBannerUrl,themeDecorHtml,themeDecorMotion} from './theme-render.js?v=10.31-THEME.1';
 import {streamerName,streamerText,streamerDestination,publicStreamerDestination,pageLocation,pageDestination} from './streamer-navigation.js?v=10.21-WEB.3';
 import {publicPageDestination} from './public-route-location.js?v=10.20-WEB.1';
 import {readPublicRouteContext,publicApplicationHref,publicApplicationPage,createPublicLinkClient} from './public-links.js';
 import {createPublicShare} from './share-dialog.js';
 import {createPublicLinkSettings} from './public-link-settings.js';
 import {createNotifications} from './notifications.js?v=10.28-CANCEL.1';
-import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.29-SPACE.1';
+import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.31-THEME.1';
 import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.20-WEB.1';
 import {createPlayerManager} from './player-manager.js?v=10.20-WEB.1';
 import {createNativePlayerProvisioner} from './native-player-provisioning.js?v=10.20-WEB.1';
@@ -48,7 +48,7 @@ import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.20-WE
 import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.20-WEB.1';
 import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.29-THEME.2';
 import {createMedalManagement} from './medal-management.js?v=10.29-THEME.2';
-import {roomPricing,roomRollover,queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,requestFees,reservedCredits,reservedHour,savedQuota,songSelection,cancelRecovery} from './core.js?v=10.29-BANNER.1';
+import {roomPricing,roomRollover,queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,requestFees,reservedCredits,reservedHour,savedQuota,songSelection,cancelRecovery} from './core.js?v=10.31-THEME.1';
 import {formatGift} from './pricing-engine.js?v=10.29-SPACE.1';
 import {feeColumns,giftReveal,priceGuide,crownGuide} from './pricing-ui.js?v=10.29-SPACE.1';
 // Gift value displays follow the page theme; the sheet is small and loaded once.
@@ -754,8 +754,14 @@ function editHome(){openHomeEditor({home:state.settings.home,room:state.currentS
 // A published theme (首頁主題設計) wins; otherwise the earlier home colour settings apply unchanged.
 function applyHomeTheme(){const root=document.documentElement;if(state.settings.theme){themeApply(root,state.settings.theme);return;}themeClear(root);if(!state.settings.home){delete root.dataset.homeTheme;return;}root.dataset.homeTheme='custom';for(const [k,v] of Object.entries(themePalette(state.settings.home.color,state.settings.home.themeColors)))root.style.setProperty('--home-'+k,v);}
 // Decorations only on the streamer homepage; other pages inherit colours and images only.
-function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme,home=!['admin','common-book','book','center','gallery'].includes(route);if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=home&&theme?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html)app.insertAdjacentHTML('beforeend',html);themeDecorMotion(document,html?theme:null,{host:app});}
-async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=10.29-THEME.2',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=10.29-BANNER.1');}
+// Decorations belong to the streamer's theme, so they show on every page that uses
+// it (home, songbook, admin, player centre), never on the platform management view.
+// Page-anchored decorations keep the home layout: on other pages their layer is as
+// tall as that streamer's home page (capped by the current page), so they neither
+// spread down a long list nor get cut off on a short page.
+const themeDecorHomeKey=()=> 'papa-theme-decor-home-'+(state.currentStreamer?.id||streamerSlug);
+function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme;if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=theme&&!managementPage()?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html){app.insertAdjacentHTML('beforeend',html);const layer=app.querySelector(':scope>.theme-decor-layer:not(.theme-decor-screen)');if(layer){const home=!['admin','common-book','book','center','gallery'].includes(route);if(home){try{localStorage.setItem(themeDecorHomeKey(),String(app.offsetHeight));}catch{}}else{let homeHeight=0;try{homeHeight=Number(localStorage.getItem(themeDecorHomeKey()))||0;}catch{}if(homeHeight>0){layer.style.bottom='auto';layer.style.height=Math.min(app.offsetHeight,homeHeight)+'px';}}}}themeDecorMotion(document,html?theme:null,{host:app});}
+async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=10.29-THEME.2',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=10.31-THEME.1');}
 async function openThemeDesigner(){
  if(demo||draft)throw Error('首頁主題設計請在正式同步模式使用');if(!admin)throw Error('請先登入管理');
  const {openThemeStudio}=await loadThemeStudio();const room=state.currentStreamer,space=state.streamers.find(r=>r.id===room.id)?.spaceId||room.spaceId||'space-001';

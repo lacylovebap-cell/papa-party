@@ -1,7 +1,7 @@
 // Applies a theme to a document root (real pages) or to the preview iframe.
 // Pure CSS: colours, image opacity and masks change custom properties only, so
 // slider moves never re-request an image or touch the network.
-import {themeNormalize,themeCssVariables,themePageLayer,themeImageValue} from './theme-engine.js?v=10.29-BANNER.1';
+import {themeNormalize,themeCssVariables,themePageLayer,themeImageValue} from './theme-engine.js?v=10.31-THEME.1';
 
 const themeVarNames=new Set();
 export function themeApply(root,theme,{resolve=u=>u,hall=false}={}){
@@ -9,6 +9,8 @@ export function themeApply(root,theme,{resolve=u=>u,hall=false}={}){
  if(!theme){themeClear(root);return;}
  const t=themeNormalize(theme,{hall}),vars={...themeCssVariables(t,{resolve}),'--theme-page-layer':themePageLayer(t,{resolve})||'none'};
  root.dataset.themeV2=t.mode;root.dataset.homeTheme='custom';
+ // Below 100% the card background moves to its own layer so only it fades.
+ if((t.cardAlpha??100)<100)root.dataset.themeCardAlpha='';else delete root.dataset.themeCardAlpha;
  for(const [k,v] of Object.entries(vars)){themeVarNames.add(k);if(root.style.getPropertyValue(k)!==v)root.style.setProperty(k,v);}
  const doc=root.ownerDocument,body=doc.body;
  if(!body)return;
@@ -19,7 +21,7 @@ export function themeApply(root,theme,{resolve=u=>u,hall=false}={}){
 }
 export function themeClear(root){
  if(!root)return;
- delete root.dataset.themeV2;
+ delete root.dataset.themeV2;delete root.dataset.themeCardAlpha;
  for(const k of themeVarNames)root.style.removeProperty(k);
  root.ownerDocument?.body?.querySelector(':scope>.theme-page-layer')?.remove();
 }
