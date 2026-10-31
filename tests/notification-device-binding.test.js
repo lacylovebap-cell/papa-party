@@ -57,8 +57,8 @@ test('a missing subscription is not treated as a successful binding',async t=>{
 });
 
 test('a failed binding retries on the next refresh and latches only its success',async t=>{
- let attempts=0;const harness=pushHarness(t,{upsert:async()=>{if(++attempts===1)throw Error('temporary network failure');return {};}});
- await harness.refresh();await harness.refresh();await harness.refresh();
+ t.mock.timers.enable({apis:['Date']});let attempts=0;const harness=pushHarness(t,{upsert:async()=>{if(++attempts===1)throw Error('temporary network failure');return {};}});
+ await harness.refresh();await harness.refresh();assert.equal(attempts,1);t.mock.timers.tick(5000);await harness.refresh();
  assert.equal(attempts,2);assert.equal(harness.reads(),2);assert.equal(harness.bindings().length,2);assert.equal(harness.prompts(),0);
 });
 

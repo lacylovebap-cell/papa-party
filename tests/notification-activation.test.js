@@ -27,7 +27,7 @@ function harness(t,{permission='granted',requestPermission,register,getSubscript
  const click=(action,id)=>{const button={dataset:{notice:action,noticeId:id}};inGesture=true;try{return documentListeners.click({target:{closest:()=>button},preventDefault(){}});}finally{inGesture=false;}};
  const form={id:'notice-settings',values:['pushEnabled'],submit:{disabled:false},querySelector(){return this.submit;}};
  return {get notices(){return notices;},dialog,requests,toasts,errorTarget,healthTarget,notification,registration,subscription,settle,click,form,storage,
-  pointer(){documentListeners.pointerdown();},soundPlays:()=>soundPlays,blockSound(value){soundBlocked=value;},
+  changePush(){dialogListeners.change({target:{name:'pushEnabled'}});},pointer(){documentListeners.pointerdown();},soundPlays:()=>soundPlays,blockSound(value){soundBlocked=value;},
   reload(){dialog.open=false;dialog.innerHTML='';for(const listeners of [documentListeners,dialogListeners])for(const name of Object.keys(listeners))delete listeners[name];notices=create();notices.button();},
   setContext(patch){current={...current,...patch};},prompts:()=>prompts,reads:()=>workerReads,registrations:()=>workerRegistrations,subscriptions:()=>subscriptions,
   async settings(){await click('settings');await settle();},close(){dialog.close();},submit(){return dialogListeners.submit({target:form,preventDefault(){}});}};
@@ -130,7 +130,7 @@ for(const [name,patch] of [['room',{streamer:'michelle'}],['Space',{spaceId:'spa
 
 test('explicit enable clears only its scoped disable choice and remembered binding works after reload',async t=>{
  const h=harness(t,{initialPreferences:{pushEnabled:true}});await h.settings();await h.click('disablePush');await h.click('enablePush');
- assert.match(h.healthTarget.innerHTML,/未於本機停用/);assert.equal(h.requests.filter(body=>body.op==='pushSubscribe').length,1);
+ assert.match(h.healthTarget.innerHTML,/已啟用並綁定成功/);assert.equal(h.requests.filter(body=>body.op==='pushSubscribe').length,1);
  h.reload();await h.notices.refresh();await h.settle();assert.equal(h.requests.filter(body=>body.op==='pushSubscribe').length,2,'explicit enable restored permission to bind this room/device');
  assert.equal(h.prompts(),0);assert.equal(h.requests.filter(body=>body.op==='noticePreferences').length,1);
 });
@@ -211,4 +211,29 @@ test('already granted permission enables an unset preference once without anothe
 test('granted permission repairs a missing subscription once without prompting',async t=>{
  const h=harness(t,{initialPreferences:{pushEnabled:true},getSubscription:()=>Promise.resolve(null)});await h.notices.refresh();await h.settle();await h.settle();await h.notices.refresh();
  assert.equal(h.prompts(),0);assert.equal(h.subscriptions(),1);assert.equal(h.requests.filter(x=>x.op==='pushSubscribe').length,1);
+});
+
+test('saving unrelated sound settings preserves server push intent despite stale unchecked input',async t=>{
+ const h=harness(t,{initialPreferences:{pushEnabled:true}});await h.notices.refresh();await h.settings();h.form.values=['muteSound'];await h.submit();
+ assert.equal(h.requests.filter(x=>x.op==='noticePreferences').at(-1).preferences.pushEnabled,true);
+ assert.notEqual(JSON.parse(h.storage.get('pa-notice-device-preferences-v1')).pushAllowed,false);
+});
+test('automatic activation synchronizes the already-open push checkbox',async t=>{
+ const h=harness(t,{initialPreferences:{}});const checkbox={checked:false};const query=h.dialog.querySelector.bind(h.dialog);
+ h.dialog.querySelector=s=>s==='[name="pushEnabled"]'?checkbox:query(s);
+ await h.settings();await h.notices.refresh();await h.settle();await h.settle();
+ assert.equal(h.requests.some(x=>x.op==='noticePreferences'&&x.preferences.pushEnabled),true);
+ assert.equal(checkbox.checked,true);
+});
+
+
+test('explicit checkbox change persists opt-out and reload never enables it',async t=>{
+ const h=harness(t,{initialPreferences:{pushEnabled:true}});await h.notices.refresh();await h.settings();h.form.values=[];h.changePush();await h.submit();
+ assert.equal(h.requests.filter(x=>x.op==='noticePreferences').at(-1).preferences.pushEnabled,false);
+ const count=h.requests.filter(x=>x.op==='pushSubscribe').length;h.reload();await h.notices.refresh();await h.settle();assert.equal(h.requests.filter(x=>x.op==='pushSubscribe').length,count);
+});
+test('legacy false stays false without guessing user intent',async t=>{
+ const h=harness(t,{initialPreferences:{pushEnabled:false}});await h.notices.refresh();await h.settings();await h.settle();
+ assert.equal(h.requests.some(x=>x.op==='pushSubscribe'||x.op==='noticePreferences'),false);
+ assert.match(h.healthTarget.innerHTML,/帳號未允許推播/);
 });

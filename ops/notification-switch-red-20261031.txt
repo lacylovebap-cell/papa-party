@@ -1,0 +1,85 @@
+✔ settings health is local/on-demand and exposes no automatic test notice or business API read (51.5685ms)
+✔ already granted permission reuses subscription and binds the captured device without requesting permission (33.8576ms)
+✔ denied permission gives browser guidance without another permission request or API write (1.6024ms)
+✔ permission is requested synchronously from the click and repeated clicks coalesce until it resolves (3.6966ms)
+✔ a permission completion cannot activate after the recipient changes (1.6853ms)
+✔ a permission completion cannot activate after the room changes (1.3859ms)
+✔ a permission completion cannot activate after the Space changes (1.1966ms)
+✔ a permission completion cannot activate after the device changes (1.3463ms)
+✔ a permission completion cannot activate after the role changes (1.5698ms)
+✔ a stale register completion cannot continue activation or report success in a replacement identity (1.909ms)
+✔ a stale pushKey completion cannot continue activation or report success in a replacement identity (1.476ms)
+✔ a stale subscription completion cannot continue activation or report success in a replacement identity (1.4244ms)
+✔ a stale pushSubscribe completion cannot continue activation or report success in a replacement identity (3.1149ms)
+✔ a stale noticePreferences completion cannot continue activation or report success in a replacement identity (1.8295ms)
+✔ closing settings while permission is pending cancels later activation stages (1.2886ms)
+✔ settings save suppresses duplicates and does not repaint/show success after the form closes (1.6763ms)
+✔ settings save cannot refresh replacement recipient preferences or report its success (1.318ms)
+✔ inbox 查看 routes only a loaded notice in the current identity and has no button for an unknown empty target (2.8209ms)
+✔ disabling this device survives reload and blocks remembered binding without changing global preferences (2.5172ms)
+✔ a local disable does not disable another room binding (2.0878ms)
+✔ a local disable does not disable another Space binding (2.9591ms)
+✔ a local disable does not disable another recipient binding (1.5563ms)
+✔ a local disable does not disable another device binding (1.6611ms)
+✔ explicit enable clears only its scoped disable choice and remembered binding works after reload (3.3914ms)
+✔ failed local persistence cannot claim a durable disable or remove the server route (1.0925ms)
+✔ disable waits for an already-issued remembered bind, then deletes it and stays disabled after reload (2.7285ms)
+✔ disable cancels a pending permission activation without an upsert or preference change (1.3316ms)
+✔ disable after an explicit bind was issued deletes after it and suppresses stale activation success (2.4099ms)
+✔ a reopened form gets a fresh activation while sharing the pending origin permission prompt (3.2105ms)
+✔ a replacement identity gets a fresh activation while sharing the pending origin permission prompt (4.604ms)
+✔ a replacement recipient binding waits for the old in-flight upsert so the final endpoint belongs to the latest identity (3.6836ms)
+✔ first setup requests permission only on click and persists across reload and room switches (1.2688ms)
+✔ denied and dismissed setup never repeatedly request notification permission (0.6326ms)
+✔ skip first setup persists and does not request notification permission (0.7149ms)
+✔ revoked permission does not silently rebind a remembered subscription (1.8183ms)
+✔ audio restores on interaction after reload and room change, but explicit off stays off (1.4349ms)
+✔ previously granted permission that resets to default does not show first setup again (0.6321ms)
+✔ already granted permission enables an unset preference once without another permission prompt (1.3921ms)
+✔ granted permission repairs a missing subscription once without prompting (1.3922ms)
+✖ saving unrelated sound settings preserves server push intent despite stale unchecked input (3.4432ms)
+✖ automatic activation synchronizes the already-open push checkbox (5.5009ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 39
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 351.4116
+
+✖ failing tests:
+
+test at tests\notification-activation.test.js:216:1
+✖ saving unrelated sound settings preserves server push intent despite stale unchecked input (3.4432ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///C:/Users/Administrator/Documents/Codex/2026-10-01/referenced-chatgpt-conversation-this-is-an/work/papa-party-notification-final-1025/tests/notification-activation.test.js:218:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\notification-activation.test.js:221:1
+✖ automatic activation synchronizes the already-open push checkbox (5.5009ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///C:/Users/Administrator/Documents/Codex/2026-10-01/referenced-chatgpt-conversation-this-is-an/work/papa-party-notification-final-1025/tests/notification-activation.test.js:226:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
