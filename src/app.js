@@ -30,7 +30,7 @@ import {publicPageDestination} from './public-route-location.js?v=10.20-WEB.1';
 import {readPublicRouteContext,publicApplicationHref,publicApplicationPage,createPublicLinkClient} from './public-links.js';
 import {createPublicShare} from './share-dialog.js';
 import {createPublicLinkSettings} from './public-link-settings.js';
-import {createNotifications} from './notifications.js?v=10.31-NOTICE.3';
+import {createNotifications} from './notifications.js?v=10.31-PUSH.1';
 import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.31-THEME.1';
 import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.20-WEB.1';
 import {createPlayerManager} from './player-manager.js?v=10.20-WEB.1';

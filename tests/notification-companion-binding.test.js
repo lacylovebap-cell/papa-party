@@ -75,3 +75,18 @@ test('a companion with blank preference records push intent once after binding',
  assert.deepEqual(ops,['notifications','pushSubscribe','noticePreferences']);
  assert.equal(h.companion_requests[2].preferences.pushEnabled,true);
 });
+
+test('each identity/device reports its push state at most once per 6 hours, without endpoint secrets',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ const h=harness(t,{main:player});
+ await h.notices.refresh();await h.settle();
+ assert.equal(h.main_requests.filter(b=>b.op==='pushDiagnostic').length,0,'never competes with page start-up requests');
+ t.mock.timers.tick(8000);await h.settle();
+ const reports=()=>h.main_requests.filter(b=>b.op==='pushDiagnostic');
+ assert.equal(reports().length,1);
+ const d=reports()[0].diagnostic;
+ assert.equal(d.permission,'granted');assert.equal(d.subscription,'present');assert.equal(d.endpointHost,'fcm.example');
+ assert.equal(JSON.stringify(d).includes('shared-browser'),false,'full endpoint is never sent');
+ await h.notices.refresh();await h.settle();t.mock.timers.tick(8000);await h.settle();
+ assert.equal(reports().length,1,'throttled');
+});
