@@ -61,3 +61,8 @@ type `call` (主播呼叫). Built like KIND.1: only the Core reducer and notific
 `party-api-10.31-KIND.1.js` are replaced with the same sections of a fresh bundle, plus the releaseInfo version.
 Needs migration `20261031150000_notice_type_call.sql` (applied before the Edge; rollback `ops/notice-type-call-rollback-20261031.sql`).
 Rollback: `party-api-10.31-KIND.1.js` at commit `18f9b9f143f99bde1021d06697269120a4495449` (v77).
+
+10.31-PUSH.2 = deployed 10.31-CALL.1 (v78) with one change: `pushSubscribe` upserts on `(streamer_id, endpoint, recipient)`
+so a streamer and a player of the same room can share one phone. Needs migration
+`20261031160000_push_subscription_per_recipient.sql` first (rollback `ops/push-subscription-per-recipient-rollback-20261031.sql`).
+Rollback Edge: `party-api-10.31-CALL.1.js` at commit `df901c83e7c4c3d38f95b76d33123cd454567bf5` (v78).

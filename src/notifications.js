@@ -98,26 +98,29 @@ export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpe
  // logged in as president). The message centre follows one identity, but the
  // other must still receive Web Push on the same, already-granted browser
  // subscription. Never prompts, never creates a subscription, never overrides
- // an explicit off, and never shares one (room, endpoint) row with the manager.
+ // an explicit off. Since 10.31-PUSH.2 a (room, endpoint) can hold one row per
+ // recipient, so a streamer and a player of the same room share one phone.
  async function bindCompanionPush(){
   const c=companion?.();
   if(!c||!companionApi||c.demo||!c.recipient||permission()!=='granted'||devicePrefs.read().pushAllowed===false||!navigator.serviceWorker?.getRegistration)return;
   const main=context();if(main.recipient&&main.recipient===c.recipient)return;
-  if(main.role==='streamer_admin'&&main.streamer===c.streamer)return;
   const k=communicationIdentity(c,`${c.streamer}:${c.recipient}`),bindingKey=k+':'+c.deviceSessionId;
   let disabled=false;try{disabled=JSON.parse(localStorage.getItem('pa-notice-'+k+'-'+pushDisableKey(c)))===true;}catch{}
   if(disabled||companionBound===bindingKey||companionBinding===bindingKey)return;
   const still=()=>{const now=companion?.();return !!now&&now.recipient===c.recipient&&now.streamer===c.streamer&&now.deviceSessionId===c.deviceSessionId;};
-  companionBinding=bindingKey;try{
+  let outcome='skipped';companionBinding=bindingKey;try{
    const reg=await navigator.serviceWorker.getRegistration(new URL('../',import.meta.url)),sub=await reg?.pushManager.getSubscription();
-   if(!sub||!still())return;
+   if(!sub){outcome='no-subscription';return;}if(!still())return;
    const inbox=await companionApi({op:'notifications',page:0});if(!still())return;
-   const raw=inbox?.preferences||{};if(raw.pushEnabled===false){companionBound=bindingKey;return;}
+   const raw=inbox?.preferences||{};if(raw.pushEnabled===false){outcome='push-off';companionBound=bindingKey;return;}
    await companionApi({op:'pushSubscribe',subscription:sub.toJSON(),...(c.deviceSessionId?{expectedDeviceSessionId:c.deviceSessionId}:{})});
    if(raw.pushEnabled!==true&&still())await companionApi({op:'noticePreferences',preferences:{...cleanNoticePrefs(raw),pushEnabled:true}});
-   if(still())companionBound=bindingKey;
-  }finally{if(companionBinding===bindingKey)companionBinding='';}
+   if(still()){companionBound=bindingKey;outcome='bound';}
+  }catch(error){outcome='error:'+String(error?.message||error).slice(0,60);throw error;}finally{if(companionBinding===bindingKey)companionBinding='';reportCompanionState(c,k,outcome);}
  }
+ // The companion identity reports its own outcome (bound, no subscription, push off,
+ // error) once per 6 hours, so a phone signed in twice is visible in Edge logs too.
+ function reportCompanionState(c,k,outcome){try{const mark='pa-push-diag:companion:'+k+':'+(c.deviceSessionId||'legacy');let last=0;try{last=Number(localStorage.getItem(mark))||0;}catch{}if(outcome==='bound'&&Date.now()-last<21600000)return;void companionApi({op:'pushDiagnostic',diagnostic:{permission:permission(),subscription:outcome==='no-subscription'?'none':'present',bound:outcome==='bound',pushEnabled:outcome!=='push-off',error:outcome==='bound'?null:'companion:'+outcome,app:'10.31-PUSH.2'}}).then(()=>{try{localStorage.setItem(mark,String(Date.now()));}catch{}}).catch(()=>{});}catch{}}
  // One small, privacy-safe status line per identity/device every 6 hours so a
  // device that never binds (no permission, LINE in-app, iPhone not on Home
  // Screen) is visible in Edge logs. No table, no polling, no endpoint secrets.

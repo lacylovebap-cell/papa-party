@@ -46,14 +46,14 @@ test('a player signed in beside the president on the same browser gets a device-
  assert.equal(h.companion_requests.filter(b=>b.op==='pushSubscribe').at(-1).expectedDeviceSessionId,'player-device-2','new device login rebinds');
 });
 
-test('companion binding never overrides an explicit off, a local device opt-out, or the room manager row',async t=>{
+test('companion binding never overrides an explicit off or a local device opt-out, and also binds a player of the manager\'s own room',async t=>{
  {const h=harness(t,{main:president,companion:player,companionPrefs:{pushEnabled:false}});await h.notices.refresh();await h.settle();
   assert.equal(h.companion_requests.filter(b=>b.op==='pushSubscribe').length,0,'explicit account off stays off');
   assert.equal(h.companion_requests.filter(b=>b.op==='noticePreferences').length,0);}
  {const h=harness(t,{main:president,companion:player,local:{'pa-notice-papa:P900000000-push-disabled:player-device':'true'}});await h.notices.refresh();await h.settle();
   assert.equal(h.companion_requests.length,0,'device-level opt-out is respected');}
  {const h=harness(t,{main:{role:'streamer_admin',recipient:'__admin__',streamer:'papa',spaceId:'space-001',deviceSessionId:'admin-device'},companion:player});await h.notices.refresh();await h.settle();
-  assert.equal(h.companion_requests.length,0,'same room + endpoint belongs to the manager; never overwritten by the player');}
+  const bind=h.companion_requests.filter(b=>b.op==='pushSubscribe');assert.equal(bind.length,1,'since PUSH.2 the player of the manager\'s own room is bound too (one row per recipient)');}
 });
 
 test('a blank (never chosen) preference on an authorized browser binds and records push intent; explicit false does not',async t=>{
@@ -71,8 +71,9 @@ test('a blank (never chosen) preference on an authorized browser binds and recor
 
 test('a companion with blank preference records push intent once after binding',async t=>{
  const h=harness(t,{main:president,companion:player,companionPrefs:{}});await h.notices.refresh();await h.settle();
- const ops=h.companion_requests.map(b=>b.op);
+ const ops=h.companion_requests.map(b=>b.op).filter(op=>op!=='pushDiagnostic');
  assert.deepEqual(ops,['notifications','pushSubscribe','noticePreferences']);
+ const diag=h.companion_requests.filter(b=>b.op==='pushDiagnostic');assert.equal(diag.length,1,'the companion reports its outcome once');assert.equal(diag[0].diagnostic.bound,true);assert.equal(JSON.stringify(diag[0]).includes('endpoint'),false,'no endpoint is sent');
  assert.equal(h.companion_requests[2].preferences.pushEnabled,true);
 });
 
