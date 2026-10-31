@@ -55,3 +55,9 @@ Rollback: `party-api-10.29-PRICE.2.js` at commit `1a8ab1b89dba93dd2da406b1944314
 Built by replacing only the Core reducer section of `party-api-10.31-PUSH.1.js` with the same section of a fresh
 bundle (the only differences are `changeQueueKind` and its `case "changeKind"`), plus the releaseInfo version.
 No database change. Rollback: `party-api-10.31-PUSH.1.js` at commit `ccb051bc0da74fad8b63073cf1c9f64b243cfd01` (v76).
+
+10.31-CALL.1 = deployed 10.31-KIND.1 (v77) + the manager queue operation `call` (📣 呼叫玩家, 30 s apart) and the notice
+type `call` (主播呼叫). Built like KIND.1: only the Core reducer and notification-rules sections of
+`party-api-10.31-KIND.1.js` are replaced with the same sections of a fresh bundle, plus the releaseInfo version.
+Needs migration `20261031150000_notice_type_call.sql` (applied before the Edge; rollback `ops/notice-type-call-rollback-20261031.sql`).
+Rollback: `party-api-10.31-KIND.1.js` at commit `18f9b9f143f99bde1021d06697269120a4495449` (v77).

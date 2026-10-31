@@ -14,8 +14,8 @@ import {createWebAppInstall} from './web-app-install.js?v=10.20-WEB.1';
 import {refreshView,rememberView} from './view-refresh.js?v=10.20-WEB.1';
 import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.20-WEB.1';
 import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
-import {canonicalNoticeLink} from './notification-rules.js?v=10.31-NOTICE.1';
-import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.20-WEB.1';
+import {canonicalNoticeLink} from './notification-rules.js?v=10.31-CALL.1';
+import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.31-CALL.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
 import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.28-QUEUE.1';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
@@ -30,7 +30,7 @@ import {publicPageDestination} from './public-route-location.js?v=10.20-WEB.1';
 import {readPublicRouteContext,publicApplicationHref,publicApplicationPage,createPublicLinkClient} from './public-links.js';
 import {createPublicShare} from './share-dialog.js';
 import {createPublicLinkSettings} from './public-link-settings.js';
-import {createNotifications} from './notifications.js?v=10.31-PUSH.1';
+import {createNotifications} from './notifications.js?v=10.31-CALL.1';
 import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.31-THEME.1';
 import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.20-WEB.1';
 import {createPlayerManager} from './player-manager.js?v=10.20-WEB.1';
@@ -48,7 +48,7 @@ import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.20-WE
 import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.20-WEB.1';
 import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.29-THEME.2';
 import {createMedalManagement} from './medal-management.js?v=10.29-THEME.2';
-import {roomPricing,roomRollover,queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,requestFees,reservedCredits,reservedHour,savedQuota,songSelection,cancelRecovery} from './core.js?v=10.31-KIND.1';
+import {roomPricing,roomRollover,queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,requestFees,reservedCredits,reservedHour,savedQuota,songSelection,cancelRecovery} from './core.js?v=10.31-CALL.1';
 import {formatGift} from './pricing-engine.js?v=10.29-SPACE.1';
 import {feeColumns,giftReveal,priceGuide,crownGuide} from './pricing-ui.js?v=10.29-SPACE.1';
 // Gift value displays follow the page theme; the sheet is small and loaded once.
