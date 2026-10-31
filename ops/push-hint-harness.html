@@ -1,0 +1,12 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../src/style.css"><link rel="stylesheet" href="../src/mobile.css"><link rel="stylesheet" href="../src/theme.css"><link rel="stylesheet" href="../src/theme-v2.css">
+</head><body><div id="app"></div><script type="module">
+const mode=location.hash.slice(1);
+Object.defineProperty(Notification,'permission',{get:()=>mode==='denied'?'denied':'default'});
+const {createNotifications}=await import('../src/notifications.js');const {createChat}=await import('../src/chat.js');
+const ctx={role:'player',recipient:'P1',playerId:'P1',streamer:'papa',streamerName:'怕怕',spaceId:'space-001',deviceSessionId:'d1',accountId:'a1',demo:false,manager:false};
+const api=async b=>b.op==='chatMessages'?{rows:[{id:'m1',seq:1,sender_side:'manager',body:'今天要來聽歌嗎？',created_at:new Date().toISOString()}],recipientRead:0,hasOlder:false}:{rows:[],unread:{},preferences:{pushEnabled:true}};
+const n=createNotifications({api,context:()=>ctx,toast(){},apiUrl:'https://x.test/functions/v1/p',apiKey:'k'});
+const chat=createChat({api,context:()=>ctx,toast(){},pushHint:()=>n.pushHint()});
+await chat.open();
+</script></body></html>
