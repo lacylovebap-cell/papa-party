@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>通知可靠性隔離驗收</title><link rel="stylesheet" href="../src/style.css"><main><h1>通知可靠性隔離驗收</h1><p>合成通知，不連線正式資料或推播服務。</p><button id="run">執行 16 類補同步驗證</button><pre id="result">尚未執行</pre><div id="header"></div></main><script type="module">
+import {createNotifications} from '../src/notifications.js';
+import {NOTICE_TYPES} from '../src/notification-rules.js';
+let data=[],received=[],scope='fixture-a';
+const time=new Date().toISOString();
+const api=async p=>{
+ if(p.op==='notifications')return {rows:data.slice(-50).reverse(),preferences:{muteAll:true,pushEnabled:false},unread:{system:data.length},deltaSupported:true};
+ if(p.op==='noticeDelta')return data.filter(n=>n.id>p.afterId).slice(0,51);
+ throw Error('未預期操作 '+p.op);
+};
+const n=createNotifications({api,context:()=>({role:'super_admin',streamer:scope,recipient:'__super__',spaceId:scope}),toast(){},onUpdate:rows=>received.push(...rows),apiUrl:'http://127.0.0.1:8907',apiKey:'fixture'});
+document.querySelector('#header').innerHTML=n.button(true);
+document.querySelector('#run').onclick=async()=>{
+ try{
+ data=[{id:'000',type:'system',body:'基準通知',created_at:time}];await n.refresh();
+ const types=Object.keys(NOTICE_TYPES);
+ data.push(...Array.from({length:120},(_,i)=>({id:String(i+1).padStart(3,'0'),type:types[i%types.length],body:'隔離通知 '+types[i%types.length],created_at:time})));
+ await n.refresh();await n.refresh();
+ if(received.length!==120||new Set(received.map(x=>x.id)).size!==120)throw Error('漏接或重複 '+received.length);
+ scope='fixture-b';data=[];await n.refresh();
+ if(received.length!==120)throw Error('跨空間通知混用');
+ document.querySelector('#result').textContent='PASS：'+types.length+' 類、120 筆補同步、重試不重複、切換空間隔離。僅瀏覽器合成測試；未驗證正式持久化或裝置推播。';
+ }catch(e){document.querySelector('#result').textContent='FAIL：'+e.message;}
+};
+</script></html>

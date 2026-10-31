@@ -67,3 +67,13 @@ export function webNoticePath(link){
  const pairs=[['streamer',link.streamerSlug],['streamerId',link.streamerId],['spaceId',link.spaceId],['entityType',link.entityType],['entityId',link.entityId],['notificationId',link.notificationId]];
  return './?'+pairs.filter(([,value])=>value!=null).map(([key,value])=>key+'='+encodeURIComponent(value)).join('&')+'#'+link.section;
 }
+
+// Push transport freshness only: never removes or expires the inbox record.
+export function noticePushWindow(notice,now=Date.now()){
+ const seconds={ready:300,accepted:900,live:900,saved:900,status:900,failed:900,cancel:3600,completed:3600};
+ const age=Object.hasOwn(seconds,notice.type)?seconds[notice.type]:86400;
+ const created=Date.parse(notice.created_at);
+ if(!Number.isFinite(created)||!Number.isFinite(now))return {ttl:0,expiresAt:null};
+ const expiresAt=created+age*1000;
+ return {ttl:Math.max(0,Math.min(age,Math.ceil((expiresAt-now)/1000))),expiresAt};
+}

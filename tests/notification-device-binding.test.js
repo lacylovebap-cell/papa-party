@@ -87,3 +87,15 @@ for(const [label,patch] of [['recipient',{recipient:'P2'}],['room',{streamer:'mi
  assert.equal(harness.bindings().length,2,'current device remains successfully bound');
  assert.equal(harness.bindings()[1].expectedDeviceSessionId,'device-two');
 });
+
+
+test('legacy authorized subscription rebinds without inventing a device identity or asking permission',async t=>{
+ const h=pushHarness(t);h.setContext({deviceSessionId:undefined});
+ await h.refresh();await h.refresh();
+ assert.equal(h.bindings().length,1);
+ assert.equal(Object.hasOwn(h.bindings()[0],'expectedDeviceSessionId'),false);
+ assert.equal(h.prompts(),0);
+ h.setContext({recipient:'P2'});await h.refresh();
+ assert.equal(h.bindings().length,2);
+ assert.equal(h.bindings()[1].context.recipient,'P2');
+});

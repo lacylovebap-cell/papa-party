@@ -11,11 +11,11 @@ test('old unread notices do not repeatedly reload related views, while new notic
  globalThis.Audio=class{constructor(url){this.src=String(url);}pause(){}};
  globalThis.localStorage={getItem(){return null;},setItem(){}};
  globalThis.setInterval=(...args)=>{const id=original.setInterval(...args);timers.push(id);id.unref();return id;};
- let room='papa',rows=[],relatedRefreshes=0,apiCalls=0;
+ let room='papa',rows=[],relatedRefreshes=0,apiCalls=0,hold=null;
  const notice=(id,read_at=null)=>({id,type:'message',body:'新私訊',read_at,created_at:new Date().toISOString()});
  try{
   const notifications=createNotifications({
-   api:async({op})=>{assert.equal(op,'notifications');apiCalls++;return {rows,unread:{message:rows.filter(n=>!n.read_at).length},preferences:{muteAll:true}};},
+   api:async({op})=>{assert.equal(op,'notifications');apiCalls++;const captured=rows;if(hold)await hold;return {rows:captured,unread:{message:rows.filter(n=>!n.read_at).length},preferences:{muteAll:true}};},
    context:()=>({demo:false,role:'super_admin',streamer:room,recipient:'__super__',streamerName:room}),
    toast(){},onUpdate(){relatedRefreshes++;},apiUrl:'https://example.test/functions/v1/party-api',apiKey:'test'
   });
@@ -43,6 +43,14 @@ test('old unread notices do not repeatedly reload related views, while new notic
   rows=[notice('another-room-new'),...rows];
   await notifications.refresh();
   assert.equal(relatedRefreshes,2,'a genuinely new notice in the new room still refreshes');
+
+  let release;hold=new Promise(resolve=>{release=resolve;});
+  const beforeCalls=apiCalls,firstRead=notifications.refresh();
+  rows=[notice('arrived-during-read'),...rows];
+  for(let i=0;i<20;i++)await notifications.refresh();
+  hold=null;release();await firstRead;await new Promise(setImmediate);
+  assert.equal(apiCalls,beforeCalls+2,'concurrent wakeups coalesce to one trailing read');
+  assert.equal(relatedRefreshes,3,'event arriving during a read is not dropped');
  }finally{
   for(const [key,value] of Object.entries(original)){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}
   for(const id of timers)clearInterval(id);

@@ -12,11 +12,11 @@ import {timeValue,queueConfirmed,queuePrepared,queuePreparation} from '../src/co
 // rendering and unrelated API refreshes outside this harness; target planning,
 // auth deferral, URL mutation and asynchronous landing guards remain real.
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
-const start=app.indexOf('function render(){const landing=prepareNoticeLanding();');
+const start=app.indexOf('function render(){');
 const end=app.indexOf('\nasync function loginDialog()',start);
 assert.ok(start>=0&&end>start,'the app navigation integration is present');
 const integration=app.slice(start,end);
-const queueRendering=app.split(/\r?\n/).filter(line=>['function renderCenter(','function playerTabs(','function queueRows(','function paginate(','function sortControl(','const statusName='].some(prefix=>line.startsWith(prefix))).join('\n');
+const queueRendering=app.split(/\r?\n/).filter(line=>['function playerHistoryHtml(','function playerCenterNav(','function queueRowOnly(','function renderCenter(','function playerTabs(','function queueRows(','function paginate(','function sortControl(','const statusName='].some(prefix=>line.startsWith(prefix))).join('\n');
 const target=(changes={})=>({version:1,spaceId:'space-001',streamerId:'papa',streamerSlug:'papa',section:'center',entityType:'completed',entityId:'q15',notificationId:'notice-1',...changes});
 const queues=()=>Array.from({length:26},(_,i)=>({id:'q'+i,streamer_id:'papa',playerId:'P1',status:i<5?'waiting':'completed',at:new Date(Date.UTC(2026,0,i+1)).toISOString()}));
 
@@ -32,7 +32,7 @@ function harness(overrides={}){
   location,history,spaceMount:'https://paparty.app/',streamerSlug:'papa',demo:false,draft:null,entryPending:false,
   session:{playerId:'P1',accountId:'account-1',sessionId:'device-1',token:'token-1'},admin:null,
   state:{currentStreamer:{id:'papa',spaceId:'space-001'},streamers:[{id:'papa',slug:'papa',spaceId:'space-001'},{id:'mi',slug:'michelle',spaceId:'space-002'}],settings:{current_space:'shengma'},queue:queues(),ledger:[],players:[{playerId:'P1',name:'玩家甲'}],songs:[],crowns:[],cards:[],wishes:[]},
-  route:'home',tab:'songs',subtab:'overview',selectedPlayer:'other',queueHistory:false,ledgerQuery:'old search',pages:{},listSorts:{queueHistory:'newest'},pendingNoticeTarget:null,noticeLanding:null,
+  scrollToPlayerLedger:false,queueNoteLine:()=>'',queueTags:()=>'',historyView:'all',ledgerFilter:'all',storedBalanceHtml:()=>'',route:'home',tab:'songs',subtab:'overview',selectedPlayer:'other',queueHistory:false,ledgerQuery:'old search',pages:{},listSorts:{queueHistory:'newest'},pendingNoticeTarget:null,noticeLanding:null,
   nativePlayerView:{open:false},playerArchiveView:{open:false},unavailableReadScope:null,syncReadIdentity:()=>'fixture-scope',isAdmin:()=>Boolean(context.admin&&context.route==='admin'),api:async()=>({found:false}),
   $:selector=>selector==='#dialog'?dialog:selector==='#app'?appNode:null,
   document:{querySelector:selector=>selector==='dialog[open]'&&dialog.open?dialog:null,querySelectorAll(selector){return rowNodes.filter(row=>selector==='[data-ledger-id]'?'ledgerId'in row.dataset:'queueId'in row.dataset);}},
@@ -41,6 +41,7 @@ function harness(overrides={}){
   requestAnimationFrame:callback=>effects.frames.push(callback),modal:(...args)=>effects.modals.push(args),playerName:id=>'player '+id,venueName:pool=>pool,time:value=>String(value??''),
   clock:()=> '2026-10-12T00:00:00Z',song:id=>context.state.songs.find(row=>row.songId===id),me:()=>context.state.players.find(row=>row.playerId===context.session?.playerId),card:(_title,body)=>'<section>'+body+'</section>',blank:()=>'<p>沒有資料</p>',selectedQueue:new Set(),
   chat:{open:async()=>{effects.chat++;}},board:{open:async()=>{effects.board++;}},
+  managementEntry:{sync(){},state:()=>({ready:true})},platformDirectory:{sync(){},clear(){}},managementPage:()=>false,inNativeSpace:()=>false,syncThemeDecor(){},updateAppStart(){},roomContextHref:()=>location.href,appInstall:{prepareSource(){}},
   applyHomeTheme(){},header(){},loadVisibleFavoriteFlags(){},loadFavoriteAudience(){},loadFavorites(){},loadListeningOverview(){},achievementPanel:{load:async()=>{}},medalManagement:{load:async()=>{}},activityPage:{load:async()=>{}},loadPlayerManagement(){},syncPhotoCarousel(){},
   ...Object.fromEntries(['Admin','Center','Home','CommonBook','Book','Gallery'].map(view=>['render'+view,function(){effects.banners=[];effects.views.push({view,route:context.route,tab:context.tab,subtab:context.subtab});}])),
   ...overrides
@@ -55,7 +56,7 @@ test('player notice waits for login, then the actual render opens the authorized
  assert.equal(h.context.pendingNoticeTarget.entityId,'q15');assert.equal(h.context.noticeLanding,null);
  assert.equal(h.effects.views.at(-1).view,'Home');assert.match(h.effects.banners[0],/請先登入/);assert.equal(h.effects.frames.length,0);
  h.context.session={playerId:'P1',sessionId:'new-login'};h.render();h.flush();
- assert.equal(h.context.pendingNoticeTarget,null);assert.equal(h.context.route,'center');assert.equal(h.context.subtab,'queue');assert.equal(h.context.pages['queue-history'],2);
+ assert.equal(h.context.pendingNoticeTarget,null);assert.equal(h.context.route,'center');assert.equal(h.context.subtab,'queue');assert.equal(h.context.pages['history-all'],2);
  assert.equal(h.effects.views.at(-1).view,'Center');assert.equal(h.context.noticeLanding.id,'q15');assert.equal(h.effects.focus[0].id,'q15');assert.equal(new URL(h.context.location.href).hash,'#center');
 });
 
@@ -69,14 +70,14 @@ test('manager notice requires manager login even when a player is signed in',()=
 test('empty current queue cannot clamp a notification history target from page 2 to page 1',()=>{
  const h=harness({pendingNoticeTarget:target()});h.useActualQueueRendering();h.context.state.queue=queues().map(row=>({...row,status:'completed'}));h.context.selectedQueue.add('q25');
  h.render();h.flush();
- assert.equal(h.context.pages.queue,1,'the empty current list maintains its own first page');assert.equal(h.context.pages['queue-history'],2,'rendering the empty current list must not clamp the planned history page');
+ assert.equal(h.context.pages.queue,1,'the empty current list maintains its own first page');assert.equal(h.context.pages['history-all'],2,'rendering the empty current list must not clamp the planned history page');
  assert.equal(h.context.noticeLanding.page,2);assert.match(h.effects.html,/data-queue-id="q15"/);assert.doesNotMatch(h.effects.html,/data-queue-id="q25"/);assert.equal(h.effects.focus[0].id,'q15');assert.equal(h.context.selectedQueue.has('q25'),true,'navigation retains cross-page selections');
 });
 
 test('empty history queue cannot clamp an active notification target on page 2',()=>{
  const h=harness({pendingNoticeTarget:target({entityType:'ready'})});h.useActualQueueRendering();h.context.state.queue=queues().map(row=>({...row,status:'waiting'}));
  h.render();h.flush();
- assert.equal(h.context.pages.queue,2);assert.equal(h.context.pages['queue-history'],1);assert.match(h.effects.html,/data-queue-id="q15"/);assert.doesNotMatch(h.effects.html,/data-queue-id="q0"/);assert.equal(h.effects.focus[0].id,'q15');
+ assert.equal(h.context.pages.queue,2);assert.equal(h.context.pages['history-all'],1);assert.match(h.effects.html,/data-queue-id="q15"/);assert.doesNotMatch(h.effects.html,/data-queue-id="q0"/);assert.equal(h.effects.focus[0].id,'q15');
 });
 
 for(const change of [{spaceId:'another-space'},{streamerId:'another-room'},{streamerSlug:'another-slug'}])test('target mismatch cannot redirect current authorized view: '+JSON.stringify(change),()=>{
@@ -92,12 +93,12 @@ test('rejecting a new mismatched target clears an older landing banner',()=>{
 
 test('a missing record falls back to a finite history list and does not focus another row',()=>{
  const h=harness({pendingNoticeTarget:target({entityId:'deleted-record'})});h.render();h.flush();
- assert.equal(h.context.route,'center');assert.equal(h.context.subtab,'queue');assert.equal(h.context.pages['queue-history'],1);assert.equal(h.context.noticeLanding.found,false);assert.match(h.effects.banners[0],/已移除或目前無法查看/);assert.equal(h.effects.focus.length,0);
+ assert.equal(h.context.route,'center');assert.equal(h.context.subtab,'queue');assert.equal(h.context.pages['history-all'],1);assert.equal(h.context.noticeLanding.found,false);assert.match(h.effects.banners[0],/已移除或目前無法查看/);assert.equal(h.effects.focus.length,0);
 });
 
 test('another player record in the same room is unavailable through URL target identity',()=>{
  const h=harness({pendingNoticeTarget:target()});h.context.state.queue[15].playerId='P2';h.render();h.flush();
- assert.equal(h.context.noticeLanding.found,false);assert.equal(h.context.pages['queue-history'],1);assert.equal(h.effects.focus.length,0);
+ assert.equal(h.context.noticeLanding.found,false);assert.equal(h.context.pages['history-all'],1);assert.equal(h.effects.focus.length,0);
 });
 
 test('a credit in another pool opens only that authorized read-only detail and escapes its note',()=>{

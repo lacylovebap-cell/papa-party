@@ -14,7 +14,7 @@ import {createWebAppInstall} from './web-app-install.js?v=10.20-WEB.1';
 import {refreshView,rememberView} from './view-refresh.js?v=10.20-WEB.1';
 import {createWebSyncRecovery} from './web-sync-recovery.js?v=10.20-WEB.1';
 import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
-import {canonicalNoticeLink} from './notification-rules.js?v=10.28-CANCEL.1';
+import {canonicalNoticeLink} from './notification-rules.js?v=10.31-NOTICE.1';
 import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.20-WEB.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
 import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.28-QUEUE.1';
@@ -30,7 +30,7 @@ import {publicPageDestination} from './public-route-location.js?v=10.20-WEB.1';
 import {readPublicRouteContext,publicApplicationHref,publicApplicationPage,createPublicLinkClient} from './public-links.js';
 import {createPublicShare} from './share-dialog.js';
 import {createPublicLinkSettings} from './public-link-settings.js';
-import {createNotifications} from './notifications.js?v=10.28-CANCEL.1';
+import {createNotifications} from './notifications.js?v=10.31-NOTICE.1';
 import {createRoomDraft,recordRoomDraftAction,recordRoomDraftImport} from './room-draft.js?v=10.31-THEME.1';
 import {venuePolicySettings,venuePolicyHistoryVenue,venuePolicyLedgerPool,venuePolicyConsumedPool,venuePolicySavedSnapshot} from './venue-policy.js?v=10.20-WEB.1';
 import {createPlayerManager} from './player-manager.js?v=10.20-WEB.1';
@@ -794,6 +794,14 @@ function prepareNoticeLanding(){
  if(!noticeTargetMatchesRoom(target,{spaceId:state.currentStreamer.spaceId||'space-001',roomId:state.currentStreamer.id,streamerSlug})){toast('這則通知的主播或空間與目前頁面不同，請從原通知重新開啟。');return null;}
  const management=target.section==='admin',kind=notificationTargetView(target),plan=planNotificationLanding(target,{kind,queue:state.queue,ledger:state.ledger,wishes:state.wishes,playerId:session?.playerId,management,roomId:state.currentStreamer.id,currentPool:venuePolicySettings(state.settings).current_space,ledgerPool:venuePolicyLedgerPool,timeValue,historyOrder:listSorts.queueHistory,currentOrder:listSorts.queueCurrent});
  route=management?'admin':'center';if(management){selectedPlayer=null;tab=kind==='credit'?'ledger':kind==='queue'?'queue':kind==='wish'?'wishes':tab;if(kind==='queue')queueHistory=plan.history;if(kind==='credit')ledgerQuery='';}else subtab=target.entityType==='achievement'?'achievements':kind==='credit'?'ledger':kind==='queue'?'queue':kind==='wish'?'wishes':'overview';
+ if(!management&&kind==='queue'){
+  historyView='all';
+  if(plan.history){
+   const hist=state.queue.filter(q=>q.playerId===session.playerId&&!['pending','waiting'].includes(q.status)),shown=new Set(hist.map(q=>q.id)),pool=venuePolicySettings(state.settings).current_space;
+   const timeline=[...hist.map(q=>({id:q.id,at:timeValue(q.effective_at||q.completedAt||q.at)})),...state.ledger.filter(l=>l.playerId===session.playerId&&venuePolicyLedgerPool(l)===pool&&!(l.queueId&&shown.has(l.queueId))).map(l=>({id:null,at:timeValue(l.at)}))].sort((a,b)=>(Number.isFinite(b.at)?b.at:-Infinity)-(Number.isFinite(a.at)?a.at:-Infinity));
+   plan.pageKey='history-all';plan.page=Math.max(1,Math.floor(timeline.findIndex(x=>x.id===plan.id)/10)+1);
+  }
+ }
  if(plan.pageKey)pages[plan.pageKey]=plan.page;
  const current=new URL(location.href);current.hash=route;history.replaceState(null,'',current.href);
  noticeLanding={...plan,target,route,tab:management?tab:subtab,account:noticeLandingIdentity()};return noticeLanding;

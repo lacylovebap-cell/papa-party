@@ -29,6 +29,7 @@ self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
 self.addEventListener('push',event=>{event.waitUntil((async()=>{
  let data;try{data=event.data?.json();}catch{return;}
  if(typeof data?.id!=='string'||!data.id||data.id.length>128||typeof data.body!=='string'||!data.body||data.body.length>4096)return;
+ if(data.expiresAt!=null&&(!Number.isFinite(data.expiresAt)||Date.now()>=data.expiresAt))return;
  // Existing Edge payloads already send a canonical link. Prefer it so old
  // abbreviated Web URLs gain entity identity without a backend deployment.
  const target=data.link==null?null:noticeTarget(data.link);if(data.link!=null&&!target)return;

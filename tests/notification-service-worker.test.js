@@ -55,3 +55,11 @@ test('same-origin root scope and duplicate notice delivery retain their prior be
  assert.equal(w.shown[0].options.data.url,new URL(notificationTargetPath(link),'https://example.test/').href);
  const duplicate=worker({existing:[{}]});await duplicate.push({id:'n1',body:'body',link});assert.equal(duplicate.shown.length,0);
 });
+
+
+test('expired push is not displayed while old payloads without expiry remain compatible',async()=>{
+ const w=worker();await w.push({id:'old',body:'stale',link,expiresAt:Date.now()-1000});
+ assert.equal(w.shown.length,0);
+ await w.push({id:'legacy',body:'legacy',link});assert.equal(w.shown.length,1);
+ await w.push({id:'current',body:'current',link,expiresAt:Date.now()+60000});assert.equal(w.shown.length,2);
+});
