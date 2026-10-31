@@ -50,3 +50,8 @@ player logins (`spacePlayerLogin`, `spacePlayerCreate`, `spacePlayerAccess`, `sp
 `20261029120000_space_activation.sql` and `20261029120100_space_player_logins.sql` (applied before the Edge).
 Rollback: `party-api-10.29-PRICE.2.js` at commit `1a8ab1b89dba93dd2da406b194431415a6b97b87` (v71), then
 `ops/space-operations-rollback-20261029.sql` if the database part must be withdrawn too.
+
+10.31-KIND.1 = deployed 10.31-PUSH.1 (v76) + the manager queue operation `changeKind` (提歌⇄現點 correction).
+Built by replacing only the Core reducer section of `party-api-10.31-PUSH.1.js` with the same section of a fresh
+bundle (the only differences are `changeQueueKind` and its `case "changeKind"`), plus the releaseInfo version.
+No database change. Rollback: `party-api-10.31-PUSH.1.js` at commit `ccb051bc0da74fad8b63073cf1c9f64b243cfd01` (v76).
