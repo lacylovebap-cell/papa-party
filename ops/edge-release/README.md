@@ -73,3 +73,8 @@ Rollback Edge: `party-api-10.31-CALL.1.js` at commit `df901c83e7c4c3d38f95b76d33
 10.31-PUSH.3 = deployed 10.31-PUSH.2 (v79) with 主播呼叫 push links typed `ready` instead of `call`: phones still running the
 service worker from before 10.31-CALL.1 silently dropped `call` links. Inbox rows keep type `call`. No database change.
 Rollback: `party-api-10.31-PUSH.2.js` at commit `2d6f31e63afb90e999c3196e0080bdcf4b703913` (v79).
+
+10.31-NOTICE.4 = deployed 10.31-PUSH.3 (v80) with one change: the message centre accepts `scopeMode:'space'` from players
+(one list for every streamer of their Space). Needs migration `20261031170000_player_notice_space_scope.sql` first
+(rollback `ops/player-notice-space-scope-rollback-20261031.sql`, identical to the production function before it).
+Rollback Edge: `party-api-10.31-PUSH.3.js` at commit `b585e83692b1df9fb3b5962a11dc94354deadb77` (v80).
