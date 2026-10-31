@@ -16,7 +16,7 @@ const start=app.indexOf('function render(){');
 const end=app.indexOf('\nasync function loginDialog()',start);
 assert.ok(start>=0&&end>start,'the app navigation integration is present');
 const integration=app.slice(start,end);
-const queueRendering=app.split(/\r?\n/).filter(line=>['function playerHistoryHtml(','function playerCenterNav(','function queueRowOnly(','function renderCenter(','function playerTabs(','function queueRows(','function paginate(','function sortControl(','const statusName='].some(prefix=>line.startsWith(prefix))).join('\n');
+const queueRendering=app.split(/\r?\n/).filter(line=>['function playerHistoryHtml(','function playerCenterNav(','function queueRowOnly(','function renderCenter(','function playerTabs(','function queueKindChangeable(','function queueRows(','function paginate(','function sortControl(','const statusName='].some(prefix=>line.startsWith(prefix))).join('\n');
 const target=(changes={})=>({version:1,spaceId:'space-001',streamerId:'papa',streamerSlug:'papa',section:'center',entityType:'completed',entityId:'q15',notificationId:'notice-1',...changes});
 const queues=()=>Array.from({length:26},(_,i)=>({id:'q'+i,streamer_id:'papa',playerId:'P1',status:i<5?'waiting':'completed',at:new Date(Date.UTC(2026,0,i+1)).toISOString()}));
 

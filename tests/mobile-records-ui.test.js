@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {requestSourceLabel} from '../src/request-source.js';
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
-const appLines=app.split(/\r?\n/),queueRows=['function queueSourceShort(','function queueTags(','function queueNoteLine(','function queueRows('].map(prefix=>appLines.find(line=>line.startsWith(prefix))).join('\n');
+const appLines=app.split(/\r?\n/),queueRows=['function queueSourceShort(','function queueTags(','function queueNoteLine(','function queueKindChangeable(','function queueRows('].map(prefix=>appLines.find(line=>line.startsWith(prefix))).join('\n');
 const h=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function render(rows,{manager=false,playerId='mine',songs=[],history=false,currentSort='newest',historySort='newest',showSort=true,sortCurrent=!manager}={}){
  const original=structuredClone(rows),context=vm.createContext({listSorts:{queueCurrent:currentSort,queueHistory:historySort},timeValue:value=>Date.parse(value)||0,
