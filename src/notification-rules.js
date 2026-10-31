@@ -1,5 +1,5 @@
 export const NOTICE_TYPES={
- live:['玩家現點',2],saved:['玩家提歌',2],cancel:['取消點歌／提歌',2],ready:['準備好了／即將演唱',2],accepted:['提歌成功／已收到／準備時間',2],completed:['完成演唱',1],credit:['存歌異動',1],status:['操作狀態修改',1],failed:['提歌額度已滿',1],message:['私人訊息',2],comment:['公開留言／回覆',1],announcement:['公告',1],achievement:['取得勳章',1],wish:['許願收到／處理結果',2],system:['系統異常',2],delivery:['推播傳送失敗',1]
+ live:['玩家現點',2],saved:['玩家提歌',2],cancel:['取消點歌／提歌',2],ready:['準備好了／即將演唱',2],call:['主播呼叫',2],accepted:['提歌成功／已收到／準備時間',2],completed:['完成演唱',1],credit:['存歌異動',1],status:['操作狀態修改',1],failed:['提歌額度已滿',1],message:['私人訊息',2],comment:['公開留言／回覆',1],announcement:['公告',1],achievement:['取得勳章',1],wish:['許願收到／處理結果',2],system:['系統異常',2],delivery:['推播傳送失敗',1]
 };
 export function cleanNoticePrefs(input={}){const v={muteAll:input.muteAll===true,muteSound:input.muteSound===true,pushEnabled:input.pushEnabled===true,types:{}};for(const [type,[,level]] of Object.entries(NOTICE_TYPES)){const src=input.types?.[type]||{};v.types[type]=Object.fromEntries(['center','popup','sound','push','badge'].map(k=>[k,typeof src[k]==='boolean'?src[k]:['center','badge'].includes(k)||level===2]));}return v;}
 export function noticeChannels(prefs,type){const p=cleanNoticePrefs(prefs),v={...(p.types[type]||p.types.system)};v.sound=v.sound&&!p.muteSound&&!p.muteAll;v.popup=v.popup&&!p.muteAll;v.push=v.push&&p.pushEnabled&&!p.muteAll;return v;}
@@ -10,7 +10,7 @@ export function queueNoticeCurrent(notice,row){
  const q=row?.data;
  if(!q||row.space_id!==notice.space_id||q.streamer_id!==notice.streamer_id||q.playerId!==notice.recipient||q.status!=='waiting'||q.archived_at||q.voided_at)return false;
  if(Date.parse(q.preparationStartedAt)>Date.parse(notice.created_at))return false;
- return notice.type!=='ready'||Boolean(q.readyAt)&&q.awaitingAcknowledgment!==true&&q.awaitingPreparation!==true||Boolean(q.calledAt)&&Date.parse(notice.created_at)>=Date.parse(q.calledAt)-60000;
+ return notice.type!=='ready'||Boolean(q.readyAt)&&q.awaitingAcknowledgment!==true&&q.awaitingPreparation!==true;
 }
 // Cancellation wording comes only from the settlement written in the same commit,
 // so a notice never claims a return the ledger did not make.
@@ -36,8 +36,8 @@ export function deriveNotices(before,after,context,t=new Date().toISOString()){
   if(!old){if(context.role==='player')add('__admin__',q.kind==='saved'?'saved':'live',`${player}${q.kind==='saved'?'提出存歌':'現點'}${title}`,q.id);if(q.kind==='saved'&&q.status==='waiting')add(q.playerId,'accepted',q.awaitingAcknowledgment?`${title}已收到你的提歌囉，正在等待主播回應`:`${title}提歌成功，已加入待播`,q.id);continue;}
   const preparationChanged=old.preparationStartedAt!==q.preparationStartedAt||old.stage!==q.stage||old.preparationMinutes!==q.preparationMinutes;
   if(context.role==='player'&&['ownQueueBatch','replaceOwn'].includes(context.action)&&(old.songId!==q.songId||JSON.stringify(old.items)!==JSON.stringify(q.items))){add('__admin__',q.kind==='saved'?'saved':'live',`${player}把《${old.title||'歌曲'}》更換為${title}，請重新確認`,q.id);add(q.playerId,'accepted',`${title}換歌已送出，等待主播重新確認`,q.id);}
-  // 呼叫玩家: the streamer taps 📣 on a waiting row; one short ready-type notice per tap.
-  if(q.calledAt&&old.calledAt!==q.calledAt&&q.playerId&&q.status==='waiting')add(q.playerId,'ready',`📣 呼叫中！${title}要開唱囉，速速回來～`,q.id);
+  // 呼叫玩家: its own notice type (not the countdown's 準備好了), one per tap.
+  if(q.calledAt&&old.calledAt!==q.calledAt&&q.playerId&&q.status==='waiting')rows.push({id:crypto.randomUUID(),streamer_id:roomId,streamer_name:name,recipient:q.playerId,type:'call',level:NOTICE_TYPES.call[1],body:`📣 ${name}呼叫中，速回！${title}`,entity_id:q.id,created_at:t});
   if(old.status!==q.status){
    if(q.status==='cancelled'&&q.playerId){const text=cancelNoticeText(q,player,title),toPlayer=()=>add(q.playerId,'cancel',text.player,q.id),toAdmin=()=>add('__admin__','cancel',text.admin,q.id);if(context.role==='player'){toAdmin();toPlayer();}else{toPlayer();toAdmin();}}
    else if(q.status==='completed')add(q.playerId,'completed',`${title}已完成演唱`,q.id);

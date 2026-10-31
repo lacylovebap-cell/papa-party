@@ -1,6 +1,6 @@
 // Notification links select a view. The receiving view must still use the
 // current authenticated identity and its ordinary server-side access checks.
-const targetTypes=new Set(['live','saved','cancel','ready','accepted','completed','credit','status','failed','message','comment','announcement','achievement','wish','system','delivery']);
+const targetTypes=new Set(['live','saved','cancel','ready','call','accepted','completed','credit','status','failed','message','comment','announcement','achievement','wish','system','delivery']);
 const queryFields=['streamer','streamerId','spaceId','entityType','entityId','notificationId'];
 const secretFields=new Set(['token','access_token','refresh_token','password','apikey','api_key','authorization','auth','sessiontoken','credential']);
 const invalidCharacters=/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/;
@@ -16,7 +16,7 @@ export function validateNotificationTarget(value){
 }
 export function notificationTargetView(value){
  const target=validateNotificationTarget(value);if(!target)return null;
- if(['live','saved','cancel','ready','accepted','completed','status'].includes(target.entityType))return 'queue';
+ if(['live','saved','cancel','ready','call','accepted','completed','status'].includes(target.entityType))return 'queue';
  if(target.entityType==='credit')return 'credit';
  if(target.entityType==='wish')return 'wish';
  if(target.entityType==='message')return 'chat';

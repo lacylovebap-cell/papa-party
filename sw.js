@@ -1,7 +1,7 @@
 // Push only: no cached API responses, login tokens, or offline business mutations.
 // This classic worker cannot import ESM. Keep its transport validation in parity
 // with notification-target.js; tests exercise both with the same target vectors.
-const noticeTargetTypes=new Set(['live','saved','cancel','ready','accepted','completed','credit','status','failed','message','comment','announcement','achievement','wish','system','delivery']);
+const noticeTargetTypes=new Set(['live','saved','cancel','ready','call','accepted','completed','credit','status','failed','message','comment','announcement','achievement','wish','system','delivery']);
 const noticeSecretFields=new Set(['token','access_token','refresh_token','password','apikey','api_key','authorization','auth','sessiontoken','credential']);
 const noticeInvalidCharacters=/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/;
 function noticeTargetString(value,max,nullable=false){if(value==null)return nullable?null:undefined;return typeof value==='string'&&value.length>0&&value.length<=max&&value.trim()===value&&!noticeInvalidCharacters.test(value)?value:undefined;}
