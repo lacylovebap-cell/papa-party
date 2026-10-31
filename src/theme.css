@@ -350,6 +350,9 @@ html #app .queue-compact .queue-controls .queue-call{min-height:22px!important;p
 .push-prompt-dialog .dialog-actions>button.primary{flex:1 1 auto}
 /* Player message centre: 全部 + one chip per streamer; each notice names its streamer. */
 .notice-streamer-filter{display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 8px;margin:4px 0 6px}
-.notice-streamer-filter>button{flex:0 0 auto;border-radius:999px;padding:5px 12px;min-height:30px;font-size:12px;white-space:nowrap}
+.notice-streamer-filter{align-items:center}
+.notice-streamer-filter>button{flex:0 0 auto;border-radius:999px;padding:5px 14px;min-height:32px;font-size:12px;white-space:nowrap}
+.notice-streamer-filter>select{flex:1 1 140px;max-width:220px;min-height:32px;border-radius:999px;padding:4px 12px;font-size:12px}
+.notice-streamer-filter>select.active{border-color:var(--home-accent,#9b6bc0);font-weight:700}
 .notice-streamer-filter>button[aria-pressed=true]{background:var(--home-button,#7a4f9b);border-color:var(--theme-button-solid,#9b6bc0);color:var(--home-buttonText,#fff);font-weight:700}
 .notice-streamer-tag{display:inline-block;padding:1px 8px;margin-right:6px;border-radius:999px;background:color-mix(in srgb,var(--home-accent,#9b6bc0) 28%,transparent);color:var(--home-text,#f1e8fa);font-weight:700;font-size:11px}
