@@ -27,7 +27,7 @@ test('a player opens one list with every streamer, and can narrow it to one stre
 test('the player view shows 全部 + a searchable streamer box and tags each notice with its streamer',()=>{
  const v={category:'system',scopeMode:'space',rows:[{id:'x',streamer_name:'咪醬',type:'ready',body:'咪醬｜《小幸運》準備好演唱囉',created_at:'2026-10-31T14:00:00Z',read_at:null}],page:0,total:1,hasMore:false,countsReady:true,unread:{system:1,message:0,board:0},badges:{system:1,message:0,board:0}};
  const html=messageCenterHtml(v,{scopeLabel:'全部主播的通知',streamerFilters:[{slug:'',label:'全部',active:true},{slug:'mi',label:'咪醬',active:false}]});
- assert.match(html,/data-notice="centerStreamer" data-streamer="" aria-pressed="true"[^>]*>全部/);assert.match(html,/<input type="search" data-notice-streamer list="notice-streamer-options"[^>]*placeholder="🔍 搜尋或選擇主播…"[^>]*value=""/);assert.match(html,/<datalist id="notice-streamer-options"><option value="咪醬"><\/option><\/datalist>/);
+ assert.match(html,/data-notice="centerStreamer" data-streamer="" aria-pressed="true"[^>]*>全部/);assert.match(html,/<select data-notice-streamer[^>]*><option value="" selected>🔍 選擇主播…<\/option><option value="mi">咪醬<\/option><\/select>/);
  assert.match(html,/notice-streamer-tag">咪醬<\/span>/);assert.match(html,/<p>《小幸運》準備好演唱囉<\/p>/,'the name is not repeated in the text');
  assert.doesNotMatch(html,/data-notice="centerScope"/);
 });

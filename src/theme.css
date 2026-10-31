@@ -352,7 +352,18 @@ html #app .queue-compact .queue-controls .queue-call{min-height:22px!important;p
 .notice-streamer-filter{display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 8px;margin:4px 0 6px}
 .notice-streamer-filter{align-items:center}
 .notice-streamer-filter>button{flex:0 0 auto;border-radius:999px;padding:5px 14px;min-height:32px;font-size:12px;white-space:nowrap}
-.notice-streamer-filter>input[data-notice-streamer]{flex:1 1 150px;max-width:240px;min-height:32px;border-radius:999px;padding:4px 14px;font-size:13px}
-.notice-streamer-filter>input[data-notice-streamer].active{border-color:var(--home-accent,#9b6bc0);font-weight:700}
+.notice-streamer-filter>select{flex:1 1 150px;max-width:240px;min-height:32px;border-radius:999px;padding:4px 12px;font-size:13px}
+.notice-streamer-filter>select.active{border-color:var(--home-accent,#9b6bc0);font-weight:700}
 .notice-streamer-filter>button[aria-pressed=true]{background:var(--home-button,#7a4f9b);border-color:var(--theme-button-solid,#9b6bc0);color:var(--home-buttonText,#fff);font-weight:700}
 .notice-streamer-tag{display:inline-block;padding:1px 8px;margin-right:6px;border-radius:999px;background:color-mix(in srgb,var(--home-accent,#9b6bc0) 28%,transparent);color:var(--home-text,#f1e8fa);font-weight:700;font-size:11px}
+/* Searchable dropdowns (select-search.js): the select keeps its size; a panel opens on tap. */
+.ss-panel{position:fixed;z-index:1000;display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--home-line,var(--line,#3a2f45));border-radius:12px;background:var(--home-panel,#1b1622);color:var(--home-text,#eee);box-shadow:0 10px 28px #0008;box-sizing:border-box}
+.ss-panel .ss-search{width:100%;min-height:34px;border-radius:999px;padding:5px 12px;font-size:14px;box-sizing:border-box}
+.ss-panel .ss-options{overflow:auto;display:flex;flex-direction:column;gap:2px;min-height:0}
+.ss-panel .ss-option{display:block;width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:8px 10px;min-height:34px;border-radius:8px;font-size:14px;white-space:normal}
+.ss-panel .ss-option:hover,.ss-panel .ss-option:focus{background:color-mix(in srgb,var(--home-accent,#9b6bc0) 22%,transparent);outline:none}
+.ss-panel .ss-option.selected{background:var(--home-button,#7a4f9b);color:var(--home-buttonText,#fff);font-weight:700}
+.ss-panel .ss-empty{margin:6px 4px;font-size:13px;opacity:.7}
+[data-theme-v2] .ss-panel .ss-option{background:transparent;border:0;color:var(--home-text)}
+[data-theme-v2] .ss-panel .ss-option.selected{background:var(--home-button);color:var(--home-buttonText)}
+[data-theme-v2] .ss-panel .ss-option:hover,[data-theme-v2] .ss-panel .ss-option:focus{background:color-mix(in srgb,var(--home-accent) 22%,transparent);filter:none}

@@ -87,3 +87,5 @@ lobby.start();
 document.querySelector('header .header-inner')?.insertAdjacentHTML('beforeend',appStartButton());
 updateAppStart(null,new URL('lobby.html',mountUrl).href,{source:{v:1,kind:'hall',spaceId:scope.spaceId,streamerId:null},name:scope.name,spaceName:scope.name});
 }
+// Searchable dropdowns everywhere (loaded on its own so a failure never blocks the page).
+import('./select-search.js?v=10.31-SELECT.1').then(m=>m.installSelectSearch(document)).catch(()=>{});
