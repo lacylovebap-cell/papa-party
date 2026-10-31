@@ -62,7 +62,10 @@ type `call` (主播呼叫). Built like KIND.1: only the Core reducer and notific
 Needs migration `20261031150000_notice_type_call.sql` (applied before the Edge; rollback `ops/notice-type-call-rollback-20261031.sql`).
 Rollback: `party-api-10.31-KIND.1.js` at commit `18f9b9f143f99bde1021d06697269120a4495449` (v77).
 
-10.31-PUSH.2 = deployed 10.31-CALL.1 (v78) with one change: `pushSubscribe` upserts on `(streamer_id, endpoint, recipient)`
-so a streamer and a player of the same room can share one phone. Needs migration
-`20261031160000_push_subscription_per_recipient.sql` first (rollback `ops/push-subscription-per-recipient-rollback-20261031.sql`).
+10.31-PUSH.2 = deployed 10.31-CALL.1 (v78) with two changes: `pushSubscribe` upserts on `(streamer_id, endpoint, recipient)`
+so a streamer and a player of the same room can share one phone; and `deliverPush` accepts a player's job whose
+subscription was registered under another room of the same Space (never chosen push preference counts as on for a
+player who has a device subscription; an explicit off still wins). Needs migrations
+`20261031160000_push_subscription_per_recipient.sql` and `20261031161000_player_push_any_room.sql` first
+(rollbacks `ops/push-subscription-per-recipient-rollback-20261031.sql`, `ops/player-push-any-room-rollback-20261031.sql`).
 Rollback Edge: `party-api-10.31-CALL.1.js` at commit `df901c83e7c4c3d38f95b76d33123cd454567bf5` (v78).
