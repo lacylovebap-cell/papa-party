@@ -10,7 +10,7 @@ export function queueNoticeCurrent(notice,row){
  const q=row?.data;
  if(!q||row.space_id!==notice.space_id||q.streamer_id!==notice.streamer_id||q.playerId!==notice.recipient||q.status!=='waiting'||q.archived_at||q.voided_at)return false;
  if(Date.parse(q.preparationStartedAt)>Date.parse(notice.created_at))return false;
- return notice.type!=='ready'||Boolean(q.readyAt)&&q.awaitingAcknowledgment!==true&&q.awaitingPreparation!==true;
+ return notice.type!=='ready'||Boolean(q.readyAt)&&q.awaitingAcknowledgment!==true&&q.awaitingPreparation!==true||Boolean(q.calledAt)&&Date.parse(notice.created_at)>=Date.parse(q.calledAt)-60000;
 }
 // Cancellation wording comes only from the settlement written in the same commit,
 // so a notice never claims a return the ledger did not make.
@@ -36,6 +36,8 @@ export function deriveNotices(before,after,context,t=new Date().toISOString()){
   if(!old){if(context.role==='player')add('__admin__',q.kind==='saved'?'saved':'live',`${player}${q.kind==='saved'?'提出存歌':'現點'}${title}`,q.id);if(q.kind==='saved'&&q.status==='waiting')add(q.playerId,'accepted',q.awaitingAcknowledgment?`${title}已收到你的提歌囉，正在等待主播回應`:`${title}提歌成功，已加入待播`,q.id);continue;}
   const preparationChanged=old.preparationStartedAt!==q.preparationStartedAt||old.stage!==q.stage||old.preparationMinutes!==q.preparationMinutes;
   if(context.role==='player'&&['ownQueueBatch','replaceOwn'].includes(context.action)&&(old.songId!==q.songId||JSON.stringify(old.items)!==JSON.stringify(q.items))){add('__admin__',q.kind==='saved'?'saved':'live',`${player}把《${old.title||'歌曲'}》更換為${title}，請重新確認`,q.id);add(q.playerId,'accepted',`${title}換歌已送出，等待主播重新確認`,q.id);}
+  // 呼叫玩家: the streamer taps 📣 on a waiting row; one short ready-type notice per tap.
+  if(q.calledAt&&old.calledAt!==q.calledAt&&q.playerId&&q.status==='waiting')add(q.playerId,'ready',`📣 呼叫中！${title}要開唱囉，速速回來～`,q.id);
   if(old.status!==q.status){
    if(q.status==='cancelled'&&q.playerId){const text=cancelNoticeText(q,player,title),toPlayer=()=>add(q.playerId,'cancel',text.player,q.id),toAdmin=()=>add('__admin__','cancel',text.admin,q.id);if(context.role==='player'){toAdmin();toPlayer();}else{toPlayer();toAdmin();}}
    else if(q.status==='completed')add(q.playerId,'completed',`${title}已完成演唱`,q.id);
