@@ -6,11 +6,11 @@ import {canReplaceSound,isSuper} from './access-policy.js?v=10.28-CANCEL.1';
 import {communicationIdentity} from './communication-context.js?v=10.19-WEB.1';
 import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=10.31-NOTICE.1';
 import {createWebNotificationHealth} from './web-notification-health.js?v=10.19-WEB.1';
-export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpenCategory,apiUrl,apiKey,messageCenterV2=false}){
+export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpenCategory,apiUrl,apiKey,messageCenterV2=false,companion=()=>null,companionApi=null}){
  let deviceStorage;try{deviceStorage=globalThis.localStorage;}catch{}
  const devicePrefs=createNotificationDevicePreferences(deviceStorage);
  const delta=createNoticeDelta();let deltaBacklog=false;
- let automaticActivationKey='',pushSettingDirty=false;let bindingFailures=0,bindingRetryAt=0;
+ let automaticActivationKey='',pushSettingDirty=false,companionBound='',companionBinding='';let bindingFailures=0,bindingRetryAt=0;
  const bindingFailed=()=>{bindingFailures++;bindingRetryAt=Date.now()+Math.min(300000,5000*2**Math.min(bindingFailures-1,6));};
  const bindingRecovered=()=>{bindingFailures=0;bindingRetryAt=0;};
  const permission=()=>globalThis.Notification?.permission||'unsupported';
@@ -62,7 +62,7 @@ export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpe
    const nextVersion=latestPage.playerSoundVersion||'';
    if(nextVersion!==playerSoundVersion){const samePageVersion=nextVersion===data.playerSoundVersion,source=(samePageVersion?(latestPage.playerSound??data.playerSound):latestPage.playerSound)||new URL('../assets/notification.m4a',import.meta.url).href;sound.src=source;playerSoundVersion=nextVersion;}
   }else{const source=latestPage.playerSound||new URL('../assets/notification.m4a',import.meta.url).href;if(sound.src!==source)sound.src=source;}
- }counts=latestPage.unread||{};more=latest.length>50;rows=latest.slice(0,50);{const arrivals=[...new Map([...recovered,...(latestPage.rows||[]).slice(0,50)].map(n=>[n.id,n])).values()];fresh=arrivals.filter(n=>!seen.has(n.id)&&!n.read_at);for(const n of arrivals)seen.add(n.id);if(previous){const active=fresh.filter(n=>Date.now()-Date.parse(n.created_at)<120000);const pop=active.find(n=>noticeChannels(prefs,n.type).popup);if(pop&&!document.hidden)toast(pop.body);const audible=active.find(n=>noticeChannels(prefs,n.type).sound);if(audible&&!document.hidden){const ring=async()=>{if(read('lastSound',null)===audible.id)return;if(await play())write('lastSound',audible.id);};if(navigator.locks)await navigator.locks.request(storageKey('audio-lock'),ring);else await ring();}}primed=true;}if(!c.demo&&data.topic)connect(data.topic);bindRememberedPush(c,g).catch(()=>{});if(centerEnabled())await center.refreshCounts();if(g!==generation||contextStamp(c)!==contextStamp(context()))return;updateButton();renderHealth();if(view==='inbox')showInbox(false);if(previous&&fresh.length)onUpdate?.(fresh);}finally{loading=false;if(refreshPending){refreshPending=false;queueMicrotask(()=>refresh().catch(()=>{}));}}}
+ }counts=latestPage.unread||{};more=latest.length>50;rows=latest.slice(0,50);{const arrivals=[...new Map([...recovered,...(latestPage.rows||[]).slice(0,50)].map(n=>[n.id,n])).values()];fresh=arrivals.filter(n=>!seen.has(n.id)&&!n.read_at);for(const n of arrivals)seen.add(n.id);if(previous){const active=fresh.filter(n=>Date.now()-Date.parse(n.created_at)<120000);const pop=active.find(n=>noticeChannels(prefs,n.type).popup);if(pop&&!document.hidden)toast(pop.body);const audible=active.find(n=>noticeChannels(prefs,n.type).sound);if(audible&&!document.hidden){const ring=async()=>{if(read('lastSound',null)===audible.id)return;if(await play())write('lastSound',audible.id);};if(navigator.locks)await navigator.locks.request(storageKey('audio-lock'),ring);else await ring();}}primed=true;}if(!c.demo&&data.topic)connect(data.topic);bindRememberedPush(c,g).catch(()=>{});bindCompanionPush().catch(()=>{});if(centerEnabled())await center.refreshCounts();if(g!==generation||contextStamp(c)!==contextStamp(context()))return;updateButton();renderHealth();if(view==='inbox')showInbox(false);if(previous&&fresh.length)onUpdate?.(fresh);}finally{loading=false;if(refreshPending){refreshPending=false;queueMicrotask(()=>refresh().catch(()=>{}));}}}
  function shell(title,html){dialogRevision++;dialog.innerHTML=`<div class="dialog-head"><h2>${escape(title)}</h2><button type="button" data-notice="close" aria-label="關閉通知">✕</button></div><div class="dialog-body${view==='settings'||view==='centerSettings'?' notice-settings-body':centerEnabled()&&view==='inbox'?' notice-center-body':''}">${html}${view==='settings'||view==='centerSettings'||centerEnabled()&&view==='inbox'?'':'<p class="error" id="notice-error" role="status"></p>'}</div>`;if(!dialog.open)dialog.showModal();}
  function devicePushStatus(){const h=health.snapshot();if(pushDisabled(context())||devicePrefs.read().pushAllowed===false)return '使用者已在這台裝置停用';if(permission()!=='granted')return '尚未取得瀏覽器授權';if(!prefs.pushEnabled)return '帳號未允許推播（保留既有設定）';if(h.binding.inFlight||pushActivation)return '正在自動修復';if(h.error||h.binding.error)return '綁定失敗，將自動重試';if(boundDevice===key+':'+context().deviceSessionId&&h.worker==='ready'&&h.subscription==='present')return '已啟用並綁定成功';return '正在檢查／等待自動修復';}
  function healthHtml(){const h=health.snapshot(),labels={unknown:'尚未檢查',unsupported:'不支援',ready:'已找到',missing:'尚未建立',present:'已建立',error:'無法讀取'},permission={default:'尚未允許',granted:'已允許',denied:'已拒絕',unsupported:'不支援'},time=value=>value===null?'尚無紀錄':new Date(value).toLocaleString('zh-TW',{timeZone:'Asia/Taipei'});return `<dl class="notice-health-summary"><div><dt>瀏覽器</dt><dd>${h.secure?'安全連線':'需要 HTTPS'} · ${h.notificationSupported&&h.pushSupported?'支援推播':'未提供推播功能'}</dd></div><div><dt>通知權限</dt><dd>${permission[h.permission]||'尚未檢查'}</dd></div><div><dt>此主播裝置推播</dt><dd>${escape(devicePushStatus())}</dd></div><div><dt>服務／訂閱</dt><dd>${labels[h.worker]}／${labels[h.subscription]}</dd></div><div><dt>最近綁定嘗試</dt><dd>${escape(time(h.binding.attemptAt))}${h.binding.inFlight?' · 處理中':''}</dd></div><div><dt>最近綁定成功</dt><dd>${escape(time(h.binding.successAt))}</dd></div></dl>${h.error||h.binding.error?`<p class="error">${escape(h.error||h.binding.error)}</p>`:''}<p class="subtle">${h.checking?'正在檢查本機狀態。':'僅顯示這次登入於本機觀察的結果；通知是否送達需另外測試。'}${h.permission==='denied'?' 權限已拒絕，請到瀏覽器設定允許通知後再啟用。':''}</p>`;}
@@ -93,6 +93,30 @@ export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpe
    // on the next lifecycle refresh. Only this successfully bound identity is done.
    if(currentBinding()){boundDevice=bindingKey;bindingRecovered();health.recordBinding('success');await health.check();}
   }catch(error){if(currentBinding()){bindingFailed();health.recordBinding('error',error);}throw error;}finally{if(bindingDevice===bindingKey)bindingDevice='';}
+ }
+ // A second signed-in identity on this browser (e.g. a player who is also
+ // logged in as president). The message centre follows one identity, but the
+ // other must still receive Web Push on the same, already-granted browser
+ // subscription. Never prompts, never creates a subscription, never overrides
+ // an explicit off, and never shares one (room, endpoint) row with the manager.
+ async function bindCompanionPush(){
+  const c=companion?.();
+  if(!c||!companionApi||c.demo||!c.recipient||permission()!=='granted'||devicePrefs.read().pushAllowed===false||!navigator.serviceWorker?.getRegistration)return;
+  const main=context();if(main.recipient&&main.recipient===c.recipient)return;
+  if(main.role==='streamer_admin'&&main.streamer===c.streamer)return;
+  const k=communicationIdentity(c,`${c.streamer}:${c.recipient}`),bindingKey=k+':'+c.deviceSessionId;
+  let disabled=false;try{disabled=JSON.parse(localStorage.getItem('pa-notice-'+k+'-'+pushDisableKey(c)))===true;}catch{}
+  if(disabled||companionBound===bindingKey||companionBinding===bindingKey)return;
+  const still=()=>{const now=companion?.();return !!now&&now.recipient===c.recipient&&now.streamer===c.streamer&&now.deviceSessionId===c.deviceSessionId;};
+  companionBinding=bindingKey;try{
+   const reg=await navigator.serviceWorker.getRegistration(new URL('../',import.meta.url)),sub=await reg?.pushManager.getSubscription();
+   if(!sub||!still())return;
+   const inbox=await companionApi({op:'notifications',page:0});if(!still())return;
+   const raw=inbox?.preferences||{};if(raw.pushEnabled===false){companionBound=bindingKey;return;}
+   await companionApi({op:'pushSubscribe',subscription:sub.toJSON(),...(c.deviceSessionId?{expectedDeviceSessionId:c.deviceSessionId}:{})});
+   if(raw.pushEnabled!==true&&still())await companionApi({op:'noticePreferences',preferences:{...cleanNoticePrefs(raw),pushEnabled:true}});
+   if(still())companionBound=bindingKey;
+  }finally{if(companionBinding===bindingKey)companionBinding='';}
  }
  function pushOn(settings=true){
   if(pushActivation?.attempt.valid())return pushActivation.promise;

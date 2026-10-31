@@ -1,0 +1,34 @@
+TAP version 13
+# Subtest: a player signed in beside the president on the same browser gets a device-bound player subscription
+ok 1 - a player signed in beside the president on the same browser gets a device-bound player subscription
+  ---
+  duration_ms: 9.437107
+  type: 'test'
+  ...
+# Subtest: companion binding never overrides an explicit off, a local device opt-out, or the room manager row
+ok 2 - companion binding never overrides an explicit off, a local device opt-out, or the room manager row
+  ---
+  duration_ms: 2.924691
+  type: 'test'
+  ...
+# Subtest: a blank (never chosen) preference on an authorized browser binds and records push intent; explicit false does not
+ok 3 - a blank (never chosen) preference on an authorized browser binds and records push intent; explicit false does not
+  ---
+  duration_ms: 5.135758
+  type: 'test'
+  ...
+# Subtest: a companion with blank preference records push intent once after binding
+ok 4 - a companion with blank preference records push intent once after binding
+  ---
+  duration_ms: 3.33814
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 90.853067

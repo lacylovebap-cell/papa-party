@@ -1,0 +1,75 @@
+TAP version 13
+# Subtest: a player signed in beside the president on the same browser gets a device-bound player subscription
+not ok 1 - a player signed in beside the president on the same browser gets a device-bound player subscription
+  ---
+  duration_ms: 11.980095
+  type: 'test'
+  location: '/home/claude/papa-party/tests/notification-companion-binding.test.js:34:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    player identity is bound, not only the active manager
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/claude/papa-party/tests/notification-companion-binding.test.js:38:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: companion binding never overrides an explicit off, a local device opt-out, or the room manager row
+ok 2 - companion binding never overrides an explicit off, a local device opt-out, or the room manager row
+  ---
+  duration_ms: 5.327374
+  type: 'test'
+  ...
+# Subtest: a blank (never chosen) preference on an authorized browser binds and records push intent; explicit false does not
+ok 3 - a blank (never chosen) preference on an authorized browser binds and records push intent; explicit false does not
+  ---
+  duration_ms: 7.365203
+  type: 'test'
+  ...
+# Subtest: a companion with blank preference records push intent once after binding
+not ok 4 - a companion with blank preference records push intent once after binding
+  ---
+  duration_ms: 4.006943
+  type: 'test'
+  location: '/home/claude/papa-party/tests/notification-companion-binding.test.js:72:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   'notifications',
+    -   'pushSubscribe',
+    -   'noticePreferences'
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'notifications'
+    1: 'pushSubscribe'
+    2: 'noticePreferences'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/claude/papa-party/tests/notification-companion-binding.test.js:75:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 2
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 123.304053
