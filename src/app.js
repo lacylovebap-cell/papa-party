@@ -20,7 +20,7 @@ import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-la
 import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=10.28-QUEUE.1';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
 import {createBoard} from './board.js?v=10.20-WEB.1';
-import {createChat} from './chat.js?v=10.20-WEB.1';
+import {createChat} from './chat.js?v=10.31-PUSH.2';
 import {requestSourceLabel} from './request-source.js?v=10.20-WEB.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=10.20-WEB.1';
 import {openHomeEditor} from './home-editor.js?v=10.20-WEB.1';
