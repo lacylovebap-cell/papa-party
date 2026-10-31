@@ -69,3 +69,7 @@ player who has a device subscription; an explicit off still wins). Needs migrati
 `20261031160000_push_subscription_per_recipient.sql` and `20261031161000_player_push_any_room.sql` first
 (rollbacks `ops/push-subscription-per-recipient-rollback-20261031.sql`, `ops/player-push-any-room-rollback-20261031.sql`).
 Rollback Edge: `party-api-10.31-CALL.1.js` at commit `df901c83e7c4c3d38f95b76d33123cd454567bf5` (v78).
+
+10.31-PUSH.3 = deployed 10.31-PUSH.2 (v79) with 主播呼叫 push links typed `ready` instead of `call`: phones still running the
+service worker from before 10.31-CALL.1 silently dropped `call` links. Inbox rows keep type `call`. No database change.
+Rollback: `party-api-10.31-PUSH.2.js` at commit `2d6f31e63afb90e999c3196e0080bdcf4b703913` (v79).

@@ -33,3 +33,8 @@ test('呼叫 works during a preparation countdown and is not the countdown 準�
  assert.deepEqual(notices.map(n=>[n.type,n.recipient]),[['call',player]]);
  assert.equal(queueNoticeCurrent(notices[0],{space_id:'space-001',data:q}),true);
 });
+test('呼叫 push links use a type every installed service worker already accepts',async()=>{
+ const {canonicalNoticeLink}=await import('../src/notification-rules.js');
+ assert.equal(canonicalNoticeLink({type:'call',streamer_id:'papa',recipient:'P1',id:'n1',entity_id:'q1'},'papa').entityType,'ready');
+ assert.equal(canonicalNoticeLink({type:'message',streamer_id:'papa',recipient:'P1',id:'n2'},'papa').entityType,'message');
+});

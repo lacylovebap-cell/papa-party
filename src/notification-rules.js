@@ -63,7 +63,9 @@ export function validPushSubscription(s){try{const u=new URL(s?.endpoint);return
 export function canonicalNoticeLink(notice,streamerSlug){return {
  version:1,spaceId:notice.space_id||null,streamerId:notice.streamer_id,
  streamerSlug:streamerSlug||'papa',section:['admin','center'].includes(notice.section)?notice.section:['__admin__','__super__'].includes(notice.recipient)?'admin':'center',
- entityType:notice.type||null,entityId:notice.entity_id||null,notificationId:notice.id
+ // A push is shown by whatever service worker the phone already has. Older ones drop
+ // unknown types, so 主播呼叫 links as 'ready' (same queue landing); the inbox keeps 'call'.
+ entityType:(notice.type==='call'?'ready':notice.type)||null,entityId:notice.entity_id||null,notificationId:notice.id
 };}
 export function webNoticePath(link){
  const pairs=[['streamer',link.streamerSlug],['streamerId',link.streamerId],['spaceId',link.spaceId],['entityType',link.entityType],['entityId',link.entityId],['notificationId',link.notificationId]];
