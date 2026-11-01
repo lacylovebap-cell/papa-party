@@ -368,6 +368,6 @@ html #app .queue-compact .queue-controls .queue-call{min-height:22px!important;p
 [data-theme-v2] .ss-panel .ss-option.selected{background:var(--home-button);color:var(--home-buttonText)}
 [data-theme-v2] .ss-panel .ss-option:hover,[data-theme-v2] .ss-panel .ss-option:focus{background:color-mix(in srgb,var(--home-accent) 22%,transparent);filter:none}
 /* 過檔待定 (11.02) */
-.carry-pending-line{display:block;color:#f5c26b;font-weight:600}
+.carry-pending-line{display:block;color:#f5c26b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .carry-pending-banner{border-color:#f5c26b66;color:#f8d79a}
 .carry-pending-note{font-weight:700}
