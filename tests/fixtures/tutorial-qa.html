@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>教學面板本機驗證</title><style>body{font:16px system-ui;margin:24px;background:#f2f5fa;color:#283951}label{display:block;margin:18px 0}button{padding:10px}body.dark{color-scheme:dark;--home-panel:#211a2d;--home-text:#eee;--panel:#211a2d;--card:#211a2d;--text:#eee;--border:#665279;background:#171222;color:#eee}</style><h1>教學面板本機驗證</h1><p>此頁只載入靜態教材，不連正式資料庫。原本編輯內容應在教學關閉後保留。</p><label>身分<select id="role"><option value="player">玩家</option><option value="streamer">主播</option></select></label><label>尚未送出的留言<textarea id="draft">這是尚未送出的留言，請保留。</textarea></label><button id="open">📖 操作教學</button><button id="theme">切換淺色／深色</button><button id="under">開啟原有編輯視窗</button><button id="verify">執行面板驗證</button><pre id="result"></pre><dialog id="existing"><h2>原有編輯視窗</h2><input value="尚未儲存的歌曲設定"><button id="nested">📖 操作教學</button><button onclick="this.parentElement.close()">退出編輯</button></dialog><script type="module">
+import {createTutorialCenter} from '../../src/tutorial-center.js';
+const requests=[];let fail=false;const read=async(...args)=>{requests.push(args[0]);if(fail){fail=false;return new Response('',{status:503});}return fetch(...args);};
+const role=document.querySelector('#role'),draft=document.querySelector('#draft');const center=createTutorialCenter({document,getAudience:()=>role.value,review:true,fetch:read});
+document.querySelector('#open').onclick=()=>center.open();document.querySelector('#nested').onclick=()=>center.open();document.querySelector('#theme').onclick=()=>document.body.classList.toggle('dark');document.querySelector('#under').onclick=()=>document.querySelector('#existing').showModal();
+const tick=()=>new Promise(resolve=>setTimeout(resolve,100));
+document.querySelector('#verify').onclick=async()=>{const results=[],check=(v,m)=>{if(!v)throw Error(m);results.push('PASS '+m);};try{
+ const before=draft.value,hash=location.hash;role.value='player';await center.open();
+ check(document.querySelectorAll('[data-tutorial-article]').length===5,'玩家只顯示五篇教材');
+ check(!document.querySelector('.tutorial-center img'),'目錄不下載教材圖片');
+ check(!requests.some(x=>x.includes('S01.json')),'玩家不讀取主播文章');
+ await center.open({id:'S01'});check(!document.querySelector('[data-tutorial-heading]'),'玩家無法直接跳轉主播文章');
+ await center.open({id:'P01',chapter:'fees'});check(document.querySelector('h4').textContent==='查看禮物值','文章章節跳轉');
+ check(document.querySelectorAll('.tutorial-center img').length===1,'每次只載入當前步驟圖片');
+ document.querySelector('[data-tutorial-close]').click();await tick();check(draft.value===before&&location.hash===hash,'關閉保留原始表單與路由');
+ role.value='streamer';await center.open();check(document.querySelectorAll('[data-tutorial-article]').length===8,'主播顯示八篇教材');
+ check((await center.relatedLink('S07','1'))==='','未完成文章不建立完整教學連結');
+ document.querySelector('[data-tutorial-close]').click();await tick();
+ document.querySelector('#existing').showModal();const original=document.querySelector('#existing input');original.value='編輯中的內容';document.querySelector('#nested').focus();await center.open({id:'S01'});document.querySelector('[data-tutorial-close]').click();await tick();check(document.querySelector('#existing').open&&original.value==='編輯中的內容','原有視窗與未儲存內容保留');check(document.activeElement.id==='nested','焦點返回原本按鈕');document.querySelector('#existing').close();
+ const retry=createTutorialCenter({document,getAudience:()=>role.value,review:true,fetch:read});fail=true;await retry.open();check(!!document.querySelectorAll('.tutorial-center')[1].querySelector('[role=alert]'),'載入失敗顯示錯誤');document.querySelectorAll('.tutorial-center')[1].close();await tick();await retry.open();check(document.querySelectorAll('.tutorial-center')[1].querySelectorAll('[data-tutorial-article]').length===8,'載入失敗後可重試');document.querySelectorAll('.tutorial-center')[1].close();
+ check(requests.every(x=>x.includes('/src/tutorials/')),'面板只請求靜態教材，沒有資料庫或追蹤寫入');
+ results.push('全部通過');
+}catch(error){results.push('FAIL '+error.message);}document.querySelector('#result').textContent=results.join('\n');};
+</script></html>

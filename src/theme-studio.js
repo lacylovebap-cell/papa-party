@@ -324,7 +324,7 @@ export function openThemeStudio(options){
   move(e);const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);};addEventListener('pointermove',move);addEventListener('pointerup',up);
  });
  let helpFor=null;
- function showHelp(el){const pop=$('[data-ts-help-pop]'),r=el.getBoundingClientRect();helpFor=el;pop.innerHTML='<button type="button" class="ts-help-close" aria-label="關閉說明">✕</button><p>'+h(THEME_HELP[el.dataset.help]||'')+'</p>';pop.hidden=false;pop.style.top=Math.min(innerHeight-140,r.bottom+6)+'px';pop.style.left=Math.max(8,Math.min(innerWidth-300,r.left-140))+'px';}
+ function showHelp(el){const pop=$('[data-ts-help-pop]'),r=el.getBoundingClientRect();helpFor=el;pop.innerHTML='<button type="button" class="ts-help-close" aria-label="關閉說明">✕</button><p>'+h(THEME_HELP[el.dataset.help]||'')+'</p>';pop.hidden=false;pop.style.top=Math.min(innerHeight-140,r.bottom+6)+'px';pop.style.left=Math.max(8,Math.min(innerWidth-300,r.left-140))+'px';const key=el.dataset.help,chapter=({base:'1',smart:'1',gradients:'1',colors:'1',background:'2',banner:'2',card:'2',mask:'3',maskWidth:'3',maskPosition:'3',maskFeather:'3',decor:'4',hallCard:'3',decorMotion:'4',opacity:'3',draft:'5',publish:'5',reset:'5'})[key];if(chapter)document.dispatchEvent(new CustomEvent('pa-tutorial-context',{detail:{container:pop,id:'S07',chapter}}));}
  function hideHelp(){helpFor=null;$('[data-ts-help-pop]').hidden=true;}
  // Scrolling the controls moves the ? away from its bubble, so close it.
  $('[data-ts-controls]').addEventListener('scroll',()=>{if(helpFor)hideHelp();},{passive:true});

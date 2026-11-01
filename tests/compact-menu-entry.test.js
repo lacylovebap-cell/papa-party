@@ -35,7 +35,8 @@ test('cached admin button becomes an explicit streamer queue link while platform
 });
 test('a signed-in player menu keeps one ordinary backend login entry without granting a role',()=>{
  let replacement,callback,added=0;
- const account={querySelector:selector=>selector==='h3'?{textContent:'帳號與管理'}:{append(){added++;}}};
+ const tutorial={dataset:{act:'tutorialCenter'}};
+ const account={querySelector:selector=>selector==='h3'?{textContent:'帳號與管理'}:{querySelector:()=>tutorial,insertBefore(node,before){assert.equal(before,tutorial);added++;}}};
  const menu={dataset:{layoutRevision:'1023'},classList:{contains:()=>true},querySelector:()=>replacement||null,querySelectorAll:selector=>selector==='section'?[account]:[]};
  const document={getElementById:id=>id==='header'?{querySelector:()=>menu}:null,createElement:tag=>({tag,dataset:{},replaceWith:link=>replacement=link})};
  const context={URL,document,window:{},location:{href:'https://paparty.app/v2.html?streamer=papa#home',hash:'#home'},

@@ -1,4 +1,4 @@
-import {installCompactMenu} from './application-menu.js?v=1023-menu-1';
+import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.1';
 import {readPublicRouteContext} from './public-links.js';
 import {streamerAdminDestination} from './streamer-admin-route.js';
 
@@ -18,7 +18,7 @@ if(header){
   // the destination still uses the existing authenticated manager checks.
   if(!buttons.length&&!menu.querySelector('a[data-streamer-admin]')){
    const account=[...menu.querySelectorAll('section')].find(section=>section.querySelector('h3')?.textContent==='帳號與管理')?.querySelector('.compact-menu-items');
-   if(account){const button=document.createElement('button');button.className='tiny';account.append(button);buttons.push(button);}
+   if(account){const button=document.createElement('button');button.className='tiny';account.insertBefore(button,account.querySelector('[data-act="tutorialCenter"]'));buttons.push(button);}
   }
   for(const button of buttons){
    const link=document.createElement('a');link.className=button.className;
