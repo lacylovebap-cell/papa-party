@@ -1,8 +1,8 @@
-import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.7';
+import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.8';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
 
-import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.7';
+import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.8';
 import {createPlatformManagement} from './platform-management.js?v=10.29-SPACE.1';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
