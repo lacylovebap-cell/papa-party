@@ -46,7 +46,7 @@
 .tutorial-figure{margin:0}
 .tutorial-image{position:relative;border:6px solid light-dark(#2b2438,#0d0a12);border-radius:26px;overflow:hidden;box-shadow:0 10px 30px #0004;background:#000}
 .tutorial-figure img{display:block;width:100%;height:auto}
-.tutorial-mark{position:absolute;transform:translate(-50%,-50%);pointer-events:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--tc-gold);color:#241d30;font-weight:800;font-size:.85rem;border:2px solid #241d30;box-shadow:0 0 0 4px #f5c26b66}
+.tutorial-mark{position:absolute;transform:translate(-50%,-50%);pointer-events:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--tc-gold);color:#241d30;font-weight:800;font-size:.75rem;border:2px solid #241d30;box-shadow:0 0 0 3px #f5c26b55}
 .tutorial-legend{list-style:none;margin:12px 0 4px;padding:0;display:grid;gap:6px}
 .tutorial-legend li{display:flex;align-items:center;gap:8px;font-size:.88rem}
 .tutorial-legend b{display:grid;place-items:center;flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--tc-gold);color:#241d30;font-size:.76rem}

@@ -27,7 +27,7 @@
       "過檔"
     ],
     "audience": "player",
-    "status": "draft",
+    "status": "published",
     "file": "P02.json"
   },
   {
@@ -42,7 +42,7 @@
       "到期"
     ],
     "audience": "player",
-    "status": "draft",
+    "status": "published",
     "file": "P03.json"
   },
   {
@@ -56,7 +56,7 @@
       "回執"
     ],
     "audience": "player",
-    "status": "draft",
+    "status": "published",
     "file": "P04.json"
   },
   {
@@ -70,7 +70,7 @@
       "存歌"
     ],
     "audience": "player",
-    "status": "draft",
+    "status": "published",
     "file": "P05.json"
   },
   {
@@ -103,7 +103,7 @@
       "預覽"
     ],
     "audience": "streamer",
-    "status": "draft",
+    "status": "published",
     "file": "S02.json"
   },
   {
@@ -118,7 +118,7 @@
       "回報"
     ],
     "audience": "streamer",
-    "status": "draft",
+    "status": "published",
     "file": "S03.json"
   },
   {
@@ -133,7 +133,7 @@
       "現點"
     ],
     "audience": "streamer",
-    "status": "draft",
+    "status": "published",
     "file": "S04.json"
   },
   {
@@ -147,7 +147,7 @@
       "批量"
     ],
     "audience": "streamer",
-    "status": "draft",
+    "status": "published",
     "file": "S05.json"
   },
   {
@@ -163,7 +163,7 @@
       "到期"
     ],
     "audience": "streamer",
-    "status": "draft",
+    "status": "published",
     "file": "S06.json"
   },
   {
@@ -180,7 +180,7 @@
       "發布"
     ],
     "audience": "streamer",
-    "status": "draft",
+    "status": "published",
     "file": "S07.json"
   },
   {
@@ -194,7 +194,7 @@
       "排查"
     ],
     "audience": "streamer",
-    "status": "draft",
+    "status": "published",
     "file": "S09.json"
   }
 ]
