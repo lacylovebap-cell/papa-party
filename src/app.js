@@ -1386,13 +1386,14 @@ async function editCatalogMetadata(variantId){
  const expectedVersions=catalogVersions([row]);
  const templates=catalogView.templates||(catalogView.templates=await api({op:'catalogTemplates',management:true}));
  const options=(rows,current)=>[['__keep__','保留目前：'+(current||'未分類')],['','不分類'],...rows.filter(row=>row.active!==false).map(row=>[row.id,row.name])];
- modal('編輯共同歌曲主資料',field('title','歌名',row.title,'text','required maxlength="300"')+field('artist','演唱者',row.artist,'text','maxlength="300"')+field('versionLabel','版本名稱',row.versionLabel||'','text','maxlength="120"')+field('versionKind','版本類型（原版／現場／翻唱等）',row.versionKind||'original','text','maxlength="80"')+field('performerDetail','演唱者補充',row.performerDetail||'','text','maxlength="300"')+field('versionNote','版本說明',row.versionNote||'','text','maxlength="500"')+nativeSelect('languageId','語言',options(templates.languages||[],row.language),'__keep__')+nativeSelect('performerTypeId','演唱者類型',options(templates.performerTypes||[],row.performerType),'__keep__')+'<p class="muted">只調整共同主資料；主播自己的標籤、扣歌設定、歌詞與註記會保留。</p>',async f=>{
+ modal('編輯共同歌曲主資料',field('title','歌名',row.title,'text','required maxlength="300"')+field('artist','演唱者',row.artist,'text','maxlength="300"')+field('versionLabel','版本名稱',row.versionLabel||'','text','maxlength="120"')+field('versionKind','版本類型（原版／現場／翻唱等）',row.versionKind||'original','text','maxlength="80"')+field('performerDetail','演唱者補充',row.performerDetail||'','text','maxlength="300"')+field('versionNote','版本說明',row.versionNote||'','text','maxlength="500"')+nativeSelect('languageId','語言',options(templates.languages||[],row.language),'__keep__')+nativeSelect('performerTypeId','演唱者類型',options(templates.performerTypes||[],row.performerType),'__keep__')+'<p class="muted">修改歌名或演唱者會同步到所有已連結這個版本的主播歌本；主播自己的標籤、扣歌設定、歌詞與註記會保留。</p>',async f=>{
   if(demo||draft)throw Error('預覽模式無法修改共同主資料');
   const metadata={title:f.get('title'),artist:f.get('artist'),versionLabel:f.get('versionLabel')};
   for(const name of ['languageId','performerTypeId'])if(f.get(name)!=='__keep__')metadata[name]=f.get(name)||null;
   const details=Object.fromEntries(['versionKind','performerDetail','versionNote'].map(k=>[k,f.get(k)||'']));
-  await api({op:'catalogGovernance',action:'update_variant',variantIds:[variantId],metadata,details,expectedVersions,management:true});
-  sharedBrowse.selected.clear();sharedBrowse.selectedRows.clear();invalidateCatalogTabs();await refresh(true);toast('共同主資料已更新');
+  const saved=await api({op:'catalogGovernance',action:'update_variant',variantIds:[variantId],metadata,details,expectedVersions,management:true});
+  sharedBrowse.selected.clear();sharedBrowse.selectedRows.clear();invalidateCatalogTabs();await refresh(true);
+  const sync=saved?.sync||{};toast('共同主資料已更新'+(sync.synced?'，已同步 '+sync.synced+' 首主播歌曲':'')+(sync.conflicts?'；'+sync.conflicts+' 首因該主播已有同名同歌手歌曲未同步':'')+(sync.failed?'；'+sync.failed+' 首同步失敗（已記錄）':''));
  });
 }
 async function mergeCatalogFamilies(){

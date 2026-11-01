@@ -162,9 +162,10 @@ async function catalogOperation(b:any,who:any){
    const details=b.details;
    if(typeof details!=='object'||Array.isArray(details)||Object.entries(details).some(([key,value])=>
     !['versionKind','performerDetail','versionNote'].includes(key)||typeof value!=='string'||value.length>(key==='versionNote'?500:key==='versionKind'?80:300)))throw Error('版本說明內容不正確');
-   return await api('/rest/v1/rpc/papa_catalog_update_variant_full',{chosen_variant:ids[0],metadata,
+   return await api('/rest/v1/rpc/papa_catalog_update_variant_synced',{chosen_variant:ids[0],metadata,
     details,expected_version:versions[ids[0]],actor_id:catalogActor(who)});
   }
+  if(b.action==='update_variant')return await api('/rest/v1/rpc/papa_catalog_update_variant_synced',{chosen_variant:ids[0],metadata,details:null,expected_version:versions[ids[0]],actor_id:catalogActor(who)});
   return await api('/rest/v1/rpc/papa_catalog_governance',{action:b.action,variant_ids:ids,candidate_ids:candidates,target_family:b.action==='merge_family'?b.targetFamilyId:null,metadata,expected_versions:Object.fromEntries(ids.map((id:any)=>[id,versions[id]])),expected_sources:Object.fromEntries(candidates.map((id:any)=>[id,sources[id]])),actor_id:catalogActor(who)});
  }
  if(op==='catalogSuggestions'){
