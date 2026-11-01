@@ -1,391 +1,421 @@
 [
-  {
-    "id": "P01",
-    "title": "點歌、提歌與現點",
-    "category": "點歌與額度",
-    "keywords": [
-      "點歌",
-      "提歌",
-      "現點",
-      "存歌",
-      "費用"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P01.json"
-  },
-  {
-    "id": "P02",
-    "title": "提歌額度與歌曲倍率",
-    "category": "點歌與額度",
-    "keywords": [
-      "每小時",
-      "專屬提歌權",
-      "額外額度",
-      "0.5",
-      "倍率",
-      "過檔"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P02.json"
-  },
-  {
-    "id": "P03",
-    "title": "冠歌",
-    "category": "冠歌",
-    "keywords": [
-      "冠歌",
-      "卡別",
-      "費用",
-      "生效",
-      "到期"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P03.json"
-  },
-  {
-    "id": "P04",
-    "title": "點歌通知",
-    "category": "紀錄與通知",
-    "keywords": [
-      "通知",
-      "收到",
-      "準備",
-      "回執"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P04.json"
-  },
-  {
-    "id": "P05",
-    "title": "點歌紀錄與取消",
-    "category": "紀錄與通知",
-    "keywords": [
-      "歷史",
-      "取消",
-      "恢復",
-      "存歌"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P05.json"
-  },
-  {
-    "id": "S01",
-    "title": "待播歌單管理",
-    "category": "點歌管理",
-    "keywords": [
-      "待播",
-      "確認",
-      "收到",
-      "準備時間",
-      "完成",
-      "更多",
-      "加入待播"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S01.json"
-  },
-  {
-    "id": "S02",
-    "title": "新增與批量匯入歌曲",
-    "category": "歌本與曲庫",
-    "keywords": [
-      "匯入",
-      "格式",
-      "重複",
-      "更新",
-      "跳過",
-      "預覽"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S02.json"
-  },
-  {
-    "id": "S03",
-    "title": "共同曲庫與版本綁定",
-    "category": "歌本與曲庫",
-    "keywords": [
-      "綁定",
-      "版本",
-      "誰也會唱",
-      "解除",
-      "回報"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S03.json"
-  },
-  {
-    "id": "S04",
-    "title": "歌曲編輯及倍率",
-    "category": "歌本與曲庫",
-    "keywords": [
-      "隱藏",
-      "解除隱藏",
-      "倍率",
-      "半首",
-      "現點"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S04.json"
-  },
-  {
-    "id": "S05",
-    "title": "玩家管理與專屬提歌權",
-    "category": "玩家與權限",
-    "keywords": [
-      "玩家",
-      "權限",
-      "額外額度",
-      "批量"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S05.json"
-  },
-  {
-    "id": "S06",
-    "title": "冠歌管理",
-    "category": "點歌管理",
-    "keywords": [
-      "冠歌",
-      "新增",
-      "編輯",
-      "匯入",
-      "卡別",
-      "到期"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S06.json"
-  },
-  {
-    "id": "S07",
-    "title": "首頁主題設計",
-    "category": "設計與通知",
-    "keywords": [
-      "配色",
-      "圖片",
-      "裁切",
-      "遮罩",
-      "裝飾",
-      "草稿",
-      "發布"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S07.json"
-  },
-  {
-    "id": "S09",
-    "title": "通知與回執",
-    "category": "設計與通知",
-    "keywords": [
-      "通知",
-      "回執",
-      "準備完成",
-      "排查"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S09.json"
-  },
-  {
-    "id": "S10",
-    "title": "存歌與分配教學",
-    "category": "點歌管理",
-    "keywords": [
-      "存歌",
-      "分配",
-      "加入待播",
-      "待播",
-      "準備時間",
-      "現點"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S10.json"
-  },
-  {
-    "id": "P06",
-    "title": "登入與帳號",
-    "category": "帳號與安裝",
-    "keywords": [
-      "登入",
-      "密碼",
-      "名稱",
-      "登出"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P06.json"
-  },
-  {
-    "id": "P07",
-    "title": "安裝到手機主畫面",
-    "category": "帳號與安裝",
-    "keywords": [
-      "安裝",
-      "主畫面",
-      "PWA",
-      "App"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P07.json"
-  },
-  {
-    "id": "P08",
-    "title": "許願池與我的最愛",
-    "category": "探索與互動",
-    "keywords": [
-      "許願",
-      "我的最愛",
-      "收藏",
-      "想聽"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P08.json"
-  },
-  {
-    "id": "P09",
-    "title": "勳章與展示牆卡片",
-    "category": "探索與互動",
-    "keywords": [
-      "勳章",
-      "卡片",
-      "展示牆"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P09.json"
-  },
-  {
-    "id": "P10",
-    "title": "價目表、擲骰與排行榜",
-    "category": "探索與互動",
-    "keywords": [
-      "價目表",
-      "價格",
-      "擲骰",
-      "今天聽什麼",
-      "排行榜",
-      "共同歌本"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P10.json"
-  },
-  {
-    "id": "S11",
-    "title": "帳號與專屬網址",
-    "category": "帳號與設定",
-    "keywords": [
-      "密碼",
-      "登出",
-      "專屬網址",
-      "QR"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S11.json"
-  },
-  {
-    "id": "S12",
-    "title": "直播與價格設定",
-    "category": "帳號與設定",
-    "keywords": [
-      "價格",
-      "存歌方案",
-      "冠歌卡別",
-      "說明書",
-      "電台",
-      "每小時提歌上限"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S12.json"
-  },
-  {
-    "id": "S13",
-    "title": "歌本整理：標籤、新練與隱藏",
-    "category": "歌本與曲庫",
-    "keywords": [
-      "標籤",
-      "新練",
-      "隱藏",
-      "歌詞",
-      "註記"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S13.json"
-  },
-  {
-    "id": "S14",
-    "title": "卡片、許願池與統計",
-    "category": "玩家與活動",
-    "keywords": [
-      "卡片",
-      "許願池",
-      "統計",
-      "帳務日期",
-      "勳章"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S14.json"
-  },
-  {
-    "id": "S15",
-    "title": "本日狀態與歷史",
-    "category": "點歌管理",
-    "keywords": [
-      "狀態",
-      "空閒",
-      "忙碌",
-      "歷史",
-      "加入待播"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S15.json"
-  },
-  {
-    "id": "S16",
-    "title": "勳章管理",
-    "category": "玩家與權限",
-    "keywords": [
-      "勳章",
-      "顯示方式",
-      "隱藏",
-      "授予"
-    ],
-    "audience": "streamer",
-    "status": "published",
-    "file": "S16.json"
-  },
-  {
-    "id": "P11",
-    "title": "跨主播點歌",
-    "category": "探索與互動",
-    "keywords": [
-      "跨主播",
-      "統一提歌",
-      "統一現點",
-      "多位主播",
-      "待播"
-    ],
-    "audience": "player",
-    "status": "published",
-    "file": "P11.json"
-  }
+ {
+  "id": "P01",
+  "title": "點歌、提歌與現點",
+  "category": "點歌與額度",
+  "keywords": [
+   "點歌",
+   "提歌",
+   "現點",
+   "存歌",
+   "費用"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P01.json"
+ },
+ {
+  "id": "P02",
+  "title": "提歌額度與歌曲倍率",
+  "category": "點歌與額度",
+  "keywords": [
+   "每小時",
+   "專屬提歌權",
+   "額外額度",
+   "0.5",
+   "倍率",
+   "過檔"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P02.json"
+ },
+ {
+  "id": "P03",
+  "title": "冠歌",
+  "category": "冠歌",
+  "keywords": [
+   "冠歌",
+   "卡別",
+   "費用",
+   "生效",
+   "到期"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P03.json"
+ },
+ {
+  "id": "P04",
+  "title": "點歌通知",
+  "category": "紀錄與通知",
+  "keywords": [
+   "通知",
+   "收到",
+   "準備",
+   "回執"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P04.json"
+ },
+ {
+  "id": "P05",
+  "title": "點歌紀錄與取消",
+  "category": "紀錄與通知",
+  "keywords": [
+   "歷史",
+   "取消",
+   "恢復",
+   "存歌"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P05.json"
+ },
+ {
+  "id": "S01",
+  "title": "待播歌單管理",
+  "category": "點歌管理",
+  "keywords": [
+   "待播",
+   "確認",
+   "收到",
+   "準備時間",
+   "完成",
+   "更多",
+   "加入待播"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S01.json"
+ },
+ {
+  "id": "S02",
+  "title": "新增與批量匯入歌曲",
+  "category": "歌本與曲庫",
+  "keywords": [
+   "匯入",
+   "格式",
+   "重複",
+   "更新",
+   "跳過",
+   "預覽"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S02.json"
+ },
+ {
+  "id": "S03",
+  "title": "共同曲庫與版本綁定",
+  "category": "歌本與曲庫",
+  "keywords": [
+   "綁定",
+   "版本",
+   "誰也會唱",
+   "解除",
+   "回報"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S03.json"
+ },
+ {
+  "id": "S04",
+  "title": "歌曲編輯及倍率",
+  "category": "歌本與曲庫",
+  "keywords": [
+   "隱藏",
+   "解除隱藏",
+   "倍率",
+   "半首",
+   "現點"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S04.json"
+ },
+ {
+  "id": "S05",
+  "title": "玩家管理與專屬提歌權",
+  "category": "玩家與權限",
+  "keywords": [
+   "玩家",
+   "權限",
+   "額外額度",
+   "批量"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S05.json"
+ },
+ {
+  "id": "S06",
+  "title": "冠歌管理",
+  "category": "點歌管理",
+  "keywords": [
+   "冠歌",
+   "新增",
+   "編輯",
+   "匯入",
+   "卡別",
+   "到期"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S06.json"
+ },
+ {
+  "id": "S07",
+  "title": "首頁主題設計",
+  "category": "設計與通知",
+  "keywords": [
+   "配色",
+   "圖片",
+   "裁切",
+   "遮罩",
+   "裝飾",
+   "草稿",
+   "發布"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S07.json"
+ },
+ {
+  "id": "S09",
+  "title": "通知與回執",
+  "category": "設計與通知",
+  "keywords": [
+   "通知",
+   "回執",
+   "準備完成",
+   "排查"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S09.json"
+ },
+ {
+  "id": "S10",
+  "title": "存歌與分配教學",
+  "category": "點歌管理",
+  "keywords": [
+   "存歌",
+   "分配",
+   "加入待播",
+   "待播",
+   "準備時間",
+   "現點"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S10.json"
+ },
+ {
+  "id": "P06",
+  "title": "登入與帳號",
+  "category": "帳號與安裝",
+  "keywords": [
+   "登入",
+   "密碼",
+   "名稱",
+   "登出"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P06.json"
+ },
+ {
+  "id": "P07",
+  "title": "安裝到手機主畫面",
+  "category": "帳號與安裝",
+  "keywords": [
+   "安裝",
+   "主畫面",
+   "PWA",
+   "App"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P07.json"
+ },
+ {
+  "id": "P08",
+  "title": "許願池與我的最愛",
+  "category": "探索與互動",
+  "keywords": [
+   "許願",
+   "我的最愛",
+   "收藏",
+   "想聽"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P08.json"
+ },
+ {
+  "id": "P09",
+  "title": "勳章與展示牆卡片",
+  "category": "探索與互動",
+  "keywords": [
+   "勳章",
+   "卡片",
+   "展示牆"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P09.json"
+ },
+ {
+  "id": "P10",
+  "title": "價目表、擲骰與排行榜",
+  "category": "探索與互動",
+  "keywords": [
+   "價目表",
+   "價格",
+   "擲骰",
+   "今天聽什麼",
+   "排行榜",
+   "共同歌本"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P10.json"
+ },
+ {
+  "id": "S11",
+  "title": "帳號與專屬網址",
+  "category": "帳號與設定",
+  "keywords": [
+   "密碼",
+   "登出",
+   "專屬網址",
+   "QR"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S11.json"
+ },
+ {
+  "id": "S12",
+  "title": "直播與價格設定",
+  "category": "帳號與設定",
+  "keywords": [
+   "價格",
+   "存歌方案",
+   "冠歌卡別",
+   "說明書",
+   "電台",
+   "每小時提歌上限"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S12.json"
+ },
+ {
+  "id": "S13",
+  "title": "歌本整理：標籤、新練與隱藏",
+  "category": "歌本與曲庫",
+  "keywords": [
+   "標籤",
+   "新練",
+   "隱藏",
+   "歌詞",
+   "註記"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S13.json"
+ },
+ {
+  "id": "S14",
+  "title": "卡片、許願池與統計",
+  "category": "玩家與活動",
+  "keywords": [
+   "卡片",
+   "許願池",
+   "統計",
+   "帳務日期",
+   "勳章"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S14.json"
+ },
+ {
+  "id": "S15",
+  "title": "本日狀態與歷史",
+  "category": "點歌管理",
+  "keywords": [
+   "狀態",
+   "空閒",
+   "忙碌",
+   "歷史",
+   "加入待播"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S15.json"
+ },
+ {
+  "id": "S16",
+  "title": "勳章管理",
+  "category": "玩家與權限",
+  "keywords": [
+   "勳章",
+   "顯示方式",
+   "隱藏",
+   "授予"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S16.json"
+ },
+ {
+  "id": "P11",
+  "title": "跨主播點歌",
+  "category": "探索與互動",
+  "keywords": [
+   "跨主播",
+   "統一提歌",
+   "統一現點",
+   "多位主播",
+   "待播"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P11.json"
+ },
+ {
+  "id": "P12",
+  "title": "提歌被取消、過檔後怎麼辦",
+  "category": "點歌紀錄",
+  "keywords": [
+   "取消",
+   "過檔",
+   "額度回補",
+   "被取消",
+   "提歌被擋"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P12.json"
+ },
+ {
+  "id": "S17",
+  "title": "批次操作細節",
+  "category": "點歌管理",
+  "keywords": [
+   "批次",
+   "全選",
+   "取消選取",
+   "取消已選歌曲",
+   "勾選"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S17.json"
+ }
 ]

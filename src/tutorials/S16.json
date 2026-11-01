@@ -11,7 +11,7 @@
   "audience": "streamer",
   "status": "published",
   "file": "S16.json",
-  "version": "11.02-TUTORIAL.8",
+  "version": "11.02-TUTORIAL.9",
   "missing": "",
   "intro": "看你的主播有哪些勳章、多少人拿到，設定公開方式，也可以手動授予勳章。畫面為正式站，未授予任何玩家。",
   "reviewedAt": "2026-11-02",
@@ -60,7 +60,7 @@
       "width": 684,
       "height": 873,
       "alt": "PA Party 主播後台勳章管理畫面，沒有顯示玩家資料",
-      "caption": "正式站畫面（主播後台）· 11.02-TUTORIAL.8 · 2026-11-02；未授予任何玩家"
+      "caption": "正式站畫面（主播後台）· 11.02-TUTORIAL.9 · 2026-11-02；未授予任何玩家"
     },
     {
       "id": "detail",
@@ -99,7 +99,7 @@
       "width": 684,
       "height": 873,
       "alt": "PA Party 主播後台勳章管理畫面，沒有顯示玩家資料",
-      "caption": "正式站畫面（主播後台）· 11.02-TUTORIAL.8 · 2026-11-02；未授予任何玩家"
+      "caption": "正式站畫面（主播後台）· 11.02-TUTORIAL.9 · 2026-11-02；未授予任何玩家"
     },
     {
       "id": "grant",
@@ -154,7 +154,7 @@
       "width": 684,
       "height": 873,
       "alt": "PA Party 主播後台勳章管理畫面，沒有顯示玩家資料",
-      "caption": "正式站畫面（主播後台）· 11.02-TUTORIAL.8 · 2026-11-02；未授予任何玩家"
+      "caption": "正式站畫面（主播後台）· 11.02-TUTORIAL.9 · 2026-11-02；未授予任何玩家"
     }
   ]
 }
