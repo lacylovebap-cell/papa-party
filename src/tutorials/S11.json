@@ -1,0 +1,80 @@
+{
+  "id": "S11",
+  "title": "帳號與專屬網址",
+  "category": "帳號與設定",
+  "keywords": [
+    "密碼",
+    "登出",
+    "專屬網址",
+    "QR"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S11.json",
+  "version": "11.02-TUTORIAL.5",
+  "missing": "",
+  "intro": "改後台密碼，並設定你自己的公開網址與 QR Code。",
+  "reviewedAt": "2026-11-02",
+  "reviewedBy": "總裁確認上線",
+  "steps": [
+    {
+      "id": "pw",
+      "title": "修改主播密碼",
+      "text": "後台上方「修改密碼」：輸入目前密碼與兩次新密碼（至少 4 字）。儲存後需要重新登入。",
+      "buttons": [
+        [
+          "目前密碼",
+          "先驗證你自己。"
+        ],
+        [
+          "新密碼／再輸入一次",
+          "至少 4 字，兩次要一樣。"
+        ],
+        [
+          "儲存",
+          "儲存後需重新登入。"
+        ]
+      ],
+      "notes": [
+        "密碼請自己記好，不要告訴玩家。"
+      ],
+      "marks": [
+        {
+          "x": 50.0,
+          "y": 37.3,
+          "label": "目前／新密碼"
+        },
+        {
+          "x": 85.4,
+          "y": 74.7,
+          "label": "儲存"
+        }
+      ],
+      "image": "images/s11-pw.webp",
+      "width": 585,
+      "height": 1050,
+      "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
+      "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
+    },
+    {
+      "id": "qr",
+      "title": "專屬網址與 QR Code",
+      "text": "在「更多 → 設定」，「專屬網址與 QR Code」可以設定公開首頁網址，並複製或下載 LOGO QR Code。",
+      "buttons": [
+        [
+          "專屬網址與 QR Code",
+          "開啟網址與 QR 設定。"
+        ]
+      ],
+      "notes": [
+        "QR Code 可以放在直播畫面讓玩家掃。"
+      ],
+      "marks": [],
+      "image": "images/s12-radio.webp",
+      "width": 585,
+      "height": 1050,
+      "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
+      "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
+    }
+  ]
+}

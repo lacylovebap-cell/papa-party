@@ -1,0 +1,51 @@
+{
+  "id": "P07",
+  "title": "安裝到手機主畫面",
+  "category": "帳號與安裝",
+  "keywords": [
+    "安裝",
+    "主畫面",
+    "PWA",
+    "App"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P07.json",
+  "version": "11.02-TUTORIAL.5",
+  "missing": "",
+  "intro": "把 PA Party 放進主畫面，之後像 App 一樣一點就開。",
+  "reviewedAt": "2026-11-02",
+  "reviewedBy": "總裁確認上線",
+  "steps": [
+    {
+      "id": "install",
+      "title": "安裝 PA Party",
+      "text": "首頁的「安裝 PA Party」會告訴你這台裝置怎麼安裝：電腦用 Chrome 或 Edge，按網址列的安裝圖示；手機請看「其他裝置的安裝方式」。",
+      "buttons": [
+        [
+          "安裝 PA Party",
+          "開啟安裝說明。"
+        ],
+        [
+          "其他裝置的安裝方式",
+          "展開手機與平板的步驟。"
+        ],
+        [
+          "知道了",
+          "關閉說明。"
+        ]
+      ],
+      "notes": [
+        "請離開 Facebook／LINE 內建瀏覽器，改用 Chrome、Safari 等瀏覽器開啟。",
+        "iPhone 要從 Safari 加入主畫面後，再從主畫面開啟，通知才比較容易收到。",
+        "安裝後用原本的帳號登入，歌曲、存歌與點歌紀錄都會保留。"
+      ],
+      "marks": [],
+      "image": "images/p07-install.webp",
+      "width": 585,
+      "height": 1050,
+      "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
+      "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
+    }
+  ]
+}

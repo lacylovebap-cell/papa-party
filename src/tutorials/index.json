@@ -212,5 +212,151 @@
     "audience": "streamer",
     "status": "published",
     "file": "S10.json"
+  },
+  {
+    "id": "P06",
+    "title": "登入與帳號",
+    "category": "帳號與安裝",
+    "keywords": [
+      "登入",
+      "密碼",
+      "名稱",
+      "登出"
+    ],
+    "audience": "player",
+    "status": "published",
+    "file": "P06.json"
+  },
+  {
+    "id": "P07",
+    "title": "安裝到手機主畫面",
+    "category": "帳號與安裝",
+    "keywords": [
+      "安裝",
+      "主畫面",
+      "PWA",
+      "App"
+    ],
+    "audience": "player",
+    "status": "published",
+    "file": "P07.json"
+  },
+  {
+    "id": "P08",
+    "title": "許願池與我的最愛",
+    "category": "探索與互動",
+    "keywords": [
+      "許願",
+      "我的最愛",
+      "收藏",
+      "想聽"
+    ],
+    "audience": "player",
+    "status": "published",
+    "file": "P08.json"
+  },
+  {
+    "id": "P09",
+    "title": "勳章與展示牆卡片",
+    "category": "探索與互動",
+    "keywords": [
+      "勳章",
+      "卡片",
+      "展示牆"
+    ],
+    "audience": "player",
+    "status": "published",
+    "file": "P09.json"
+  },
+  {
+    "id": "P10",
+    "title": "價目表、擲骰與排行榜",
+    "category": "探索與互動",
+    "keywords": [
+      "價目表",
+      "價格",
+      "擲骰",
+      "今天聽什麼",
+      "排行榜",
+      "共同歌本"
+    ],
+    "audience": "player",
+    "status": "published",
+    "file": "P10.json"
+  },
+  {
+    "id": "S11",
+    "title": "帳號與專屬網址",
+    "category": "帳號與設定",
+    "keywords": [
+      "密碼",
+      "登出",
+      "專屬網址",
+      "QR"
+    ],
+    "audience": "streamer",
+    "status": "published",
+    "file": "S11.json"
+  },
+  {
+    "id": "S12",
+    "title": "直播與價格設定",
+    "category": "帳號與設定",
+    "keywords": [
+      "價格",
+      "存歌方案",
+      "冠歌卡別",
+      "說明書",
+      "電台",
+      "每小時提歌上限"
+    ],
+    "audience": "streamer",
+    "status": "published",
+    "file": "S12.json"
+  },
+  {
+    "id": "S13",
+    "title": "歌本整理：標籤、新練與隱藏",
+    "category": "歌本與曲庫",
+    "keywords": [
+      "標籤",
+      "新練",
+      "隱藏",
+      "歌詞",
+      "註記"
+    ],
+    "audience": "streamer",
+    "status": "published",
+    "file": "S13.json"
+  },
+  {
+    "id": "S14",
+    "title": "卡片、許願池與統計",
+    "category": "玩家與活動",
+    "keywords": [
+      "卡片",
+      "許願池",
+      "統計",
+      "帳務日期",
+      "勳章"
+    ],
+    "audience": "streamer",
+    "status": "published",
+    "file": "S14.json"
+  },
+  {
+    "id": "S15",
+    "title": "本日狀態與歷史",
+    "category": "點歌管理",
+    "keywords": [
+      "狀態",
+      "空閒",
+      "忙碌",
+      "歷史",
+      "加入待播"
+    ],
+    "audience": "streamer",
+    "status": "published",
+    "file": "S15.json"
   }
 ]

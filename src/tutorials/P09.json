@@ -1,0 +1,76 @@
+{
+  "id": "P09",
+  "title": "勳章與展示牆卡片",
+  "category": "探索與互動",
+  "keywords": [
+    "勳章",
+    "卡片",
+    "展示牆"
+  ],
+  "audience": "player",
+  "status": "published",
+  "file": "P09.json",
+  "version": "11.02-TUTORIAL.5",
+  "missing": "",
+  "intro": "玩家中心的勳章和卡片是怎麼來的、在哪裡看。",
+  "reviewedAt": "2026-11-02",
+  "reviewedBy": "總裁確認上線",
+  "steps": [
+    {
+      "id": "medal",
+      "title": "勳章",
+      "text": "玩家中心的「勳章」分頁會顯示你拿到的勳章。",
+      "buttons": [
+        [
+          "勳章分頁",
+          "你的勳章。"
+        ]
+      ],
+      "notes": [
+        "勳章由主播頒發，沒有就是還沒拿到。"
+      ],
+      "marks": [
+        {
+          "x": 67.2,
+          "y": 31.1,
+          "label": "勳章"
+        }
+      ],
+      "image": "images/p09-medal.webp",
+      "width": 585,
+      "height": 1050,
+      "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
+      "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
+    },
+    {
+      "id": "cards",
+      "title": "卡片與展示牆",
+      "text": "「卡片」分頁是你的卡片，首頁「展示牆」會公開展示卡片。",
+      "buttons": [
+        [
+          "卡片分頁",
+          "你的卡片。"
+        ],
+        [
+          "全部卡片",
+          "首頁展示牆的完整列表。"
+        ]
+      ],
+      "notes": [
+        "卡片由主播上傳。"
+      ],
+      "marks": [
+        {
+          "x": 73.1,
+          "y": 43.6,
+          "label": "卡片"
+        }
+      ],
+      "image": "images/p09-cards.webp",
+      "width": 585,
+      "height": 1050,
+      "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
+      "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
+    }
+  ]
+}

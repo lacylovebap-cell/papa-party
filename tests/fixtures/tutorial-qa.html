@@ -6,18 +6,18 @@ document.querySelector('#open').onclick=()=>center.open();document.querySelector
 const tick=()=>new Promise(resolve=>setTimeout(resolve,100));
 document.querySelector('#verify').onclick=async()=>{const results=[],check=(v,m)=>{if(!v)throw Error(m);results.push('PASS '+m);};try{
  const before=draft.value,hash=location.hash;role.value='player';await center.open();
- check(document.querySelectorAll('[data-tutorial-article]').length===5,'玩家只顯示五篇教材');
+ check(document.querySelectorAll('[data-tutorial-article]').length===10,'玩家只顯示十篇教材');
  check(!document.querySelector('.tutorial-center img'),'目錄不下載教材圖片');
  check(!requests.some(x=>x.includes('S01.json')),'玩家不讀取主播文章');
  await center.open({id:'S01'});check(!document.querySelector('[data-tutorial-heading]'),'玩家無法直接跳轉主播文章');
  await center.open({id:'P01',chapter:'fees'});check(document.querySelector('h4').textContent==='查看禮物值','文章章節跳轉');
  check(document.querySelectorAll('.tutorial-center img').length===1,'每次只載入當前步驟圖片');
  document.querySelector('[data-tutorial-close]').click();await tick();check(draft.value===before&&location.hash===hash,'關閉保留原始表單與路由');
- role.value='streamer';await center.open();check(document.querySelectorAll('[data-tutorial-article]').length===9,'主播顯示九篇教材');
+ role.value='streamer';await center.open();check(document.querySelectorAll('[data-tutorial-article]').length===14,'主播顯示十四篇教材');
  check((await center.relatedLink('S07','1'))==='','未完成文章不建立完整教學連結');
  document.querySelector('[data-tutorial-close]').click();await tick();
  document.querySelector('#existing').showModal();const original=document.querySelector('#existing input');original.value='編輯中的內容';document.querySelector('#nested').focus();await center.open({id:'S01'});document.querySelector('[data-tutorial-close]').click();await tick();check(document.querySelector('#existing').open&&original.value==='編輯中的內容','原有視窗與未儲存內容保留');check(document.activeElement.id==='nested','焦點返回原本按鈕');document.querySelector('#existing').close();
- const retry=createTutorialCenter({document,getAudience:()=>role.value,review:true,fetch:read});fail=true;await retry.open();check(!!document.querySelectorAll('.tutorial-center')[1].querySelector('[role=alert]'),'載入失敗顯示錯誤');document.querySelectorAll('.tutorial-center')[1].close();await tick();await retry.open();check(document.querySelectorAll('.tutorial-center')[1].querySelectorAll('[data-tutorial-article]').length===9,'載入失敗後可重試');document.querySelectorAll('.tutorial-center')[1].close();
+ const retry=createTutorialCenter({document,getAudience:()=>role.value,review:true,fetch:read});fail=true;await retry.open();check(!!document.querySelectorAll('.tutorial-center')[1].querySelector('[role=alert]'),'載入失敗顯示錯誤');document.querySelectorAll('.tutorial-center')[1].close();await tick();await retry.open();check(document.querySelectorAll('.tutorial-center')[1].querySelectorAll('[data-tutorial-article]').length===14,'載入失敗後可重試');document.querySelectorAll('.tutorial-center')[1].close();
  check(requests.every(x=>x.includes('/src/tutorials/')),'面板只請求靜態教材，沒有資料庫或追蹤寫入');
  results.push('全部通過');
 }catch(error){results.push('FAIL '+error.message);}document.querySelector('#result').textContent=results.join('\n');};
