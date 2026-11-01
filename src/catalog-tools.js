@@ -99,3 +99,6 @@ export function installActionHints(){
  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});document.addEventListener('click',e=>{if(!e.target.closest('.action-help')&&!popup.contains(e.target))hide();});
  document.addEventListener('close',hide,true);document.addEventListener('cancel',hide,true);window.addEventListener('resize',hide);document.addEventListener('scroll',hide,true);
 }
+
+// 更多選單：點選單以外的地方就收起來
+document.addEventListener('pointerdown',e=>{for(const d of document.querySelectorAll('details.queue-more[open]'))if(!d.contains(e.target))d.open=false;},true);
