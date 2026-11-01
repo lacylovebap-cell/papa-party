@@ -1,4 +1,4 @@
-import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.15';
+import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.16';
 import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.15';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
