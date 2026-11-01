@@ -6,7 +6,7 @@ document.querySelector('#open').onclick=()=>center.open();document.querySelector
 const tick=()=>new Promise(resolve=>setTimeout(resolve,100));
 document.querySelector('#verify').onclick=async()=>{const results=[],check=(v,m)=>{if(!v)throw Error(m);results.push('PASS '+m);};try{
  const before=draft.value,hash=location.hash;role.value='player';await center.open();
- check(document.querySelectorAll('[data-tutorial-article]').length===10,'玩家只顯示十篇教材');
+ check(document.querySelectorAll('[data-tutorial-article]').length===11,'玩家只顯示十一篇教材');
  check(!document.querySelector('.tutorial-center img'),'目錄不下載教材圖片');
  check(!requests.some(x=>x.includes('S01.json')),'玩家不讀取主播文章');
  await center.open({id:'S01'});check(!document.querySelector('[data-tutorial-heading]'),'玩家無法直接跳轉主播文章');

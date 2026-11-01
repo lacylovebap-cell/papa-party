@@ -372,5 +372,20 @@
     "audience": "streamer",
     "status": "published",
     "file": "S16.json"
+  },
+  {
+    "id": "P11",
+    "title": "跨主播點歌",
+    "category": "探索與互動",
+    "keywords": [
+      "跨主播",
+      "統一提歌",
+      "統一現點",
+      "多位主播",
+      "待播"
+    ],
+    "audience": "player",
+    "status": "published",
+    "file": "P11.json"
   }
 ]
