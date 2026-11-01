@@ -358,5 +358,19 @@
     "audience": "streamer",
     "status": "published",
     "file": "S15.json"
+  },
+  {
+    "id": "S16",
+    "title": "勳章管理",
+    "category": "玩家與權限",
+    "keywords": [
+      "勳章",
+      "顯示方式",
+      "隱藏",
+      "授予"
+    ],
+    "audience": "streamer",
+    "status": "published",
+    "file": "S16.json"
   }
 ]
