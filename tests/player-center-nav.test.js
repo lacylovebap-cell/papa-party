@@ -11,9 +11,9 @@ function ui(subtab){
  const context=vm.createContext({state,subtab,ledgerFilter:'all',historyView:'all',statusName:{completed:'🎤 已完成',cancelled:'已取消'},pages:{},session:{playerId:'P1'},demo:true,draft:null,noticeLanding:null,ledgerQuery:'',inNativeSpace:()=>false,
   h:x=>String(x??''),blank:x=>'<p>'+(x||'空')+'</p>',say:()=>'',time:x=>x,timeValue:x=>Date.parse(x),button:(label,action,id='',cls='',extra='')=>'<button data-act="'+action+'" data-id="'+id+'" class="'+cls+'" '+extra+'>'+label+'</button>',
   venuePolicySettings:()=>({current_space:'shengma',radio_enabled:false}),venuePolicyLedgerPool:()=>'shengma',balance:()=>4,storedBalanceHtml:()=>'4 首',playerName:()=>'不不',
-  paginate:rows=>({rows,nav:'<div class="pagination"></div>'}),sortControl:()=>'',queueRows:rows=>rows.map(q=>'<article data-queue-id="'+q.id+'"></article>').join('')+'<div class="pagination"></div>',centerWaitingHtml:()=>'',
+  paginate:rows=>({rows,nav:'<div class="pagination"></div>'}),sortControl:()=>'',queueRows:rows=>rows.map(q=>'<article data-queue-id="'+q.id+'"></article>').join('')+'<div class="pagination"></div>',centerWaitingHtml:()=>'',queueRowHtml:(q,manager)=>'<article data-queue-id="'+q.id+'" class="manager-row">'+q.title+'<details class="queue-more"></details></article>',
   listeningOverviewHtml:()=>'',isSuperAdmin:()=>false,venueSwitch:()=>'',playerArchiveView:{pending:new Set()},favoritesPanelHtml:()=>'',crownsHtml:()=>'冠歌內容',orderedCards:x=>x,photoHtml:()=>'',wishRows:()=>'許願內容'});
- vm.runInContext(['function playerTabs(','function playerCenterNav(','function queueRowOnly(','function playerHistoryHtml(','function ledgerRows(','function ledgerItemHtml(','function playerLedgerItemHtml(','function ledgerSongName('].map(line).join('\n'),context);
+ vm.runInContext(['function playerTabs(','function playerCenterNav(','function queueRowOnly(','function managerHistoryRow(','function playerHistoryHtml(','function ledgerRows(','function ledgerItemHtml(','function playerLedgerItemHtml(','function ledgerSongName('].map(line).join('\n'),context);
  return code=>vm.runInContext(code,context);
 }
 test('player nav: 總覽｜點歌歷史｜我的最愛｜勳章 then 更多 holding 冠歌、卡片、許願; no player 存歌 tab',()=>{
@@ -34,7 +34,13 @@ test('點歌歷史: balance, then 全部紀錄 timeline, 存歌明細 with ＋�
  assert.deepEqual([...run('ledgerRows("P1",false,"in")').matchAll(/data-ledger-id="(\w+)"/g)].map(m=>m[1]),['L3','L1']);
  assert.deepEqual([...run('ledgerRows("P1",false,"out")').matchAll(/data-ledger-id="(\w+)"/g)].map(m=>m[1]),['L2']);
  assert.doesNotMatch(run('ledgerRows("P1",true)'),/🎵/);
- assert.doesNotMatch(ui('queue')('playerTabs("P1",true)'),/player-history/);
+ // 11.01: the streamer's view of a player uses the same merged timeline, with manager rows.
+ const managed=ui('queue');managed("historyView='all'");const m=managed('playerTabs("P1",true)');
+ assert.match(m,/player-history/);assert.match(m,/目前剩餘存歌<b>4 首<\/b>/);
+ const mt=m.slice(m.indexOf('player-history-all'));
+ assert.deepEqual([...mt.matchAll(/data-(queue|ledger)-id="(\w+)"/g)].map(x=>x[2]),['L3','Q1','L1'],'same order as the player sees');
+ assert.match(mt,/data-queue-id="Q1" class="manager-row"[^]*?queue-more[^]*?player-record-amount negative"[^>]*>-1 首<\/span><\/article>/,'manager row keeps 更多 and shows the song\'s own −1');
+ managed("historyView='ledger'");assert.match(managed('playerTabs("P1",true)'),/新增存歌/,'存歌明細 keeps manager tools');
 });
 test('old player 存歌 links land on 點歌歷史 → 存歌紀錄 and filters restart at page 1',()=>{
  assert.match(source,/function renderCenter\(\)\{const p=me\(\);if\(subtab==='ledger'\)\{subtab='queue';historyView='ledger';ledgerFilter='all';scrollToPlayerLedger=true;/);
