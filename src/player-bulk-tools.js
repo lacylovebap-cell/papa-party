@@ -1,4 +1,4 @@
-import {mutate,validSongSelection} from './core.js?v=10.31-CALL.1';
+import {mutate,validSongSelection} from './core.js?v=11.01-VOID.1';
 import {REQUEST_SOURCES} from './request-source.js?v=10.19-WEB.1';
 
 export function validateRequestBatch(rows){

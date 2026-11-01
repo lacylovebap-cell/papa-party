@@ -12,9 +12,10 @@ export function accountingStats(s,t){
  // Old prepaid allocations remain split receipts. New reservations already
  // have a full source receipt and must never be added a second time.
  const source=q=>(s.ledger||[]).find(l=>valid(l)&&l.playerId===q.playerId&&(l.id===q.source_transaction_id||q.allocation_id&&l.allocation_id===q.allocation_id)&&!l.queueId&&!l.conversion);
- const live=(s.queue||[]).filter(q=>valid(q)&&!q.receipt_voided_at&&q.kind==='live'&&!q.openingBalance&&!reservationAllocation(q)&&same(q.acceptedAt)&&(!q.allocation_id||!source(q)?.voided_at));
- const completed=(s.queue||[]).filter(q=>valid(q)&&q.kind!=='self'&&q.status==='completed'&&!q.performance_duplicate_of&&same(q.completedAt));
- const ledger=(s.ledger||[]).filter(valid),queues=(s.queue||[]).filter(valid);
+ const live=(s.queue||[]).filter(q=>valid(q)&&!q.receipt_voided_at&&!q.voided_at&&q.kind==='live'&&!q.openingBalance&&!reservationAllocation(q)&&same(q.acceptedAt)&&(!q.allocation_id||!source(q)?.voided_at));
+ const completed=(s.queue||[]).filter(q=>valid(q)&&!q.voided_at&&q.kind!=='self'&&q.status==='completed'&&!q.performance_duplicate_of&&same(q.completedAt));
+ const voided=new Set((s.queue||[]).filter(q=>q.voided_at).map(q=>q.id));
+ const ledger=(s.ledger||[]).filter(l=>valid(l)&&!voided.has(l.queueId)),queues=(s.queue||[]).filter(q=>valid(q)&&!q.voided_at);
  const saved=ledger.reduce((n,l)=>n+Number(l.amount),0);
  const reserved=queues.filter(q=>['pending','waiting'].includes(q.status)&&(q.kind==='saved'||reservationAllocation(q))).reduce((n,q)=>n+cost(q),0);
  const buckets=new Map(),key=(p,pool)=>p+'|'+(pool??'shengma'),add=(p,pool,n)=>{const k=key(p,pool);buckets.set(k,(buckets.get(k)||0)+n);};
