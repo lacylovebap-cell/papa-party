@@ -1,4 +1,4 @@
-import {TABLES,scopeState,mutate,captureMutationIds,replayMutationIds,timeValue,stamp} from './core.js?v=11.01-VOID.1';
+import {TABLES,scopeState,mutate,captureMutationIds,replayMutationIds,timeValue,stamp} from './core.js?v=11.02-CARRY.1';
 import {applyRoomImport} from './room-import.js?v=10.31-THEME.1';
 import {scopedOperationalAction,scopedRoomMutationAction} from './state-patch.js?v=10.31-THEME.1';
 
