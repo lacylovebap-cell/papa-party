@@ -1,6 +1,72 @@
-.tutorial-center{box-sizing:border-box;width:min(880px,94vw);max-width:94vw;height:min(880px,92dvh);max-height:92dvh;padding:0;border:1px solid var(--border,#776a88);border-radius:18px;background:var(--panel,#fff);color:var(--text,#211b2c);box-shadow:0 20px 80px #0005;overflow:hidden}.tutorial-center::backdrop{background:#0009}.tutorial-center>header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border,#ccc);gap:12px}.tutorial-center h2{margin:0;font-size:1.2rem}.tutorial-center .tutorial-body{padding:20px;overflow:auto;height:calc(100% - 76px);box-sizing:border-box;overscroll-behavior:contain}.tutorial-center button,.tutorial-center input,.tutorial-center select{font:inherit;color:inherit;border:1px solid var(--border,#bbb);border-radius:9px;padding:10px 12px;background:var(--card,var(--panel,#fff));cursor:pointer}.tutorial-center button:focus-visible,.tutorial-center input:focus-visible,.tutorial-center select:focus-visible{outline:3px solid #9e74c7;outline-offset:2px}.tutorial-center button:disabled{opacity:.45;cursor:default}.tutorial-center label{display:block;margin:12px 0}.tutorial-center input,.tutorial-center select{display:block;box-sizing:border-box;width:100%;margin-top:6px}.tutorial-item{display:grid;text-align:left;width:100%;gap:7px;margin:12px 0}.tutorial-item span,.tutorial-eyebrow,.tutorial-item small{font-size:.85rem;opacity:.85}.tutorial-item strong{font-size:1.05rem}.tutorial-note,.tutorial-missing{padding:12px;border:1px dashed var(--border,#88729a);border-radius:10px}.tutorial-center h3{font-size:1.4rem}.tutorial-center p,.tutorial-center li,.tutorial-center dd{line-height:1.7}.tutorial-center dd{margin:4px 0 14px 0}.tutorial-center dt{font-weight:bold}.tutorial-chapters{display:flex;flex-wrap:wrap;gap:6px}.tutorial-chapters [aria-current]{outline:2px solid #a787cb}.tutorial-figure{position:relative;margin:18px auto;max-width:520px}.tutorial-figure img{display:block;width:100%;height:auto;border-radius:12px}.tutorial-figure figcaption{font-size:.85rem;line-height:1.6;margin-top:6px}.tutorial-mark{position:absolute;transform:translate(-50%,-50%);background:#ffda7c;color:#211b2c;border:2px solid #6d4600;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font-weight:bold;box-shadow:0 0 0 3px #fff9}.tutorial-center footer{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--border,#ccc);padding-top:16px;margin-top:24px}@media(max-width:650px){.tutorial-center{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border:0;border-radius:0;margin:0}.tutorial-center>header{padding:12px 16px}.tutorial-center .tutorial-body{padding:16px;height:calc(100% - 70px)}}
-.tutorial-center{--tutorial-panel:var(--home-panel,light-dark(#fff,#19141f));--tutorial-text:var(--home-text,light-dark(#211b2c,#eeeaf3));--tutorial-line:var(--home-line,var(--line,#877894));background:var(--tutorial-panel);color:var(--tutorial-text);border-color:var(--tutorial-line)}.tutorial-center[open]{display:flex;flex-direction:column}.tutorial-center>header{flex:0 0 auto;position:relative;background:var(--tutorial-panel);color:var(--tutorial-text)}.tutorial-center .tutorial-body{flex:1;min-height:0;height:auto}.tutorial-center h2,.tutorial-center h3,.tutorial-center h4,.tutorial-center label,.tutorial-center small{color:var(--tutorial-text)}.tutorial-center button,.tutorial-center input,.tutorial-center select{background:var(--tutorial-panel);color:var(--tutorial-text);border-color:var(--tutorial-line)}.tutorial-center button{white-space:normal;text-align:start}.tutorial-center button:hover{background:var(--tutorial-panel)}.tutorial-center header h2{color:var(--tutorial-text)}
-
-.tutorial-center .tutorial-image{position:relative}.tutorial-center .tutorial-image .tutorial-mark{pointer-events:none}
-.tutorial-center::backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}
-.tutorial-center>header{backdrop-filter:none;-webkit-backdrop-filter:none}
+/* Tutorial centre: a self-contained dialog, scoped to .tutorial-center. */
+.tutorial-center{--tc-bg:var(--home-panel,light-dark(#fff,#17121f));--tc-text:var(--home-text,light-dark(#241d30,#efeaf6));--tc-card:color-mix(in srgb,var(--tc-text) 7%,var(--tc-bg));--tc-sub:color-mix(in srgb,var(--tc-text) 66%,var(--tc-bg));--tc-line:var(--home-line,light-dark(#ddd3e8,#3a3049));--tc-accent:var(--home-accent,light-dark(#7a4fc2,#b084e8));--tc-gold:#f5c26b;box-sizing:border-box;width:min(980px,96vw);max-width:96vw;height:min(880px,94dvh);max-height:94dvh;padding:0;border:1px solid var(--tc-line);border-radius:22px;background:var(--tc-bg);color:var(--tc-text);box-shadow:0 24px 90px #0007;overflow:hidden}
+.tutorial-center::backdrop{background:#000a}
+.tutorial-center[open]{display:flex;flex-direction:column}
+.tutorial-center>header{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--tc-line);background:var(--tc-bg)}
+.tutorial-center h2{margin:0;font-size:1.1rem}
+.tutorial-center .tutorial-body{flex:1;min-height:0;overflow:auto;padding:22px 24px 0;overscroll-behavior:contain;scroll-behavior:smooth}
+.tutorial-center button,.tutorial-center input,.tutorial-center select{font:inherit;color:var(--tc-text);border:1px solid var(--tc-line);border-radius:12px;padding:10px 14px;background:var(--tc-card);cursor:pointer;text-align:start;white-space:normal;transition:background .15s,border-color .15s,transform .1s}
+.tutorial-center button:hover:not(:disabled){border-color:var(--tc-accent)}
+.tutorial-center button:active:not(:disabled){transform:scale(.98)}
+.tutorial-center button:disabled{opacity:.4;cursor:default}
+.tutorial-center :focus-visible{outline:3px solid var(--tc-gold);outline-offset:2px}
+.tutorial-center>header [data-tutorial-close]{width:38px;height:38px;padding:0;font-size:0;display:grid;place-items:center;border-radius:50%}
+.tutorial-center>header [data-tutorial-close]::before{content:"✕";font-size:1rem}
+.tutorial-eyebrow{margin:0 0 6px;font-size:.82rem;color:var(--tc-sub);letter-spacing:.04em}
+.tutorial-center h3{margin:0 0 8px;font-size:1.55rem;line-height:1.3}
+.tutorial-sub,.tutorial-intro{margin:0 0 14px;color:var(--tc-sub);line-height:1.7}
+.tutorial-note{margin:12px 0;padding:10px 14px;border-radius:12px;background:light-dark(#fff7e6,#33291a);border:1px solid var(--tc-gold);font-size:.9rem;line-height:1.6}
+.tutorial-hero{padding:6px 0 4px}
+.tutorial-tools{display:grid;grid-template-columns:1fr 200px;gap:10px;margin:14px 0 18px}
+.tutorial-tools label{margin:0;display:block}
+.tutorial-search{display:flex;align-items:center;gap:8px;border:1px solid var(--tc-line);border-radius:999px;padding:0 16px;background:var(--tc-card)}
+.tutorial-search input{flex:1;border:0;background:transparent;padding:12px 0;width:auto;margin:0;min-width:0;border-radius:0}
+.tutorial-cat select{width:100%;margin:0;border-radius:999px;padding:12px 16px}
+.tutorial-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:24px}
+.tutorial-item{display:flex;align-items:center;gap:14px;width:100%;margin:0;padding:16px;border-radius:16px}
+.tutorial-badge{flex:0 0 auto;display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--tc-accent),color-mix(in srgb,var(--tc-accent) 60%,#fff));color:#fff;font-size:.9rem}
+.tutorial-item-text{flex:1;min-width:0;display:grid;gap:3px}
+.tutorial-item-text strong{font-size:1.02rem;line-height:1.35}
+.tutorial-item small{color:var(--tc-sub);font-size:.82rem}
+.tutorial-chip{flex:0 0 auto;font-style:normal;font-size:.74rem;padding:4px 10px;border-radius:999px}
+.tutorial-chip.ok{background:#2c7a4b33;color:light-dark(#1f6a3e,#7fe0a6)}
+.tutorial-chip.wip{background:#f5c26b33;color:light-dark(#8a5b00,#f5c26b)}
+.tutorial-empty{grid-column:1/-1;text-align:center;padding:40px 12px;color:var(--tc-sub)}
+.tutorial-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.tutorial-back{padding:8px 14px;border-radius:999px}
+.tutorial-progress-text{font-size:.88rem;color:var(--tc-sub)}
+.tutorial-progress{height:6px;border-radius:99px;background:var(--tc-line);overflow:hidden;margin-bottom:16px}
+.tutorial-progress i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--tc-accent),var(--tc-gold));transition:width .25s}
+.tutorial-chapters{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px 12px;scrollbar-width:thin}
+.tutorial-chapters button{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border-radius:999px;font-size:.88rem;white-space:nowrap}
+.tutorial-chapters b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--tc-line);font-size:.78rem}
+.tutorial-chapters [aria-current]{border-color:var(--tc-accent);background:light-dark(#efe6fb,#2d2240)}
+.tutorial-chapters [aria-current] b{background:var(--tc-accent);color:#fff}
+.tutorial-step{display:grid;grid-template-columns:minmax(240px,320px) 1fr;gap:26px;align-items:start;padding-bottom:12px}
+.tutorial-figure{margin:0}
+.tutorial-image{position:relative;border:6px solid light-dark(#2b2438,#0d0a12);border-radius:26px;overflow:hidden;box-shadow:0 10px 30px #0004;background:#000}
+.tutorial-figure img{display:block;width:100%;height:auto}
+.tutorial-mark{position:absolute;transform:translate(-50%,-50%);pointer-events:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--tc-gold);color:#241d30;font-weight:800;font-size:.85rem;border:2px solid #241d30;box-shadow:0 0 0 4px #f5c26b66}
+.tutorial-legend{list-style:none;margin:12px 0 4px;padding:0;display:grid;gap:6px}
+.tutorial-legend li{display:flex;align-items:center;gap:8px;font-size:.88rem}
+.tutorial-legend b{display:grid;place-items:center;flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--tc-gold);color:#241d30;font-size:.76rem}
+.tutorial-figure figcaption small{display:block;margin-top:8px;color:var(--tc-sub);font-size:.76rem;line-height:1.5}
+.tutorial-copy h4{margin:0 0 8px;font-size:1.3rem}
+.tutorial-text{margin:0 0 16px;line-height:1.8}
+.tutorial-block,.tutorial-callout{border-radius:16px;padding:14px 16px;margin:0 0 14px}
+.tutorial-block{background:var(--tc-card);border:1px solid var(--tc-line)}
+.tutorial-callout{background:light-dark(#fff7e6,#2e2517);border:1px solid #f5c26b88}
+.tutorial-center h5{margin:0 0 10px;font-size:.95rem}
+.tutorial-block dl{margin:0;display:grid;gap:10px}
+.tutorial-btn-row{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:baseline}
+.tutorial-btn-row dt{font-weight:700;padding:3px 12px;border-radius:999px;background:light-dark(#efe6fb,#33264a);font-size:.88rem;white-space:nowrap}
+.tutorial-btn-row dd{margin:0;line-height:1.65;font-size:.93rem}
+.tutorial-callout ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.tutorial-callout li{line-height:1.65;font-size:.93rem}
+.tutorial-missing{padding:30px 14px;border:1px dashed var(--tc-line);border-radius:16px;text-align:center;color:var(--tc-sub)}
+.tutorial-nav{position:sticky;bottom:0;display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin:8px -24px 0;padding:12px 24px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--tc-line);background:var(--tc-bg)}
+.tutorial-nav button{text-align:center;padding:13px;border-radius:14px;font-weight:700}
+.tutorial-nav .primary:not(:disabled){background:linear-gradient(135deg,var(--tc-accent),color-mix(in srgb,var(--tc-accent) 75%,#fff));border-color:transparent;color:#fff}
+@media(max-width:700px){.tutorial-center{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border:0;border-radius:0;margin:0}.tutorial-center .tutorial-body{padding:16px 16px 0}.tutorial-grid,.tutorial-tools{grid-template-columns:1fr}.tutorial-step{grid-template-columns:1fr;gap:16px}.tutorial-figure{max-width:330px;margin:0 auto}.tutorial-nav{margin:8px -16px 0;padding:12px 16px calc(14px + env(safe-area-inset-bottom))}.tutorial-center h3{font-size:1.35rem}}
+@media(prefers-reduced-motion:reduce){.tutorial-center *{transition:none!important;scroll-behavior:auto!important}}
+.tutorial-center::backdrop,.tutorial-center>header{backdrop-filter:none;-webkit-backdrop-filter:none}
