@@ -44,7 +44,7 @@ export function openThemeStudio(options){
  const pending=new Map();// hash -> prepared image (local, not uploaded)
  const knownUrls=new Map();// hash -> real uploaded url
  const remember=t=>{for(const u of themeImageUrls(t)){const a=themeAsset(u);if(a&&!u.startsWith(LOCAL_HOST))knownUrls.set(a.hash,u);}};
- const ui={target:'streamer',page:'home',device:'mobile',access:null,accessError:'',busy:false,guides:true,gradientsOpen:false,status:''};
+ const ui={decorSelected:new Set(),target:'streamer',page:'home',device:'mobile',access:null,accessError:'',busy:false,guides:true,gradientsOpen:false,status:''};
  const targets={streamer:makeTarget(settings?.theme||null,settings?.themeDraft||null,room.id,false),hall:null};
  remember(settings?.theme);remember(settings?.themeDraft);
  function makeTarget(published,draft,owner,hall){
@@ -70,7 +70,7 @@ export function openThemeStudio(options){
 
  // ---------- controls ----------
  const help=key=>`<button type="button" class="ts-help" data-help="${key}" aria-label="說明">?</button>`;
- const slider=(path,label,value,min=0,max=100,helpKey='',unit='%',disabled=false)=>`<label class="ts-slider"><span>${h(label)} ${helpKey?help(helpKey):''}<output>${value}${unit}</output></span><input type="range" min="${min}" max="${max}" value="${value}" data-path="${path}" data-unit="${unit}" ${disabled?'disabled':''}></label>`;
+ const slider=(path,label,value,min=0,max=100,helpKey='',unit='%',disabled=false)=>`<div class="ts-slider"><span>${h(label)} ${helpKey?help(helpKey):''}<output>${value}${unit}</output></span><input type="range" min="${min}" max="${max}" value="${value}" data-path="${path}" data-unit="${unit}" aria-label="${h(label)}" ${disabled?'disabled':''}></div>`;
  function locked(text){return `<p class="ts-locked">🔒 ${h(text||THEME_LOCKED_MESSAGE)}</p>`;}
  function imageBlock(role){
   const t=current().working,img=themeImageValue(t.images[role],role),has=!!t.images[role]?.url,spec=THEME_IMAGE_ROLES[role],dis=!can('images');
@@ -100,10 +100,21 @@ export function openThemeStudio(options){
   if(!ui.gradientsOpen)return '';
   return `<div class="ts-gradient-grid" role="group" aria-label="30 種漸層完整配色">${THEME_GRADIENTS.map(x=>`<button type="button" class="ts-gradient-card ${t.gradient===x.id?'on':''}" data-gradient-choice="${x.id}" aria-pressed="${t.gradient===x.id}"><i aria-hidden="true" style="background:linear-gradient(115deg,${x.colors.join(',')})"></i><span>${x.name}<small>${THEME_GRADIENT_DESIGNS[x.id].mode==='dark'?'預設深色':'預設淺色'} · 完整主題</small></span></button>`).join('')}</div>`;
  }
+ // Batch: tick several decorations, then one motion / size / opacity applies to all ticked ones.
+ function decorBatchBlock(t,dis){
+  if(t.decor.length<2)return '';
+  for(const i of [...ui.decorSelected])if(i>=t.decor.length)ui.decorSelected.delete(i);
+  const sel=[...ui.decorSelected].map(i=>t.decor[i]).filter(Boolean),all=sel.length===t.decor.length,same=k=>sel.length&&sel.every(d=>(d[k]??null)===(sel[0][k]??null));
+  const motion=sel.length&&same('motion')?(sel[0].motion||'none'):'',size=sel.length?Math.round(sel.reduce((n,d)=>n+Number(d.size??18),0)/sel.length):18,op=sel.length?Math.round(sel.reduce((n,d)=>n+Number(d.opacity??100),0)/sel.length):100;
+  return `<div class="ts-decor-batch"><div class="ts-decor-batch-head"><label class="ts-decor-all"><input type="checkbox" data-decor-select-all ${all?'checked':''} ${dis?'disabled':''}> 全選</label><span class="ts-hint">已選 ${sel.length} / ${t.decor.length} 張${sel.length?'，下方調整會同時套用':'；勾選圖片左側的方框可一起調整'}</span></div>`
+   +(sel.length?`<div class="ts-motion"><span>批次動態</span><select data-decor-batch-motion aria-label="批次動態" ${dis?'disabled':''}>${motion?'':'<option value="" selected>（各自不同）</option>'}${Object.entries(THEME_DECOR_MOTIONS).map(([k,label])=>`<option value="${k}" ${motion===k?'selected':''}>${label}</option>`).join('')}</select></div>`
+   +`<div class="ts-slider"><span>批次大小<output>${size}%</output></span><input type="range" min="4" max="60" value="${size}" data-decor-batch="size" aria-label="批次大小" ${dis?'disabled':''}></div>`
+   +`<div class="ts-slider"><span>批次顯示程度<output>${op}%</output></span><input type="range" min="0" max="100" value="${op}" data-decor-batch="opacity" aria-label="批次顯示程度" ${dis?'disabled':''}></div>`:'')+'</div>';
+ }
  function decorBlock(){
   const t=current().working,dis=!can('images');
-  return `<div class="ts-img-row"><label class="ts-btn ts-file ${dis||t.decor.length>=THEME_DECOR_LIMIT?'disabled':''}">＋ 新增裝飾圖片<input type="file" accept="image/png,image/webp" data-upload="decor" ${dis||t.decor.length>=THEME_DECOR_LIMIT?'disabled':''}></label><span class="ts-hint">最多 ${THEME_DECOR_LIMIT} 張；建議 800 × 800 px 透明 PNG／WebP</span></div>`
-   +t.decor.map((d,i)=>{const prepared=d.url.startsWith(LOCAL_HOST)?pending.get(themeAsset(d.url)?.hash):null;return `<div class="ts-decor-item"><img src="${h(resolve(d.url))}" alt=""><div class="ts-grow">${prepared?`<p class="ts-hint">✅ 已壓縮：${prepared.width}×${prepared.height}，${themeKB(prepared.originalBytes)} → <b>${themeKB(prepared.bytes)}</b></p>`:''}<div class="ts-motion"><span>動態 ${help('decorMotion')}</span><select data-decor-motion="${i}" aria-label="裝飾動態" ${dis?'disabled':''}>${Object.entries(THEME_DECOR_MOTIONS).map(([k,label])=>`<option value="${k}" ${(d.motion||'none')===k?'selected':''}>${label}</option>`).join('')}</select></div>${d.motion==='tap'?'<p class="ts-hint">不用拖曳位置：在左側預覽任意處點一下，就會在點的位置冒出來。</p>':d.motion==='fixed'||d.motion==='follow'?'<p class="ts-hint">位置以螢幕畫面計算，捲動時仍在畫面上。</p>':''}${slider(`decor.${i}.size`,'大小',d.size,4,60,'','%',dis)}${slider(`decor.${i}.opacity`,'顯示程度',d.opacity,0,100,'opacity','%',dis)}</div><div class="ts-col">${d.motion==='tap'?'':`<button type="button" class="ts-btn ts-ghost" data-decor-reset="${i}">重設位置</button>`}<button type="button" class="ts-btn ts-ghost" data-decor-remove="${i}">移除</button></div></div>`;}).join('')
+  return `<div class="ts-img-row"><label class="ts-btn ts-file ${dis||t.decor.length>=THEME_DECOR_LIMIT?'disabled':''}">＋ 新增裝飾圖片<input type="file" accept="image/png,image/webp" multiple data-upload="decor" ${dis||t.decor.length>=THEME_DECOR_LIMIT?'disabled':''}></label><span class="ts-hint">最多 ${THEME_DECOR_LIMIT} 張，可一次多選；建議 800 × 800 px 透明 PNG／WebP</span></div>`+decorBatchBlock(t,dis)
+   +t.decor.map((d,i)=>{const prepared=d.url.startsWith(LOCAL_HOST)?pending.get(themeAsset(d.url)?.hash):null;return `<div class="ts-decor-item"><input type="checkbox" class="ts-decor-check" data-decor-select="${i}" aria-label="選取第 ${i+1} 張裝飾" ${ui.decorSelected.has(i)?'checked':''} ${dis?'disabled':''}><img src="${h(resolve(d.url))}" alt=""><div class="ts-grow">${prepared?`<p class="ts-hint">✅ 已壓縮：${prepared.width}×${prepared.height}，${themeKB(prepared.originalBytes)} → <b>${themeKB(prepared.bytes)}</b></p>`:''}<div class="ts-motion"><span>動態 ${help('decorMotion')}</span><select data-decor-motion="${i}" aria-label="裝飾動態" ${dis?'disabled':''}>${Object.entries(THEME_DECOR_MOTIONS).map(([k,label])=>`<option value="${k}" ${(d.motion||'none')===k?'selected':''}>${label}</option>`).join('')}</select></div>${d.motion==='tap'?'<p class="ts-hint">不用拖曳位置：在左側預覽任意處點一下，就會在點的位置冒出來。</p>':d.motion==='fixed'||d.motion==='follow'?'<p class="ts-hint">位置以螢幕畫面計算，捲動時仍在畫面上。</p>':''}${slider(`decor.${i}.size`,'大小',d.size,4,60,'','%',dis)}${slider(`decor.${i}.opacity`,'顯示程度',d.opacity,0,100,'opacity','%',dis)}</div><div class="ts-col">${d.motion==='tap'?'':`<button type="button" class="ts-btn ts-ghost" data-decor-reset="${i}">重設位置</button>`}<button type="button" class="ts-btn ts-ghost" data-decor-remove="${i}">移除</button></div></div>`;}).join('')
    +(t.decor.length?'<p class="ts-hint">在左側預覽的主播首頁直接拖曳裝飾圖片來移動位置。</p>':'');
  }
  function renderControls(){
@@ -263,6 +274,10 @@ export function openThemeStudio(options){
   if(el.matches('[data-path]')){setPath(el.dataset.path,el.value);const out=el.closest('.ts-slider')?.querySelector('output');if(out)out.textContent=el.value+(el.dataset.unit??'%');markDirty(false);schedule();return;}
   if(el.matches('[data-base-color]')){delete t.gradient;t.base=el.value.toLowerCase();regenerate(false);$('[data-base-hex]').value=t.base.toUpperCase();markDirty(false);schedule();renderControlsSoon();return;}
   if(el.matches('[data-base-hex]')){const v=el.value.trim();if(/^#?[0-9a-f]{6}$/i.test(v)){delete t.gradient;t.base=('#'+v.replace('#','')).toLowerCase();regenerate(false);markDirty(false);schedule();renderControlsSoon();}return;}
+  if(el.matches('[data-decor-batch]')){const k=el.dataset.decorBatch,n=Number(el.value);for(const i of ui.decorSelected){const d=t.decor[i];if(d)d[k]=n;const item=root.querySelector(`[data-path="decor.${i}.${k}"]`);if(item){item.value=n;const o=item.closest('.ts-slider')?.querySelector('output');if(o)o.textContent=n+'%';}}const out=el.closest('.ts-slider')?.querySelector('output');if(out)out.textContent=n+'%';markDirty(false);schedule();return;}
+  if(el.matches('[data-decor-batch-motion]')){if(!el.value)return;for(const i of ui.decorSelected){const d=t.decor[i];if(!d)continue;if(el.value==='none')delete d.motion;else d.motion=el.value;}markDirty();schedule();renderControlsSoon();return;}
+  if(el.matches('[data-decor-select]')){const i=Number(el.dataset.decorSelect);if(el.checked)ui.decorSelected.add(i);else ui.decorSelected.delete(i);renderControlsSoon();return;}
+  if(el.matches('[data-decor-select-all]')){ui.decorSelected=el.checked?new Set(t.decor.map((_,i)=>i)):new Set();renderControlsSoon();return;}
   if(el.matches('[data-decor-motion]')){const d=t.decor[Number(el.dataset.decorMotion)];if(d){if(el.value==='none')delete d.motion;else d.motion=el.value;}markDirty();schedule();return;}
   if(el.matches('[data-divider-color]')){t.divider={...(t.divider||{}),color:el.value.toLowerCase()};markDirty(false);schedule();renderControlsSoon();return;}
   if(el.matches('[data-color]')){t.colors[el.dataset.color]=el.value.toLowerCase();tg.manual.add(el.dataset.color);t.manual=[...tg.manual];markDirty(false);schedule();renderControlsSoon();return;}
@@ -270,7 +285,11 @@ export function openThemeStudio(options){
  root.addEventListener('change',async e=>{
   const el=e.target;
   if(el.matches('[data-guides]')){ui.guides=el.checked;schedule();return;}
-  if(el.matches('[data-upload]')){const file=el.files?.[0];el.value='';if(file)await addImage(el.dataset.upload,file);}
+  if(el.matches('[data-upload]')){const files=[...(el.files||[])];el.value='';if(!files.length)return;
+   if(el.dataset.upload!=='decor'){await addImage(el.dataset.upload,files[0]);return;}
+   const room=THEME_DECOR_LIMIT-current().working.decor.length,take=files.slice(0,Math.max(0,room));
+   for(const file of take)await addImage('decor',file);
+   if(files.length>take.length)toast(`裝飾圖片最多 ${THEME_DECOR_LIMIT} 張，已加入 ${take.length} 張，其餘 ${files.length-take.length} 張略過`);}
  });
  async function addImage(role,file){
   const tg=current(),t=tg.working;
@@ -313,7 +332,7 @@ export function openThemeStudio(options){
   if(el.matches('[data-divider-reset]')){delete t.divider;markDirty();schedule();return;}
   if(el.dataset.colorAuto){tg.manual.delete(el.dataset.colorAuto);t.manual=[...tg.manual];if(THEME_BANNER_COLOR_KEYS.includes(el.dataset.colorAuto))delete t.colors[el.dataset.colorAuto];else t.colors[el.dataset.colorAuto]=((t.gradient?themeGradientPalette(t.gradient,t.mode)?.colors:null)||themeSmartPalette(t.base,t.mode))[el.dataset.colorAuto];markDirty();schedule();return;}
   if(el.dataset.remove){const role=el.dataset.remove;if(role==='banner'){const {url,...rest}=t.images.banner||{};t.images.banner=rest;}else delete t.images[role];markDirty();renderPage();return;}
-  if(el.dataset.decorRemove!==undefined){t.decor.splice(Number(el.dataset.decorRemove),1);markDirty();renderPage();return;}
+  if(el.dataset.decorRemove!==undefined){t.decor.splice(Number(el.dataset.decorRemove),1);ui.decorSelected.clear();markDirty();renderPage();return;}
   if(el.dataset.decorReset!==undefined){const d=t.decor[Number(el.dataset.decorReset)];if(d){d.x=50;d.y=20;d.size=18;}markDirty();schedule();return;}
  });
  // Focus frames: drag the dot to choose which part of the picture stays visible.
