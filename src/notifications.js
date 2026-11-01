@@ -170,14 +170,14 @@ export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpe
    const shownKey='pa-push-prompt:'+key;try{if(sessionStorage.getItem(shownKey))return;sessionStorage.setItem(shownKey,'1');}catch{}
    const ua=String(navigator.userAgent||''),ios=/iPhone|iPad|iPod/.test(ua),standalone=!!(globalThis.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone);
    const supported='serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window;
-   let text='開啟後，主播呼叫、歌準備好了、私訊都會直接跳通知給你。',action=true;
+   let text='開啟後，主播呼叫、歌準備好了、私訊都會直接跳通知給你。',action=true,blocked=false;
    if(/\bLine\/|FBAN|FBAV|Instagram|MicroMessenger/i.test(ua)){text='你現在是在 LINE 等 App 裡面開網站，收不到通知。請點右上角「⋯」，選「用瀏覽器開啟」（Chrome 或 Safari）。';action=false;}
    else if(ios&&!standalone){text='iPhone 要先點下方的分享鍵，選「加入主畫面」，再從主畫面打開 PA Party，才收得到通知。';action=false;}
    else if(!supported){text='這個瀏覽器不支援通知，請改用 Chrome 或 Safari 開啟。';action=false;}
-   else if(permission()==='denied'){text='這支手機把 PA Party 的通知封鎖了。請到瀏覽器的「網站設定 → 通知」改成「允許」，再回來就好。';action=false;}
+   else if(permission()==='denied'){blocked=true;action=false;text='通知被瀏覽器封鎖了，網頁沒辦法替你打開，請照下面步驟改成「允許」，改好按「我改好了」。'+(ios?'<br>iPhone：設定 → 通知 → PA Party → 允許通知。':/Android/i.test(ua)?'<br>Android：點網址列左邊的鎖頭（或設定圖示）→ 權限 → 通知 → 允許。':'<br>電腦：點網址列左邊的鎖頭 → 通知 → 允許。');}
    promptDialog?.remove();promptDialog=document.createElement('dialog');promptDialog.className='push-prompt-dialog';
-   promptDialog.innerHTML=`<div class="dialog-head"><h2>🔔 開啟通知，才不會錯過</h2><button type="button" data-push-prompt="close" aria-label="稍後">✕</button></div><div class="dialog-body"><p>${text}</p><div class="dialog-actions">${action?'<button type="button" class="primary" data-push-prompt="on">開啟通知</button>':''}<button type="button" data-push-prompt="close">${action?'稍後':'知道了'}</button></div></div>`;
-   promptDialog.addEventListener('click',e=>{const b=e.target.closest('[data-push-prompt]');if(!b)return;const d=promptDialog;d?.close();d?.remove();if(promptDialog===d)promptDialog=null;
+   promptDialog.innerHTML=`<div class="dialog-head"><h2>🔔 開啟通知，才不會錯過</h2><button type="button" data-push-prompt="close" aria-label="稍後">✕</button></div><div class="dialog-body"><p>${text}</p><div class="dialog-actions">${action?'<button type="button" class="primary" data-push-prompt="on">開啟通知</button>':''}${blocked?'<button type="button" class="primary" data-push-prompt="recheck">我改好了</button>':''}<button type="button" data-push-prompt="close">${action?'稍後':'知道了'}</button></div></div>`;
+   promptDialog.addEventListener('click',e=>{const b=e.target.closest('[data-push-prompt]');if(!b)return;if(b.dataset.pushPrompt==='recheck'){if(permission()==='granted'){const d=promptDialog;d?.close();d?.remove();if(promptDialog===d)promptDialog=null;devicePrefs.save({setupDone:true,pushAllowed:true});pushOn(false).catch(error=>toast(error.message||'通知開啟失敗'));}else toast('還是封鎖中，請照步驟改完再按一次');return;}const d=promptDialog;d?.close();d?.remove();if(promptDialog===d)promptDialog=null;
     if(b.dataset.pushPrompt==='on'){devicePrefs.save({setupDone:true,pushAllowed:true});document.querySelectorAll('.notice-first-setup').forEach(el=>el.remove());pushOn(false).catch(error=>toast(error.message||'通知開啟失敗'));}});
    document.body.append(promptDialog);promptDialog.showModal();
   }catch{}
