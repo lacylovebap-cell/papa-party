@@ -6,7 +6,7 @@ import {visibleTutorials,searchTutorials} from '../src/tutorial-center.js';
 const folder='src/tutorials',index=JSON.parse(fs.readFileSync(folder+'/index.json'));
 test('role-specific search never leaks streamer results to the player index',()=>{
  const player=visibleTutorials(index,'player',true),streamer=visibleTutorials(index,'streamer',true);
- assert.equal(player.length,5);assert.equal(streamer.length,8);
+ assert.equal(player.length,5);assert.equal(streamer.length,9);
  assert.equal(searchTutorials(player,'批量').length,0);
  assert.equal(searchTutorials(streamer,'S07')[0].id,'S07');
  assert.equal(searchTutorials(player,'  Ｐ０１  ')[0].id,'P01');
