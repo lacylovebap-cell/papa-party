@@ -53,7 +53,7 @@ export function deriveNotices(before,after,context,t=new Date().toISOString()){
  for(const wish of (after.wishes||[]).filter(row=>row.streamer_id===roomId)){
   const old=oldWishes.get(wish.id),title=`《${wish.title||'歌曲'}》`;
   if(!old&&context.role==='player'){add('__admin__','wish','收到玩家許願 '+title,wish.id);add(wish.playerId,'wish',title+'許願已收到，等待主播回覆',wish.id);}
-  else if(old&&old.status!==wish.status)add(wish.playerId,'wish',title+'許願回覆：'+(wish.status||'收到'),wish.id);
+  else if(old){const added=!old.songId&&wish.songId,changed=old.status!==wish.status;if(changed&&wish.status==='已學會')add(wish.playerId,'wish','🎉 願望成真！'+title+'學會了'+(added?'，已加入歌本，現在可以點囉':''),wish.id);else if(changed)add(wish.playerId,'wish',title+'許願回覆：'+(wish.status||'收到'),wish.id);else if(added)add(wish.playerId,'wish','🎵 '+title+'已加入歌本，現在可以點囉',wish.id);}
  }
  return rows;
 }

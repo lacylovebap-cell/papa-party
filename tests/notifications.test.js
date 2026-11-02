@@ -16,7 +16,7 @@ test('receipt with preparation minutes produces one important scoped reminder in
 test('wish creation and status results notify only the correct host and owner without private request notes',()=>{
  const before=state(),after=state();after.wishes=[{id:'w1',streamer_id:'a',playerId:'p',title:'願望曲',status:'收到',note:'private wish note'},{id:'w2',streamer_id:'b',playerId:'q',title:'別的主播',status:'收到'}];
  const received=deriveNotices(before,after,context);assert.deepEqual(received.map(row=>[row.recipient,row.type]),[['__admin__','wish'],['p','wish']]);assert.ok(received.every(row=>row.entity_id==='w1'));assert.doesNotMatch(JSON.stringify(received),/private wish note|別的主播/);
- for(const status of ['考慮中','學習中','已學會','暫不學']){const next=structuredClone(after);next.wishes[0].status=status;const rows=deriveNotices(after,next,{...context,role:'admin'});assert.equal(rows.length,1);assert.equal(rows[0].recipient,'p');assert.match(rows[0].body,new RegExp(status));}
+ for(const status of ['考慮中','學習中','已學會','暫不學']){const next=structuredClone(after);next.wishes[0].status=status;const rows=deriveNotices(after,next,{...context,role:'admin'});assert.equal(rows.length,1);assert.equal(rows[0].recipient,'p');assert.match(rows[0].body,new RegExp(status==='已學會'?'學會了':status));}
  assert.deepEqual(deriveNotices(after,structuredClone(after),context),[]);
 });
 test('live request only notifies the host; old unchanged queue never replays',()=>{const before=state(),after=state();after.queue=[{...request,kind:'live',status:'pending'}];assert.deepEqual(deriveNotices(before,after,context).map(n=>n.type),['live']);assert.deepEqual(deriveNotices(after,structuredClone(after),context),[]);});
