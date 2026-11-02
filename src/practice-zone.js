@@ -91,5 +91,6 @@ export function createPracticeZone({h,modal,field,select,area,toast,render,getIt
  function change(e){const b=e.target.closest?.('select[data-pz=stage]');if(!b)return;const it=items().find(x=>x.id===b.dataset.id);if(it&&it.stage!==b.value)run(async()=>{await save(items().map(x=>x.id===it.id?{...x,stage:b.value}:x));toast('階段：'+stage(b.value).name);});}
  async function addFromCatalog(row){if(items().some(i=>i.variantId&&i.variantId===row.variantId)){toast('這首已經在待練區');return;}await run(async()=>{await save([{id:uid(),source:'catalog',stage:'want',tags:[],...row},...items()]);toast('已加入待練區（想學）');});}
  if(typeof document!=='undefined'){document.addEventListener('click',click);document.addEventListener('change',change);}
- return {html,items,addFromCatalog};
+ async function addMany(rows){const have=new Set(items().filter(i=>i.variantId).map(i=>i.variantId)),fresh=[];for(const r of rows){if(!r.variantId||have.has(r.variantId))continue;have.add(r.variantId);fresh.push({id:uid(),source:'catalog',stage:'want',tags:[],...r});}if(!fresh.length){toast('這些歌都已經在待練區');return 0;}let ok=0;await run(async()=>{await save([...fresh,...items()]);ok=fresh.length;toast('已加入待練區 '+ok+' 首（想學）');});return ok;}
+ return {html,items,addFromCatalog,addMany};
 }
