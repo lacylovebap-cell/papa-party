@@ -1,10 +1,10 @@
 import {createPracticeZone} from './practice-zone.js?v=11.02-PZ.3';
-import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.36';
-import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.36';
+import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.37';
+import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.37';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
 
-import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.36';
+import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.37';
 import {createPlatformManagement} from './platform-management.js?v=10.29-SPACE.1';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
@@ -20,7 +20,7 @@ import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
 import {canonicalNoticeLink} from './notification-rules.js?v=10.31-PUSH.3';
 import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.31-CALL.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.36';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.37';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
 import {createBoard} from './board.js?v=10.20-WEB.1';
 import {createChat} from './chat.js?v=10.31-PUSH.2';
@@ -816,7 +816,7 @@ function applyHomeTheme(){const root=document.documentElement;if(state.settings.
 // spread down a long list nor get cut off on a short page.
 const themeDecorHomeKey=()=> 'papa-theme-decor-home-'+(state.currentStreamer?.id||streamerSlug);
 function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme;if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=theme&&!managementPage()?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html){app.insertAdjacentHTML('beforeend',html);const layer=app.querySelector(':scope>.theme-decor-layer:not(.theme-decor-screen)');if(layer){const home=!['admin','common-book','book','center','gallery'].includes(route);if(home){try{localStorage.setItem(themeDecorHomeKey(),String(app.offsetHeight));}catch{}}else{let homeHeight=0;try{homeHeight=Number(localStorage.getItem(themeDecorHomeKey()))||0;}catch{}if(homeHeight>0){layer.style.bottom='auto';layer.style.height=Math.min(app.offsetHeight,homeHeight)+'px';}}}}themeDecorMotion(document,html?theme:null,{host:app});}
-async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.36',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.36');}
+async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.37',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.37');}
 async function openThemeDesigner(){
  if(demo||draft)throw Error('首頁主題設計請在正式同步模式使用');if(!admin)throw Error('請先登入管理');
  const {openThemeStudio}=await loadThemeStudio();const room=state.currentStreamer,space=state.streamers.find(r=>r.id===room.id)?.spaceId||room.spaceId||'space-001';
@@ -1309,7 +1309,7 @@ function catalogReviewHtml(){
  }else if(status==='duplicates'){
   entries=(catalogView.groups||[]).map(group=>{const picked=[...catalogView.selectedRows.values()].filter(row=>row?.groupId===group.id).length;return '<section class="catalog-candidate-group"><h3><label class="catalog-check"><input type="checkbox" data-catalog-group="'+h(group.id)+'" '+(picked>=group.total?'checked':'')+' aria-label="全選本組" aria-checked="'+(picked&&picked<group.total?'mixed':picked>=group.total?'true':'false')+'"> '+h(group.rows?.[0]?.title||'候選群組')+' · '+group.total+' 筆</label></h3><div class="actions">'+['confirm_same','different_versions','independent'].map((decision,i)=>button(['合併為同一首','同一首，但不同版本',group.total===1?'獨立為一首':'獨立為另一首'][i],'catalogGroupDecision',group.id,'tiny','data-decision="'+decision+'"')).join('')+button('關聯既有共同版本','catalogGroupLink',group.id,'tiny')+button('稍後處理','catalogLater',group.id,'tiny')+'</div>'+(group.total>8?'<details><summary>展開候選</summary>':'')+(group.rows||[]).map(rowHtml).join('')+(group.rows.length<group.total?button('載入更多候選','catalogGroupMore',group.id,'tiny'):'')+(group.total>8?'</details>':'')+'</section>';}).join('');
  }else if(status==='approved'){
-  actions=button('選取本頁','relationSelectPage','','tiny')+button('取消選取','relationClear','','tiny')+button('批量加入我的歌本','relationAdd','','tiny primary',catalogView.versionSelected?.size?'':'disabled')+button('批量加入待練','relationPractice','','tiny',catalogView.versionSelected?.size?'':'disabled')+'<small>已選 '+(catalogView.versionSelected?.size||0)+' 首</small>';
+  actions=button('選取本頁','relationSelectPage','','tiny')+button('取消選取','relationClear','','tiny')+button('批量加入歌本','relationAdd','','tiny primary',catalogView.versionSelected?.size?'':'disabled')+button('加入待練','relationPractice','','tiny',catalogView.versionSelected?.size?'':'disabled')+'<small>已選 '+(catalogView.versionSelected?.size||0)+' 首</small>';
   entries=catalogView.items.map(f=>'<section class="catalog-candidate-group catalog-family"><h3>《'+h(f.title)+'》</h3>'+(f.variants||[]).map(v=>'<div class="song catalog-variant-row"><label class="catalog-check"><input type="checkbox" data-relation-select="'+h(v.id)+'" '+(v.alreadyAdded?'disabled':catalogView.versionSelected?.has(v.id)?'checked':'')+' aria-label="選取 '+h(f.title)+' '+h(v.versionLabel||'原版')+'"></label><div class="info"><b>'+h(v.versionLabel||({cover:'翻唱',original:'原版',live:'現場版',remix:'混音版',dj:'DJ版'})[v.versionKind]||v.versionKind||'原版')+'</b><small>'+h([v.artist,v.performerDetail,v.language,v.performerType,v.versionNote].filter(Boolean).join(' · '))+'</small></div><div class="actions relation-actions">'+(isSuperAdmin()?button('編輯','relationEdit',v.id,'tiny')+button('拆版本','relationSplit',v.id,'tiny')+button('解除關係','relationUnlink',v.id,'tiny')+button('刪除','relationDelete',v.id,'tiny danger'):'')+(v.streamerCount>0&&!(v.streamerCount===1&&v.alreadyAdded)?button('查看主播（'+v.streamerCount+'）','relationRooms',v.id,'tiny'):'')+button('回報問題','catalogReport',v.id,'tiny')+(v.alreadyAdded?'<small>已在我的歌本</small>':'')+(isSuperAdmin()?button(v.hasSharedLyrics?'查看／編輯共同歌詞':'建立共同歌詞','catalogSharedLyrics',v.id,'tiny')+(v.lyricProposalCount?button('有可採用歌詞（'+v.lyricProposalCount+'）','catalogLyricProposals',v.id,'tiny'):''):'')+'</div></div>').join('')+'</section>').join('');
  }else if(status==='issues'){
   const types={song_info:'歌曲資訊',artist_name:'歌手名稱',performer_type:'歌手分類',language:'語言',version_type:'版本類型',missing_version:'缺少版本',version_relation:'版本關係',duplicate:'疑似重複',other:'其他'};

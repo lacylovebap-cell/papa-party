@@ -43,7 +43,7 @@ test('ordinary streamer can inspect version relations without master-write contr
  const html=vm.runInContext('catalogReviewHtml()',context);assert.match(html,/查看主播（3）/);
  for(const act of ['relationEdit','relationSplit','relationUnlink','relationDelete','catalogSharedLyrics'])assert.ok(!html.includes('data-act="'+act+'"'));
  assert.ok(!html.includes('單筆待審'));assert.match(html,/我的問題回報/);
- assert.doesNotMatch(html,/有可採用歌詞/);assert.match(html,/語言篩選/);assert.match(html,/版本篩選/);assert.match(html,/data-act="catalogReport"/);assert.match(html,/data-relation-select/);assert.match(html,/批量加入我的歌本/);
+ assert.doesNotMatch(html,/有可採用歌詞/);assert.match(html,/語言篩選/);assert.match(html,/版本篩選/);assert.match(html,/data-act="catalogReport"/);assert.match(html,/data-relation-select/);assert.match(html,/批量加入歌本/);
 });
 
 test('relation selection survives paging, skips existing songs and reuses the existing batch-add flow',async()=>{
