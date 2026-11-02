@@ -405,13 +405,13 @@ html #app .notice-target-banner{border-color:var(--home-accent,#cba4ea)!importan
 .admin-section-tabs .notice-count{margin-left:2px;padding:0 5px;font-size:10px;line-height:16px;min-width:16px;text-align:center;border-radius:8px}
 /* 紅色數字再縮小：不撐開分頁、不推擠版面 */
 .admin-section-tabs .notice-count{display:inline-block;margin-left:1px;padding:0 3px;font-size:9px;line-height:13px;min-width:13px;height:13px;vertical-align:top;border-radius:7px}
-/* 版本關係：每首版本的按鈕收納（編輯／查看主播在右側，其餘放在「更多」浮動框） */
+/* 版本關係：編輯／查看主播並排在右側，「更多」在兩顆正下方置中（三角形），展開是一排的浮動條 */
 .catalog-family .catalog-variant-row{grid-template-columns:22px minmax(0,1fr) auto!important;position:relative}
-.catalog-variant-row>.rel-side{grid-column:3;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-.catalog-variant-row>.rel-side button{min-width:92px;padding:4px 9px!important;font-size:11px!important;min-height:28px;white-space:nowrap}
-.catalog-variant-row>.rel-more{grid-column:1/-1;grid-row:2;justify-self:center;position:relative}
-.rel-more>summary{list-style:none;cursor:pointer;padding:4px 22px;min-height:28px;display:inline-flex;align-items:center;font-size:11px;border-radius:999px;border:1px solid var(--line,#ffffff30);background:#ffffff0d}
+.catalog-variant-row>.rel-side{grid-column:3;grid-row:1;display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:4px}
+.catalog-variant-row>.rel-side button{padding:2px 7px!important;font-size:10.5px!important;min-height:24px!important;line-height:1.2;white-space:nowrap}
+.catalog-variant-row>.rel-more{grid-column:3;grid-row:2;justify-self:center;position:static}
+.rel-more>summary{list-style:none;cursor:pointer;padding:2px 14px;min-height:22px;display:inline-flex;align-items:center;font-size:10.5px;border-radius:999px;border:1px solid var(--line,#ffffff30);background:#ffffff0d}
 .rel-more>summary::-webkit-details-marker{display:none}
 .rel-more[open]>summary{background:#ffffff22}
-.rel-more-pop{position:absolute;z-index:60;left:50%;transform:translateX(-50%);top:calc(100% + 4px);width:max-content;min-width:130px;max-width:min(280px,78vw);display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;padding:8px;border-radius:14px;background:#1d1530;border:1px solid #ffffff2a;box-shadow:0 10px 28px #000a}
-.rel-more-pop button{margin:0!important;min-height:36px;font-size:12px!important;text-align:center}
+.rel-more-pop{position:absolute;z-index:60;left:0;right:0;top:calc(100% - 2px);display:flex;flex-wrap:nowrap;gap:4px;justify-content:center;padding:6px 6px;overflow-x:auto;border-radius:14px;background:#1d1530;border:1px solid #ffffff2a;box-shadow:0 10px 28px #000a}
+.rel-more-pop button{flex:none;margin:0!important;padding:3px 7px!important;min-height:26px!important;font-size:10.5px!important;white-space:nowrap}
