@@ -36,7 +36,7 @@
    "width": 684,
    "height": 1227,
    "alt": "主播後台待播，某首歌的「更多」展開後有「連動存歌」",
-   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.39 · 2026-11-03"
+   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.40 · 2026-11-03"
   },
   {
    "id": "dialog",
@@ -65,7 +65,7 @@
    "width": 684,
    "height": 1227,
    "alt": "連動存歌視窗：選擇存歌、勾選歌曲、顯示剩餘首數",
-   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.39 · 2026-11-03"
+   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.40 · 2026-11-03"
   },
   {
    "id": "alloc",
@@ -89,12 +89,12 @@
    "width": 684,
    "height": 1227,
    "alt": "分配視窗：連動現有歌曲區塊",
-   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.39 · 2026-11-03"
+   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.40 · 2026-11-03"
   }
  ],
  "status": "published",
  "file": "S18.json",
- "version": "11.02-TUTORIAL.39",
+ "version": "11.02-TUTORIAL.40",
  "missing": "",
  "reviewedAt": "2026-11-03",
  "reviewedBy": "總裁確認上線"
