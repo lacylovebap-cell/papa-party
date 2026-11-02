@@ -108,3 +108,7 @@ document.addEventListener('toggle',e=>{const d=e.target;if(!d.matches?.('details
 
 // 後台「更多」：點其他地方就收起
 document.addEventListener('pointerdown',e=>{const t=e.target;for(const d of document.querySelectorAll('details.admin-more-tabs[open]'))if(!d.contains(t))d.removeAttribute('open');},true);
+
+// 版本關係「更多」：點外面或點選項後收起
+document.addEventListener('pointerdown',e=>{for(const d of document.querySelectorAll('details.rel-more[open]'))if(!d.contains(e.target))d.removeAttribute('open');},true);
+document.addEventListener('click',e=>{const d=e.target.closest?.('details.rel-more');if(d&&e.target.closest('.rel-more-pop button'))d.removeAttribute('open');},true);
