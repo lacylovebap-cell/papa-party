@@ -1,10 +1,10 @@
 import {createPracticeZone} from './practice-zone.js?v=11.02-PZ.5';
-import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.41';
-import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.41';
+import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.42';
+import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.42';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
 
-import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.41';
+import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.42';
 import {createPlatformManagement} from './platform-management.js?v=10.29-SPACE.1';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
@@ -20,7 +20,7 @@ import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
 import {canonicalNoticeLink} from './notification-rules.js?v=10.31-PUSH.3';
 import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.31-CALL.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.41';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.42';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
 import {createBoard} from './board.js?v=10.20-WEB.1';
 import {createChat} from './chat.js?v=10.31-PUSH.2';
@@ -591,7 +591,7 @@ function renderHome(){
  const home=normalizeHome(state.settings.home),summary=currentAccounting();
  const defaultImage=state.currentStreamer?.banner_url||(streamerSlug==='papa'?'assets/papa-singer-hero.jpg':'');
  const publishedTheme=state.settings.theme||null,heroImage=themeBannerUrl(publishedTheme)||(home.imageMode==='none'?'':home.imageMode==='custom'?home.imageUrl:defaultImage);
- const heroFields={title:'<h2>'+h(home.title||state.currentStreamer?.home_title||hostName()+' PARTY')+'</h2>',subtitle:'<small>'+h(home.subtitle||state.currentStreamer?.subtitle||'')+'</small>',status:'<div class="state-label" style="color:'+c[1]+'">'+c[0]+' '+h(home.statusText||st)+'</div>',message:'<p class="status-note">'+h(home.message||hostText(c[2]))+'</p>',nowPlaying:'<p class="now-playing">目前待播歌名：<strong>'+h(state.nowPlaying?.title||'目前沒有待播歌曲')+'</strong></p>',preparation:state.nowPlaying?'<p class="preparation-note">'+(state.nowPlaying.preparationMinutes>0?'準備中，請稍後 '+state.nowPlaying.preparationMinutes+' 分鐘':'準備好了，即將開唱 ♡')+'</p>':'',hour:'<div class="hour" id="hour">'+hour()+'</div>',sung:'<p>本場已唱：'+summary.sung+' 次</p>',queue:'<p>待播：'+(state.waitingCount??state.queue.filter(q=>q.status==='waiting').length)+' 首</p>'};
+ const heroFields={title:'<h2>'+h(home.title||state.currentStreamer?.home_title||hostName()+' PARTY')+'</h2>',subtitle:'<small>'+h(home.subtitle||state.currentStreamer?.subtitle||'')+'</small>',status:'<div class="state-label" style="color:'+c[1]+'">'+c[0]+' '+h(home.statusText||st)+'</div>',message:'<p class="status-note">'+h(home.message||hostText(c[2]))+'</p>',nowPlaying:'<p class="now-playing">目前待播歌名：<strong>'+h(state.nowPlaying?.title||'尚無')+'</strong></p>',preparation:state.nowPlaying?'<p class="preparation-note">'+(state.nowPlaying.preparationMinutes>0?'準備中，請稍後 '+state.nowPlaying.preparationMinutes+' 分鐘':'準備好了，即將開唱 ♡')+'</p>':'',hour:'<div class="hour" id="hour">'+hour()+'</div>',sung:'<p>本場已唱：'+summary.sung+' 次</p>',queue:'<p>待播：'+(state.waitingCount??state.queue.filter(q=>q.status==='waiting').length)+' 首</p>'};
  const banner='<section class="hero integrated-hero">'+(heroImage?'<img src="'+h(heroImage)+'" alt="'+h(state.currentStreamer?.home_title||'音樂時光')+'" fetchpriority="high"'+(publishedTheme?' style="'+themeBannerImageStyle(publishedTheme)+'"':'')+'>':'<div class="hero-placeholder" aria-hidden="true"></div>')+'<div class="hero-overlay">'+home.fieldOrder.filter(k=>home.fields[k]).map(k=>heroFields[k]).join('')+'</div></section>';
  const search=card('找找'+h(hostName())+'會唱的歌👀','<input id="home-search" aria-label="搜尋歌曲" placeholder="歌名、歌手、語言、標籤都可以…"><div id="home-results">'+blank('給我一點線索，幫你翻歌本 ♡')+'</div>',true,button('完整歌本 ↗','book')).replace('card wide','card wide home-search-card');
  const fresh=card('✨ 新練歌曲',songRows(newPracticeSongs(state.songs).filter(s=>!s.hidden).slice(0,5)),true,button('查看更多','newPractice'));
@@ -816,7 +816,7 @@ function applyHomeTheme(){const root=document.documentElement;if(state.settings.
 // spread down a long list nor get cut off on a short page.
 const themeDecorHomeKey=()=> 'papa-theme-decor-home-'+(state.currentStreamer?.id||streamerSlug);
 function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme;if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=theme&&!managementPage()?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html){app.insertAdjacentHTML('beforeend',html);const layer=app.querySelector(':scope>.theme-decor-layer:not(.theme-decor-screen)');if(layer){const home=!['admin','common-book','book','center','gallery'].includes(route);if(home){try{localStorage.setItem(themeDecorHomeKey(),String(app.offsetHeight));}catch{}}else{let homeHeight=0;try{homeHeight=Number(localStorage.getItem(themeDecorHomeKey()))||0;}catch{}if(homeHeight>0){layer.style.bottom='auto';layer.style.height=Math.min(app.offsetHeight,homeHeight)+'px';}}}}themeDecorMotion(document,html?theme:null,{host:app});}
-async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.41',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.41');}
+async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.42',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.42');}
 async function openThemeDesigner(){
  if(demo||draft)throw Error('首頁主題設計請在正式同步模式使用');if(!admin)throw Error('請先登入管理');
  const {openThemeStudio}=await loadThemeStudio();const room=state.currentStreamer,space=state.streamers.find(r=>r.id===room.id)?.spaceId||room.spaceId||'space-001';
