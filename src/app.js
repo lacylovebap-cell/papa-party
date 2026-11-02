@@ -1,9 +1,9 @@
-import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.28';
-import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.28';
+import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.29';
+import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.29';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
 
-import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.28';
+import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.29';
 import {createPlatformManagement} from './platform-management.js?v=10.29-SPACE.1';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
@@ -19,7 +19,7 @@ import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
 import {canonicalNoticeLink} from './notification-rules.js?v=10.31-PUSH.3';
 import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.31-CALL.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.28';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.29';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
 import {createBoard} from './board.js?v=10.20-WEB.1';
 import {createChat} from './chat.js?v=10.31-PUSH.2';
@@ -790,7 +790,7 @@ function applyHomeTheme(){const root=document.documentElement;if(state.settings.
 // spread down a long list nor get cut off on a short page.
 const themeDecorHomeKey=()=> 'papa-theme-decor-home-'+(state.currentStreamer?.id||streamerSlug);
 function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme;if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=theme&&!managementPage()?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html){app.insertAdjacentHTML('beforeend',html);const layer=app.querySelector(':scope>.theme-decor-layer:not(.theme-decor-screen)');if(layer){const home=!['admin','common-book','book','center','gallery'].includes(route);if(home){try{localStorage.setItem(themeDecorHomeKey(),String(app.offsetHeight));}catch{}}else{let homeHeight=0;try{homeHeight=Number(localStorage.getItem(themeDecorHomeKey()))||0;}catch{}if(homeHeight>0){layer.style.bottom='auto';layer.style.height=Math.min(app.offsetHeight,homeHeight)+'px';}}}}themeDecorMotion(document,html?theme:null,{host:app});}
-async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.28',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.28');}
+async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.29',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.29');}
 async function openThemeDesigner(){
  if(demo||draft)throw Error('首頁主題設計請在正式同步模式使用');if(!admin)throw Error('請先登入管理');
  const {openThemeStudio}=await loadThemeStudio();const room=state.currentStreamer,space=state.streamers.find(r=>r.id===room.id)?.spaceId||room.spaceId||'space-001';
@@ -1245,7 +1245,7 @@ function receiptRemaining(l){const used=state.queue.filter(q=>!['cancelled','sto
 const RECENT_MS=2*3600*1000,olderRows=new Map();
 const recentTime=x=>Date.parse(x.completedAt||x.at||'')||0;
 function recentSplit(rows,render,key,pinned=[]){const sorted=[...rows].sort((a,b)=>recentTime(b)-recentTime(a)),cut=Date.now()-RECENT_MS,isRecent=x=>recentTime(x)>=cut||pinned.includes(x.id),recent=sorted.filter(isRecent),older=sorted.filter(x=>!isRecent(x));olderRows.set(key,()=>older.map(render).join(''));return recent.map(render).join('')+(recent.length?'':'<p class="muted">最近 2 小時內沒有紀錄。</p>')+(older.length?'<div id="older-'+key+'"></div><button type="button" class="ghost" data-older="'+key+'">更多（較早的 '+older.length+' 筆）</button>':'');}
-document.addEventListener('click',e=>{const b=e.target.closest?.('[data-older]');if(!b)return;const box=document.getElementById('older-'+b.dataset.older),fn=olderRows.get(b.dataset.older);if(box&&fn){box.innerHTML=fn();b.remove();document.dispatchEvent(new Event('change',{bubbles:true}));}});
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-older]');if(!b)return;const box=document.getElementById('older-'+b.dataset.older),fn=olderRows.get(b.dataset.older);if(box&&fn){box.innerHTML=fn();b.remove();box.dispatchEvent(new Event('change',{bubbles:true}));}});
 function linkQueueDialog(ids){const rows=ids.map(id=>state.queue.find(q=>q.id===id)).filter(Boolean);if(!rows.length)return toast('請先勾選要連動的歌曲');const pid=rows[0].playerId;if(rows.some(q=>q.playerId!==pid))return toast('一次只能連動同一位玩家的歌曲');if(rows.some(q=>!queueLinkable(q)))return toast('所選歌曲已連動或不能連動');
  const receipts=state.ledger.filter(l=>l.playerId===pid&&l.amount>0&&!l.queueId&&!l.conversion&&!l.voided_at&&!l.allocation_id&&receiptRemaining(l)>0);
  if(!receipts.length)return toast('這位玩家沒有可連動的存歌紀錄');
