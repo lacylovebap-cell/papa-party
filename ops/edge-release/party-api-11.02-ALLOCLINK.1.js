@@ -4855,7 +4855,7 @@ function mutate(source, action, actor, t = stamp()) {
       const linkIds = [...new Set(Array.isArray(p.existingQueueIds) ? p.existingQueueIds : [])];
       requireThat(linkIds.length <= 50, "一次最多掛上 50 首");
       const linkRows = linkIds.map((id) => room.queue.find((q) => q.id === id));
-      requireThat(linkRows.every((q) => q && q.playerId === p.playerId && q.kind === "live" && ["pending", "waiting"].includes(q.status) && !q.allocation_id && !q.source_transaction_id && !q.selfProvided && !q.voided_at), "所選待播歌已異動或不符，不能掛上");
+      requireThat(linkRows.every((q) => q && q.playerId === p.playerId && q.kind === "live" && ["pending", "waiting"].includes(q.status) && !q.allocation_id && !q.source_transaction_id && !q.voided_at), "所選待播歌已異動或不符，不能掛上");
       const linkCost = linkRows.reduce((n, q) => n + queueCost(q), 0);
       requireThat(stored + linkCost + quotes.reduce((n, q) => n + q.creditCost, 0) === total, "現點首數加存歌首數必須等於收到總首數");
       requireThat(!original?.voided_at && !original?.allocation_id, "舊分配來源請先核對，不能重複分配");
