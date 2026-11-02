@@ -481,5 +481,22 @@
   "audience": "player",
   "status": "draft",
   "file": "P13.json"
+ },
+ {
+  "id": "S21",
+  "title": "待練區：還沒上架的歌先放這裡",
+  "category": "歌本管理",
+  "keywords": [
+   "待練",
+   "待練區",
+   "練習",
+   "上架",
+   "共同曲庫",
+   "想學",
+   "練唱中"
+  ],
+  "audience": "streamer",
+  "status": "draft",
+  "file": "S21.json"
  }
 ]

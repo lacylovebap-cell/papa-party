@@ -13,7 +13,7 @@ document.querySelector('#verify').onclick=async()=>{const results=[],check=(v,m)
  await center.open({id:'P01',chapter:'fees'});check(document.querySelector('h4').textContent==='查看禮物值','文章章節跳轉');
  check(document.querySelectorAll('.tutorial-center img').length===1,'每次只載入當前步驟圖片');
  document.querySelector('[data-tutorial-close]').click();await tick();check(draft.value===before&&location.hash===hash,'關閉保留原始表單與路由');
- role.value='streamer';await center.open();check(document.querySelectorAll('[data-tutorial-article]').length===19,'主播顯示十九篇教材');
+ role.value='streamer';await center.open();check(document.querySelectorAll('[data-tutorial-article]').length===20,'主播顯示二十篇教材');
  check((await center.relatedLink('S07','1'))==='','未完成文章不建立完整教學連結');
  document.querySelector('[data-tutorial-close]').click();await tick();
  document.querySelector('#existing').showModal();const original=document.querySelector('#existing input');original.value='編輯中的內容';document.querySelector('#nested').focus();await center.open({id:'S01'});document.querySelector('[data-tutorial-close]').click();await tick();check(document.querySelector('#existing').open&&original.value==='編輯中的內容','原有視窗與未儲存內容保留');check(document.activeElement.id==='nested','焦點返回原本按鈕');document.querySelector('#existing').close();

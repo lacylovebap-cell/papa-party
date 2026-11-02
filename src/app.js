@@ -1,10 +1,10 @@
-import {createPracticeZone} from './practice-zone.js?v=11.02-PZ.1';
-import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.33';
-import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.33';
+import {createPracticeZone} from './practice-zone.js?v=11.02-PZ.2';
+import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.34';
+import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.34';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
 
-import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.33';
+import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.34';
 import {createPlatformManagement} from './platform-management.js?v=10.29-SPACE.1';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
@@ -20,7 +20,7 @@ import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
 import {canonicalNoticeLink} from './notification-rules.js?v=10.31-PUSH.3';
 import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.31-CALL.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.33';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.34';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
 import {createBoard} from './board.js?v=10.20-WEB.1';
 import {createChat} from './chat.js?v=10.31-PUSH.2';
@@ -774,11 +774,20 @@ function renderPlatformManagement(){
 async function openPlatformManagement(){if(!admin&&!session)throw Error('請先登入');const capabilities=await managementEntry.load({force:true});if(!capabilities?.president)throw Error(managementEntry.state().error||'平台管理中心僅供總裁帳號使用');if(isSuperAdmin()){route='admin';tab='platform';}else{route='center';subtab='platform';}syncPageLocation(true);render();}
 
 // 操作歷史 was withdrawn on 2026-10-28 (user request); a remembered tab falls back to 待播.
-const practiceZone=createPracticeZone({h,modal,field,select,area,toast,render:()=>render(),getLangs:()=>{try{const l=visibleLanguages().map(x=>x.name).filter(Boolean);return l.length?l:['華語','台語','粵語','日語','韓語','英語','其他'];}catch{return ['華語','台語','其他'];}},getTags:()=>(state.settings?.tags||[]).filter(x=>x&&x!=='新練'),seed:[
- {id:'s1',title:'天空之城',artist:'示範歌手',lang:'日語',stage:'listen',tags:['抒情','慢歌'],source:'manual',note:'副歌的高音要換氣，key 先降 2。',due:'2026-11-20',lyrics:'遠い空の向こうに\n光る雲が流れてく\n（先貼了一小段，之後再補完整）'},
- {id:'s2',title:'夜間飛行',artist:'示範歌手',lang:'華語',stage:'sing',tags:['新練','抒情'],source:'catalog',note:'第二段節奏比較快，還在抓。',due:'2026-11-12',lyrics:'夜色靜靜落在窗邊\n我在心裡練習一遍\n再一遍'},
- {id:'s3',title:'海的盡頭',artist:'示範歌手',lang:'台語',stage:'ready',tags:['台語'],source:'manual',note:'差最後一段轉音，這週可以上架。',lyrics:'海風吹來熟悉的味\n......'},
- {id:'s4',title:'星光練習曲',artist:'示範歌手',lang:'華語',stage:'want',tags:[],source:'catalog'}]});
+const practiceZone=createPracticeZone({h,modal,field,select,area,toast,render:()=>render(),
+ getItems:()=>state.settings?.practiceZone||[],
+ save:items=>dispatch('settings',{practiceZone:items}),
+ publish:async it=>{
+  const keep=()=>(state.settings?.practiceZone||[]).filter(x=>x.id!==it.id);
+  if(it.source==='catalog'&&it.variantId){
+   await api({op:'catalogBatchAdd',variantIds:[it.variantId],lyricsMode:'shared',management:true});
+   await refresh(true);
+   const added=state.songs.find(x=>x.catalogVariantId===it.variantId);
+   if(added&&(it.tags?.length)){try{await dispatch('song',{songId:added.songId,title:added.title,artist:added.artist,cat:added.cat,artistType:added.artistType,version:added.version,murmur:added.murmur,lyrics:added.lyrics,creditCost:added.creditCost,shortMode:added.shortMode,pairSongIds:added.pairSongIds,hidden:!!added.hidden,tags:[...new Set([...(added.tags||[]),...it.tags])],new:true});}catch(err){toast('已上架，但標籤沒帶過去：'+err.message);}}
+  }else await dispatch('song',{title:it.title,artist:it.artist,cat:it.lang||'華語',tags:it.tags||[],lyrics:it.lyrics||'',murmur:'',new:true,hidden:false});
+  await dispatch('settings',{practiceZone:keep()});
+ },
+ getLangs:()=>{try{const l=visibleLanguages().map(x=>x.name).filter(Boolean);return l.length?l:['華語','台語','粵語','日語','韓語','英語','其他'];}catch{return ['華語','台語','其他'];}},getTags:()=>(state.settings?.tags||[]).filter(x=>x&&x!=='新練'),});
 function renderAdmin(){if(tab==='events')tab='queue';if(tab==='platform'){if(!document.getElementById('platform-management-styles')){const css=document.createElement('link');css.id='platform-management-styles';css.rel='stylesheet';css.href=new URL('./platform-management.css?v=10.29-SPACE.1',import.meta.url).href;document.head.append(css);}if(!isSuperAdmin()){tab='queue';}else{$('#app').innerHTML=button('返回主播管理','adminTab','queue')+platformDirectory.html();platformDirectory.bind($('#app'));const p=platformDirectory.state();if(!p.loaded&&!p.loading&&!p.error)void platformDirectory.load();return;}}if(tab==='dashboard')tab='queue';let body='';
  if(tab==='queue')body=`<div class="queue-heading"><h2>🎤 待播</h2><div class="queue-live-tools">${venueSwitch()||button('啟用電台','editVenue')}<div class="live-shortcuts">${[['空閒','空閒中','#79d5b0'],['忙碌','忙碌中','#f299ab'],['準備','準備中','#e9b975'],['暫停','暫停點歌','#c4a5ed']].map(([label,value,color])=>button('<span class="queue-status-dot" aria-hidden="true" style="background:'+color+'"></span>'+label,'status',value,state.settings.status===value?'tiny active':'tiny')).join('')}</div></div></div>${(()=>{const c=carryInfo();return c?'<p class="notice carry-pending-banner" role="status">⏳ 有 '+c.count+' 首歌已跨到這個小時、還沒確認是否過檔。'+(c.totalRemaining<=0?'確認前玩家暫時不能提歌。':'確認前會先保留這個小時的額度。')+'按「完成」時選擇是否過檔就會解除。</p>':'';})()}<div class="queue-toolbar">${button('＋ 加入待播歌曲','onBehalf','','tiny primary queue-add')}<div class="tabs">${button('待播','queueMode','active',!queueHistory?'active':'')}${button('歷史','queueMode','history',queueHistory?'active':'')}</div></div><details class="queue-bulk"><summary>批次操作</summary>${button('全選目前列表','selectQueue')}${button('取消選取','clearQueueSelection')}${button('連動所選歌曲','linkSelectedQueue','','tiny')}${button(queueHistory?'封存已選歷史':'取消已選歌曲','deleteSelectedQueue','','tiny danger')}</details>${queueRows(state.queue.filter(q=>queueHistory?!['pending','waiting'].includes(q.status):['pending','waiting'].includes(q.status)),true,true,queueHistory)}<footer class="queue-summary">${(()=>{const totals=currentAccounting();if(!totals)return blank('帳務摘要尚未確認');return `<div class="queue-totals">收到新歌 ${totals.received} 首 ｜ 存歌 ${totals.stored} 首 ｜ 已唱 ${totals.sung} 首</div>`;})()}<small>歌曲 ${state.songs.length} · 玩家 ${state.players.length} · 冠歌 ${state.crowns.length}</small></footer>`;
 
@@ -807,7 +816,7 @@ function applyHomeTheme(){const root=document.documentElement;if(state.settings.
 // spread down a long list nor get cut off on a short page.
 const themeDecorHomeKey=()=> 'papa-theme-decor-home-'+(state.currentStreamer?.id||streamerSlug);
 function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme;if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=theme&&!managementPage()?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html){app.insertAdjacentHTML('beforeend',html);const layer=app.querySelector(':scope>.theme-decor-layer:not(.theme-decor-screen)');if(layer){const home=!['admin','common-book','book','center','gallery'].includes(route);if(home){try{localStorage.setItem(themeDecorHomeKey(),String(app.offsetHeight));}catch{}}else{let homeHeight=0;try{homeHeight=Number(localStorage.getItem(themeDecorHomeKey()))||0;}catch{}if(homeHeight>0){layer.style.bottom='auto';layer.style.height=Math.min(app.offsetHeight,homeHeight)+'px';}}}}themeDecorMotion(document,html?theme:null,{host:app});}
-async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.33',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.33');}
+async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.34',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.34');}
 async function openThemeDesigner(){
  if(demo||draft)throw Error('首頁主題設計請在正式同步模式使用');if(!admin)throw Error('請先登入管理');
  const {openThemeStudio}=await loadThemeStudio();const room=state.currentStreamer,space=state.streamers.find(r=>r.id===room.id)?.spaceId||room.spaceId||'space-001';
