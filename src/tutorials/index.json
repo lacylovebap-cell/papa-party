@@ -431,7 +431,7 @@
    "不重複"
   ],
   "audience": "streamer",
-  "status": "draft",
+  "status": "published",
   "file": "S18.json"
  },
  {
@@ -448,7 +448,7 @@
    "通知"
   ],
   "audience": "streamer",
-  "status": "draft",
+  "status": "published",
   "file": "S19.json"
  },
  {
@@ -464,7 +464,7 @@
    "存歌"
   ],
   "audience": "streamer",
-  "status": "draft",
+  "status": "published",
   "file": "S20.json"
  },
  {
@@ -479,7 +479,7 @@
    "可以點"
   ],
   "audience": "player",
-  "status": "draft",
+  "status": "published",
   "file": "P13.json"
  },
  {
@@ -496,7 +496,7 @@
    "練唱中"
   ],
   "audience": "streamer",
-  "status": "draft",
+  "status": "published",
   "file": "S21.json"
  }
 ]

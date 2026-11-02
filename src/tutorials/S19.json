@@ -37,7 +37,7 @@
    "width": 684,
    "height": 1227,
    "alt": "許願池列表：狀態、已加入曲庫提示、處理與刪除",
-   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.34 · 2026-11-03"
+   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.35 · 2026-11-03"
   },
   {
    "id": "edit",
@@ -61,13 +61,13 @@
    "width": 684,
    "height": 1227,
    "alt": "處理許願視窗",
-   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.34 · 2026-11-03"
+   "caption": "示範資料畫面（非真實玩家）· 11.02-TUTORIAL.35 · 2026-11-03"
   }
  ],
- "status": "draft",
+ "status": "published",
  "file": "S19.json",
- "version": "11.02-TUTORIAL.34",
- "missing": "待總裁確認內容並用正式站畫面重拍截圖後上線",
- "reviewedAt": "",
- "reviewedBy": ""
+ "version": "11.02-TUTORIAL.35",
+ "missing": "",
+ "reviewedAt": "2026-11-03",
+ "reviewedBy": "總裁確認上線"
 }
