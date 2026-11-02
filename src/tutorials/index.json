@@ -417,5 +417,69 @@
   "audience": "streamer",
   "status": "published",
   "file": "S17.json"
+ },
+ {
+  "id": "S18",
+  "title": "連動存歌：現點歌接到同一份禮物",
+  "category": "存歌帳務",
+  "keywords": [
+   "連動",
+   "存歌",
+   "分配",
+   "歷史",
+   "待播",
+   "不重複"
+  ],
+  "audience": "streamer",
+  "status": "draft",
+  "file": "S18.json"
+ },
+ {
+  "id": "S19",
+  "title": "許願池：處理、刪除、學會加入曲庫",
+  "category": "許願池",
+  "keywords": [
+   "許願",
+   "許願池",
+   "處理",
+   "刪除",
+   "已學會",
+   "加入曲庫",
+   "通知"
+  ],
+  "audience": "streamer",
+  "status": "draft",
+  "file": "S19.json"
+ },
+ {
+  "id": "S20",
+  "title": "後台小提醒：紅色數字、剩餘首數、更多選單",
+  "category": "後台操作",
+  "keywords": [
+   "紅色數字",
+   "剩餘",
+   "更多",
+   "選單",
+   "提醒",
+   "存歌"
+  ],
+  "audience": "streamer",
+  "status": "draft",
+  "file": "S20.json"
+ },
+ {
+  "id": "P13",
+  "title": "許願學會了，會收到通知",
+  "category": "許願",
+  "keywords": [
+   "許願",
+   "通知",
+   "學會",
+   "歌本",
+   "可以點"
+  ],
+  "audience": "player",
+  "status": "draft",
+  "file": "P13.json"
  }
 ]
