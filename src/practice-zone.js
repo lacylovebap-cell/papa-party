@@ -44,14 +44,21 @@ const CSS=`
 .pz-lyr summary{cursor:pointer;font-size:12px;opacity:.8;list-style:none}
 .pz-lyr summary::-webkit-details-marker{display:none}
 .pz-lyr pre{white-space:pre-wrap;font:inherit;font-size:12.5px;line-height:1.7;margin:6px 0 0;padding:9px 11px;border-radius:9px;background:#0000002e;max-height:180px;overflow:auto}
-.pz-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
-.pz-actions button{min-height:34px;font-size:12.5px;padding:6px 11px}
-.pz-go{background:linear-gradient(135deg,#ff7eb6,#b36bff)!important;color:#fff!important;border-color:transparent!important;font-weight:700}
+.pz-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:11px}
+.pz-actions button{min-height:28px;font-size:12px;padding:3px 10px}
+.pz-spacer{flex:1}
+.pz-stagesel{display:inline-flex;align-items:center;gap:5px;margin:0;font-size:12px;opacity:.9}
+.pz-stagesel select{width:auto;margin:0;min-height:28px;padding:2px 24px 2px 8px;font-size:12px}
+.pz-chk{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
+.pz-chk label{display:inline-flex;align-items:center;gap:5px;margin:0;padding:5px 10px;border-radius:999px;border:1px solid var(--line,#fff2);font-size:12.5px;cursor:pointer}
+.pz-chk input{width:auto;margin:0}
+.pz-chk label:has(input:checked){background:color-mix(in srgb,var(--pz-accent) 30%,transparent);border-color:var(--pz-accent)}
+.pz-go{background:linear-gradient(135deg,#ff7eb6,#b36bff)!important;color:#fff!important;border-color:transparent!important;font-weight:600}
 .pz-empty{text-align:center;padding:28px 12px;opacity:.75;font-size:13.5px;line-height:1.8}
 .pz-empty b{display:block;font-size:30px;margin-bottom:4px}
 .pz-help{margin-top:12px;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.7;opacity:.8;border:1px dashed #ffffff26}
 `;
-export function createPracticeZone({h,modal,field,select,area,toast,render,seed=[]}){
+export function createPracticeZone({h,modal,field,select,area,toast,render,seed=[],getLangs=()=>LANGS,getTags=()=>[]}){
  let items=seed.map(x=>({...x})),filter='all',style=null;
  const stage=id=>STAGES.find(s=>s.id===id)||STAGES[0];
  const uid=()=>'pz'+Math.random().toString(36).slice(2,9);
@@ -62,23 +69,25 @@ export function createPracticeZone({h,modal,field,select,area,toast,render,seed=
   <div class="pz-progress"><div class="pz-track"><div class="pz-fill" style="width:${s.pct}%"></div><div class="pz-dots">${STAGES.map((_,i)=>`<i class="${i<=idx?'on':''}"></i>`).join('')}</div></div><span class="pz-pct">${s.pct}%</span></div>
   ${it.note?`<p class="pz-note">📝 ${h(it.note)}</p>`:''}${it.due?`<div class="pz-due">🎯 預計上架：${h(it.due)}</div>`:''}
   ${lyr?`<details class="pz-lyr"><summary>📜 歌詞（${lyr.split(/\\n/).filter(Boolean).length} 行）· 點開查看</summary><pre>${h(lyr)}</pre></details>`:'<div class="pz-due">📜 還沒填歌詞</div>'}
-  <div class="pz-actions">${idx<STAGES.length-1?`<button type="button" data-pz="next" data-id="${h(it.id)}">▶ 進到「${STAGES[idx+1].name}」</button>`:''}<button type="button" class="pz-go" data-pz="publish" data-id="${h(it.id)}">🎉 學會了，上架到歌本</button><button type="button" data-pz="edit" data-id="${h(it.id)}">編輯</button><button type="button" class="danger" data-pz="remove" data-id="${h(it.id)}">刪除</button></div></article>`;}
+  <div class="pz-actions"><label class="pz-stagesel">階段<select data-pz="stage" data-id="${h(it.id)}">${STAGES.map(x=>`<option value="${x.id}" ${x.id===it.stage?'selected':''}>${x.icon} ${x.name}</option>`).join('')}</select></label><span class="pz-spacer"></span><button type="button" class="pz-go" data-pz="publish" data-id="${h(it.id)}">🎉 上架到歌本</button><button type="button" data-pz="edit" data-id="${h(it.id)}">編輯</button><button type="button" class="danger" data-pz="remove" data-id="${h(it.id)}">刪除</button></div></article>`;}
  function html(){ensureStyle();const count=id=>items.filter(i=>id==='all'||i.stage===id).length,rows=items.filter(i=>filter==='all'||i.stage===filter);
   return `<div class="pz"><div class="pz-hero"><h2>🎓 待練區</h2><p>還在練、還沒要上架的歌，先把歌名、歌詞、標籤都填好放這裡。學會了按一下就進歌本，資料直接沿用。</p><span class="pz-lock">🔒 只有你看得到・不會出現在歌本、也不能被點</span></div>
   <div class="pz-bar"><button type="button" class="pz-primary" data-pz="add">＋ 新增待練歌</button><button type="button" data-pz="catalog">📚 從共同曲庫挑歌</button></div>
   <div class="pz-chips" role="tablist">${[{id:'all',icon:'🗂️',name:'全部'},...STAGES].map(s=>`<button type="button" class="pz-chip ${filter===s.id?'on':''}" data-pz="filter" data-id="${s.id}">${s.icon} ${s.name}<b>${count(s.id)}</b></button>`).join('')}</div>
   <div class="pz-list">${rows.map(card).join('')||`<div class="pz-empty"><b>🎶</b>這裡還沒有歌<br>想練的歌先丟進來，慢慢練到可以上架</div>`}</div>
   <div class="pz-help">階段說明：${STAGES.map(s=>`${s.icon}${s.name}（${s.hint}）`).join(' → ')}</div></div>`;}
- function form(it={}){return field('title','歌名',it.title||'','text','required maxlength="80"')+field('artist','歌手',it.artist||'','text','required maxlength="60"')+select('lang','語言',LANGS,it.lang||'華語')+select('stage','目前階段',STAGES.map(s=>[s.id,s.icon+' '+s.name]),it.stage||'want')+field('tags','標籤（用逗號分開）',(it.tags||[]).join('，'),'text','maxlength="120"')+field('due','預計上架日（可不填）',it.due||'','date')+area('lyrics','歌詞（可先貼，之後再補）',it.lyrics||'')+area('note','練習筆記（哪裡還不熟、key 要不要調…）',it.note||'');}
- const parse=f=>({title:String(f.get('title')||'').trim(),artist:String(f.get('artist')||'').trim(),lang:f.get('lang')||'華語',stage:f.get('stage')||'want',tags:String(f.get('tags')||'').split(/[,，、\s]+/).map(x=>x.trim()).filter(Boolean).slice(0,12),due:f.get('due')||'',lyrics:String(f.get('lyrics')||''),note:String(f.get('note')||'').trim()});
+ function form(it={}){const langs=[...new Set([...getLangs(),...(it.lang?[it.lang]:[])])],tags=[...new Set([...getTags(),...(it.tags||[])])];
+  return field('title','歌名',it.title||'','text','required maxlength="80"')+field('artist','歌手',it.artist||'','text','required maxlength="60"')+select('lang','語言（和歌本的語言一致）',langs,it.lang||langs[0]||'華語')+select('stage','目前階段',STAGES.map(s=>[s.id,s.icon+' '+s.name]),it.stage||'want')+`<div class="full"><span>標籤（和歌本的標籤一致）</span><div class="pz-chk">${tags.map(t=>`<label><input type="checkbox" name="tag" value="${h(t)}" ${(it.tags||[]).includes(t)?'checked':''}>#${h(t)}</label>`).join('')||'<small>歌本還沒有標籤，上架時再選。</small>'}</div></div>`+field('due','預計上架日（可不填）',it.due||'','date')+area('lyrics','歌詞（可先貼，之後再補）',it.lyrics||'')+area('note','備註／練習筆記（哪裡還不熟、key 要不要調…）',it.note||'');}
+ const parse=f=>({title:String(f.get('title')||'').trim(),artist:String(f.get('artist')||'').trim(),lang:f.get('lang')||'華語',stage:f.get('stage')||'want',tags:f.getAll('tag').slice(0,20),due:f.get('due')||'',lyrics:String(f.get('lyrics')||''),note:String(f.get('note')||'').trim()});
  function click(e){const b=e.target.closest?.('[data-pz]');if(!b)return;const act=b.dataset.pz,id=b.dataset.id,it=items.find(x=>x.id===id);
   if(act==='filter'){filter=id;render();}
   else if(act==='add')modal('＋ 新增待練歌',form(),async f=>{const v=parse(f);if(!v.title||!v.artist)throw Error('請填歌名與歌手');items.unshift({id:uid(),source:'manual',...v});toast('已放進待練區');render();});
   else if(act==='edit'&&it)modal('編輯待練歌',form(it),async f=>{Object.assign(it,parse(f));toast('已儲存');render();});
-  else if(act==='next'&&it){const i=STAGES.findIndex(s=>s.id===it.stage);if(i<STAGES.length-1){it.stage=STAGES[i+1].id;toast('進到「'+stage(it.stage).name+'」');render();}}
   else if(act==='publish'&&it){if(confirm('「'+it.title+'」學會了？上架後玩家就能在歌本看到、也能點這首。'))toast('（示範）已上架到歌本，歌名、歌詞、標籤都沿用');}
   else if(act==='remove'&&it){if(confirm('從待練區刪除「'+it.title+'」？'))items=items.filter(x=>x!==it);render();}
   else if(act==='catalog')toast('（示範）會跳到「共同曲庫」，每首歌旁多一顆「加入待練」');}
- if(typeof document!=='undefined')document.addEventListener('click',click);
- return {html,items:()=>items};
+ function change(e){const b=e.target.closest?.('select[data-pz=stage]');if(!b)return;const it=items.find(x=>x.id===b.dataset.id);if(it){it.stage=b.value;toast('階段：'+stage(it.stage).name);render();}}
+ function addFromCatalog(row){if(items.some(i=>i.variantId&&i.variantId===row.variantId)){toast('這首已經在待練區');return;}items.unshift({id:uid(),source:'catalog',stage:'want',tags:[],...row});toast('已加入待練區（想學）');}
+ if(typeof document!=='undefined'){document.addEventListener('click',click);document.addEventListener('change',change);}
+ return {html,items:()=>items,addFromCatalog};
 }
