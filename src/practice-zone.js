@@ -16,10 +16,10 @@ const CSS=`
 .pz-bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
 .pz-bar button{flex:1 1 auto;min-height:40px}
 .pz-primary{background:linear-gradient(135deg,var(--pz-accent),color-mix(in srgb,var(--pz-accent) 55%,#000))!important;color:#fff!important;border-color:transparent!important;font-weight:700}
-.pz-chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0 10px;scrollbar-width:none}
+.pz-chips{display:flex;gap:4px;overflow-x:auto;padding:8px 0 10px;scrollbar-width:none}
 .pz-chips::-webkit-scrollbar{display:none}
-.pz-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;font-size:12.5px;border:1px solid var(--line,#fff2);background:#ffffff08;white-space:nowrap}
-.pz-chip b{font-size:11px;min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:9px;background:#ffffff18;font-weight:600}
+.pz-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border-radius:999px;font-size:11.5px;border:1px solid var(--line,#fff2);background:#ffffff08;white-space:nowrap}
+.pz-chip b{font-size:10px;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:9px;background:#ffffff18;font-weight:600}
 .pz-chip.on{background:color-mix(in srgb,var(--pz-accent) 32%,transparent);border-color:var(--pz-accent)}
 .pz-list{display:grid;gap:10px}
 .pz-card{position:relative;padding:13px 13px 12px 16px;border-radius:14px;border:1px solid var(--line,#fff2);background:linear-gradient(180deg,#ffffff0b,#ffffff04);overflow:hidden}
@@ -74,7 +74,7 @@ export function createPracticeZone({h,modal,field,select,area,toast,render,getIt
  function html(){ensureStyle();const count=id=>items().filter(i=>id==='all'||i.stage===id).length,rows=items().filter(i=>filter==='all'||i.stage===filter);
   return `<div class="pz"><div class="pz-hero"><h2>🎓 待練區</h2><p>還在練、還沒要上架的歌，先把歌名、歌詞、標籤都填好放這裡。學會了按一下就進歌本，資料直接沿用。</p><span class="pz-lock">🔒 只有你看得到・不會出現在歌本、也不能被點</span></div>
   <div class="pz-bar"><button type="button" class="pz-primary" data-pz="add">＋ 新增待練歌</button><button type="button" data-pz="catalog">📚 從共同曲庫挑歌</button></div>
-  <div class="pz-chips" role="tablist">${[{id:'all',icon:'🗂️',name:'全部'},...STAGES].map(s=>`<button type="button" class="pz-chip ${filter===s.id?'on':''}" data-pz="filter" data-id="${s.id}">${s.icon} ${s.name}<b>${count(s.id)}</b></button>`).join('')}</div>
+  <div class="pz-chips" role="tablist">${[{id:'all',icon:'🗂️',name:'全部'},...STAGES].map(s=>`<button type="button" class="pz-chip ${filter===s.id?'on':''}" data-pz="filter" data-id="${s.id}">${s.name}<b>${count(s.id)}</b></button>`).join('')}</div>
   <div class="pz-list">${rows.map(card).join('')||`<div class="pz-empty"><b>🎶</b>這裡還沒有歌<br>想練的歌先丟進來，慢慢練到可以上架</div>`}</div>
   <div class="pz-help">階段說明：${STAGES.map(s=>`${s.icon}${s.name}（${s.hint}）`).join(' → ')}</div></div>`;}
  function form(it={}){const langs=[...new Set([...getLangs(),...(it.lang?[it.lang]:[])])],tags=[...new Set([...getTags(),...(it.tags||[])])];
