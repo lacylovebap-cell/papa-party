@@ -498,5 +498,22 @@
   "audience": "streamer",
   "status": "published",
   "file": "S21.json"
+ },
+ {
+  "id": "S22",
+  "title": "共同曲庫「版本關係」：編輯、查看主播與更多",
+  "category": "歌本管理",
+  "keywords": [
+   "共同曲庫",
+   "版本關係",
+   "編輯",
+   "查看主播",
+   "更多",
+   "批量加入歌本",
+   "加入待練"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S22.json"
  }
 ]

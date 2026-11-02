@@ -15,13 +15,15 @@ const CSS=`
 .pz-bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
 .pz-bar button{flex:1 1 auto;min-height:40px}
 .pz-primary{background:linear-gradient(135deg,var(--pz-accent),color-mix(in srgb,var(--pz-accent) 55%,#000))!important;color:#fff!important;border-color:transparent!important;font-weight:700}
-.pz-chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0 10px;scrollbar-width:none}
+.pz-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px 0 10px}
 .pz-chips::-webkit-scrollbar{display:none}
-.pz-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;font-size:12.5px;border:1px solid var(--line,#fff2);background:#ffffff08;white-space:nowrap}
+.pz-chip{min-width:0;justify-content:center;display:inline-flex;align-items:center;gap:3px;padding:6px 3px;border-radius:999px;font-size:clamp(10.5px,3vw,12.5px);border:1px solid var(--home-line,var(--line,#fff2));background:#ffffff08;white-space:nowrap}
 .pz-chip b{font-size:11px;min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:9px;background:#ffffff18;font-weight:600}
+.pz-chip b{flex:none}
+@media(max-width:430px){.pz-chip .pz-ic{display:none}.pz-chip{gap:4px}}
 .pz-chip.on{background:color-mix(in srgb,var(--pz-accent) 32%,transparent);border-color:var(--pz-accent)}
 .pz-list{display:grid;gap:10px}
-.pz-card{position:relative;padding:13px 13px 12px 16px;border-radius:14px;border:1px solid var(--line,#fff2);background:linear-gradient(180deg,#ffffff0b,#ffffff04);overflow:hidden}
+.pz-card{position:relative;padding:13px 13px 12px 16px;border-radius:14px;border:1px solid var(--home-line,var(--line,#fff2));background:linear-gradient(180deg,#ffffff0b,#ffffff04);overflow:hidden}
 .pz-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
 .pz-top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
 .pz-title{font-size:16px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
@@ -49,7 +51,7 @@ const CSS=`
 .pz-stagesel{display:inline-flex;align-items:center;gap:5px;margin:0;font-size:12px;opacity:.9}
 .pz-stagesel select{width:auto;margin:0;min-height:28px;padding:2px 24px 2px 8px;font-size:12px}
 .pz-chk{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
-.pz-chk label{display:inline-flex;align-items:center;gap:5px;margin:0;padding:5px 10px;border-radius:999px;border:1px solid var(--line,#fff2);font-size:12.5px;cursor:pointer}
+.pz-chk label{display:inline-flex;align-items:center;gap:5px;margin:0;padding:5px 10px;border-radius:999px;border:1px solid var(--home-line,var(--line,#fff2));font-size:12.5px;cursor:pointer}
 .pz-chk input{width:auto;margin:0}
 .pz-chk label:has(input:checked){background:color-mix(in srgb,var(--pz-accent) 30%,transparent);border-color:var(--pz-accent)}
 .pz-go{background:linear-gradient(135deg,#ff7eb6,#b36bff)!important;color:#fff!important;border-color:transparent!important;font-weight:600}
@@ -73,7 +75,7 @@ export function createPracticeZone({h,modal,field,select,area,toast,render,getIt
  function html(){ensureStyle();const count=id=>items().filter(i=>id==='all'||i.stage===id).length,rows=items().filter(i=>filter==='all'||i.stage===filter);
   return `<div class="pz"><div class="pz-hero"><h2>🎓 待練區</h2><p>還在練、還沒要上架的歌，先把歌名、歌詞、標籤都填好放這裡。學會了按一下就進歌本，資料直接沿用。</p><span class="pz-lock">🔒 只有你看得到・不會出現在歌本、也不能被點</span></div>
   <div class="pz-bar"><button type="button" class="pz-primary" data-pz="add">＋ 新增待練歌</button><button type="button" data-pz="catalog">📚 從共同曲庫挑歌</button></div>
-  <div class="pz-chips" role="tablist">${[{id:'all',icon:'🗂️',name:'全部'},...STAGES].map(s=>`<button type="button" class="pz-chip ${filter===s.id?'on':''}" data-pz="filter" data-id="${s.id}">${s.icon} ${s.name}<b>${count(s.id)}</b></button>`).join('')}</div>
+  <div class="pz-chips" role="tablist">${[{id:'all',icon:'🗂️',name:'全部'},...STAGES].map(s=>`<button type="button" class="pz-chip ${filter===s.id?'on':''}" data-pz="filter" data-id="${s.id}"><span class="pz-ic">${s.icon}</span>${s.name}<b>${count(s.id)}</b></button>`).join('')}</div>
   <div class="pz-list">${rows.map(card).join('')||`<div class="pz-empty"><b>🎶</b>這裡還沒有歌<br>想練的歌先丟進來，慢慢練到可以上架</div>`}</div>
   <div class="pz-help">階段說明：${STAGES.map(s=>`${s.icon}${s.name}（${s.hint}）`).join(' → ')}</div></div>`;}
  function form(it={}){const langs=[...new Set([...getLangs(),...(it.lang?[it.lang]:[])])],tags=[...new Set([...getTags(),...(it.tags||[])])];
