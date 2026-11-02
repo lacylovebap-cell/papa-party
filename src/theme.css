@@ -390,3 +390,5 @@ html #app .queue-row .queue-more[open]>.queue-more-content>small,html #app .queu
 html #app .song-more[open]{flex:1 0 100%!important;width:100%!important;align-self:stretch!important;max-width:100%}
 html #app .song-more[open]>.actions{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:flex-end!important;align-items:center!important;gap:6px!important;width:100%!important;max-height:84px;overflow-y:auto;box-sizing:border-box;padding-top:6px}
 html #app .song-more[open]>.actions>*{margin:0!important;flex:none;max-width:100%}
+html #app .selectable-song:has(.song-more[open]){flex-wrap:wrap!important}
+html #app .selectable-song:has(.song-more[open]) .song-primary-actions{max-width:100%!important;flex:1 0 100%!important;width:100%!important;justify-content:flex-end!important}
