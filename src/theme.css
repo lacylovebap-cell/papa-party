@@ -393,3 +393,6 @@ html #app .song-more[open]>.actions>*{margin:0!important;flex:none;max-width:100
 html #app .selectable-song:has(.song-more[open]){flex-wrap:wrap!important}
 html #app .selectable-song:has(.song-more[open]) .song-primary-actions{max-width:100%!important;flex:1 0 100%!important;width:100%!important;justify-content:flex-end!important}
 html #app .selectable-song .song-more[open]>.actions{max-width:100%!important;flex:1 0 100%!important}
+/* 通知點開後標示的卡片：跟隨各主播主題色 (11.02-TUTORIAL.23) */
+html #app .notification-target,html .notification-target{outline:2px solid var(--home-accent,#cba4ea)!important;outline-offset:-2px;background:color-mix(in srgb,var(--home-accent,#cba4ea) 16%,var(--home-panel,#1b1528))!important;border-radius:10px}
+html #app .notice-target-banner{border-color:var(--home-accent,#cba4ea)!important;background:color-mix(in srgb,var(--home-accent,#cba4ea) 14%,var(--home-panel,#1b1528))!important;color:var(--home-text,inherit)}
