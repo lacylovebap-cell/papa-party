@@ -528,7 +528,12 @@ export function mutate(source,action,actor,t=stamp()){
     q.allocation_id=group;q.allocation_model='reservation-v1';q.source_transaction_id=receipt.id;q.allocation_storage_pool=storage_pool;q.receivedCreditCost=queueCost(q);q.openingBalance=!!receipt.openingBalance;
     if(x.completed){q.awaitingPreparation=false;next=mutateBase(next,{streamer:room.currentStreamer.id,type:'queue',data:{id:q.id,operation:'complete',effective_at:at}},actor,t);}
    }
-   if(linkIds.length)linkRowsToReceipt(next,receipt,linkIds,t,at,group);
+   if(linkIds.length){
+    const doneIds=linkIds.filter(id=>next.queue.find(q=>q.id===id)?.status==='completed'),openIds=linkIds.filter(id=>!doneIds.includes(id));
+    // 已完成的歌要補扣存歌，帳要記在這位主播名下，所以走一般的 queue 連動。
+    if(doneIds.length)next=mutateBase(next,{streamer:room.currentStreamer.id,type:'queue',data:{id:doneIds[0],operation:'link',receiptId:receipt.id,ids:doneIds}},actor,t);
+    if(openIds.length)linkRowsToReceipt(next,next.ledger.find(l=>l.id===receipt.id),openIds,t,at,group);
+   }
 
   }else{
    requireThat(['queue','ledger','crowns','cards','wishes'].includes(p.table),'不支援此紀錄');

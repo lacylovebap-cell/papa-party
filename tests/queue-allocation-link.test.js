@@ -71,3 +71,13 @@ test('queue op link: partial link leaves the rest as stored songs; cannot exceed
  s=run(s,'request',{songId:songs[3],kind:'live',giftConfirmed:true},{role:'player',playerId:pid},later);const fourth=room(s).queue.at(-1).id;
  assert.throws(()=>run(s,'queue',{id:fourth,operation:'link',receiptId:ledgerId,ids:[fourth]}),/超過這筆存歌/);
 });
+
+test('after linking 1 via link op, allocate on the same receipt can link the other 2 completed songs',()=>{
+ const {s:s0,pid,ledgerId,queued}=setup();
+ let s=s0;
+ for(const id of queued){s=run(s,'queue',{id,operation:'approve',preparationMinutes:0});s=run(s,'queue',{id,operation:'complete'});}
+ s=run(s,'queue',{id:queued[2],operation:'link',receiptId:ledgerId,ids:[queued[2]]});
+ assert.equal(bal(s,pid),2);
+ s=run(s,'allocate',{playerId:pid,ledgerId,total:3,stored:1,effective_at:later,items:[],existingQueueIds:queued.slice(0,2)});
+ assert.equal(bal(s,pid),0);
+});
