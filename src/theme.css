@@ -395,3 +395,7 @@ html #app .selectable-song .song-more[open]>.actions>*{margin:0!important;flex:n
 /* 通知點開後標示的卡片：跟隨各主播主題色 (11.02-TUTORIAL.23) */
 html #app .notification-target,html .notification-target{outline:2px solid var(--home-accent,#cba4ea)!important;outline-offset:-2px;background:color-mix(in srgb,var(--home-accent,#cba4ea) 16%,var(--home-panel,#1b1528))!important;border-radius:10px}
 html #app .notice-target-banner{border-color:var(--home-accent,#cba4ea)!important;background:color-mix(in srgb,var(--home-accent,#cba4ea) 14%,var(--home-panel,#1b1528))!important;color:var(--home-text,inherit)}
+
+/* 紀錄右下角的小字：這筆之後剩餘存歌 */
+.bal-tag{position:absolute;right:10px;bottom:3px;font-size:10px;line-height:1;opacity:.5;font-weight:400;letter-spacing:.02em;pointer-events:none;white-space:nowrap}
+.song:has(>.bal-tag),article:has(>.bal-tag){position:relative;padding-bottom:16px}
