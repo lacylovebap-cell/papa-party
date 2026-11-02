@@ -44,7 +44,30 @@ test('attached songs: completing spends 1 each once; cancelling gives 1 back; to
 test('rejects mismatched totals, unknown ids, and songs already allocated',()=>{
  const {s:s0,pid,ledgerId,queued}=setup();
  assert.throws(()=>link(s0,pid,ledgerId,queued.slice(0,2)),/必須等於|可用存歌|分配/);
- assert.throws(()=>link(s0,pid,ledgerId,['nope','x','y']),/不能掛上/);
+ assert.throws(()=>link(s0,pid,ledgerId,['nope','x','y']),/不能連動/);
  const s=link(s0,pid,ledgerId,queued);
- assert.throws(()=>run(s,'allocate',{playerId:pid,total:1,stored:0,effective_at:later,items:[],existingQueueIds:[queued[0]]}),/不能掛上/);
+ assert.throws(()=>run(s,'allocate',{playerId:pid,total:1,stored:0,effective_at:later,items:[],existingQueueIds:[queued[0]]}),/不能連動/);
+});
+
+test('queue op link: completed 現點 songs are paid by the receipt once (the 不不 case)',()=>{
+ const {s:s0,pid,ledgerId,queued}=setup();
+ let s=s0;
+ for(const id of queued){s=run(s,'queue',{id,operation:'approve',preparationMinutes:0});s=run(s,'queue',{id,operation:'complete'});}
+ assert.equal(bal(s,pid),3,'before: gift counted twice (3 stored + 3 live sung)');
+ s=run(s,'queue',{id:queued[0],operation:'link',receiptId:ledgerId,ids:queued});
+ assert.equal(bal(s,pid),0,'after: stored 3 are used by the 3 songs');
+ for(const id of queued){const q=room(s).queue.find(x=>x.id===id);assert.equal(q.kind,'saved');assert.equal(q.linked_receipt_id,ledgerId);}
+ assert.throws(()=>run(s,'queue',{id:queued[0],operation:'link',receiptId:ledgerId,ids:[queued[0]]}),/不符或已連動/);
+});
+
+test('queue op link: partial link leaves the rest as stored songs; cannot exceed the receipt',()=>{
+ const {s:s0,pid,ledgerId,queued,songs}=setup();
+ let s=s0;
+ const id=queued[0];s=run(s,'queue',{id,operation:'approve',preparationMinutes:0});s=run(s,'queue',{id,operation:'complete'});
+ s=run(s,'queue',{id,operation:'link',receiptId:ledgerId,ids:[id]});
+ assert.equal(bal(s,pid),2);
+ s=run(s,'queue',{id:queued[1],operation:'link',receiptId:ledgerId,ids:queued.slice(1)});
+ assert.equal(room(s).queue.find(q=>q.id===queued[2]).status,'waiting');
+ s=run(s,'request',{songId:songs[3],kind:'live',giftConfirmed:true},{role:'player',playerId:pid},later);const fourth=room(s).queue.at(-1).id;
+ assert.throws(()=>run(s,'queue',{id:fourth,operation:'link',receiptId:ledgerId,ids:[fourth]}),/超過這筆存歌/);
 });
