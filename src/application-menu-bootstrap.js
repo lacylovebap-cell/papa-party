@@ -1,4 +1,4 @@
-import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.21';
+import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.22';
 import {readPublicRouteContext} from './public-links.js';
 import {streamerAdminDestination} from './streamer-admin-route.js';
 

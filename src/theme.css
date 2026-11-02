@@ -392,3 +392,4 @@ html #app .song-more[open]>.actions{display:flex!important;flex-direction:row!im
 html #app .song-more[open]>.actions>*{margin:0!important;flex:none;max-width:100%}
 html #app .selectable-song:has(.song-more[open]){flex-wrap:wrap!important}
 html #app .selectable-song:has(.song-more[open]) .song-primary-actions{max-width:100%!important;flex:1 0 100%!important;width:100%!important;justify-content:flex-end!important}
+html #app .selectable-song .song-more[open]>.actions{max-width:100%!important;flex:1 0 100%!important}
