@@ -105,3 +105,6 @@ document.addEventListener('pointerdown',e=>{for(const d of document.querySelecto
 // 手機：更多選單貼齊該列卡片寬度（控制區本身有位移，CSS 無法直接對齊）
 document.addEventListener('toggle',e=>{const d=e.target;if(!d.matches?.('details.queue-more'))return;const c=d.querySelector('.queue-more-content');if(!c)return;if(!d.open||innerWidth>650){['left','width','right'].forEach(k=>c.style.removeProperty(k));return;}
  const row=d.closest('.queue-row'),host=c.offsetParent;if(!row||!host)return;const rr=row.getBoundingClientRect(),hr=host.getBoundingClientRect();c.style.setProperty('left',(rr.left-hr.left)+'px','important');c.style.setProperty('right','auto','important');c.style.setProperty('width',rr.width+'px','important');},true);
+
+// 後台「更多」：點其他地方就收起
+document.addEventListener('pointerdown',e=>{const t=e.target;for(const d of document.querySelectorAll('details.admin-more-tabs[open]'))if(!d.contains(t))d.removeAttribute('open');},true);
