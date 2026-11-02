@@ -407,10 +407,11 @@ html #app .notice-target-banner{border-color:var(--home-accent,#cba4ea)!importan
 .admin-section-tabs .notice-count{display:inline-block;margin-left:1px;padding:0 3px;font-size:9px;line-height:13px;min-width:13px;height:13px;vertical-align:top;border-radius:7px}
 /* 版本關係：編輯／查看主播並排在右側，「更多」在兩顆正下方置中（三角形），展開是一排的浮動條 */
 .catalog-family .catalog-variant-row{grid-template-columns:22px minmax(0,1fr) auto!important;position:relative}
-.catalog-variant-row>.rel-side{grid-column:3;grid-row:1;display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:4px}
-.catalog-variant-row>.rel-side button{padding:2px 7px!important;font-size:10.5px!important;min-height:24px!important;line-height:1.2;white-space:nowrap}
+.catalog-variant-row>.rel-col{grid-column:3;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.rel-col>.rel-side{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:4px}
+.rel-col>.rel-side button{padding:2px 7px!important;font-size:10.5px!important;min-height:24px!important;line-height:1.2;white-space:nowrap}
 .catalog-family .catalog-variant-row{row-gap:0!important}
-.catalog-variant-row>.rel-more{grid-column:3;grid-row:2;justify-self:center;position:static;margin-top:3px}
+.rel-col>.rel-more{position:static}
 .rel-more>summary{list-style:none;cursor:pointer;padding:2px 14px;min-height:22px;display:inline-flex;align-items:center;font-size:10.5px;border-radius:999px;border:1px solid var(--line,#ffffff30);background:#ffffff0d}
 .rel-more>summary::-webkit-details-marker{display:none}
 .rel-more[open]>summary{background:#ffffff22}
