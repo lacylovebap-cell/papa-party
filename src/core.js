@@ -492,9 +492,12 @@ export function mutate(source,action,actor,t=stamp()){
    const total=creditNumber(p.total),stored=creditNumber(p.stored||0,true),rows=Array.isArray(p.items)?p.items:[];
    requireThat(rows.length<=50,'一次最多分配 50 首');const player=requirePlayer(room,p.playerId);requireThat(!rows.length||!player.archived,'玩家已封存，請先恢復玩家再新增點歌');
    const at=validTime(p.effective_at||t,t),venue=venuePolicyRequestVenue(room,{venue:p.venue,allowOverride:true}),original=p.ledgerId?room.ledger.find(l=>l.id===p.ledgerId):null,storage_pool=original?venuePolicyLedgerPool(original):venue;requireThat(venue==='radio'||storage_pool==='shengma','聲瑪不能分配電台存歌'); if(p.ledgerId){requireThat(original&&original.playerId===p.playerId&&original.amount===total&&!original.queueId&&!original.conversion&&!original.accounting_adjustment,'請選此玩家可分配的存歌紀錄');requireThat(venuePolicyAvailableCredits(room,p.playerId,storage_pool)>=total-stored,'存歌已有使用或保留，無法重新分配');}const quotes=rows.map(x=>quoteSong(room,x.songId,x,p.playerId,at));
-   requireThat(stored+quotes.reduce((n,q)=>n+q.creditCost,0)===total,'現點首數加存歌首數必須等於收到總首數');
+   const linkIds=[...new Set(Array.isArray(p.existingQueueIds)?p.existingQueueIds:[])];requireThat(linkIds.length<=50,'一次最多掛上 50 首');
+   const linkRows=linkIds.map(id=>room.queue.find(q=>q.id===id));requireThat(linkRows.every(q=>q&&q.playerId===p.playerId&&q.kind==='live'&&['pending','waiting'].includes(q.status)&&!q.allocation_id&&!q.source_transaction_id&&!q.selfProvided&&!q.voided_at),'所選待播歌已異動或不符，不能掛上');
+   const linkCost=linkRows.reduce((n,q)=>n+queueCost(q),0);
+   requireThat(stored+linkCost+quotes.reduce((n,q)=>n+q.creditCost,0)===total,'現點首數加存歌首數必須等於收到總首數');
    requireThat(!original?.voided_at&&!original?.allocation_id,'舊分配來源請先核對，不能重複分配');
-   const cost=quotes.reduce((n,q)=>n+q.creditCost,0),used=original?room.queue.filter(q=>q.source_transaction_id===original.id&&['pending','waiting','completed'].includes(q.status)).reduce((n,q)=>n+queueCost(q),0):0;
+   const cost=linkCost+quotes.reduce((n,q)=>n+q.creditCost,0),used=original?room.queue.filter(q=>q.source_transaction_id===original.id&&['pending','waiting','completed'].includes(q.status)).reduce((n,q)=>n+queueCost(q),0):0;
    requireThat(used+cost<=total,'此收歌交易可分配額度不足');
    requireThat(!original||venuePolicyAvailableCredits(room,p.playerId,storage_pool)>=cost,'可用存歌不足');
    next=structuredClone(before);const group=uid();
@@ -507,6 +510,9 @@ export function mutate(source,action,actor,t=stamp()){
     q.allocation_id=group;q.allocation_model='reservation-v1';q.source_transaction_id=receipt.id;q.allocation_storage_pool=storage_pool;q.receivedCreditCost=queueCost(q);q.openingBalance=!!receipt.openingBalance;
     if(x.completed){q.awaitingPreparation=false;next=mutateBase(next,{streamer:room.currentStreamer.id,type:'queue',data:{id:q.id,operation:'complete',effective_at:at}},actor,t);}
    }
+   for(const id of linkIds){const q=next.queue.find(x=>x.id===id);
+    q.status='waiting';q.giftConfirmed=true;q.awaitingAcknowledgment=false;q.awaitingPreparation=q.awaitingPreparation??true;if(!q.acceptedAt)q.acceptedAt=at;
+    q.allocation_id=group;q.allocation_model='reservation-v1';q.source_transaction_id=receipt.id;q.allocation_storage_pool=storage_pool;q.receivedCreditCost=queueCost(q);q.openingBalance=!!receipt.openingBalance;q.linked_existing_at=t;}
 
   }else{
    requireThat(['queue','ledger','crowns','cards','wishes'].includes(p.table),'不支援此紀錄');
