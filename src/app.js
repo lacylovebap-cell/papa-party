@@ -43,7 +43,7 @@ import {createSongFavorites} from './song-favorites.js?v=10.20-WEB.1';
 import {createOwnQueue,ownQueueCancelJobs} from './player-own-queue.js?v=10.20-WEB.1';
 import {listenedSongs} from './listening-history.js?v=10.20-WEB.1';
 import {API,PUBLISHABLE_KEY} from './config.js?v=10.20-WEB.1';
-import {createWebDeviceLogin} from './web-device-login.js?v=10.20-WEB.1';
+import {createWebDeviceLogin} from './web-device-login.js?v=11.03-LOGIN.1';
 import {roomStorageKey} from './communication-context.js?v=10.20-WEB.1';
 import {createWebSpaceEntry} from './web-space-entry.js?v=10.20-WEB.1&pwa=1';
 import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} from './space-entry.js?v=10.20-WEB.1&pwa=1';

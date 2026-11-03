@@ -54,7 +54,10 @@ export function createDeviceSessions({transport,store,lock,installationId,platfo
  return {
   async remember(role,token,scope={}){
    const key=validRole(role);return lock(key,async()=>{
-    if(await store.get(key))throw Error('請先登出目前裝置身分');
+    // A fresh password login replaces a stale credential left in this slot
+    // (expired session, interrupted logout). Revoke it on the server, then go on.
+    const stale=await store.get(key);
+    if(stale){await revoke(stale);access.delete(key);await store.remove(key);}
     const start=await transport({op:'deviceStart',token,installationId,platform,appVersion,streamer:scope.streamer});
     const serverRole=start.role==='president'?'super_admin':start.role;
     if(serverRole!==role||typeof start.sessionId!=='string'||!start.sessionId||typeof start.refreshToken!=='string'||!start.refreshToken.startsWith('refresh:')){await revoke({...start,role:serverRole});throw Error('裝置登入身分不一致，請重新登入');}

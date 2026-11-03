@@ -1,4 +1,4 @@
-import {createDeviceSessions} from './device-session.js?v=10.19-WEB.1';
+import {createDeviceSessions} from './device-session.js?v=11.03-LOGIN.1';
 import {createWebCredentialStore} from './web-credential-store.js?v=10.19-WEB.1';
 
 // Keeps the existing login UI and demo mode. Unsupported browsers retain the
