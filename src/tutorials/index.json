@@ -526,7 +526,10 @@
    "月統計",
    "收到新歌",
    "已唱",
-   "開台天數"
+   "開台天數",
+   "匯出",
+   "Excel",
+   "封存"
   ],
   "audience": "streamer",
   "status": "published",

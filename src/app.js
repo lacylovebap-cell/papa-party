@@ -1,11 +1,11 @@
 import {createPracticeZone} from './practice-zone.js?v=11.02-PZ.5';
-import {createMonthStats} from './month-stats.js?v=11.03-MS.2';
-import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.45';
-import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.45';
+import {createMonthStats} from './month-stats.js?v=11.03-MS.3';
+import {createTutorialCenter} from './tutorial-center.js?v=11.02-TUTORIAL.46';
+import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.46';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
 
-import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.45';
+import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.46';
 import {createPlatformManagement} from './platform-management.js?v=10.29-SPACE.1';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
@@ -21,7 +21,7 @@ import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
 import {canonicalNoticeLink} from './notification-rules.js?v=10.31-PUSH.3';
 import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.31-CALL.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.45';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.02-TUTORIAL.46';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
 import {createBoard} from './board.js?v=10.20-WEB.1';
 import {createChat} from './chat.js?v=10.31-PUSH.2';
@@ -775,7 +775,7 @@ function renderPlatformManagement(){
 async function openPlatformManagement(){if(!admin&&!session)throw Error('請先登入');const capabilities=await managementEntry.load({force:true});if(!capabilities?.president)throw Error(managementEntry.state().error||'平台管理中心僅供總裁帳號使用');if(isSuperAdmin()){route='admin';tab='platform';}else{route='center';subtab='platform';}syncPageLocation(true);render();}
 
 // 操作歷史 was withdrawn on 2026-10-28 (user request); a remembered tab falls back to 待播.
-const monthStats=createMonthStats({scope:()=>String(syncReadIdentity()),today:()=>accountingDay(clock(),accountingRollover(state)),onChange:()=>{if(route==='admin'&&admin&&tab==='stats')render();},fetchMonth:async(m,force)=>{if(demo||draft&&isAdmin()){const days=[],[y,mo]=m.split('-').map(Number),last=new Date(Date.UTC(y,mo,0)).getUTCDate(),today=accountingDay(clock(),accountingRollover(state));for(let d=1;d<=last;d++){const day=m+'-'+String(d).padStart(2,'0');if(day>today)break;const v=stats(state,day+'T'+String(accountingRollover(state)).padStart(2,'0')+':00:00+08:00');days.push({day,received:v.received,sung:v.sung});}return {days};}return (await api({op:'accountingMonth',month:m,refresh:!!force,management:true})).month;}});
+const monthStats=createMonthStats({title:()=>state.currentStreamer?.display_name||hostName(),scope:()=>String(syncReadIdentity()),today:()=>accountingDay(clock(),accountingRollover(state)),onChange:()=>{if(route==='admin'&&admin&&tab==='stats')render();},fetchMonth:async(m,force)=>{if(demo||draft&&isAdmin()){const days=[],[y,mo]=m.split('-').map(Number),last=new Date(Date.UTC(y,mo,0)).getUTCDate(),today=accountingDay(clock(),accountingRollover(state));for(let d=1;d<=last;d++){const day=m+'-'+String(d).padStart(2,'0');if(day>today)break;const v=stats(state,day+'T'+String(accountingRollover(state)).padStart(2,'0')+':00:00+08:00');days.push({day,received:v.received,sung:v.sung});}return {days};}return (await api({op:'accountingMonth',month:m,refresh:!!force,management:true})).month;}});
 const practiceZone=createPracticeZone({h,modal,field,select,area,toast,render:()=>render(),
  getItems:()=>state.settings?.practiceZone||[],
  save:items=>dispatch('settings',{practiceZone:items}),
@@ -818,7 +818,7 @@ function applyHomeTheme(){const root=document.documentElement;if(state.settings.
 // spread down a long list nor get cut off on a short page.
 const themeDecorHomeKey=()=> 'papa-theme-decor-home-'+(state.currentStreamer?.id||streamerSlug);
 function syncThemeDecor(){const app=$('#app'),theme=state.settings.theme;if(!app)return;app.querySelectorAll(':scope>.theme-decor-layer').forEach(el=>el.remove());const html=theme&&!managementPage()?themeDecorHtml(theme,{escape:h}):'';app.classList.toggle('theme-home-host',!!html);if(html){app.insertAdjacentHTML('beforeend',html);const layer=app.querySelector(':scope>.theme-decor-layer:not(.theme-decor-screen)');if(layer){const home=!['admin','common-book','book','center','gallery'].includes(route);if(home){try{localStorage.setItem(themeDecorHomeKey(),String(app.offsetHeight));}catch{}}else{let homeHeight=0;try{homeHeight=Number(localStorage.getItem(themeDecorHomeKey()))||0;}catch{}if(homeHeight>0){layer.style.bottom='auto';layer.style.height=Math.min(app.offsetHeight,homeHeight)+'px';}}}}themeDecorMotion(document,html?theme:null,{host:app});}
-async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.45',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.45');}
+async function loadThemeStudio(){if(!document.querySelector('link[data-theme-studio-css]')){const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./theme-studio.css?v=11.02-TUTORIAL.46',import.meta.url).href;link.dataset.themeStudioCss='';document.head.append(link);}return import('./theme-studio.js?v=11.02-TUTORIAL.46');}
 async function openThemeDesigner(){
  if(demo||draft)throw Error('首頁主題設計請在正式同步模式使用');if(!admin)throw Error('請先登入管理');
  const {openThemeStudio}=await loadThemeStudio();const room=state.currentStreamer,space=state.streamers.find(r=>r.id===room.id)?.spaceId||room.spaceId||'space-001';

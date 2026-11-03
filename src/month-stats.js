@@ -22,10 +22,10 @@ const CSS=`.ms{--ms-a:var(--home-accent,#9a74d1);margin-bottom:14px;padding:14px
 .ms-tag{font-size:10px;padding:1px 6px;border-radius:999px;background:var(--ms-a);color:#fff;margin-left:2px}
 .ms-mark{grid-column:3/-1;font-size:11px;margin-top:-2px}
 .ms-state{padding:22px 8px;text-align:center;opacity:.85;font-size:13px}
-.ms-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 0 0;font-size:11px;opacity:.75}
-.ms-foot button{min-height:26px;padding:1px 10px;font-size:11px}
+.ms-foot{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin:8px 0 0;font-size:11px}.ms-foot>span:first-child{opacity:.75}
+.ms-btns{display:flex;gap:8px;flex-wrap:nowrap;justify-content:center}.ms-btns button{flex:1 1 0;white-space:nowrap}.ms-foot button{min-height:26px;padding:1px 10px;font-size:11px}
 @media(max-width:360px){.ms-row{grid-template-columns:40px 18px minmax(0,1fr) auto}.ms-card b{font-size:21px}.ms-n{align-items:center}.ms-n em{min-width:30px}}`;
-export function createMonthStats({fetchMonth,today,onChange,scope=()=>''}){
+export function createMonthStats({fetchMonth,today,onChange,scope=()=>'',title=()=>'PA Party'}){
  const cache=new Map(),key=m=>scope()+'|'+m;let month='',loading=false,error='';
  const dayOf=()=>today();
  const curMonth=()=>dayOf().slice(0,7);
@@ -53,12 +53,19 @@ export function createMonthStats({fetchMonth,today,onChange,scope=()=>''}){
    if(!d.received&&!d.sung)return `<div class="ms-row off ${isToday?'today':''}">${head}<span class="ms-off">${isToday?'🌱 今天還沒有紀錄':'😴 休息'}</span></div>`;
    return `<div class="ms-row ${isToday?'today':''}">${head}<div class="ms-bars"><div class="ms-bar r" style="width:${Math.max(3,d.received/mx*100).toFixed(0)}%"></div><div class="ms-bar s" style="width:${Math.max(3,d.sung/mx*100).toFixed(0)}%"></div></div><span class="ms-n">${tag}${star}<em>🎁 ${d.received}</em><em>🎤 ${d.sung}</em></span></div>`;};
   const list=days.length?`<div class="ms-list">${days.map(row).join('')}</div>`:'<div class="ms-state">這個月還沒有資料 🌱</div>';
-  return `<section class="ms">${nav}<div class="ms-cards"><div class="ms-card"><span class="e">🎁</span><b>${rec}</b><small>收到新歌</small></div><div class="ms-card"><span class="e">🎤</span><b>${sung}</b><small>已唱</small></div><div class="ms-card"><span class="e">🌙</span><b>${on}</b><small>開台天數</small></div></div>${bestLine}<div class="ms-key"><span><i style="background:var(--ms-a)"></i>收到新歌</span><span><i style="background:#ffb454"></i>已唱</span></div>${loading?'<div class="ms-state">更新中…</div>':''}${list}<div class="ms-foot"><span>依換場時間計算，不含測試資料</span><button type="button" data-ms="refresh">重新計算</button></div></section>`;
+  return `<section class="ms">${nav}<div class="ms-cards"><div class="ms-card"><span class="e">🎁</span><b>${rec}</b><small>收到新歌</small></div><div class="ms-card"><span class="e">🎤</span><b>${sung}</b><small>已唱</small></div><div class="ms-card"><span class="e">🌙</span><b>${on}</b><small>開台天數</small></div></div>${bestLine}<div class="ms-key"><span><i style="background:var(--ms-a)"></i>收到新歌</span><span><i style="background:#ffb454"></i>已唱</span></div>${loading?'<div class="ms-state">更新中…</div>':''}${list}<div class="ms-foot"><span>依換場時間計算，不含測試資料</span><span class="ms-btns"><button type="button" data-ms="export" ${loading?'disabled':''}>📥 匯出 Excel</button><button type="button" data-ms="refresh">重新計算</button></span></div></section>`;
  }
  document.addEventListener('click',e=>{const b=e.target.closest?.('[data-ms]');if(!b)return;const a=b.dataset.ms;
   if(a==='prev'){month=shift(month||curMonth(),-1);error='';load(month);onChange();}
   else if(a==='next'&&month<curMonth()){month=shift(month,1);error='';load(month);onChange();}
   else if(a==='retry'){error='';load(month||curMonth(),true);}
-  else if(a==='refresh')load(month||curMonth(),true);});
+  else if(a==='refresh')load(month||curMonth(),true);
+  else if(a==='export')exportXlsx();});
+ async function exportXlsx(){const entry=cache.get(key(month));if(!entry||loading)return;
+  try{const {makeXlsx,downloadBlob}=await import('./xlsx-lite.js?v=11.03-XLSX.1'),days=entry.days.slice().sort((a,b)=>a.day<b.day?-1:1),[y,mo]=month.split('-'),name=title(),
+   rec=days.reduce((n,d)=>n+d.received,0),sung=days.reduce((n,d)=>n+d.sung,0),on=days.filter(d=>d.received||d.sung).length,H=v=>({v,head:true});
+   const rows=[[{v:`${name} ${y} 年 ${Number(mo)} 月統計`,bold:true}],[`依換場時間計算，不含測試資料；匯出時間 ${new Date().toLocaleString('zh-TW',{hour12:false})}`],[],[H('日期'),H('星期'),H('收到新歌'),H('已唱')],
+    ...days.map(d=>[d.day,'星期'+WD[new Date(d.day+'T00:00:00Z').getUTCDay()],d.received,d.sung]),[{v:'合計',bold:true},'',{v:rec,bold:true},{v:sung,bold:true}],[{v:'開台天數',bold:true},'',{v:on,bold:true}]];
+   downloadBlob(makeXlsx({name:`${y}-${mo}`,widths:[14,10,12,10],rows}),`${String(name).replace(/[\\/:*?"<>|]/g,'')}-統計-${y}-${mo}.xlsx`);}catch(e){error='匯出失敗：'+(e?.message||e);onChange();}}
  return {html,ensure,reset(){cache.clear();error='';}};
 }
