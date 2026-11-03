@@ -35,7 +35,7 @@ export function createMonthStats({fetchMonth,today,onChange,scope=()=>''}){
  async function load(m,force=false){
   if(loading)return;const hit=cache.get(key(m));if(!force&&fresh(m,hit))return;
   loading=true;error='';onChange();
-  try{const r=await fetchMonth(m,force);cache.set(key(m),{days:r.days||[],at:Date.now()});}catch(e){error=e?.message||'讀取失敗';}
+  try{let f=force,r,n=0;do{n++;r=await fetchMonth(m,f);f=false;cache.set(key(m),{days:r.days||[],at:r.complete===false?0:Date.now()});if(r.complete===false)onChange();}while(r.complete===false&&n<12);}catch(e){error=e?.message||'讀取失敗';}
   loading=false;onChange();
  }
  function ensure(){if(!month)month=curMonth();if(!loading&&!error&&!fresh(month,cache.get(key(month))))load(month);}

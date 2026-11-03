@@ -14,7 +14,7 @@
  "audience": "streamer",
  "status": "published",
  "file": "S22.json",
- "version": "11.02-TUTORIAL.44",
+ "version": "11.02-TUTORIAL.45",
  "missing": "",
  "reviewedAt": "2026-11-03",
  "reviewedBy": "總裁確認上線",
@@ -47,7 +47,7 @@
    "width": 684,
    "height": 1227,
    "alt": "版本關係每一列的按鈕",
-   "caption": "示範資料畫面（非真實歌曲）· 11.02-TUTORIAL.44 · 2026-11-03"
+   "caption": "示範資料畫面（非真實歌曲）· 11.02-TUTORIAL.45 · 2026-11-03"
   },
   {
    "id": "more",
@@ -84,7 +84,7 @@
    "width": 684,
    "height": 1227,
    "alt": "更多展開成一排按鈕",
-   "caption": "示範資料畫面（非真實歌曲）· 11.02-TUTORIAL.44 · 2026-11-03"
+   "caption": "示範資料畫面（非真實歌曲）· 11.02-TUTORIAL.45 · 2026-11-03"
   },
   {
    "id": "streamer",
@@ -108,7 +108,7 @@
    "width": 684,
    "height": 1227,
    "alt": "主播版本列與更多",
-   "caption": "示範資料畫面（非真實歌曲）· 11.02-TUTORIAL.44 · 2026-11-03"
+   "caption": "示範資料畫面（非真實歌曲）· 11.02-TUTORIAL.45 · 2026-11-03"
   }
  ]
 }
