@@ -515,5 +515,21 @@
   "audience": "streamer",
   "status": "published",
   "file": "S22.json"
+ },
+ {
+  "id": "S23",
+  "title": "每月統計：每天收到幾首、唱幾首",
+  "category": "帳務與統計",
+  "keywords": [
+   "統計",
+   "每月",
+   "月統計",
+   "收到新歌",
+   "已唱",
+   "開台天數"
+  ],
+  "audience": "streamer",
+  "status": "published",
+  "file": "S23.json"
  }
 ]
