@@ -171,3 +171,4 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
 .catalog-compact-toolbar .catalog-language-selection-row>.catalog-selection-row{flex:0 1 auto;gap:4px}
 .catalog-language-selection-row .catalog-selection-row button{font-size:11px!important;padding:6px!important}
 .catalog-language-selection-row .catalog-selection-row small{font-size:10px}
+#modal-form > #dialog-error { flex: 0 0 auto; margin: 0; padding: 8px 14px; }

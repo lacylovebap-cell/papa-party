@@ -1043,7 +1043,7 @@ case 'ownReplaceChoose':await chooseOwnReplacement(id);break;
 case 'recordTime':recordTime(b.dataset.table,id);break;
  case 'queueLyrics':await queueLyrics(id);break;case 'editQueue':editQueue(id);break;case 'allocate':{const f=b.dataset.newLedger?new FormData($('#modal-form')):null;allocateDialog(id,f?Object.fromEntries(f):{});break;}
 case 'allocationRow':addAllocationRow();break;
-case 'removeAllocationRow':b.closest('.allocation-row').remove();break;
+case 'removeAllocationRow':b.closest('.allocation-row').remove();updateAllocationRemaining();break;
 
 case 'move':await dispatch('queue',{id,operation:'move',direction:Number(b.dataset.step)});break;
 case 'stage':prepareQueue(id,'stage');break;
@@ -1281,10 +1281,42 @@ function linkQueueDialog(ids){const rows=ids.map(id=>state.queue.find(q=>q.id===
  modal('連動存歌：'+playerName(pid),'<p>把這幾首現點歌接到下面選的一筆存歌，那份禮物就只算一次：待播的會用存歌保留，已完成的會補扣存歌。連動的首數不能超過這筆存歌剩下的首數，沒連動的首數仍是存歌。</p><h4>① 選一筆存歌（最近 2 小時）</h4>'+recentSplit(receipts,(l)=>'<label class="check" style="display:flex;align-items:center;justify-content:flex-start;gap:8px;text-align:left;width:100%"><input style="flex:none;width:auto;margin:0" type="radio" name="receiptId" value="'+h(l.id)+'" data-remaining="'+receiptRemaining(l)+'" '+''+'> '+h(String(l.at).slice(0,16).replace('T',' '))+' · +'+creditText(l.amount)+' 首（剩 '+creditText(receiptRemaining(l))+' 首）'+(l.note?' · '+h(l.note):'')+'</label>','receipts')+'<h4>② 勾選要連動的歌曲（最近 2 小時）</h4>'+recentSplit(pool,q=>'<label class="check"><input type="checkbox" name="linkQueueId" value="'+h(q.id)+'" data-cost="'+Number(q.creditCost??1)+'" '+(ids.includes(q.id)?'checked':'')+'> '+h(q.title)+'（'+creditText(Number(q.creditCost??1))+' 首 · '+stateText(q)+'）</label>','songs',ids)+'<p id="link-sum" class="muted"></p>',async(f,form)=>{const receiptId=form.querySelector('[name=receiptId]:checked')?.value,picked=[...form.querySelectorAll('[name=linkQueueId]:checked')].map(x=>x.value);if(!receiptId||!picked.length)throw Error('請選一筆存歌並勾選歌曲');await dispatch('queue',{id:picked[0],operation:'link',receiptId,ids:picked});selectedQueue.clear();toast('已連動');});
  const sum=()=>{const left=Number($('#dialog [name=receiptId]:checked')?.dataset.remaining||0),used=[...document.querySelectorAll('#dialog [name=linkQueueId]:checked')].reduce((n,x)=>n+Number(x.dataset.cost),0),box=$('#link-sum'),submit=$('#dialog button[type=submit]');if(box)box.textContent='已選 '+creditText(used)+' 首／這筆存歌剩 '+creditText(left)+' 首'+(used>left?'（超過了，請取消幾首）':used<left?'；剩下 '+creditText(left-used)+' 首仍是存歌':'');if(submit)submit.disabled=used>left||!used;};
  $('#dialog').addEventListener('change',sum);setTimeout(()=>{if(!$('#dialog [name=receiptId]:checked')){const r=$('#dialog [name=receiptId]');if(r)r.checked=true;}sum();},0);}
-function allocateDialog(id,initial={}){const old=state.ledger.find(l=>l.id===id);modal('收到歌單：分配現點／存歌',venueSelector('venue',old?venuePolicyLedgerPool(old):initial.storage_pool||venuePolicySettings(state.settings).current_space)+select('playerId','玩家',playerOptions(old?.playerId),old?.playerId||initial.playerId||'')+field('total','收到總首數',old?.amount||Number(initial.amount)||3,'number','min="0.5" step="0.5" required '+(old?'readonly':''))+field('stored','保留存歌首數',old?.amount||Number(initial.amount)||2,'number','min="0" step="0.5" required')+field('effective_at','實際收到時間',dateInput(old?.at||initial.at||clock()),'datetime-local','required')+area('note','備註',old?.note||initial.note||'')+check('openingBalance','歷史／初始存歌（不計當日收到）',old?.openingBalance||old?.note==='初始存歌')+'<p class="muted">原始收歌總數會完整保留。下方待唱保留額度，完成演唱才扣除；未唱取消只釋放保留，不另外增加存歌。保留存歌首數＋歌曲用額必須等於收到總首數。</p><div id="allocation-rows"></div>'+button('＋加入現點歌曲','allocationRow')+'<div id="allocation-existing" class="notice" hidden></div>',async(f,form)=>{const existingQueueIds=[...form.querySelectorAll('[name=existingQueueId]:checked')].map(x=>x.value).filter(Boolean);const items=[...form.querySelectorAll('.allocation-row')].map(row=>({songId:row.querySelector('[name=songId]').value,pairSongId:row.querySelector('[name=pairSongId]')?.value||'',completed:row.querySelector('[name=completed]').checked,selfProvided:row.querySelector('[name=selfProvided]').checked}));await dispatch('allocate',{...formData(f),ledgerId:old?.id,items,existingQueueIds,effective_at:isoInput(f.get('effective_at')),openingBalance:f.has('openingBalance')});});setTimeout(()=>{if(typeof allocationExistingRefresh==='function')allocationExistingRefresh();},0);}
+function allocateDialog(id,initial={}){const old=state.ledger.find(l=>l.id===id);modal('收到歌單：分配現點／存歌',venueSelector('venue',old?venuePolicyLedgerPool(old):initial.storage_pool||venuePolicySettings(state.settings).current_space)+select('playerId','玩家',playerOptions(old?.playerId),old?.playerId||initial.playerId||'')+field('total','收到總首數',old?.amount||Number(initial.amount)||3,'number','min="0.5" step="0.5" required '+(old?'readonly':''))+field('stored','保留存歌首數',old?.amount||Number(initial.amount)||2,'number','min="0" step="0.5" readonly')+field('effective_at','實際收到時間',dateInput(old?.at||initial.at||clock()),'datetime-local','required')+area('note','備註',old?.note||initial.note||'')+check('openingBalance','歷史／初始存歌（不計當日收到）',old?.openingBalance||old?.note==='初始存歌')+'<p class="muted">原始收歌總數會完整保留。下方待唱保留額度，完成演唱才扣除；未唱取消只釋放保留，不另外增加存歌。保留存歌首數＋歌曲用額必須等於收到總首數。</p><div id="allocation-rows"></div>'+button('＋加入現點歌曲','allocationRow')+'<div id="allocation-existing" class="notice" hidden></div>',async(f,form)=>{
+ const allocation=readAllocation(form);
+ await dispatch('allocate',{...formData(f),...allocation,ledgerId:old?.id,effective_at:isoInput(f.get('effective_at')),openingBalance:f.has('openingBalance')});
+ });const form=$('#modal-form');
+ const error=form.querySelector('#dialog-error');
+ form.querySelector('.dialog-actions').before(error);
+ setTimeout(()=>{if($('#modal-form')===form){allocationExistingRefresh();updateAllocationRemaining();}},0);}
+function readAllocation(form){
+ const existing=[...form.querySelectorAll('[name=existingQueueId]:checked')];
+ const items=[...form.querySelectorAll('.allocation-row')].map(row=>({
+  songId:row.querySelector('[name=songId]').value,
+  pairSongId:row.querySelector('[name=pairSongId]')?.value||'',
+  completed:row.querySelector('[name=completed]').checked,
+  selfProvided:row.querySelector('[name=selfProvided]').checked,
+  query:row.querySelector('[data-entity-query]')?.value?.trim()
+ })).filter(item=>item.songId||item.completed||item.selfProvided||item.query).map(({query,...item})=>item);
+ if(items.some(item=>!item.songId))throw Error('請替已勾選的列選擇歌曲，或移除該列');
+ const playerId=form.elements.playerId.value;
+ const at=isoInput(form.elements.effective_at.value);
+ const used=existing.reduce((sum,input)=>sum+Number(input.dataset.cost),0)
+  +items.reduce((sum,item)=>sum+quoteSong(state,item.songId,item,playerId,at).creditCost,0);
+ const stored=Number(form.elements.total.value)-used;
+ if(stored<0)throw Error('選取歌曲使用 '+used+' 首，超過收到的總首數');
+ return {items,existingQueueIds:existing.map(input=>input.value),stored};
+}
+function updateAllocationRemaining(){
+ const form=$('#modal-form');
+ if(!form?.querySelector('#allocation-rows'))return;
+ try{form.elements.stored.value=readAllocation(form).stored;}catch{form.elements.stored.value='';}
+}
 function allocationExistingRefresh(){const box=$('#allocation-existing'),pid=$('#dialog [name=playerId]')?.value;if(!box)return;const rows=state.queue.filter(q=>q.playerId===pid&&queueLinkable(q));box.hidden=!rows.length;box.innerHTML=rows.length?'<b>連動現有歌曲（最近 2 小時；更早的按「更多」）</b><p class="muted">勾選後，這幾首會算在這次收到的總首數裡，用存歌支付，同一份禮物只算一次。總首數＝保留存歌＋新增現點＋連動的歌。</p>'+recentSplit(rows,q=>'<label class="check"><input type="checkbox" name="existingQueueId" value="'+h(q.id)+'" data-cost="'+Number(q.creditCost??1)+'"> '+h(q.title)+'（'+creditText(Number(q.creditCost??1))+' 首 · '+(q.status==='completed'?'已完成':'待播')+'）</label>','alloc'):'';}
-document.addEventListener('change',e=>{if(e.target.matches?.('#dialog [name=playerId]'))allocationExistingRefresh();if(e.target.matches?.('#dialog [name=existingQueueId]')){const used=[...document.querySelectorAll('#dialog [name=existingQueueId]:checked')].reduce((n,x)=>n+Number(x.dataset.cost||1),0),total=Number($('#dialog [name=total]')?.value||0),stored=$('#dialog [name=stored]');if(stored)stored.value=Math.max(0,total-used);}});
-function addAllocationRow(){const div=document.createElement('div');div.className='allocation-row notice';div.innerHTML=select('songId','現點歌曲',state.songs.map(s=>[s.songId,(s.hidden?'◉ 隱藏 · ':'')+s.title+'－'+s.artist]),'')+'<div class="allocation-cost"></div>'+check('selfProvided','自帶／不計熱門與常聽')+check('completed','此首已完成演唱')+button('移除此列','removeAllocationRow');$('#allocation-rows').append(div);let previous='';const update=()=>{const id=div.querySelector('[name=songId]').value,s=song(id),holder=div.querySelector('.allocation-cost');if(id!==previous){previous=id;holder.innerHTML=s?shortSongOptions(s)+'<p class="allocation-cost-summary"></p>':'';}if(!s)return;const summary=holder.querySelector('.allocation-cost-summary');try{const q=quoteSong(state,id,{pairSongId:holder.querySelector('[name=pairSongId]')?.value||''},$('#dialog [name=playerId]')?.value,clock());summary.textContent='使用 '+q.creditCost+' 首額度';}catch(error){summary.textContent=error.message;}};div.addEventListener('click',()=>setTimeout(update,0));div.addEventListener('change',update);}
+document.addEventListener('change',e=>{
+ if(e.target.matches?.('#dialog [name=playerId]'))allocationExistingRefresh();
+ if(e.target.closest?.('#modal-form'))updateAllocationRemaining();
+});
+function addAllocationRow(){const div=document.createElement('div');div.className='allocation-row notice';div.innerHTML=select('songId','現點歌曲（選填）',state.songs.map(s=>[s.songId,(s.hidden?'◉ 隱藏 · ':'')+s.title+'－'+s.artist]),'')+'<div class="allocation-cost"></div>'+check('selfProvided','自帶／不計熱門與常聽')+check('completed','此首已完成演唱')+button('移除此列','removeAllocationRow');$('#allocation-rows').append(div);let previous='';const update=()=>{const id=div.querySelector('[name=songId]').value,s=song(id),holder=div.querySelector('.allocation-cost');if(id!==previous){previous=id;holder.innerHTML=s?shortSongOptions(s)+'<p class="allocation-cost-summary"></p>':'';}if(!s)return;const summary=holder.querySelector('.allocation-cost-summary');try{const q=quoteSong(state,id,{pairSongId:holder.querySelector('[name=pairSongId]')?.value||''},$('#dialog [name=playerId]')?.value,clock());summary.textContent='使用 '+q.creditCost+' 首額度';}catch(error){summary.textContent=error.message;}};div.addEventListener('click',()=>setTimeout(()=>{update();updateAllocationRemaining();},0));div.addEventListener('change',update);}
 
 
 notifications.refresh().catch(()=>{});
