@@ -174,12 +174,20 @@ test('selected review keeps Honey 2+1 / 2+2 isolated, private data intact and ly
  const other=verifyRows.find(row=>row.songId==='verify-other');
  const live=verifyRows.find(row=>row.songId==='verify-live');
  assert.equal(exact.defaultTarget,root.variantId);
- assert.equal(other.defaultTarget,null);
- assert.equal(live.defaultTarget,null);
+ assert.equal(other.defaultTarget,undefined);
+ assert.equal(live.defaultTarget,undefined);
  await assert.rejects(batch([exact,other],'link_variant',root.variantId,{automatic:true}),/STALE/);
  await batch([exact],'link_variant',root.variantId,{automatic:true});
  await assert.rejects(batch([exact],'link_variant',root.variantId,{automatic:true}),/STALE/);
  assert.equal((await q("select variant_id from papa_catalog_song_links where song_id='verify-exact'"))[0].variant_id,root.variantId);
+ await q("update papa_v2_entities set data=data || $1::jsonb where id='verify-exact'",[{artist:"變更後歌手"}]);
+ const editedPage=await rpc('papa_catalog_review_page_matches',['duplicates','罕見唯一驗收曲','',20,0,null]);
+ const changed=editedPage.rows.flatMap(group=>group.rows).find(row=>row.songId==='verify-exact');
+ assert.equal(changed.previousVariant.variantId,root.variantId);
+ assert.equal(changed.previousVariant.artist,'驗收歌手');
+ assert.equal(changed.artist,'變更後歌手');
+ assert.equal(changed.defaultTarget,undefined);
+
  const byId=Object.fromEntries([[other.id,{versionLabel:'翻唱版'}],[live.id,{versionLabel:'現場版'}]]);
  await batch([other,live],'different_versions',null,{familyId:root.familyId,variantMetadata:byId});
  const links=await q("select l.variant_id,v.family_id from papa_catalog_song_links l join papa_catalog_variants v on v.id=l.variant_id where l.song_id in ('verify-other','verify-live')");

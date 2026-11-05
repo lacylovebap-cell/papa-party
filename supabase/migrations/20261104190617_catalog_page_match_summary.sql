@@ -28,15 +28,17 @@ create function public.papa_catalog_review_page_matches(
  ), decorated as (
   select entry.ordinality, entry.value || case
    when section='duplicates' and chosen_group is null then
-    jsonb_build_object('matches',summary.matches,'rows',
-     (select jsonb_agg(source.value || jsonb_build_object(
+    jsonb_build_object('matches',(select coalesce(jsonb_agg(m.value || jsonb_build_object('versionKind',v.version_kind) order by m.ordinality),'[]'::jsonb) from jsonb_array_elements(summary.matches) with ordinality m join papa_catalog_variants v on v.id=(m.value->>'variantId')::uuid),'rows',
+     (select jsonb_agg(source.value || jsonb_strip_nulls(jsonb_build_object(
        'defaultTarget',case when jsonb_array_length(summary.matches)=1
          and papa_catalog_normalize(source.value->>'title')=papa_catalog_normalize(entry.value->'rows'->0->>'title')
         then papa_catalog_page_exact_target((source.value->>'id')::uuid,summary.matches) end,
-       'previousVariant', (select jsonb_build_object('variantId',v.id,'title',v.title,'artist',v.artist,'versionLabel',v.version_label)
+       'previousVariant', (select jsonb_build_object('variantId',v.id,'title',v.title,'artist',v.artist,'versionLabel',v.version_label,'versionKind',v.version_kind,'language',coalesce(lang.name,v.language_text),'performerType',coalesce(pt.name,v.performer_type_text))
          from papa_catalog_song_links l join papa_catalog_variants v on v.id=l.variant_id
+         left join papa_catalog_languages lang on lang.id=v.language_id
+         left join papa_catalog_performer_types pt on pt.id=v.performer_type_id
          where l.streamer_id=source.value->>'streamerId' and l.song_id=source.value->>'songId')
-     ) order by source.ordinality) from jsonb_array_elements(entry.value->'rows') with ordinality source))
+     )) order by source.ordinality) from jsonb_array_elements(entry.value->'rows') with ordinality source))
    else '{}'::jsonb end as item
   from page cross join lateral jsonb_array_elements(page.result->'rows') with ordinality as entry
   cross join lateral (

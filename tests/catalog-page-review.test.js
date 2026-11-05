@@ -19,3 +19,12 @@ test('preview writes only confirmed page rows and retries only the unfinished ba
  assert.equal(calls.at(-1).decision,'different_versions');
  assert.equal(reloads,1);
 });
+
+test('linked candidate shows only fields that differ from the original variant',()=>{
+ const body=source.slice(source.indexOf('function catalogPreviousVariantHtml('),source.indexOf('function catalogPageRowActions('));
+ const render=vm.runInNewContext(body+'\ncatalogPreviousVariantHtml',{h:String});
+ assert.equal(render({artist:'新歌手'}),'');
+ const html=render({title:'同一首',artist:'新歌手',language:'華語',previousVariant:{title:'同一首',artist:'舊歌手',language:'華語'}});
+ assert.match(html,/歌手 舊歌手 → 新歌手/);
+ assert.doesNotMatch(html,/<li>歌名|<li>語言/);
+});

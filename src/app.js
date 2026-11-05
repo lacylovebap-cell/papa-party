@@ -1336,17 +1336,26 @@ function catalogPageChoice(row){
  const choice=catalogPageChoices.get(row.id);
  return (typeof choice==='object'?'manual':choice) || (row.defaultTarget?'default':'review');
 }
+function catalogPreviousVariantHtml(row){
+ const original=row.previousVariant;
+ if(!original)return '';
+ const fields=[['title','歌名'],['artist','歌手'],['versionLabel','版本'],['language','語言'],['performerType','演唱類型']];
+ const differences=fields.filter(([key])=>(original[key]||'')!==(row[key]||''));
+ const summary=[original.title,original.artist,original.versionLabel||original.versionKind].filter(Boolean).join(' · ');
+ return '<small>已關聯資料變更 · 原關聯 '+h(summary)+'</small>'
+  +(differences.length?'<ul>'+differences.map(([key,label])=>'<li>'+h(label+' '+(original[key]||'未填')+' → '+(row[key]||'未填'))+'</li>').join('')+'</ul>':'');
+}
 function catalogPageRowActions(row){
  const choice=catalogPageChoice(row);
  const labels={default:'預設通過',manual:'人工調整：已暫存',independent:'人工調整：獨立新增',review:'需要人工確認',later:'暫緩'};
- return (row.previousVariant?'<small>已關聯資料變更 · 原關聯 '+h([row.previousVariant.title,row.previousVariant.artist,row.previousVariant.versionLabel].filter(Boolean).join(' · '))+'</small>':'')+'<small>'+h(labels[choice])+'</small>'
+ return catalogPreviousVariantHtml(row)+'<small>'+h(labels[choice])+'</small>'
   +button('獨立新增','catalogPageChoice',row.id,'tiny','data-choice="independent"')
   +button('稍後處理','catalogPageChoice',row.id,'tiny','data-choice="later"')
   +(choice==='later'||choice==='independent'||choice==='manual'?button('恢復建議','catalogPageChoice',row.id,'tiny','data-choice=""'):'');
 }
 function catalogGroupMatches(group){
  const matches=group.matches||[];
- const line=row=>'<li>'+h([row.title,row.artist,row.versionLabel||'原版'].join(' · '))+' · '+('相似候選（'+Math.round(Number(row.score)*100)+'%）')+'</li>';
+ const line=row=>'<li>'+h([row.title,row.artist,row.versionLabel||row.versionKind||'版本未標示'].join(' · '))+' · '+('相似候選（'+Math.round(Number(row.score)*100)+'%）')+'</li>';
  return '<div class="notice"><b>既有共同歌曲</b>'
   +(matches.length?'<ul>'+matches.slice(0,3).map(line).join('')+'</ul>':'<p>目前沒有比對候選。</p>')
   +(matches.length===3&&group.rows?.[0]?button('查看其他比對候選','catalogVersionSource',group.rows[0].id,'tiny'):'')+'</div>';
