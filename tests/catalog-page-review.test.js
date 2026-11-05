@@ -4,9 +4,9 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 test('preview writes only confirmed page rows and retries only the unfinished batch',async()=>{
- const items=Array.from({length:55},(_,i)=>({id:String(i),title:'Song '+i,sourceHash:'hash',updatedAt:'version',defaultTarget:i<52?'variant-a':null}));
+ const items=Array.from({length:56},(_,i)=>({id:String(i),title:'Song '+i,sourceHash:'hash',updatedAt:'version',defaultTarget:i<52?'variant-a':null}));
  const calls=[];let submit,reloads=0,failed=false;
- const catalogView={items,loaded:true,section:'duplicates',page:1,selected:new Set(['offpage']),selectedRows:new Map(),selectedSources:new Map(),selectedVariants:new Map()};
+ const catalogView={items,loaded:true,section:'duplicates',page:1,selected:new Set(['offpage',...items.slice(0,55).map(row=>row.id)]),selectedRows:new Map(),selectedSources:new Map(),selectedVariants:new Map()};
  const ctx=vm.createContext({catalogView,admin:{},state:{currentStreamer:{id:'room'}},tab:'catalog',demo:false,draft:false,isSuperAdmin:()=>true,h:String,modal:(_title,_body,fn)=>{submit=fn;},$:()=>({}),invalidateCatalogTabs(){},loadCatalogReview:async()=>{reloads++;},toast(){},api:async request=>{calls.push(request);if(request.candidateIds[0]==='50'&&!failed){failed=true;throw Error('failed');}}});
  vm.runInContext(source.slice(source.indexOf('const catalogPageChoices='),source.indexOf('function catalogReviewHtml()'))+"\ncatalogPageChoices.set('51','independent');catalogPageChoices.set('52','later'); const plan={decision:'different_versions',ids:['53','54'],payload:{variantMetadata:{53:{versionLabel:'原版'},54:{versionLabel:'現場版'}}},versions:{53:'version',54:'version'}}; catalogPageChoices.set('53',plan);catalogPageChoices.set('54',plan);previewCatalogPage();",ctx);
  assert.equal(calls.length,0);

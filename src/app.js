@@ -1332,6 +1332,7 @@ function chooseDifferentVersion(id){
 const catalogPageChoices=new Map(),catalogPageCompleted=new Set();
 let catalogPageBusy=false,catalogReviewTimer;
 function catalogPageRows(){return catalogView.items.filter(row=>!catalogPageCompleted.has(row.id));}
+function catalogCheckedPageRows(){return catalogPageRows().filter(row=>catalogView.selected.has(row.id));}
 function catalogPageChoice(row){
  const choice=catalogPageChoices.get(row.id);
  return (typeof choice==='object'?'manual':choice) || (row.defaultTarget?'default':'review');
@@ -1397,16 +1398,17 @@ function catalogGroupMatches(group){
 }
 function previewCatalogPage(){
  if(!isSuperAdmin()||catalogView.section!=='duplicates'||catalogPageBusy||catalogView.loading||!catalogView.loaded)return;
- const rows=catalogPageRows().map(row=>({id:row.id,title:row.title,sourceHash:row.sourceHash,updatedAt:row.updatedAt,target:row.defaultTarget,manual:catalogPageChoices.get(row.id),choice:catalogPageChoice(row)}));
+ const rows=catalogCheckedPageRows().map(row=>({id:row.id,title:row.title,sourceHash:row.sourceHash,updatedAt:row.updatedAt,target:row.defaultTarget,manual:catalogPageChoices.get(row.id),choice:catalogPageChoice(row)}));
+ if(!rows.length)return toast('請先勾選本頁要通過的歌曲');
  const account=admin,room=state.currentStreamer?.id;
  const page=[catalogView.section,catalogView.page,catalogView.search,catalogView.language,catalogView.pageSize];
- const pending=rows.filter(row=>['default','independent','manual'].includes(row.choice));
+ const pending=rows.filter(row=>row.choice!=='later');
  const counts=Object.entries({default:'預設通過',independent:'人工調整',review:'需要人工確認',later:'暫緩'}).map(([key,label])=>label+' '+rows.filter(row=>row.choice===key||key==='independent'&&row.choice==='manual').length+' 筆');
  const waiting=rows.filter(row=>row.choice==='review');
  const list=items=>'<ul>'+items.map(row=>'<li>'+h(row.title)+'</li>').join('')+'</ul>';
  const summary='<p>'+h(counts.join(' · '))+'</p>'
-  +(pending.length?'<h3>這次送審</h3>'+list(pending):'<p>本頁目前沒有可通過的歌曲。請先在待確認的歌曲列選擇版本，或指定獨立新增。</p>')
-  +(waiting.length?'<details'+(!pending.length?' open':'')+'><summary>需要人工確認（'+waiting.length+' 筆）</summary>'+list(waiting)+'</details>':'');
+  +(pending.length?'<h3>這次送審</h3>'+list(pending.filter(row=>row.choice!=='review')):'<p>勾選的歌曲都已暫緩。</p>')
+  +(waiting.length?'<h3>未指定版本，確認後獨立新增（'+waiting.length+' 筆）</h3>'+list(waiting):'');
  modal('確認本頁審核',summary,pending.length?async()=>{
   if(catalogPageBusy||demo||draft||!isSuperAdmin())throw Error('請在正式管理端確認本頁');
   if(JSON.stringify(page)!==JSON.stringify([catalogView.section,catalogView.page,catalogView.search,catalogView.language,catalogView.pageSize]))throw Error('審核頁已切換，請重新預覽');
@@ -1434,7 +1436,7 @@ function previewCatalogPage(){
    invalidateCatalogTabs();await loadCatalogReview();toast('本頁審核完成');
   }finally{catalogPageBusy=false;}
  }:null);
- if(pending.length)$('#modal-form [type=submit]').textContent='確認本頁審核';
+ if(pending.length)$('#modal-form [type=submit]').textContent=waiting.length?'確認通過（含 '+waiting.length+' 筆獨立新增）':'確認本頁審核';
 }
 function catalogReviewHtml(){
  const sections=isSuperAdmin()?[['singles','單筆待審'],['duplicates','疑似重複'],['confirmed','已確認歌曲'],['approved','版本關係'],['issues','問題回報'],['templates','設定'],['history','變更紀錄']]:[['approved','版本關係'],['issues','我的問題回報']];
@@ -1464,11 +1466,9 @@ function catalogReviewHtml(){
  const lyricFilter=status==='approved'?'<select id="catalog-lyrics-filter" aria-label="共同歌詞篩選">'+[['all','全部'],['with','已建立共同歌詞'],['without','未建立共同歌詞'],...(isSuperAdmin()?[['proposals','有可採用歌詞']]:[])].map(([key,label])=>'<option value="'+key+'" '+(catalogView.lyricsFilter===key?'selected':'')+'>'+label+'</option>').join('')+'</select>':'';
  const languageSelect='<select id="catalog-review-language" aria-label="語言篩選">'+[['','全部語言'],...(catalogView.filterOptions?.languages||[]).map(x=>[x,x])].map(([key,label])=>'<option value="'+h(key)+'" '+(catalogView.language===key?'selected':'')+'>'+h(label)+'</option>').join('')+'</select>';
  if(status==='duplicates'){
-  const choices=catalogPageRows().map(catalogPageChoice);
-  const ready=choices.filter(choice=>['default','manual','independent'].includes(choice)).length;
-  const waiting=choices.filter(choice=>choice==='review').length;
-  actions=button('整頁通過（'+ready+' 筆）','catalogPagePreview','','primary',catalogPageBusy||catalogView.loading?'disabled':'')
-   +'<small>需要人工確認 '+waiting+' 筆 · 不用逐首勾選，先預覽再確認</small>'+actions;
+  const checked=catalogCheckedPageRows();
+  actions=button('整頁通過（'+checked.length+' 筆）','catalogPagePreview','','primary',!checked.length||catalogPageBusy||catalogView.loading?'disabled':'')
+   +'<small>只處理本頁勾選的歌曲，先預覽再確認</small>'+actions;
  }
  const toolbar=status==='issues'?'<div class="toolbar catalog-review-toolbar"><select id="catalog-issue-filter" aria-label="問題回報狀態">'+[['pending','待處理'],['processing','處理中'],['fixed','已修正'],['declined','不採用'],['all','全部']].map(([key,label])=>'<option value="'+key+'" '+(catalogView.issueStatus===key?'selected':'')+'>'+label+'</option>').join('')+'</select></div>':'<div class="toolbar catalog-review-toolbar catalog-compact-toolbar"><div class="catalog-search-row"><input id="catalog-review-search" type="search" aria-label="搜尋共同曲庫" placeholder="歌名、歌手、語言、演唱類型、版本、歌詞" value="'+h(catalogView.search||'')+'">'+button('搜尋','catalogFilter')+'</div>'+(['singles','duplicates'].includes(status)?'<div class="catalog-language-selection-row">'+languageSelect:relationFilters+lyricFilter)+(['singles','duplicates'].includes(status)?'<div class="catalog-selection-row">'+button('選取本頁','catalogSelectPage')+button('選取目前結果','catalogSelectAll')+button('取消選取','catalogClear')+'<small>已選 '+catalogView.selected.size+' 筆</small></div></div>':'')+'</div>';
  return tabs+toolbar+'<div class="actions catalog-batch-actions">'+actions+'</div>'+(catalogView.error?'<p class="error">'+h(catalogView.error)+'</p>':'')+(status==='approved'?sortControl('catalog'):'')+'<div id="catalog-review-list">'+(entries||blank(catalogView.loading?'正在讀取…':'沒有待處理資料'))+'</div>'+catalogPager(catalogView,'catalogPage');
