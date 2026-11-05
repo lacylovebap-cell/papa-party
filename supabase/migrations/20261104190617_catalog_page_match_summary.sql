@@ -45,10 +45,10 @@ $$;
 revoke all on function public.papa_catalog_review_page_matches(text,text,text,int,int,text) from public,anon,authenticated;
 grant execute on function public.papa_catalog_review_page_matches(text,text,text,int,int,text) to service_role;
 create function public.papa_catalog_review_page_submit(
- decision text, candidate_ids uuid[], expected_sources jsonb, expected_updates jsonb, actor_id text, target_variant uuid
+ decision text, candidate_ids uuid[], expected_sources jsonb, expected_updates jsonb, actor_id text, target_variant uuid, options jsonb
 ) returns jsonb language plpgsql security invoker set search_path=public as $$
 begin
- if decision not in ('link_variant','independent') or cardinality(candidate_ids) not between 1 and 50 then
+ if decision not in ('link_variant','independent','confirm_same','different_versions','create_variant') or cardinality(candidate_ids) not between 1 and 50 then
   raise exception 'CATALOG_REVIEW_INVALID';
  end if;
  perform 1 from papa_v2_revision where id=1 for update;
@@ -56,11 +56,21 @@ begin
  perform 1 from papa_catalog_candidates where id=any(candidate_ids) order by id for update;
  if (select count(*) from papa_catalog_candidates c where c.id=any(candidate_ids)
   and c.status='pending' and c.updated_at=(expected_updates->>c.id::text)::timestamptz
-  and (decision='independent' or papa_catalog_page_exact_target(c.id)=target_variant)
+  and (coalesce(options->>'automatic','false')<>'true' or (decision='link_variant' and papa_catalog_page_exact_target(c.id)=target_variant))
  )<>cardinality(candidate_ids) then raise exception 'CATALOG_SELECTION_STALE'; end if;
- return papa_catalog_review_selected(decision,candidate_ids,expected_sources,actor_id,target_variant=>target_variant);
+ if decision='confirm_same' and options ? 'variantDetails' then
+  return papa_catalog_review_same_full(candidate_ids,expected_sources,actor_id,coalesce(options->'commonMetadata','{}'),options->'variantDetails',(options->>'lyricsSource')::uuid,options->>'sharedBody');
+ end if;
+ if decision='different_versions' then
+  return papa_catalog_review_versions(candidate_ids,expected_sources,actor_id,coalesce(options->'commonMetadata','{}'),options->'variantMetadata',(options->>'familyId')::uuid);
+ end if;
+ return papa_catalog_review_selected(decision,candidate_ids,expected_sources,actor_id,
+  target_family=>(options->>'familyId')::uuid,target_variant=>target_variant,
+  common_metadata=>coalesce(options->'commonMetadata','{}') ||
+   case when options ? 'variantLabel' then jsonb_build_object('versionLabel',options->>'variantLabel') else '{}'::jsonb end);
+
 end $$;
-revoke all on function public.papa_catalog_review_page_submit(text,uuid[],jsonb,jsonb,text,uuid) from public,anon,authenticated;
-grant execute on function public.papa_catalog_review_page_submit(text,uuid[],jsonb,jsonb,text,uuid) to service_role;
+revoke all on function public.papa_catalog_review_page_submit(text,uuid[],jsonb,jsonb,text,uuid,jsonb) from public,anon,authenticated;
+grant execute on function public.papa_catalog_review_page_submit(text,uuid[],jsonb,jsonb,text,uuid,jsonb) to service_role;
 notify pgrst,'reload schema';
 commit;

@@ -35,7 +35,7 @@ test('selected review keeps Honey 2+1 / 2+2 isolated, private data intact and ly
  await db.exec(fs.readFileSync('supabase/migrations/20261104190617_catalog_page_match_summary.sql','utf8'));
  const page=await rpc('papa_catalog_review_page_matches',['singles','','',20,0,null]);
  assert.equal(page.rows[0].defaultTarget,undefined);
- const submit=(row,decision='independent')=>rpc('papa_catalog_review_page_submit',[decision,[row.id],{[row.id]:row.sourceHash},{[row.id]:row.updatedAt},'president',null]);
+ const submit=(row,decision='independent')=>rpc('papa_catalog_review_page_submit',[decision,[row.id],{[row.id]:row.sourceHash},{[row.id]:row.updatedAt},'president',null,{}]);
  await assert.rejects(submit({...page.rows[0],updatedAt:'2020-01-01'}),/STALE/);
  const single=await rpc('papa_catalog_review_page',['singles']);assert.equal(single.total,1);assert.equal(single.rows[0].title,'Solo');
  const dup=await rpc('papa_catalog_review_page',['duplicates','', '',1,0]);assert.equal(dup.total,3);assert.equal(dup.rows.length,1);assert.equal(dup.rows[0].rows.length,3);assert.ok(dup.hasMore);assert.ok(!JSON.stringify(dup).includes('lyrics 0'));

@@ -218,6 +218,11 @@ async function catalogOperation(b:any,who:any){
   const targetFamily=b.familyId==null?null:catalogUuid(b.familyId)?b.familyId:null;
   if(b.variantId!=null&&!targetVariant||b.familyId!=null&&!targetFamily)throw Error('共同歌曲識別碼錯誤');
   if(b.lyricsSource!=null&&(!catalogUuid(b.lyricsSource)||!ids.includes(b.lyricsSource))||b.sharedBody!=null&&(typeof b.sharedBody!=='string'||b.sharedBody.length>100000))throw Error('歌詞來源不正確');
+  if(b.pageReview===true){
+   const updates=b.expectedUpdates;
+   if(!['link_variant','independent','confirm_same','different_versions','create_variant'].includes(b.decision)||ids.some((id:any)=>typeof updates?.[id]!=='string'||!Number.isFinite(Date.parse(updates[id]))))throw Error('候選資料已更新，請重新預覽');
+   return await api('/rest/v1/rpc/papa_catalog_review_page_submit',{decision:b.decision,candidate_ids:ids,expected_sources:sources,expected_updates:Object.fromEntries(ids.map((id:any)=>[id,updates[id]])),actor_id:catalogActor(who),target_variant:targetVariant,options:Object.fromEntries(Object.entries(b).filter(([k])=>['automatic','familyId','commonMetadata','variantMetadata','variantDetails','lyricsSource','sharedBody','variantLabel'].includes(k)))});
+  }
   if(b.decision==='confirm_same'&&b.variantDetails){
    if(typeof b.variantDetails!=='object'||Array.isArray(b.variantDetails)||Object.entries(b.variantDetails).some(([key,value])=>
     !['versionKind','performerDetail','versionNote'].includes(key)||typeof value!=='string'||value.length>(key==='versionNote'?500:key==='versionKind'?80:300)))throw Error('版本資料不正確');
@@ -231,11 +236,6 @@ async function catalogOperation(b:any,who:any){
    return await api('/rest/v1/rpc/papa_catalog_review_versions',{candidate_ids:ids,
     expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),actor_id:catalogActor(who),
     common_metadata:b.commonMetadata||{},variant_metadata:b.variantMetadata,target_family:targetFamily});
-  }
-  if(b.pageReview===true){
-   const updates=b.expectedUpdates;
-   if(!['link_variant','independent'].includes(b.decision)||ids.some((id:any)=>typeof updates?.[id]!=='string'||!Number.isFinite(Date.parse(updates[id]))))throw Error('候選資料已更新，請重新預覽');
-   return await api('/rest/v1/rpc/papa_catalog_review_page_submit',{decision:b.decision,candidate_ids:ids,expected_sources:sources,expected_updates:Object.fromEntries(ids.map((id:any)=>[id,updates[id]])),actor_id:catalogActor(who),target_variant:targetVariant});
   }
   if(!['reject','remove','unlink'].includes(b.decision))return await api('/rest/v1/rpc/papa_catalog_review_selected',{decision:b.decision,candidate_ids:ids,expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),actor_id:catalogActor(who),target_family:targetFamily,target_variant:targetVariant,common_metadata:{...(b.commonMetadata||{}),...(b.variantLabel?{versionLabel:String(b.variantLabel).slice(0,100)}:{})},lyrics_source:b.lyricsSource||null,shared_body:b.sharedBody??null,version_labels:b.versionLabels||{}});
   return await api('/rest/v1/rpc/papa_catalog_review_v2',{decision:b.decision,candidate_ids:ids,target_variant:targetVariant,target_family:targetFamily,version_label:String(b.variantLabel||'').slice(0,100),actor_id:catalogActor(who),expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),common_metadata:b.commonMetadata||{}});

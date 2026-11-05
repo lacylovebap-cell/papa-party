@@ -132,6 +132,25 @@ test('shared catalog migration and transactions in isolated PostgreSQL', {skip:!
   assert.equal(again.added,0);assert.equal(again.revision,result.revision);
   await assert.rejects(rpc('papa_catalog_batch_add',['papa',[v1,'00000000-0000-4000-8000-000000000000'],'shared','streamer:papa']),/CATALOG_VARIANT_MISSING/);
  });
+ await t.test('confirmed imports stay approved on rescans and private edits, but identity edits reopen review',async()=>{
+  await db.exec('begin');
+  try{
+   const imported=await one("select song_id,variant_id,source_hash from papa_catalog_song_links where streamer_id='michelle' and variant_id=$1",[v1]);
+   assert.ok(imported);
+   const candidate=()=>one("select status,source_hash from papa_catalog_candidates where streamer_id='michelle' and song_id=$1",[imported.song_id]);
+   assert.equal((await candidate()).status,'approved');
+   await rpc('papa_catalog_reconcile_songs',['',100]);
+   const before=await candidate();
+   assert.equal(before.status,'approved');
+   await q("update papa_v2_entities set data=data || $2::jsonb where kind='songs' and id=$1",[imported.song_id,{tags:['private'],creditCost:2,lyrics:'private edit',privateNote:'private'}]);
+   assert.deepEqual(await candidate(),before);
+   await q("update papa_v2_entities set data=data || $2::jsonb where kind='songs' and id=$1",[imported.song_id,{artist:'Changed singer'}]);
+   const edited=await candidate();
+   assert.equal(edited.status,'pending');
+   assert.notEqual(edited.source_hash,before.source_hash);
+   assert.equal((await one("select variant_id from papa_catalog_song_links where streamer_id='michelle' and song_id=$1",[imported.song_id])).variant_id,imported.variant_id);
+  }finally{await db.exec('rollback');}
+ });
  await t.test('search is room scoped, paginated and returns IDs or metadata with no lyrics/notes',async()=>{
   const result=await rpc('papa_song_search_room',['papa','我的副本',['甜歌'],1,0]);
   assert.deepEqual(result.songIds,['s1']);assert.equal(result.total,1);

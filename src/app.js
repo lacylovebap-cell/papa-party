@@ -1334,15 +1334,15 @@ let catalogPageBusy=false,catalogReviewTimer;
 function catalogPageRows(){return catalogView.items.filter(row=>!catalogPageCompleted.has(row.id));}
 function catalogPageChoice(row){
  const choice=catalogPageChoices.get(row.id);
- return choice || (row.defaultTarget?'default':'review');
+ return (typeof choice==='object'?'manual':choice) || (row.defaultTarget?'default':'review');
 }
 function catalogPageRowActions(row){
  const choice=catalogPageChoice(row);
- const labels={default:'預設通過',independent:'人工調整：獨立新增',review:'需要人工確認',later:'暫緩'};
+ const labels={default:'預設通過',manual:'人工調整：已暫存',independent:'人工調整：獨立新增',review:'需要人工確認',later:'暫緩'};
  return (row.previousVariant?'<small>已關聯資料變更 · 原關聯 '+h([row.previousVariant.title,row.previousVariant.artist,row.previousVariant.versionLabel].filter(Boolean).join(' · '))+'</small>':'')+'<small>'+h(labels[choice])+'</small>'
   +button('獨立新增','catalogPageChoice',row.id,'tiny','data-choice="independent"')
   +button('稍後處理','catalogPageChoice',row.id,'tiny','data-choice="later"')
-  +(choice==='later'||choice==='independent'?button('恢復建議','catalogPageChoice',row.id,'tiny','data-choice=""'):'');
+  +(choice==='later'||choice==='independent'||choice==='manual'?button('恢復建議','catalogPageChoice',row.id,'tiny','data-choice=""'):'');
 }
 function catalogGroupMatches(group){
  const matches=group.matches||[];
@@ -1353,11 +1353,11 @@ function catalogGroupMatches(group){
 }
 function previewCatalogPage(){
  if(!isSuperAdmin()||catalogView.section!=='duplicates'||catalogPageBusy||catalogView.loading||!catalogView.loaded)return;
- const rows=catalogPageRows().map(row=>({id:row.id,title:row.title,sourceHash:row.sourceHash,updatedAt:row.updatedAt,target:row.defaultTarget,choice:catalogPageChoice(row)}));
+ const rows=catalogPageRows().map(row=>({id:row.id,title:row.title,sourceHash:row.sourceHash,updatedAt:row.updatedAt,target:row.defaultTarget,manual:catalogPageChoices.get(row.id),choice:catalogPageChoice(row)}));
  const account=admin,room=state.currentStreamer?.id;
  const page=[catalogView.section,catalogView.page,catalogView.search,catalogView.language,catalogView.pageSize];
- const pending=rows.filter(row=>['default','independent'].includes(row.choice));
- const counts=Object.entries({default:'預設通過',independent:'人工調整',review:'需要人工確認',later:'暫緩'}).map(([key,label])=>label+' '+rows.filter(row=>row.choice===key).length+' 筆');
+ const pending=rows.filter(row=>['default','independent','manual'].includes(row.choice));
+ const counts=Object.entries({default:'預設通過',independent:'人工調整',review:'需要人工確認',later:'暫緩'}).map(([key,label])=>label+' '+rows.filter(row=>row.choice===key||key==='independent'&&row.choice==='manual').length+' 筆');
  modal('確認本頁審核','<p>'+h(counts.join(' · '))+'</p><ul>'+pending.map(row=>'<li>'+h(row.title)+'</li>').join('')+'</ul><p>只送出本頁列出的歌曲。</p>',pending.length?async()=>{
   if(catalogPageBusy||demo||draft||!isSuperAdmin())throw Error('請在正式管理端確認本頁');
   if(JSON.stringify(page)!==JSON.stringify([catalogView.section,catalogView.page,catalogView.search,catalogView.language,catalogView.pageSize]))throw Error('審核頁已切換，請重新預覽');
@@ -1366,17 +1366,19 @@ function previewCatalogPage(){
    const groups=new Map();
    for(const row of pending){
     if(catalogPageCompleted.has(row.id))continue;
-    const key=row.choice==='default'?row.target:null;
+    const key=row.choice==='manual'?row.manual:row.choice==='default'?row.target:null;
     if(!groups.has(key))groups.set(key,[]);
     groups.get(key).push(row);
    }
-   for(const [targetVariant,remaining] of groups){
-    const decision=targetVariant?'link_variant':'independent';
+   for(const [key,remaining] of groups){
+    const manual=typeof key==='object'&&key;
+    const decision=manual?manual.decision:key?'link_variant':'independent';
+    if(manual&&(remaining.length!==manual.ids.length||remaining.some(row=>manual.versions[row.id]!==row.updatedAt)))throw Error('人工群組已有部分來源變更，請重新選擇整組');
     for(let start=0;start<remaining.length;start+=50){
      if(admin!==account||state.currentStreamer?.id!==room||tab!=='catalog')throw Error('管理身分或頁面已切換，請重新預覽');
      const batch=remaining.slice(start,start+50);
      catalogView.reviewPageCache=null;
-     await api({op:'catalogReview',decision,candidateIds:batch.map(row=>row.id),expectedSources:Object.fromEntries(batch.map(row=>[row.id,row.sourceHash])),expectedUpdates:Object.fromEntries(batch.map(row=>[row.id,row.updatedAt])),pageReview:true,...(targetVariant?{variantId:targetVariant}:{}),management:true});
+     await api({op:'catalogReview',decision,candidateIds:batch.map(row=>row.id),expectedSources:Object.fromEntries(batch.map(row=>[row.id,row.sourceHash])),expectedUpdates:Object.fromEntries(batch.map(row=>[row.id,row.updatedAt])),pageReview:true,...(manual?manual.payload:key?{variantId:key,automatic:true}:{}),management:true});
      for(const row of batch){catalogPageCompleted.add(row.id);catalogPageChoices.delete(row.id);catalogView.selected.delete(row.id);catalogView.selectedRows.delete(row.id);catalogView.selectedSources.delete(row.id);catalogView.selectedVariants.delete(row.id);}
     }
    }
@@ -1462,6 +1464,13 @@ async function catalogReviewAction(decision,ids=[...catalogView.selected],target
  const expectedSources=Object.fromEntries(ids.map(id=>[id,catalogView.selectedSources.get(id)]));
  if(Object.values(expectedSources).some(v=>!v))throw Error('候選資料已更新，請重新選取');
  const {confirmation,...payload}=target;
+ if(catalogView.section==='duplicates'&&['confirm_same','different_versions','independent','link_variant','create_variant'].includes(decision)){
+  const visible=catalogPageRows();
+  if(!ids.every(id=>visible.some(row=>row.id===id)))throw Error('本頁預覽只接受目前頁面的候選');
+  const planned={decision,ids:[...ids],payload,versions:Object.fromEntries(visible.filter(row=>ids.includes(row.id)).map(row=>[row.id,row.updatedAt]))};
+  for(const id of ids)catalogPageChoices.set(id,planned);
+  toast('已加入本頁預覽，確認後送出');render();return;
+ }
  if(!confirm(confirmation||'只處理已選 '+ids.length+' 筆？原歌本、私有設定與自訂歌詞保留。'))return;
  await api({op:'catalogReview',decision,candidateIds:ids,expectedSources,...payload,management:true});
  for(const id of ids){catalogView.selected.delete(id);catalogView.selectedRows.delete(id);catalogView.selectedSources.delete(id);catalogView.selectedVariants.delete(id);}
