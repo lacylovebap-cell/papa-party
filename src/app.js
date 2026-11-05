@@ -1361,7 +1361,6 @@ function catalogPageRowActions(row){
  const choice=catalogPageChoice(row);
  const labels={default:'預設通過',manual:'人工調整：已暫存',independent:'人工調整：獨立新增',review:'需要人工確認',later:'暫緩'};
  return catalogPreviousVariantHtml(row)+'<small>'+h(labels[choice])+'</small>'
-  +button('獨立新增','catalogPageChoice',row.id,'tiny','data-choice="independent"')
   +button('稍後處理','catalogPageChoice',row.id,'tiny','data-choice="later"')
   +(choice==='later'||choice==='independent'||choice==='manual'?button('恢復建議','catalogPageChoice',row.id,'tiny','data-choice=""'):'');
 }
@@ -1375,13 +1374,29 @@ function stageCatalogDirectMatch(id,variantId){
  if(!isSuperAdmin()||catalogPageBusy||catalogView.section!=='duplicates')return;
  const group=catalogView.groups.find(entry=>entry.rows.some(row=>row.id===id));
  const row=group?.rows.find(row=>row.id===id);
- if(!row||catalogPageCompleted.has(id)||!catalogVisibleMatches(group).some(match=>match.variantId===variantId))return;
- catalogPageChoices.set(id,{decision:'link_variant',ids:[id],payload:{variantId},versions:{[id]:row.updatedAt}});
+ if(!row||catalogPageCompleted.has(id))return;
+ let decision='link_variant',payload={variantId};
+ if(variantId==='independent'){
+  decision='independent';payload={};
+ }else if(variantId.startsWith('new:')){
+  const familyId=variantId.slice(4);
+  const match=catalogVisibleMatches(group).find(item=>item.familyId===familyId);
+  if(!match)return;
+  const versionLabel=prompt('輸入《'+match.title+'》的新版本名稱',row.versionLabel||'')?.trim();
+  if(!versionLabel||versionLabel.length>100){
+   if(versionLabel)toast('版本名稱最多 100 字');
+   render();return;
+  }
+  decision='create_variant';payload={familyId,variantLabel:versionLabel};
+ }else if(!catalogVisibleMatches(group).some(match=>match.variantId===variantId))return;
+ catalogPageChoices.set(id,{decision,ids:[id],payload,versions:{[id]:row.updatedAt}});
  render();
 }
 function catalogMatchRadio(row,group,match,label=''){
  const choice=catalogPageChoices.get(row.id);
- const selected=choice?.payload?.variantId||(!choice?(row.defaultTarget||catalogSuggestedTarget(row,group)):'');
+ const selected=choice?.decision==='independent'||choice==='independent'?'independent'
+  :choice?.decision==='create_variant'?'new:'+choice.payload.familyId
+  :choice?.payload?.variantId||(!choice?(row.defaultTarget||catalogSuggestedTarget(row,group)):'');
  return '<label style="display:inline-flex;align-items:baseline;gap:.5em">'
   +'<input type="radio" style="width:auto;flex:none" name="catalog-match-'+h(row.id)+'" data-catalog-match="'+h(row.id)+'" value="'+h(match.variantId)+'" '+(selected===match.variantId?'checked':'')+'>'
   +'<span>'+label+'</span></label>';
@@ -1403,8 +1418,16 @@ function catalogGroupMatches(group){
   const pickers=activeRows.length>1?'<div class="actions">'+activeRows.map(item=>catalogMatchRadio(item,group,row,h((state.streamers.find(room=>room.id===item.streamerId)?.display_name||item.streamerId||'來源')+' · '+item.artist))).join('')+'</div>':'';
   return '<li>'+(activeRows.length===1?catalogMatchRadio(activeRows[0],group,row,label):label)+pickers+'</li>';
  };
+ const families=[...new Map(matches.filter(match=>match.familyId).map(match=>[match.familyId,match])).values()];
+ const decisions=activeRows.map(item=>{
+  const choice=catalogPageChoices.get(item.id);
+  const options=catalogMatchRadio(item,group,{variantId:'independent'},'獨立為一首')
+   +families.map(match=>catalogMatchRadio(item,group,{variantId:'new:'+match.familyId},
+    h('同一首，不同版本：'+match.title+(choice?.payload?.familyId===match.familyId?' · '+choice.payload.variantLabel:'')))).join('');
+  return '<div class="actions">'+(activeRows.length>1?'<small>'+h(item.artist||item.title)+'</small>':'')+options+'</div>';
+ }).join('');
  return '<div class="notice"><b>既有共同歌曲</b>'+ (matches.length>1?'<p>有多個比對候選，請用單選鈕選擇版本。</p>':'')
-  +(matches.length?'<ul>'+matches.slice(0,3).map(line).join('')+'</ul>':'<p>目前沒有比對候選。</p>')
+  +(matches.length?'<ul>'+matches.slice(0,3).map(line).join('')+'</ul>':'<p>目前沒有比對候選。</p>')+decisions
   +(matches.length===3&&group.rows?.[0]?button('查看其他比對候選','catalogVersionSource',group.rows[0].id,'tiny'):'')+'</div>';
 }
 function previewCatalogPage(){
@@ -1420,7 +1443,11 @@ function previewCatalogPage(){
   const targetId=row.choice==='manual'?row.manual?.payload?.variantId:row.choice==='default'?row.target:null;
   const group=catalogView.groups?.find(entry=>entry.rows.some(item=>item.id===row.id));
   const match=group?.matches?.find(item=>item.variantId===targetId);
-  const label=match?[match.title,match.artist,match.versionLabel||match.versionKind].filter(Boolean).join(' · '):'';
+  const newVersion=row.manual?.decision==='create_variant'&&row.manual.payload;
+  const family=newVersion&&group?.matches?.find(item=>item.familyId===newVersion.familyId);
+  const label=newVersion?'同一首，不同版本：'+(family?.title||row.title)+' · '+newVersion.variantLabel
+   :row.manual?.decision==='independent'||row.choice==='independent'?'獨立為一首'
+   :match?[match.title,match.artist,match.versionLabel||match.versionKind].filter(Boolean).join(' · '):'';
   return '<li>'+h(row.title+(label?' → '+label:''))+'</li>';
  }).join('')+'</ul>';
  const summary='<p>'+h(counts.join(' · '))+'</p>'

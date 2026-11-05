@@ -77,3 +77,21 @@ test('single-source match renders one candidate line with the radio before its t
  assert.equal(html.match(/唯一歌名/g).length,1);
  assert.match(html,/type="radio"[^>]*checked[^>]*><span>唯一歌名/);
 });
+
+test('inline independent and new version are mutually exclusive and retain the source revision',()=>{
+ const body=source.slice(source.indexOf('function catalogMatchPercent('),source.indexOf('function catalogMatchRadio('));
+ const choices=new Map(),row={id:'source',updatedAt:'v1'};
+ const stage=vm.runInNewContext(body+'\nstageCatalogDirectMatch',{
+  catalogView:{section:'duplicates',groups:[{rows:[row],matches:[{variantId:'a',familyId:'family',title:'作品',score:.9}]}]},
+  catalogPageBusy:false,catalogPageCompleted:new Set(),catalogPageChoices:choices,
+  isSuperAdmin:()=>true,render(){},prompt:()=> '現場版'
+ });
+ stage(row.id,'independent');
+ assert.equal(choices.get(row.id).decision,'independent');
+ stage(row.id,'new:family');
+ assert.equal(choices.size,1);
+ assert.equal(choices.get(row.id).decision,'create_variant');
+ assert.equal(choices.get(row.id).payload.familyId,'family');
+ assert.equal(choices.get(row.id).payload.variantLabel,'現場版');
+ assert.equal(choices.get(row.id).versions.source,'v1');
+});
