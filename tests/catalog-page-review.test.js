@@ -42,7 +42,7 @@ test('multiple suggested versions explain manual selection and show spelling dif
 });
 
 test('a direct pick replaces the previous target for the same source',()=>{
- const body=source.slice(source.indexOf('function catalogMatchPercent('),source.indexOf('function catalogDirectMatchButtons('));
+ const body=source.slice(source.indexOf('function catalogMatchPercent('),source.indexOf('function catalogMatchRadio('));
  const choices=new Map(), row={id:'source',updatedAt:'v1'};
  const stage=vm.runInNewContext(body+'\nstageCatalogDirectMatch',{
   catalogView:{section:'duplicates',groups:[{rows:[row],matches:[{variantId:'a',score:.9},{variantId:'b',score:.8}]}]},
@@ -70,3 +70,10 @@ test('only one exact candidate is suggested and linked drift still needs a choic
 
 });
 
+test('single-source match renders one candidate line with the radio before its text',()=>{
+ const body=source.slice(source.indexOf('function catalogMatchPercent('),source.indexOf('function previewCatalogPage('));
+ const render=vm.runInNewContext(body+'\ncatalogGroupMatches',{h:String,button:()=>'',catalogPageChoices:new Map(),catalogPageCompleted:new Set(),catalogSuggestedTarget:()=> 'match'});
+ const html=render({rows:[{id:'source',title:'唯一歌名',artist:'歌手'}],matches:[{variantId:'match',title:'唯一歌名',artist:'歌手',score:.79}]});
+ assert.equal(html.match(/唯一歌名/g).length,1);
+ assert.match(html,/type="radio"[^>]*checked[^>]*><span>唯一歌名/);
+});
