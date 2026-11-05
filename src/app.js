@@ -1333,9 +1333,15 @@ const catalogPageChoices=new Map(),catalogPageCompleted=new Set();
 let catalogPageBusy=false,catalogReviewTimer;
 function catalogPageRows(){return catalogView.items.filter(row=>!catalogPageCompleted.has(row.id));}
 function catalogCheckedPageRows(){return catalogPageRows().filter(row=>catalogView.selected.has(row.id));}
+function catalogSuggestedTarget(row,group=catalogView.groups?.find(entry=>entry.rows.some(item=>item.id===row.id))){
+ const exact=(group?.matches||[]).filter(match=>Number(match.score)===1);
+ const match=exact[0];
+ if(exact.length!==1||row.previousVariant||row.preferredFamily)return '';
+ return row.title===match.title&&row.artist===match.artist&&(row.versionLabel||'')===(match.versionLabel||'')?match.variantId:'';
+}
 function catalogPageChoice(row){
  const choice=catalogPageChoices.get(row.id);
- return (typeof choice==='object'?'manual':choice) || (row.defaultTarget?'default':'review');
+ return (typeof choice==='object'?'manual':choice) || (row.defaultTarget||catalogSuggestedTarget(row)?'default':'review');
 }
 function catalogPreviousVariantHtml(row){
  const original=row.previousVariant;
@@ -1371,12 +1377,12 @@ function stageCatalogDirectMatch(id,variantId){
 function catalogDirectMatchButtons(row,group){
  const matches=catalogVisibleMatches(group);
  if(!matches.length)return '';
- const selected=catalogPageChoices.get(row.id)?.payload?.variantId;
+ const choice=catalogPageChoices.get(row.id);
+ const selected=choice?.payload?.variantId||(!choice?(row.defaultTarget||catalogSuggestedTarget(row,group)):'');
  return '<div class="actions" role="group" aria-label="選擇一個共同版本">'
-  +matches.map(match=>button((selected===match.variantId?'已選：':'選擇：')+
-   [match.title,match.artist,match.versionLabel||match.versionKind||'版本未標示',catalogMatchPercent(match.score)+'%'].filter(Boolean).join(' · '),
-   'catalogDirectMatch',row.id,'tiny'+(selected===match.variantId?' active':''),
-   'data-variant="'+h(match.variantId)+'" aria-pressed="'+(selected===match.variantId)+'"')).join('')+'</div>';
+  +matches.map(match=>'<label class="check"><input type="radio" name="catalog-match-'+h(row.id)+'" data-catalog-match="'+h(row.id)+'" value="'+h(match.variantId)+'" '+(selected===match.variantId?'checked':'')+'> '
+   +h([match.title,match.artist,match.versionLabel||match.versionKind||'版本未標示',catalogMatchPercent(match.score)+'%'].filter(Boolean).join(' · '))+'</label>').join('')+'</div>';
+
 }
 function catalogGroupMatches(group){
  const matches=catalogVisibleMatches(group);
@@ -1398,7 +1404,7 @@ function catalogGroupMatches(group){
 }
 function previewCatalogPage(){
  if(!isSuperAdmin()||catalogView.section!=='duplicates'||catalogPageBusy||catalogView.loading||!catalogView.loaded)return;
- const rows=catalogCheckedPageRows().map(row=>({id:row.id,title:row.title,sourceHash:row.sourceHash,updatedAt:row.updatedAt,target:row.defaultTarget,manual:catalogPageChoices.get(row.id),choice:catalogPageChoice(row)}));
+ const rows=catalogCheckedPageRows().map(row=>({id:row.id,title:row.title,sourceHash:row.sourceHash,updatedAt:row.updatedAt,target:row.defaultTarget||catalogSuggestedTarget(row),verified:!!row.defaultTarget,manual:catalogPageChoices.get(row.id),choice:catalogPageChoice(row)}));
  if(!rows.length)return toast('請先勾選本頁要通過的歌曲');
  const account=admin,room=state.currentStreamer?.id;
  const page=[catalogView.section,catalogView.page,catalogView.search,catalogView.language,catalogView.pageSize];
@@ -1417,7 +1423,7 @@ function previewCatalogPage(){
    const groups=new Map();
    for(const row of pending){
     if(catalogPageCompleted.has(row.id))continue;
-    const key=row.choice==='manual'?row.manual:row.choice==='default'?row.target:null;
+    const key=row.choice==='manual'?row.manual:row.choice==='default'?(row.verified?'verified:':'suggested:')+row.target:null;
     if(!groups.has(key))groups.set(key,[]);
     groups.get(key).push(row);
    }
@@ -1429,7 +1435,7 @@ function previewCatalogPage(){
      if(admin!==account||state.currentStreamer?.id!==room||tab!=='catalog')throw Error('管理身分或頁面已切換，請重新預覽');
      const batch=remaining.slice(start,start+50);
      catalogView.reviewPageCache=null;
-     await api({op:'catalogReview',decision,candidateIds:batch.map(row=>row.id),expectedSources:Object.fromEntries(batch.map(row=>[row.id,row.sourceHash])),expectedUpdates:Object.fromEntries(batch.map(row=>[row.id,row.updatedAt])),pageReview:true,...(manual?manual.payload:key?{variantId:key,automatic:true}:{}),management:true});
+     await api({op:'catalogReview',decision,candidateIds:batch.map(row=>row.id),expectedSources:Object.fromEntries(batch.map(row=>[row.id,row.sourceHash])),expectedUpdates:Object.fromEntries(batch.map(row=>[row.id,row.updatedAt])),pageReview:true,...(manual?manual.payload:key?{variantId:key.slice(key.indexOf(':')+1),automatic:key.startsWith('verified:')}:{}),management:true});
      for(const row of batch){catalogPageCompleted.add(row.id);catalogPageChoices.delete(row.id);catalogView.selected.delete(row.id);catalogView.selectedRows.delete(row.id);catalogView.selectedSources.delete(row.id);catalogView.selectedVariants.delete(row.id);}
     }
    }
@@ -1444,7 +1450,7 @@ function catalogReviewHtml(){
  if(status==='templates')return tabs+catalogTemplateHtml();
  if(status==='confirmed')return tabs+button('查看／管理已確認歌曲','catalogConfirmed','','primary');
  const room=id=>state.streamers.find(r=>r.id===id)?.display_name||id||'';
- const rowHtml=(row,group)=>catalogPageCompleted.has(row.id)?'':'<div class="song catalog-row"><label class="catalog-check"><input type="checkbox" data-catalog-review="'+h(row.id)+'" '+(catalogView.selected.has(row.id)?'checked':'')+' aria-label="選取 '+h(row.title)+'"></label><div class="info"><b>'+h(row.title)+'｜'+h(row.artist)+'</b><small>'+h([room(row.streamerId),row.language,row.performerType,row.versionLabel||(status==='duplicates'?'版本未標示':'')].filter(Boolean).join(' · '))+'</small>'+(row.preferredFamily?'<small>主播指定：同一首，但不同版本</small>':'')+'</div>'+button('編輯','catalogCandidateEdit',row.id,'tiny')+button(row.preferredFamily?'指定共同作品／版本':'關聯既有共同歌曲／版本','catalogVersionSource',row.id,'tiny')+(status==='duplicates'?catalogPageRowActions(row)+catalogDirectMatchButtons(row,group):'')+'</div>';
+ const rowHtml=(row,group)=>catalogPageCompleted.has(row.id)?'':'<div class="song catalog-row"><label class="catalog-check"><input type="checkbox" data-catalog-review="'+h(row.id)+'" '+(catalogView.selected.has(row.id)?'checked':'')+' aria-label="選取 '+h(row.title)+'"></label><div class="info"><b>'+h(row.title)+'｜'+h(row.artist)+'</b><small>'+h([room(row.streamerId),row.language,row.performerType,row.versionLabel||(status==='duplicates'?'版本未標示':'')].filter(Boolean).join(' · '))+'</small>'+(row.preferredFamily?'<small>主播指定：同一首，但不同版本</small>':'')+'</div>'+button('編輯','catalogCandidateEdit',row.id,'tiny')+button(row.preferredFamily?'指定共同作品／版本':'關聯既有共同歌曲／版本','catalogVersionSource',row.id,'tiny')+(status==='duplicates'?catalogPageRowActions(row):'')+'</div>';
  let entries='',actions='';
  if(status==='singles'){
   entries=catalogView.items.map(row=>'<section class="catalog-single-candidate">'+rowHtml(row)+'</section>').join('');
@@ -1453,7 +1459,7 @@ function catalogReviewHtml(){
   entries=(catalogView.groups||[]).map(group=>{const picked=[...catalogView.selectedRows.values()].filter(row=>row?.groupId===group.id).length;return '<section class="catalog-candidate-group"><h3><label class="catalog-check"><input type="checkbox" data-catalog-group="'+h(group.id)+'" '+(picked>=group.total?'checked':'')+' aria-label="全選本組" aria-checked="'+(picked&&picked<group.total?'mixed':picked>=group.total?'true':'false')+'"> '+h(group.rows?.[0]?.title||'候選群組')+' · '+group.total+' 筆</label></h3><div class="actions">'+(group.rows.filter(row=>!catalogPageCompleted.has(row.id)).length>=2
    ?button('合併為同一首','catalogGroupDecision',group.id,'tiny','data-decision="confirm_same" '+(picked<2?'disabled':''))
     +button('同一首，但不同版本','catalogGroupDecision',group.id,'tiny','data-decision="different_versions" '+(picked<2?'disabled':''))
-   :'')+'</div>'+catalogGroupMatches(group)+(group.total>8?'<details><summary>展開候選</summary>':'')+(group.rows||[]).map(row=>rowHtml(row,group)).join('')+(group.rows.length<group.total?button('載入更多候選','catalogGroupMore',group.id,'tiny'):'')+(group.total>8?'</details>':'')+'</section>';}).join('');
+   :'')+'</div>'+catalogGroupMatches(group)+(group.total>8?'<details><summary>展開候選</summary>':'')+(group.rows||[]).map(row=>catalogPageCompleted.has(row.id)?'':catalogDirectMatchButtons(row,group)+rowHtml(row,group)).join('')+(group.rows.length<group.total?button('載入更多候選','catalogGroupMore',group.id,'tiny'):'')+(group.total>8?'</details>':'')+'</section>';}).join('');
  }else if(status==='approved'){
   actions=button('選取本頁','relationSelectPage','','tiny')+button('取消選取','relationClear','','tiny')+button('批量加入歌本','relationAdd','','tiny primary',catalogView.versionSelected?.size?'':'disabled')+button('加入待練','relationPractice','','tiny',catalogView.versionSelected?.size?'':'disabled')+'<small>已選 '+(catalogView.versionSelected?.size||0)+' 首</small>';
   entries=catalogView.items.map(f=>'<section class="catalog-candidate-group catalog-family"><h3>《'+h(f.title)+'》</h3>'+(f.variants||[]).map(v=>'<div class="song catalog-variant-row"><label class="catalog-check"><input type="checkbox" data-relation-select="'+h(v.id)+'" '+(v.alreadyAdded?'disabled':catalogView.versionSelected?.has(v.id)?'checked':'')+' aria-label="選取 '+h(f.title)+' '+h(v.versionLabel||'原版')+'"></label><div class="info"><b>'+h(v.versionLabel||({cover:'翻唱',original:'原版',live:'現場版',remix:'混音版',dj:'DJ版'})[v.versionKind]||v.versionKind||'原版')+'</b><small>'+h([v.artist,v.performerDetail,v.language,v.performerType,v.versionNote].filter(Boolean).join(' · '))+'</small>'+(v.alreadyAdded?'<small>已在我的歌本</small>':'')+'</div><div class="rel-col"><div class="rel-side">'+(isSuperAdmin()?button('編輯','relationEdit',v.id,'tiny'):'')+(v.streamerCount>0&&!(v.streamerCount===1&&v.alreadyAdded)?button('查看主播（'+v.streamerCount+'）','relationRooms',v.id,'tiny'):'')+'</div><details class="rel-more"><summary>更多</summary><div class="rel-more-pop">'+(isSuperAdmin()?button('拆版本','relationSplit',v.id,'tiny')+button('解除關係','relationUnlink',v.id,'tiny')+button('刪除','relationDelete',v.id,'tiny danger'):'')+button('回報問題','catalogReport',v.id,'tiny')+(isSuperAdmin()?button(v.hasSharedLyrics?'查看／編輯共同歌詞':'建立共同歌詞','catalogSharedLyrics',v.id,'tiny')+(v.lyricProposalCount?button('有可採用歌詞（'+v.lyricProposalCount+'）','catalogLyricProposals',v.id,'tiny'):''):'')+'</div></details></div></div>').join('')+'</section>').join('');
@@ -1674,7 +1680,7 @@ async function showSharedLyricHistory(variantId,page=0){if(!isSuperAdmin())retur
  sharedLyricHistory={variantId,rows:r.history||[]};
  modal('共同歌詞修改歷史',`<div class="catalog-history">${(r.history||[]).map(row=>`<details class="notice"><summary>版本 ${h(row.revision||row.version)} · ${h(row.createdAt||row.created_at||'')}</summary><pre>${h(row.body||'')}</pre>${button('以此內容建立復原版本','catalogLyricRestore',variantId,'tiny',`data-revision="${h(row.revision||row.version)}"`)}</details>`).join('')||blank('尚無修改歷史')}</div><div class="pagination" data-total-pages="${Math.max(1,Math.ceil(r.historyTotal/10))}">${button('上一頁','catalogLyricHistory',variantId,'tiny',`data-page="${page-1}" ${page?'':'disabled'}`)}<small>第 ${page+1} 頁</small>${button('下一頁','catalogLyricHistory',variantId,'tiny',`data-page="${page+1}" ${r.historyHasMore?'':'disabled'}`)}</div>`);
 }
-document.addEventListener('change',e=>{if(e.target.matches('[data-catalog-review]')){const id=e.target.dataset.catalogReview;if(e.target.checked){const row=catalogView.items.find(row=>String(row.candidateId||row.id)===id);catalogView.selected.add(id);catalogView.selectedRows.set(id,row);catalogView.selectedSources.set(id,row?.sourceHash);catalogView.selectedVariants.set(id,{variantId:row?.variantId,updatedAt:row?.variantUpdatedAt});}else{catalogView.selected.delete(id);catalogView.selectedRows.delete(id);catalogView.selectedSources.delete(id);catalogView.selectedVariants.delete(id);}if(tab==='catalog')render();}if(e.target.matches('[data-catalog-variant]')){const id=e.target.dataset.catalogVariant;if(e.target.checked){sharedBrowse.selected.add(id);sharedBrowse.selectedRows.set(id,sharedBrowse.items.find(row=>String(row.variantId||row.id)===id));}else{sharedBrowse.selected.delete(id);sharedBrowse.selectedRows.delete(id);}renderSharedBrowse();}});
+document.addEventListener('change',e=>{if(e.target.matches('[data-catalog-match]')){stageCatalogDirectMatch(e.target.dataset.catalogMatch,e.target.value);return;}if(e.target.matches('[data-catalog-review]')){const id=e.target.dataset.catalogReview;if(e.target.checked){const row=catalogView.items.find(row=>String(row.candidateId||row.id)===id);catalogView.selected.add(id);catalogView.selectedRows.set(id,row);catalogView.selectedSources.set(id,row?.sourceHash);catalogView.selectedVariants.set(id,{variantId:row?.variantId,updatedAt:row?.variantUpdatedAt});}else{catalogView.selected.delete(id);catalogView.selectedRows.delete(id);catalogView.selectedSources.delete(id);catalogView.selectedVariants.delete(id);}if(tab==='catalog')render();}if(e.target.matches('[data-catalog-variant]')){const id=e.target.dataset.catalogVariant;if(e.target.checked){sharedBrowse.selected.add(id);sharedBrowse.selectedRows.set(id,sharedBrowse.items.find(row=>String(row.variantId||row.id)===id));}else{sharedBrowse.selected.delete(id);sharedBrowse.selectedRows.delete(id);}renderSharedBrowse();}});
 document.addEventListener('change',async e=>{if(!e.target.matches('[data-catalog-group]'))return;const group=catalogView.groups.find(g=>g.id===e.target.dataset.catalogGroup);if(!group)return;try{if(e.target.checked){const rows=await fetchCatalogGroupRows(group);selectCatalogRows(rows);}else for(const [id,row] of catalogView.selectedRows)if(row?.groupId===group.id){catalogView.selected.delete(id);catalogView.selectedRows.delete(id);catalogView.selectedSources.delete(id);catalogView.selectedVariants.delete(id);}render();}catch(err){toast(err.message);render();}});
 let catalogBrowseTimer;function scheduleSharedBrowse(input){if(sharedBrowse.q!==input.value){sharedBrowse.selected.clear();sharedBrowse.selectedRows.clear();sharedBrowse.membershipViews.clear();sharedBrowse.page=0;}sharedBrowse.q=input.value;sharedBrowse.generation++;clearTimeout(catalogBrowseTimer);catalogBrowseTimer=setTimeout(()=>loadSharedBrowse(0),350);}
 document.addEventListener('input',e=>{if(e.target.id==='catalog-browse-q'&&!e.isComposing)scheduleSharedBrowse(e.target);});

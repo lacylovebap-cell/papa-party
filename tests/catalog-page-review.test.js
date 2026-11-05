@@ -53,3 +53,13 @@ test('a direct pick replaces the previous target for the same source',()=>{
  assert.equal(choices.get(row.id).payload.variantId,'b');
  assert.equal(choices.get(row.id).versions.source,'v1');
 });
+
+test('only one exact candidate is suggested and linked drift still needs a choice',()=>{
+ const body=source.slice(source.indexOf('function catalogSuggestedTarget('),source.indexOf('function catalogPageChoice('));
+ const suggested=vm.runInNewContext(body+'\ncatalogSuggestedTarget',{});
+ const row={title:'同歌',artist:'歌手',versionLabel:''};
+ const match={...row,score:1,variantId:'exact'};
+ assert.equal(suggested(row,{matches:[match,{score:.34}]}),'exact');
+ assert.equal(suggested(row,{matches:[match,{...match,variantId:'second'}]}),'');
+ assert.equal(suggested({...row,previousVariant:{}},{matches:[match]}),'');
+});
