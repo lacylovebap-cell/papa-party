@@ -28,3 +28,28 @@ test('linked candidate shows only fields that differ from the original variant',
  assert.match(html,/歌手 舊歌手 → 新歌手/);
  assert.doesNotMatch(html,/<li>歌名|<li>語言/);
 });
+
+test('multiple suggested versions explain manual selection and show spelling differences',()=>{
+ const body=source.slice(source.indexOf('function catalogMatchPercent('),source.indexOf('function previewCatalogPage('));
+ const render=vm.runInNewContext(body+'\ncatalogGroupMatches',{h:String,button:()=>''});
+ const html=render({rows:[{title:'不痛',artist:'張韶涵'}],matches:[{title:'不痛',artist:'張紹涵',score:0.786,versionKind:'original'},{title:'不痛',artist:'張韶涵',score:1,versionLabel:'現場版'}]});
+ assert.doesNotMatch(html,/張紹涵|有多個比對候選/);
+ assert.match(html,/現場版/);
+ const onlyApproximate=render({rows:[{title:'不痛',artist:'張韶涵'}],matches:[{title:'不痛',artist:'張紹涵',score:0.786,versionKind:'original'},{title:'另一首',artist:'張韶涵',score:0.995,versionLabel:'現場版'}]});
+ assert.match(onlyApproximate,/有多個比對候選/);
+ assert.match(onlyApproximate,/張韶涵 → 張紹涵/);
+ assert.match(onlyApproximate,/原版 · 相似候選（79%）/);
+});
+
+test('a direct pick replaces the previous target for the same source',()=>{
+ const body=source.slice(source.indexOf('function catalogMatchPercent('),source.indexOf('function catalogDirectMatchButtons('));
+ const choices=new Map(), row={id:'source',updatedAt:'v1'};
+ const stage=vm.runInNewContext(body+'\nstageCatalogDirectMatch',{
+  catalogView:{section:'duplicates',groups:[{rows:[row],matches:[{variantId:'a',score:.9},{variantId:'b',score:.8}]}]},
+  catalogPageBusy:false,catalogPageCompleted:new Set(),catalogPageChoices:choices,isSuperAdmin:()=>true,render(){}
+ });
+ stage(row.id,'a');stage(row.id,'b');stage(row.id,'invalid');
+ assert.equal(choices.size,1);
+ assert.equal(choices.get(row.id).payload.variantId,'b');
+ assert.equal(choices.get(row.id).versions.source,'v1');
+});
