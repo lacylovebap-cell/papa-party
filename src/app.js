@@ -1334,10 +1334,15 @@ let catalogPageBusy=false,catalogReviewTimer;
 function catalogPageRows(){return catalogView.items.filter(row=>!catalogPageCompleted.has(row.id));}
 function catalogCheckedPageRows(){return catalogPageRows().filter(row=>catalogView.selected.has(row.id));}
 function catalogSuggestedTarget(row,group=catalogView.groups?.find(entry=>entry.rows.some(item=>item.id===row.id))){
- const exact=(group?.matches||[]).filter(match=>Number(match.score)===1);
- const match=exact[0];
- if(exact.length!==1||row.previousVariant||row.preferredFamily)return '';
- return row.title===match.title&&row.artist===match.artist&&(row.versionLabel||'')===(match.versionLabel||'')?match.variantId:'';
+ const matches=catalogVisibleMatches(group);
+ if(matches.length!==1||row.previousVariant||row.preferredFamily)return '';
+ const match=matches[0];
+ if(Number(match.score)===1&&row.title===match.title&&row.artist===match.artist&&(row.versionLabel||'')===(match.versionLabel||''))return match.variantId;
+ const source=group?.rows?.[0];
+ // The group lookup is based on its first source. Reuse it only for identical source metadata.
+ if(group?.matches?.length===1&&source&&catalogView.selected.has(row.id)
+  &&['title','artist','versionLabel','language','performerType'].every(key=>(source[key]||'')===(row[key]||'')))return match.variantId;
+ return '';
 }
 function catalogPageChoice(row){
  const choice=catalogPageChoices.get(row.id);
@@ -1411,7 +1416,13 @@ function previewCatalogPage(){
  const pending=rows.filter(row=>row.choice!=='later');
  const counts=Object.entries({default:'預設通過',independent:'人工調整',review:'需要人工確認',later:'暫緩'}).map(([key,label])=>label+' '+rows.filter(row=>row.choice===key||key==='independent'&&row.choice==='manual').length+' 筆');
  const waiting=rows.filter(row=>row.choice==='review');
- const list=items=>'<ul>'+items.map(row=>'<li>'+h(row.title)+'</li>').join('')+'</ul>';
+ const list=items=>'<ul>'+items.map(row=>{
+  const targetId=row.choice==='manual'?row.manual?.payload?.variantId:row.choice==='default'?row.target:null;
+  const group=catalogView.groups?.find(entry=>entry.rows.some(item=>item.id===row.id));
+  const match=group?.matches?.find(item=>item.variantId===targetId);
+  const label=match?[match.title,match.artist,match.versionLabel||match.versionKind].filter(Boolean).join(' · '):'';
+  return '<li>'+h(row.title+(label?' → '+label:''))+'</li>';
+ }).join('')+'</ul>';
  const summary='<p>'+h(counts.join(' · '))+'</p>'
   +(pending.length?'<h3>這次送審</h3>'+list(pending.filter(row=>row.choice!=='review')):'<p>勾選的歌曲都已暫緩。</p>')
   +(waiting.length?'<h3>未指定版本，確認後獨立新增（'+waiting.length+' 筆）</h3>'+list(waiting):'');

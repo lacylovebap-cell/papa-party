@@ -56,10 +56,17 @@ test('a direct pick replaces the previous target for the same source',()=>{
 
 test('only one exact candidate is suggested and linked drift still needs a choice',()=>{
  const body=source.slice(source.indexOf('function catalogSuggestedTarget('),source.indexOf('function catalogPageChoice('));
- const suggested=vm.runInNewContext(body+'\ncatalogSuggestedTarget',{});
+ const suggested=vm.runInNewContext(body+'\ncatalogSuggestedTarget',{catalogVisibleMatches:group=>{const exact=group.matches.filter(row=>row.score===1);return exact.length?exact:group.matches;},catalogView:{selected:new Set(['source'])}});
  const row={title:'同歌',artist:'歌手',versionLabel:''};
  const match={...row,score:1,variantId:'exact'};
  assert.equal(suggested(row,{matches:[match,{score:.34}]}),'exact');
  assert.equal(suggested(row,{matches:[match,{...match,variantId:'second'}]}),'');
  assert.equal(suggested({...row,previousVariant:{}},{matches:[match]}),'');
+ const sourceRow={...row,id:'source',artist:'張韶涵'};
+ const approximate={...match,artist:'張紹涵',score:.79};
+ assert.equal(suggested(sourceRow,{rows:[sourceRow],matches:[approximate]}),'exact');
+ assert.equal(suggested({...sourceRow,id:'unchecked'},{rows:[sourceRow],matches:[approximate]}),'');
+ assert.equal(suggested({...sourceRow,artist:'不同歌手'},{rows:[sourceRow],matches:[approximate]}),'');
+
 });
+
