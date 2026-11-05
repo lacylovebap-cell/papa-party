@@ -1402,7 +1402,12 @@ function previewCatalogPage(){
  const page=[catalogView.section,catalogView.page,catalogView.search,catalogView.language,catalogView.pageSize];
  const pending=rows.filter(row=>['default','independent','manual'].includes(row.choice));
  const counts=Object.entries({default:'預設通過',independent:'人工調整',review:'需要人工確認',later:'暫緩'}).map(([key,label])=>label+' '+rows.filter(row=>row.choice===key||key==='independent'&&row.choice==='manual').length+' 筆');
- modal('確認本頁審核','<p>'+h(counts.join(' · '))+'</p><ul>'+pending.map(row=>'<li>'+h(row.title)+'</li>').join('')+'</ul><p>只送出本頁列出的歌曲。</p>',pending.length?async()=>{
+ const waiting=rows.filter(row=>row.choice==='review');
+ const list=items=>'<ul>'+items.map(row=>'<li>'+h(row.title)+'</li>').join('')+'</ul>';
+ const summary='<p>'+h(counts.join(' · '))+'</p>'
+  +(pending.length?'<h3>這次送審</h3>'+list(pending):'<p>本頁目前沒有可通過的歌曲。請先在待確認的歌曲列選擇版本，或指定獨立新增。</p>')
+  +(waiting.length?'<details'+(!pending.length?' open':'')+'><summary>需要人工確認（'+waiting.length+' 筆）</summary>'+list(waiting)+'</details>':'');
+ modal('確認本頁審核',summary,pending.length?async()=>{
   if(catalogPageBusy||demo||draft||!isSuperAdmin())throw Error('請在正式管理端確認本頁');
   if(JSON.stringify(page)!==JSON.stringify([catalogView.section,catalogView.page,catalogView.search,catalogView.language,catalogView.pageSize]))throw Error('審核頁已切換，請重新預覽');
   catalogPageBusy=true;
@@ -1458,7 +1463,13 @@ function catalogReviewHtml(){
  const relationFilters=status==='approved'?membershipTabs(catalogView,'catalogMembership')+'<select id="catalog-review-language" aria-label="語言篩選">'+[['','全部語言'],...(catalogView.filterOptions?.languages||[]).map(x=>[x,x])].map(([key,label])=>'<option value="'+h(key)+'" '+(catalogView.language===key?'selected':'')+'>'+h(label)+'</option>').join('')+'</select><select id="catalog-review-version" aria-label="版本篩選">'+versionOptions(catalogView.filterOptions,catalogView)+'</select>':'';
  const lyricFilter=status==='approved'?'<select id="catalog-lyrics-filter" aria-label="共同歌詞篩選">'+[['all','全部'],['with','已建立共同歌詞'],['without','未建立共同歌詞'],...(isSuperAdmin()?[['proposals','有可採用歌詞']]:[])].map(([key,label])=>'<option value="'+key+'" '+(catalogView.lyricsFilter===key?'selected':'')+'>'+label+'</option>').join('')+'</select>':'';
  const languageSelect='<select id="catalog-review-language" aria-label="語言篩選">'+[['','全部語言'],...(catalogView.filterOptions?.languages||[]).map(x=>[x,x])].map(([key,label])=>'<option value="'+h(key)+'" '+(catalogView.language===key?'selected':'')+'>'+h(label)+'</option>').join('')+'</select>';
- if(status==='duplicates')actions=button('預覽本頁審核結果','catalogPagePreview','','primary',catalogPageBusy||catalogView.loading?'disabled':'')+actions;
+ if(status==='duplicates'){
+  const choices=catalogPageRows().map(catalogPageChoice);
+  const ready=choices.filter(choice=>['default','manual','independent'].includes(choice)).length;
+  const waiting=choices.filter(choice=>choice==='review').length;
+  actions=button('整頁通過（'+ready+' 筆）','catalogPagePreview','','primary',catalogPageBusy||catalogView.loading?'disabled':'')
+   +'<small>需要人工確認 '+waiting+' 筆 · 不用逐首勾選，先預覽再確認</small>'+actions;
+ }
  const toolbar=status==='issues'?'<div class="toolbar catalog-review-toolbar"><select id="catalog-issue-filter" aria-label="問題回報狀態">'+[['pending','待處理'],['processing','處理中'],['fixed','已修正'],['declined','不採用'],['all','全部']].map(([key,label])=>'<option value="'+key+'" '+(catalogView.issueStatus===key?'selected':'')+'>'+label+'</option>').join('')+'</select></div>':'<div class="toolbar catalog-review-toolbar catalog-compact-toolbar"><div class="catalog-search-row"><input id="catalog-review-search" type="search" aria-label="搜尋共同曲庫" placeholder="歌名、歌手、語言、演唱類型、版本、歌詞" value="'+h(catalogView.search||'')+'">'+button('搜尋','catalogFilter')+'</div>'+(['singles','duplicates'].includes(status)?'<div class="catalog-language-selection-row">'+languageSelect:relationFilters+lyricFilter)+(['singles','duplicates'].includes(status)?'<div class="catalog-selection-row">'+button('選取本頁','catalogSelectPage')+button('選取目前結果','catalogSelectAll')+button('取消選取','catalogClear')+'<small>已選 '+catalogView.selected.size+' 筆</small></div></div>':'')+'</div>';
  return tabs+toolbar+'<div class="actions catalog-batch-actions">'+actions+'</div>'+(catalogView.error?'<p class="error">'+h(catalogView.error)+'</p>':'')+(status==='approved'?sortControl('catalog'):'')+'<div id="catalog-review-list">'+(entries||blank(catalogView.loading?'正在讀取…':'沒有待處理資料'))+'</div>'+catalogPager(catalogView,'catalogPage');
 }
