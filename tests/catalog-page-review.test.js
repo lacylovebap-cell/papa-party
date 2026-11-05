@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const source=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
+test('preview writes only confirmed page rows and retries only the unfinished batch',async()=>{
+ const items=Array.from({length:53},(_,i)=>({id:String(i),title:'Song '+i,sourceHash:'hash',updatedAt:'version',defaultTarget:i!==52?'variant-a':null}));
+ const calls=[];let submit,reloads=0,failed=false;
+ const catalogView={items,loaded:true,section:'duplicates',page:1,selected:new Set(['offpage']),selectedRows:new Map(),selectedSources:new Map(),selectedVariants:new Map()};
+ const ctx=vm.createContext({catalogView,admin:{},state:{currentStreamer:{id:'room'}},tab:'catalog',demo:false,draft:false,isSuperAdmin:()=>true,h:String,modal:(_title,_body,fn)=>{submit=fn;},$:()=>({}),invalidateCatalogTabs(){},loadCatalogReview:async()=>{reloads++;},toast(){},api:async request=>{calls.push(request);if(request.candidateIds[0]==='50'&&!failed){failed=true;throw Error('failed');}}});
+ vm.runInContext(source.slice(source.indexOf('const catalogPageChoices='),source.indexOf('function catalogReviewHtml()'))+"\ncatalogPageChoices.set('51','independent');catalogPageChoices.set('52','later');previewCatalogPage();",ctx);
+ assert.equal(calls.length,0);
+ await assert.rejects(submit(),/failed/);
+ assert.equal(reloads,0);
+ await submit();
+ assert.deepEqual(calls.map(x=>Array.from(x.candidateIds).join(',')).slice(1),['50','50','51']);
+ assert.equal(calls[0].candidateIds.length,50);
+ assert.equal(calls.at(-1).decision,'independent');
+ assert.equal(reloads,1);
+});

@@ -198,7 +198,7 @@ async function catalogOperation(b:any,who:any){
   }
   if(!isSuper(who))throw Error('僅限 PA Party總裁');
   if(['singles','duplicates','families'].includes(b.status)){
-   const r=await api('/rest/v1/rpc/papa_catalog_review_page',{section:b.status,query_text:String(b.q||'').slice(0,100),language_name:String(b.language||'').slice(0,100),page_limit:page.limit,page_offset:page.offset,chosen_group:b.groupId||null});
+   const r=await api('/rest/v1/rpc/'+(b.status==='duplicates'?'papa_catalog_review_page_matches':'papa_catalog_review_page'),{section:b.status,query_text:String(b.q||'').slice(0,100),language_name:String(b.language||'').slice(0,100),page_limit:page.limit,page_offset:page.offset,chosen_group:b.groupId||null});
    return {items:r.rows||[],total:r.total||0,hasMore:!!r.hasMore,counts:r.counts};
   }
   const status=['pending','approved','rejected','removed','history'].includes(b.status)?b.status:'pending';
@@ -231,6 +231,11 @@ async function catalogOperation(b:any,who:any){
    return await api('/rest/v1/rpc/papa_catalog_review_versions',{candidate_ids:ids,
     expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),actor_id:catalogActor(who),
     common_metadata:b.commonMetadata||{},variant_metadata:b.variantMetadata,target_family:targetFamily});
+  }
+  if(b.pageReview===true){
+   const updates=b.expectedUpdates;
+   if(!['link_variant','independent'].includes(b.decision)||ids.some((id:any)=>typeof updates?.[id]!=='string'||!Number.isFinite(Date.parse(updates[id]))))throw Error('候選資料已更新，請重新預覽');
+   return await api('/rest/v1/rpc/papa_catalog_review_page_submit',{decision:b.decision,candidate_ids:ids,expected_sources:sources,expected_updates:Object.fromEntries(ids.map((id:any)=>[id,updates[id]])),actor_id:catalogActor(who),target_variant:targetVariant});
   }
   if(!['reject','remove','unlink'].includes(b.decision))return await api('/rest/v1/rpc/papa_catalog_review_selected',{decision:b.decision,candidate_ids:ids,expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),actor_id:catalogActor(who),target_family:targetFamily,target_variant:targetVariant,common_metadata:{...(b.commonMetadata||{}),...(b.variantLabel?{versionLabel:String(b.variantLabel).slice(0,100)}:{})},lyrics_source:b.lyricsSource||null,shared_body:b.sharedBody??null,version_labels:b.versionLabels||{}});
   return await api('/rest/v1/rpc/papa_catalog_review_v2',{decision:b.decision,candidate_ids:ids,target_variant:targetVariant,target_family:targetFamily,version_label:String(b.variantLabel||'').slice(0,100),actor_id:catalogActor(who),expected_sources:Object.fromEntries(ids.map((id:any)=>[id,sources[id]])),common_metadata:b.commonMetadata||{}});

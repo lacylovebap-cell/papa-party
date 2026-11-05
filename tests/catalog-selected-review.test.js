@@ -32,11 +32,21 @@ test('selected review keeps Honey 2+1 / 2+2 isolated, private data intact and ly
  }
  const selection=async ids=>{const rows=await q('select id,source_hash from papa_catalog_candidates where song_id=any($1) order by song_id',[ids]);return {ids:rows.map(r=>r.id),hashes:Object.fromEntries(rows.map(r=>[r.id,r.source_hash]))};};
  const review=async(ids,decision,extra={})=>{const a=await selection(ids);return rpc('papa_catalog_review_selected',[decision,a.ids,a.hashes,'president',extra.family||null,null,extra.metadata||{},extra.lyrics?a.ids[0]:null,null]);};
+ await db.exec(fs.readFileSync('supabase/migrations/20261104190617_catalog_page_match_summary.sql','utf8'));
+ const page=await rpc('papa_catalog_review_page_matches',['singles','','',20,0,null]);
+ assert.equal(page.rows[0].defaultTarget,undefined);
+ const submit=(row,decision='independent')=>rpc('papa_catalog_review_page_submit',[decision,[row.id],{[row.id]:row.sourceHash},{[row.id]:row.updatedAt},'president',null]);
+ await assert.rejects(submit({...page.rows[0],updatedAt:'2020-01-01'}),/STALE/);
  const single=await rpc('papa_catalog_review_page',['singles']);assert.equal(single.total,1);assert.equal(single.rows[0].title,'Solo');
  const dup=await rpc('papa_catalog_review_page',['duplicates','', '',1,0]);assert.equal(dup.total,3);assert.equal(dup.rows.length,1);assert.equal(dup.rows[0].rows.length,3);assert.ok(dup.hasMore);assert.ok(!JSON.stringify(dup).includes('lyrics 0'));
  const a=await review(['s0','s1'],'confirm_same',{lyrics:true});
  assert.equal((await rpc('papa_catalog_get_lyrics',[null,'b','s1'])).body,'lyrics 0');
  assert.equal((await rpc('papa_catalog_get_lyrics',[null,'papa','s0'])).mode,'own');
+ const matchPage=await rpc('papa_catalog_review_page_matches',['duplicates','Honey','',20,0,null]);
+ assert.ok(matchPage.rows.some(g=>g.matches.some(m=>m.variantId===a.variantId)));
+ const previousPage=await rpc('papa_catalog_review_page',['duplicates','Honey','',20,0,null]);
+ t.diagnostic('Serialized duplicate page: '+Buffer.byteLength(JSON.stringify(previousPage))+' → '+Buffer.byteLength(JSON.stringify(matchPage))+' bytes, one list call each');
+ assert.ok(!JSON.stringify(matchPage).includes('lyrics 0'));
  const residual=await rpc('papa_catalog_review_page',['duplicates','Honey']);assert.ok(residual.rows.some(g=>g.rows.length===1&&g.rows[0].songId==='s2'));
  const b=await review(['s2'],'independent');assert.notEqual(a.familyId,b.familyId);
  const c=await review(['s3','s4'],'confirm_same');const d=await review(['s5','s6'],'confirm_same');assert.notEqual(c.familyId,d.familyId);
@@ -55,6 +65,9 @@ test('selected review keeps Honey 2+1 / 2+2 isolated, private data intact and ly
  await assert.rejects(review(['s7'],'confirm_same'),/INVALID/);
  const e=await selection(['s7']);e.hashes[e.ids[0]]='0'.repeat(32);await assert.rejects(rpc('papa_catalog_review_selected',['independent',e.ids,e.hashes,'president']),/STALE/);
  await rpc('papa_catalog_candidate_edit',[e.ids[0],(await selection(['s7'])).hashes[e.ids[0]],{title:'Edited',artist:'New',language:'華語',performerType:'男歌手',versionLabel:'Live'},'president']);
+ await assert.rejects(submit(page.rows[0]),/STALE/);
+ const edited=await rpc('papa_catalog_review_page_matches',['singles','Edited','',20,0,null]);
+ assert.equal(edited.rows[0].defaultTarget,undefined);
  assert.equal((await rpc('papa_catalog_review_page',['singles'])).rows[0].title,'Edited');
  assert.deepEqual((await q("select data from papa_v2_entities where kind='songs' order by id")).map(r=>r.data),originals.sort((a,b)=>a.songId.localeCompare(b.songId)));
  assert.ok((await q('select count(*)::int n from papa_catalog_negative_decisions'))[0].n>0);
