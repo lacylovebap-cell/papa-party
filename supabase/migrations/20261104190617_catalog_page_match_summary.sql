@@ -1,9 +1,9 @@
 begin;
-create function public.papa_catalog_page_exact_target(candidate_id uuid)
+create function public.papa_catalog_page_exact_target(candidate_id uuid, page_matches jsonb default null)
 returns uuid language sql stable security invoker set search_path=public as $$
  select v.id
  from papa_catalog_candidates c
- cross join lateral (select papa_catalog_suggest_variants(c.id,2) as matches) m
+ cross join lateral (select coalesce(page_matches,papa_catalog_suggest_variants(c.id,2)) as matches) m
  join papa_catalog_variants v on v.id=(m.matches->0->>'variantId')::uuid
  where c.id=candidate_id and c.status='pending' and c.preferred_family is null
  and coalesce(c.edited_metadata,'{}'::jsonb)='{}'::jsonb
@@ -16,8 +16,8 @@ returns uuid language sql stable security invoker set search_path=public as $$
  and nullif(trim(c.language_text),'') is not null and c.language_text=m.matches->0->>'language'
  and nullif(trim(c.performer_type_text),'') is not null and c.performer_type_text=m.matches->0->>'performerType'
 $$;
-revoke all on function public.papa_catalog_page_exact_target(uuid) from public,anon,authenticated;
-grant execute on function public.papa_catalog_page_exact_target(uuid) to service_role;
+revoke all on function public.papa_catalog_page_exact_target(uuid,jsonb) from public,anon,authenticated;
+grant execute on function public.papa_catalog_page_exact_target(uuid,jsonb) to service_role;
 
 create function public.papa_catalog_review_page_matches(
  section text, query_text text, language_name text, page_limit int,
@@ -28,15 +28,23 @@ create function public.papa_catalog_review_page_matches(
  ), decorated as (
   select entry.ordinality, entry.value || case
    when section='duplicates' and chosen_group is null then
-    jsonb_build_object('matches',papa_catalog_suggest_variants((entry.value->'rows'->0->>'id')::uuid,3),'rows',
+    jsonb_build_object('matches',summary.matches,'rows',
      (select jsonb_agg(source.value || jsonb_build_object(
-       'defaultTarget',papa_catalog_page_exact_target((source.value->>'id')::uuid),
+       'defaultTarget',case when jsonb_array_length(summary.matches)=1
+         and papa_catalog_normalize(source.value->>'title')=papa_catalog_normalize(entry.value->'rows'->0->>'title')
+        then papa_catalog_page_exact_target((source.value->>'id')::uuid,summary.matches) end,
        'previousVariant', (select jsonb_build_object('variantId',v.id,'title',v.title,'artist',v.artist,'versionLabel',v.version_label)
          from papa_catalog_song_links l join papa_catalog_variants v on v.id=l.variant_id
          where l.streamer_id=source.value->>'streamerId' and l.song_id=source.value->>'songId')
      ) order by source.ordinality) from jsonb_array_elements(entry.value->'rows') with ordinality source))
    else '{}'::jsonb end as item
   from page cross join lateral jsonb_array_elements(page.result->'rows') with ordinality as entry
+  cross join lateral (
+   select case when section='duplicates' and chosen_group is null
+    then papa_catalog_suggest_variants((entry.value->'rows'->0->>'id')::uuid,3)
+    else '[]'::jsonb end as matches
+   offset 0
+  ) summary
  )
  select result || jsonb_build_object('rows',
   coalesce((select jsonb_agg(item order by ordinality) from decorated),'[]'::jsonb))

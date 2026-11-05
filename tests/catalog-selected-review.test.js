@@ -156,4 +156,36 @@ test('selected review keeps Honey 2+1 / 2+2 isolated, private data intact and ly
  const meta=await rpc('papa_catalog_song_metadata',['papa']);assert.ok(meta.some(row=>row.otherStreamerCount>0));assert.ok(meta.every(row=>Number.isInteger(row.otherStreamerCount)));assert.ok(!JSON.stringify(meta).includes('custom sf1'));
  for(const role of ['anon','authenticated']){await db.exec('set role '+role);await assert.rejects(rpc('papa_catalog_families_page_v3'),/permission denied/);await assert.rejects(rpc('papa_catalog_variant_rooms_v3',[a.variantId]),/permission denied/);await assert.rejects(rpc('papa_catalog_review_page',['singles']),/permission denied/);await assert.rejects(q('select body from papa_catalog_custom_archives'),/permission denied/);await db.exec('reset role');}
  }
+ { const insertSource=async(id,streamer,title,artist='驗收歌手',version='驗收版')=>{
+  await q('insert into papa_v2_entities values($1,$2,$3)',['songs',id,{songId:id,streamer_id:streamer,title,artist,version,cat:'華語',artistType:'女歌手',tags:['私人'],lyrics:'私人歌詞'}]);
+ };
+ const batch=async(rows,decision,target=null,options={})=>rpc('papa_catalog_review_page_submit',[
+  decision,rows.map(row=>row.id),Object.fromEntries(rows.map(row=>[row.id,row.sourceHash])),
+  Object.fromEntries(rows.map(row=>[row.id,row.updatedAt])),'president',target,options
+ ]);
+ await insertSource('verify-root','papa','罕見唯一驗收曲');
+ const root=await review(['verify-root'],'independent',{metadata:{versionLabel:'驗收版'}});
+ await insertSource('verify-exact','b','罕見唯一驗收曲');
+ await insertSource('verify-other','c','罕見唯一驗收曲','另一位歌手');
+ await insertSource('verify-live','d','罕見唯一驗收曲','驗收歌手','現場版');
+ const matches=await rpc('papa_catalog_review_page_matches',['duplicates','罕見唯一驗收曲','',20,0,null]);
+ const verifyRows=matches.rows.flatMap(group=>group.rows);
+ const exact=verifyRows.find(row=>row.songId==='verify-exact');
+ const other=verifyRows.find(row=>row.songId==='verify-other');
+ const live=verifyRows.find(row=>row.songId==='verify-live');
+ assert.equal(exact.defaultTarget,root.variantId);
+ assert.equal(other.defaultTarget,null);
+ assert.equal(live.defaultTarget,null);
+ await assert.rejects(batch([exact,other],'link_variant',root.variantId,{automatic:true}),/STALE/);
+ await batch([exact],'link_variant',root.variantId,{automatic:true});
+ await assert.rejects(batch([exact],'link_variant',root.variantId,{automatic:true}),/STALE/);
+ assert.equal((await q("select variant_id from papa_catalog_song_links where song_id='verify-exact'"))[0].variant_id,root.variantId);
+ const byId=Object.fromEntries([[other.id,{versionLabel:'翻唱版'}],[live.id,{versionLabel:'現場版'}]]);
+ await batch([other,live],'different_versions',null,{familyId:root.familyId,variantMetadata:byId});
+ const links=await q("select l.variant_id,v.family_id from papa_catalog_song_links l join papa_catalog_variants v on v.id=l.variant_id where l.song_id in ('verify-other','verify-live')");
+ assert.equal(new Set(links.map(row=>row.variant_id)).size,2);
+ assert.ok(links.every(row=>row.family_id===root.familyId));
+ assert.ok((await q("select data from papa_v2_entities where kind='songs' and id like 'verify-%'")).every(row=>row.data.lyrics==='私人歌詞'));
+
+}
 });
