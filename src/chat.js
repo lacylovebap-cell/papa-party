@@ -1,3 +1,4 @@
+import {installImeSubmitGuard} from './search-ime.js';
 import {communicationIdentity} from './communication-context.js?v=10.19-WEB.1';
 import {communicationTarget} from './communication-target.js?v=10.19-WEB.1';
 export function createChat({api,context,toast,onRead,realtimeAvailable=()=>false,pushHint=()=>''}){
@@ -47,7 +48,8 @@ export function createChat({api,context,toast,onRead,realtimeAvailable=()=>false
   const form=e.target.closest('textarea[name="body"]')?.closest('[data-chat-compose]');if(!form)return;
   e.preventDefault();if(!e.repeat&&!sending&&active())form.requestSubmit();
  });
- dialog.addEventListener('submit',async e=>{e.preventDefault();if(!active()){dialog.close();return;}const form=e.target,f=new FormData(form),g=generation;try{
+ const imeSubmit=installImeSubmitGuard(dialog);
+ dialog.addEventListener('submit',async e=>{e.preventDefault();if(e.target.hasAttribute('data-chat-search')&&imeSubmit(e.target))return;if(!active()){dialog.close();return;}const form=e.target,f=new FormData(form),g=generation;try{
   if(form.hasAttribute('data-chat-search')){const r=await call({op:'search',query:String(f.get('query')||'')});if(g!==generation||!active())return;dialog.querySelector('[data-chat-peers]').innerHTML=r.players.map(p=>`<button data-chat="thread" data-player="${h(p.playerId)}">${h(p.name)}</button>`).join('')||'<p>找不到玩家</p>';return;}
   if(!form.hasAttribute('data-chat-compose')||sending)return;const body=String(f.get('body')||'').trim();if(!body)return;
   if(!pending||pending.body!==body)pending={body,clientId:crypto.randomUUID()};sending=true;const button=form.querySelector('[type="submit"]');button.disabled=true;

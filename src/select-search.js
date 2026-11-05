@@ -25,7 +25,7 @@ function open(select){
   list.replaceChildren(...opts.map(o=>{const b=document.createElement('button');b.type='button';b.className='ss-option'+(o.selected?' selected':'');b.setAttribute('role','option');b.setAttribute('aria-selected',String(o.selected));b.textContent=textOf(o)||'（空白）';b.addEventListener('click',()=>choose(select,o));return b;}));
   if(!opts.length){const p=document.createElement('p');p.className='ss-empty';p.textContent='找不到符合的選項';list.append(p);}};
  search.addEventListener('input',render);
- search.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='Escape'){e.preventDefault();close(true);}else if(e.key==='Enter'){e.preventDefault();const first=list.querySelector('.ss-option');if(first)first.click();}else if(e.key==='ArrowDown'){e.preventDefault();list.querySelector('.ss-option')?.focus();}});
+ search.addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Escape'){e.preventDefault();close(true);}else if(e.key==='Enter'){e.preventDefault();const first=list.querySelector('.ss-option');if(first)first.click();}else if(e.key==='ArrowDown'){e.preventDefault();list.querySelector('.ss-option')?.focus();}});
  list.addEventListener('keydown',e=>{const items=[...list.querySelectorAll('.ss-option')],i=items.indexOf(document.activeElement);if(e.key==='ArrowDown'&&i>=0){e.preventDefault();items[Math.min(items.length-1,i+1)].focus();}else if(e.key==='ArrowUp'&&i>=0){e.preventDefault();(i?items[i-1]:search).focus();}else if(e.key==='Escape'){e.preventDefault();close(true);}});
  (select.closest('dialog[open]')||document.body).append(panel);render();place(select);
  list.querySelector('.ss-option.selected')?.scrollIntoView({block:'nearest'});
@@ -41,7 +41,7 @@ export function installSelectSearch(target=document){
   const s=e.target.closest?.('select');if(!eligible(s)||e.button>0)return;
   e.preventDefault();if(owner===s){close(true);return;}s.focus({preventScroll:true});open(s);
  },true);
- root.addEventListener('keydown',e=>{const s=e.target;if(!eligible(s)||e.isComposing)return;
+ root.addEventListener('keydown',e=>{const s=e.target;if(!eligible(s)||e.isComposing||e.keyCode===229)return;
   if(e.key==='Enter'||e.key===' '||e.key==='F4'||(e.altKey&&e.key==='ArrowDown')){e.preventDefault();open(s);}},true);
  // A select whose page is re-rendered under the panel takes the panel with it.
  new MutationObserver(()=>{if(panel&&owner&&!owner.isConnected)close();}).observe(root.body||root,{childList:true,subtree:true});

@@ -189,6 +189,6 @@ export function createMedalManagement({api,context,root=document,modal,toast,onC
   if(t.hasAttribute('data-medal-grant')){e.preventDefault();grant().catch(error);}
  });
  function jump(kind){const input=root.querySelector('[data-medal-jump="'+kind+'"]');if(input)list(kind,Math.max(0,Math.min(Number(input.max)-1,Math.floor(Number(input.value)||1)-1)));}
- root.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.isComposing)return;const t=e.target;if(t.dataset.medalJump){e.preventDefault();jump(t.dataset.medalJump);}if(t.dataset.medalQuery){e.preventDefault();if(active(dialog)){dialog.queries[t.dataset.medalQuery]=t.value;list(t.dataset.medalQuery);}}});
+ root.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.isComposing||e.keyCode===229)return;const t=e.target;if(t.dataset.medalJump){e.preventDefault();jump(t.dataset.medalJump);}if(t.dataset.medalQuery){e.preventDefault();if(active(dialog)){dialog.queries[t.dataset.medalQuery]=t.value;list(t.dataset.medalQuery);}}});
  return {load,openPlayer:(row,player)=>open(row,player)};
 }

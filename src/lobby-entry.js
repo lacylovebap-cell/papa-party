@@ -1,3 +1,4 @@
+import {installImeSubmitGuard} from './search-ime.js';
 import {appStartButton,updateAppStart} from './pwa-start-ui.js?v=10.20-PWA.1';
 import {createLobbyRoomRotation,installLobbyRoomRotation} from './lobby-room-rotation.js?v=10.20-WEB.1';
 import {API,PUBLISHABLE_KEY} from './config.js?v=10.20-WEB.1';
@@ -67,8 +68,9 @@ const lobby=createPublicLobby({roomPageSize:3,href:location.href,replaceLocation
 const initial=lobby.state();$('#lobby-q').value=initial.q;$('#lobby-room-q').value=initial.roomQ;
 $('#lobby-version').innerHTML=LOBBY_VERSIONS.map(([key,label])=>'<option value="'+key+'" '+(initial.versionKind===key?'selected':'')+'>'+label+'</option>').join('');
 const search=kind=>{clearTimeout(timers[kind]);return lobby.update(kind==='rooms'?{roomQ:$('#lobby-room-q').value}:{q:$('#lobby-q').value});};
-document.addEventListener('submit',e=>{const kind=e.target.dataset.lobbySearch;if(kind){e.preventDefault();if(!composing)search(kind);}});
-document.addEventListener('compositionstart',()=>{composing=true;});
+const lobbyImeSubmit=installImeSubmitGuard(document);
+document.addEventListener('submit',e=>{const kind=e.target.dataset.lobbySearch;if(kind){e.preventDefault();if(!lobbyImeSubmit(e.target))search(kind);}});
+document.addEventListener('compositionstart',e=>{composing=true;if(e.target.id==='lobby-q')clearTimeout(timers.songs);if(e.target.id==='lobby-room-q')clearTimeout(timers.rooms);});
 document.addEventListener('compositionend',e=>{composing=false;if(e.target.id==='lobby-q'||e.target.id==='lobby-room-q'){const kind=e.target.id==='lobby-q'?'songs':'rooms';clearTimeout(timers[kind]);timers[kind]=setTimeout(()=>search(kind),400);}});
 document.addEventListener('input',e=>{if(composing||e.isComposing)return;const kind=e.target.id==='lobby-q'?'songs':e.target.id==='lobby-room-q'?'rooms':null;if(kind){clearTimeout(timers[kind]);timers[kind]=setTimeout(()=>search(kind),400);}});
 document.addEventListener('change',e=>{const key=({'lobby-language':'language','lobby-performer':'performerType','lobby-version':'versionKind'})[e.target.id];if(key){clearTimeout(timers.songs);lobby.update({[key]:e.target.value,q:$('#lobby-q').value});}});

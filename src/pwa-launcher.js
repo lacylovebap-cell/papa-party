@@ -1,3 +1,4 @@
+import {installImeSubmitGuard} from './search-ime.js';
 import {HOME_KEY,normalizeHome,readHome,readLegacyHome,saveHome} from './pwa-start.js?v=10.20-PWA.1';
 import {decodeInstallSource} from './pwa-install-source.js?v=10.20-PWA.1';
 
@@ -92,7 +93,11 @@ export function mountPwaLauncher({document,window,api,storage,mount=new URL('../
   pager.append(button('上一頁',()=>launcher.search({page:state.page-1}),state.busy||state.page<=1),label,button('跳頁',jump,state.busy),button('下一頁',()=>launcher.search({page:state.page+1}),state.busy||state.page>=state.totalPages));
  };
  launcher=createPwaLauncher({api,storage,mount,href:window.location.href,navigate:url=>window.location.replace(url),render});
- form.addEventListener('submit',event=>{event.preventDefault();if(!event.isComposing)launcher.search({q:query.value,kind:kind.value,page:1});});
+ const imeSubmit=installImeSubmitGuard(form);
+ form.addEventListener('submit',event=>{
+  event.preventDefault();
+  if(!imeSubmit(form))launcher.search({q:query.value,kind:kind.value,page:1});
+ });
  kind.addEventListener('change',()=>launcher.search({q:query.value,kind:kind.value,page:1}));retry.onclick=()=>launcher.retry();choose.onclick=()=>launcher.search({q:'',kind:'all',page:1});
  launcher.start({choose:new URL(window.location.href).searchParams.get('choose')==='1'});
  window.addEventListener('pagehide',event=>{if(!event.persisted)launcher.close();},{once:true});
