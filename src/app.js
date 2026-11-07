@@ -1,14 +1,14 @@
 import {installImeSubmitGuard} from './search-ime.js';
-import {createPracticeZone} from './practice-zone.js?v=11.08-HIDE.6';
-import {createSongRanking} from './song-ranking.js?v=11.08-HIDE.6';
+import {createPracticeZone} from './practice-zone.js?v=11.08-CATN.1';
+import {createSongRanking} from './song-ranking.js?v=11.08-CATN.1';
 import {createMonthStats} from './month-stats.js?v=11.03-MS.3';
-import {createTutorialCenter} from './tutorial-center.js?v=11.08-HIDE.6';
+import {createTutorialCenter} from './tutorial-center.js?v=11.08-CATN.1';
 import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.46';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
 
 import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.46';
-import {createPlatformManagement} from './platform-management.js?v=11.08-HIDE.6';
+import {createPlatformManagement} from './platform-management.js?v=11.08-CATN.1';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
 import {streamerWriteData} from './streamer-write-data.js';
@@ -23,10 +23,10 @@ import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
 import {canonicalNoticeLink} from './notification-rules.js?v=10.31-PUSH.3';
 import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.31-CALL.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.08-HIDE.6';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.08-CATN.1';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
 import {createBoard} from './board.js?v=10.20-WEB.1';
-import {createChat} from './chat.js?v=11.08-HIDE.6';
+import {createChat} from './chat.js?v=11.08-CATN.1';
 import {requestSourceLabel} from './request-source.js?v=10.20-WEB.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=10.20-WEB.1';
 import {openHomeEditor} from './home-editor.js?v=10.20-WEB.1';
@@ -53,7 +53,7 @@ import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} fro
 import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.20-WEB.1';
 import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.20-WEB.1';
 import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.29-THEME.2';
-import {createMedalManagement} from './medal-management.js?v=11.08-HIDE.6';
+import {createMedalManagement} from './medal-management.js?v=11.08-CATN.1';
 import {roomPricing,roomRollover,queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,requestFees,reservedCredits,reservedHour,savedQuota,songSelection,cancelRecovery,carryPendingQuota,CARRY_PENDING_MESSAGE} from './core.js?v=11.02-CARRY.1';
 import {formatGift} from './pricing-engine.js?v=10.29-SPACE.1';
 import {feeColumns,giftReveal,priceGuide,crownGuide} from './pricing-ui.js?v=10.29-SPACE.1';
@@ -472,7 +472,7 @@ function syncPageLocation(push=false){const view={route,tab,subtab,selectedPlaye
 async function restorePageLocation(){const next=publicApplicationPage(location.href,publicRouteContext,spaceMount);if(next.route===route&&next.tab===tab&&next.subtab===subtab&&next.selectedPlayer===selectedPlayer&&next.queueHistory===queueHistory)return;tab=next.tab;subtab=next.subtab;selectedPlayer=next.selectedPlayer;queueHistory=next.queueHistory;await go(next.route);}
 async function go(next){if(entryPending){if(next==='admin'&&!admin){await adminLogin();return;}await openSpaceEntry();return;}if(next==='admin'&&admin?.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(roomDestination(admin.streamerSlug));u.hash='admin';location.href=u.href;return;}signatures=signatures.songs?{songs:signatures.songs}:{};route=next;syncPageLocation(true);filters={q:'',tags:[],language:''};pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);if(next==='admin'&&!admin){route='home';await adminLogin();return;}if(next==='center'&&!session){route='home';await loginDialog();return;}await refresh(true);if(next==='common-book')await loadCommonBook(0);if(pendingCommonRequest&&session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}}
 // Searchable dropdowns everywhere (loaded on its own so a failure never blocks the page).
-import('./select-search.js?v=11.08-HIDE.6').then(m=>m.installSelectSearch(document)).catch(()=>{});
+import('./select-search.js?v=11.08-CATN.1').then(m=>m.installSelectSearch(document)).catch(()=>{});
 const notifications=createNotifications({messageCenterV2:true,companion:()=>admin&&session&&!demo&&!entryPending&&!inNativeSpace()&&!nativeNoticesOff()&&!(session.spaceId&&session.spaceId!=='space-001')?{role:'player',recipient:session.playerId,streamer:streamerSlug,spaceId:session.spaceId||'space-001',deviceSessionId:session.sessionId,accountId:session.accountId}:null,companionApi:b=>api({...b,playerSession:true}),api:b=>api({...b,management:!!admin,streamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug}),apiUrl:API,apiKey:PUBLISHABLE_KEY,context:()=>({accountId:(admin||session)?.accountId,streamerId:state.currentStreamer?.id,selectedStreamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug,selectedStreamerName:state.currentStreamer?.display_name,spaceStreamers:(state.streamers||[]).filter(r=>r.active!==false&&(r.spaceId||'space-001')===(session?.spaceId||state.currentStreamer?.spaceId||'space-001')).map(r=>({slug:r.slug,id:r.id,name:r.display_name})),spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',deviceSessionId:(admin||session)?.sessionId,demo:demo||entryPending||!!(draft&&isAdmin()),role:admin?(admin.role||'super_admin'):'player',recipient:nativeNoticesOff()?null:admin?(isSuperAdmin()?'__super__':'__admin__'):session?.playerId,streamer:admin?(isSuperAdmin()?'__global__':admin.streamerSlug):streamerSlug,streamerName:admin&&isSuperAdmin()?'全部主播':state.currentStreamer?.display_name}),toast,onOpenCategory:category=>category==='message'?chat.open():board.open(),onNavigate:navigateNotice,onUpdate:notices=>{if(notices.some(notice=>notice.type==='achievement'))achievementPanel.load(true).catch(()=>{});if(notices.some(notice=>notice.type==='message'))chat.refresh().catch(()=>{});if(notices.some(notice=>['live','saved','cancel','ready','accepted','completed','credit','status','wish'].includes(notice.type)))syncRecovery.invalidate('notification');}});
 const chat=createChat({api,pushHint:()=>{try{return notifications.pushHint();}catch{return '';}},context:()=>({spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',manager:!!admin,role:admin?.role||'player',accountId:(admin||session)?.accountId,deviceSessionId:(admin||session)?.sessionId,playerId:session?.playerId,streamer:streamerSlug,streamerId:state.currentStreamer?.id,streamerName:hostName(),demo:demo||entryPending||!!draft}),toast,onRead:()=>notifications.refresh().catch(()=>{}),realtimeAvailable:()=>notifications.realtimeAvailable()});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-chat]'))chat.open().catch(e=>toast(e.message));});
@@ -828,7 +828,7 @@ function renderAdmin(){if(tab==='events')tab='queue';if(tab==='platform'){if(!do
  if(tab==='stats')body=monthStats.html()+`<label>帳務日期<input id="stats-day" type="date" value="${accountingDay(clock(),accountingRollover(state))}"></label><div id="stats-result">${statsHtml(currentAccounting())}</div><p class="muted">依本 Space 設定換場。收到新歌不含分配退回；存歌為本場收到後未分配、未唱掉的首數；已唱包含提歌、現點及已過檔演唱。測試資料不列入。</p>`;
  if(tab==='settings')body=settingsHtml();
  if(tab==='catalog'&&admin){if(!isSuperAdmin()&&!['approved','issues'].includes(catalogView.section))catalogView.section='approved';body=catalogReviewHtml();}
- $('#app').innerHTML=`<div class="admin-banner"><b>🔐 ${isSuperAdmin()?'PA Party總裁 · ':''}${h(hostName())}的管理後台</b><div class="actions">${button(h('回'+hostName()+'首頁'),'home')}${button('修改密碼','changeManagerPassword')}${button('登出管理','adminLogout')}</div></div><div class="streamer-toolbar"><details class="room-picker"><summary>目前管理主播：${h(state.currentStreamer.display_name)}</summary><input type="search" data-room-filter placeholder="搜尋主播"><div class="room-options">${state.streamers.map(r=>button(h(r.display_name)+(r.active?'':'（未開放）'),'switchStreamer',r.slug)).join('')}</div></details>${isSuperAdmin()?'<details class="streamer-management-tools"><summary>平台管理</summary><div class="actions">'+button('平台管理中心','adminTab','platform')+'</div></details>':''}</div><div class="tabs admin-section-tabs" aria-label="管理功能">${adminTabs.slice(0,4).map(([id,label])=>button(label+countBadge(adminCount(id)),'adminTab',id,tab===id?'active':'')).join('')}${button('共同曲庫','adminTab','catalog',tab==='catalog'?'active':'')}<details class="admin-more-tabs ${adminTabs.slice(0,4).some(([id])=>id===tab)||tab==='catalog'?'':'active'}"><summary>更多<span class="menu-pending-dot" data-admin-more-alert data-local-pending="${state.wishes.filter(w=>w.status==='收到').length}" ${(state.wishes.some(w=>w.status==='收到')||notifications.systemUnread?.())?'':'hidden'} aria-label="有待處理或未讀事件"></span></summary><div class="admin-more-options">${[...adminTabs.slice(4),...(isSuperAdmin()?[['platform','平台總管理'],['activity','最近活動']]:[])].map(([id,label])=>button(label+countBadge(adminCount(id)),'adminTab',id,tab===id?'active':'')).join('')}${button('📖 操作教學','tutorialCenter')}</div></details></div><section class="card">${body}</section>`;if(!isSuperAdmin()){for(const el of document.querySelectorAll('[data-act=editStreamer],[data-act=draft],[data-act=publish],[data-act=backup],[data-act=migrate],[data-act=import][data-id=players]'))el.remove();document.querySelector('.room-picker')?.remove();}if(tab==='catalog'&&!catalogView.loaded&&!catalogView.loading)setTimeout(loadCatalogReview,0);
+ $('#app').innerHTML=`<div class="admin-banner"><b>🔐 ${isSuperAdmin()?'PA Party總裁 · ':''}${h(hostName())}的管理後台</b><div class="actions">${button(h('回'+hostName()+'首頁'),'home')}${button('修改密碼','changeManagerPassword')}${button('登出管理','adminLogout')}</div></div><div class="streamer-toolbar"><details class="room-picker"><summary>目前管理主播：${h(state.currentStreamer.display_name)}</summary><input type="search" data-room-filter placeholder="搜尋主播"><div class="room-options">${state.streamers.map(r=>button(h(r.display_name)+(r.active?'':'（未開放）'),'switchStreamer',r.slug)).join('')}</div></details>${isSuperAdmin()?'<details class="streamer-management-tools"><summary>平台管理</summary><div class="actions">'+button('平台管理中心','adminTab','platform')+'</div></details>':''}</div><div class="tabs admin-section-tabs" aria-label="管理功能">${adminTabs.slice(0,4).map(([id,label])=>button(label+countBadge(adminCount(id)),'adminTab',id,tab===id?'active':'')).join('')}${button('共同曲庫'+catalogDotHtml(),'adminTab','catalog',tab==='catalog'?'active':'')}<details class="admin-more-tabs ${adminTabs.slice(0,4).some(([id])=>id===tab)||tab==='catalog'?'':'active'}"><summary>更多<span class="menu-pending-dot" data-admin-more-alert data-local-pending="${state.wishes.filter(w=>w.status==='收到').length}" ${(state.wishes.some(w=>w.status==='收到')||notifications.systemUnread?.())?'':'hidden'} aria-label="有待處理或未讀事件"></span></summary><div class="admin-more-options">${[...adminTabs.slice(4),...(isSuperAdmin()?[['platform','平台總管理'],['activity','最近活動']]:[])].map(([id,label])=>button(label+countBadge(adminCount(id)),'adminTab',id,tab===id?'active':'')).join('')}${button('📖 操作教學','tutorialCenter')}</div></details></div><section class="card">${body}</section>`;if(!isSuperAdmin()){for(const el of document.querySelectorAll('[data-act=editStreamer],[data-act=draft],[data-act=publish],[data-act=backup],[data-act=migrate],[data-act=import][data-id=players]'))el.remove();document.querySelector('.room-picker')?.remove();}if(tab==='catalog'&&!catalogView.loaded&&!catalogView.loading)setTimeout(loadCatalogReview,0);probeCatalogPending();
 }
 function editHome(){openHomeEditor({home:state.settings.home,room:state.currentStreamer,modal,dispatch,demo,toast,upload:async file=>(await api({op:'upload',image:await compress(file,1800),mime:'image/webp'})).url});}
 // A published theme (首頁主題設計) wins; otherwise the earlier home colour settings apply unchanged.
@@ -1563,6 +1563,11 @@ function catalogTemplateHtml(){
  const data=catalogView.templates;if(!data)return `<p>${catalogView.loading?'正在讀取模板…':h(catalogView.error||'尚未載入模板')}</p>`;
  return [['language','語言',data.languages||[]],['performerType','演唱者類型',data.performerTypes||[]]].map(([kind,label,rows])=>`<h3>${label}</h3><div class="actions">${button('新增'+label,'catalogTemplateAdd',kind)}</div>${rows.map(row=>`<div class="song"><div class="info"><b>${h(row.name)}</b><small>${row.active===false?'已停用':'使用中'}</small></div>${button('編輯','catalogTemplateEdit',row.id,'tiny',`data-kind="${kind}"`)}</div>`).join('')||blank()}`).join('');
 }
+// 總裁號：共同曲庫有待審時，分頁旁顯示紅點（60 秒內不重複查，只拉 1 筆取計數）
+const catalogPending={n:0,at:0,busy:false};
+function catalogDotHtml(){return isSuperAdmin()&&catalogPending.n>0?' <span class="menu-pending-dot catalog-pending-dot" aria-label="共同曲庫有待審核">&nbsp;</span>':'';}
+function catalogPendingSet(counts){if(!counts)return;const n=Number(counts.singles||0)+Number(counts.duplicates||0);if(n===catalogPending.n)return;catalogPending.n=n;const tabBtn=document.querySelector('.admin-section-tabs [data-act=adminTab][data-id=catalog]');if(tabBtn){tabBtn.querySelector('.catalog-pending-dot')?.remove();if(n>0&&isSuperAdmin())tabBtn.insertAdjacentHTML('beforeend',catalogDotHtml());}}
+async function probeCatalogPending(){if(!admin||demo||draft||!isSuperAdmin()||catalogPending.busy||Date.now()-catalogPending.at<60000)return;catalogPending.busy=true;catalogPending.at=Date.now();try{const r=await api({op:'catalogReviewList',status:'singles',limit:1,offset:0,management:true});catalogPendingSet(r?.counts);}catch{}finally{catalogPending.busy=false;}}
 async function loadCatalogReview(){
  if(!admin||tab!=='catalog'||catalogView.loading)return;
  if(catalogView.section==='confirmed'){catalogView.loaded=true;render();return;}
@@ -1586,7 +1591,7 @@ async function loadCatalogReview(){
   }
   if(section==='approved'){catalogView.filterOptions=response.filters||{};catalogView.languageFacets={scope:languageScope,at:Date.now(),filters:catalogView.filterOptions};}
   if(section==='templates')catalogView.templates=response;
-  else{catalogView.groups=section==='duplicates'?response.items||[]:[];catalogView.items=section==='duplicates'?catalogView.groups.flatMap(g=>g.rows||[]):response.items||[];catalogView.counts=response.counts||catalogView.counts;catalogView.total=response.total||0;catalogView.hasMore=!!response.hasMore;}
+  else{catalogView.groups=section==='duplicates'?response.items||[]:[];catalogView.items=section==='duplicates'?catalogView.groups.flatMap(g=>g.rows||[]):response.items||[];catalogView.counts=response.counts||catalogView.counts;catalogPendingSet(catalogView.counts);catalogPending.at=Date.now();catalogView.total=response.total||0;catalogView.hasMore=!!response.hasMore;}
   catalogView.loaded=true;
  }catch(err){if(current()){catalogView.error=err.message;catalogView.loaded=true;}}finally{catalogView.loading=false;if(tab==='catalog')render();}
 }

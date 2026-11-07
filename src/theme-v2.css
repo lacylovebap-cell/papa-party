@@ -136,5 +136,7 @@ dialog .action-help:hover,dialog .action-help:focus-visible{background:var(--hom
 .queue-ledger-add{min-height:30px;padding:5px 12px;font-size:12px}
 
 /* 待播底部直通按鈕：同款小按鈕、並排、有間距、自動換行 */
-html #app .queue-shortcuts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 10px;margin:12px 0 4px;padding:0;min-width:0;max-width:100%}
-html #app .queue-shortcuts button.qs-btn{flex:0 0 auto;min-height:30px!important;padding:4px 12px!important;font-size:13px!important;font-weight:600!important;margin:0!important;white-space:nowrap}
+
+
+
+.catalog-pending-dot{display:inline-block;width:8px;height:8px;min-width:8px;padding:0;margin-left:4px;border-radius:50%;vertical-align:middle;font-size:0}
