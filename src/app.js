@@ -1,13 +1,13 @@
 import {installImeSubmitGuard} from './search-ime.js';
 import {createPracticeZone} from './practice-zone.js?v=11.02-PZ.5';
 import {createMonthStats} from './month-stats.js?v=11.03-MS.3';
-import {createTutorialCenter} from './tutorial-center.js?v=11.08-DICE.1';
+import {createTutorialCenter} from './tutorial-center.js?v=11.08-DICE.3';
 import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.46';
 import {installMedalReplay,animateUnlockedMedals} from './medal-animation.js';
 installMedalReplay(document);
 
 import {installCompactMenu} from './application-menu.js?v=11.02-TUTORIAL.46';
-import {createPlatformManagement} from './platform-management.js?v=11.08-DICE.1';
+import {createPlatformManagement} from './platform-management.js?v=11.08-DICE.3';
 import {createManagementEntry} from './management-entry.js?v=10.21-WEB.4';
 import {installOverlayFeedback} from './overlay-feedback.js?v=10.21-WEB.4';
 import {streamerWriteData} from './streamer-write-data.js';
@@ -22,10 +22,10 @@ import {webApiFailure} from './web-api-errors.js?v=10.20-WEB.1';
 import {canonicalNoticeLink} from './notification-rules.js?v=10.31-PUSH.3';
 import {validateNotificationTarget,parseNotificationTarget,notificationTargetPath,notificationTargetView} from './notification-target.js?v=10.31-CALL.1';
 import {noticeTargetMatchesRoom,planNotificationLanding} from './notification-landing.js?v=10.20-WEB.1';
-import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.08-DICE.1';
+import {canonicalLanguage,catalogGroupKey,eventDescription,installActionHints,installSearchShortcuts} from './catalog-tools.js?v=11.08-DICE.3';
 import {fateCategories,drawSong} from './fate.js?v=10.20-WEB.1';
 import {createBoard} from './board.js?v=10.20-WEB.1';
-import {createChat} from './chat.js?v=11.08-DICE.1';
+import {createChat} from './chat.js?v=11.08-DICE.3';
 import {requestSourceLabel} from './request-source.js?v=10.20-WEB.1';
 import {normalizeHome,themePalette} from './home-settings.js?v=10.20-WEB.1';
 import {openHomeEditor} from './home-editor.js?v=10.20-WEB.1';
@@ -52,7 +52,7 @@ import {requestedSpace,requiresSpaceEntry,chooseSpaceEntry,spaceDestination} fro
 import {activityPageHtml,createActivityPage} from './activity-view.js?v=10.20-WEB.1';
 import {CARD_FIELDS,cardDisplay,orderedCards} from './card-media.js?v=10.20-WEB.1';
 import {achievementPanelHtml,achievementDetailsHtml,createAchievementPanel} from './achievements-view.js?v=10.29-THEME.2';
-import {createMedalManagement} from './medal-management.js?v=11.08-DICE.1';
+import {createMedalManagement} from './medal-management.js?v=11.08-DICE.3';
 import {roomPricing,roomRollover,queueConfirmed,queuePrepared,queuePreparation,empty,TIERS,TABLES,mutate,publicView,migrateLegacy,balance,stats,liveDay,timeValue,stamp,usedHour,hourKey,queueCrossedHour,matchesSong,crownFor,isActive,songPlays,playerSearch,achievements,previewImport,applyImport,list,upgradePlatform,scopeState,quoteSong,requestFees,reservedCredits,reservedHour,savedQuota,songSelection,cancelRecovery,carryPendingQuota,CARRY_PENDING_MESSAGE} from './core.js?v=11.02-CARRY.1';
 import {formatGift} from './pricing-engine.js?v=10.29-SPACE.1';
 import {feeColumns,giftReveal,priceGuide,crownGuide} from './pricing-ui.js?v=10.29-SPACE.1';
@@ -471,7 +471,7 @@ function syncPageLocation(push=false){const view={route,tab,subtab,selectedPlaye
 async function restorePageLocation(){const next=publicApplicationPage(location.href,publicRouteContext,spaceMount);if(next.route===route&&next.tab===tab&&next.subtab===subtab&&next.selectedPlayer===selectedPlayer&&next.queueHistory===queueHistory)return;tab=next.tab;subtab=next.subtab;selectedPlayer=next.selectedPlayer;queueHistory=next.queueHistory;await go(next.route);}
 async function go(next){if(entryPending){if(next==='admin'&&!admin){await adminLogin();return;}await openSpaceEntry();return;}if(next==='admin'&&admin?.role==='streamer_admin'&&admin.streamerSlug!==streamerSlug){const u=new URL(roomDestination(admin.streamerSlug));u.hash='admin';location.href=u.href;return;}signatures=signatures.songs?{songs:signatures.songs}:{};route=next;syncPageLocation(true);filters={q:'',tags:[],language:''};pages={};roomSearch.generation++;clearTimeout(roomSearch.timer);if(next==='admin'&&!admin){route='home';await adminLogin();return;}if(next==='center'&&!session){route='home';await loginDialog();return;}await refresh(true);if(next==='common-book')await loadCommonBook(0);if(pendingCommonRequest&&session){const item=pendingCommonRequest;pendingCommonRequest=null;await requestSong(item.songId,item.kind);}}
 // Searchable dropdowns everywhere (loaded on its own so a failure never blocks the page).
-import('./select-search.js?v=11.08-DICE.1').then(m=>m.installSelectSearch(document)).catch(()=>{});
+import('./select-search.js?v=11.08-DICE.3').then(m=>m.installSelectSearch(document)).catch(()=>{});
 const notifications=createNotifications({messageCenterV2:true,companion:()=>admin&&session&&!demo&&!entryPending&&!inNativeSpace()&&!nativeNoticesOff()&&!(session.spaceId&&session.spaceId!=='space-001')?{role:'player',recipient:session.playerId,streamer:streamerSlug,spaceId:session.spaceId||'space-001',deviceSessionId:session.sessionId,accountId:session.accountId}:null,companionApi:b=>api({...b,playerSession:true}),api:b=>api({...b,management:!!admin,streamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug}),apiUrl:API,apiKey:PUBLISHABLE_KEY,context:()=>({accountId:(admin||session)?.accountId,streamerId:state.currentStreamer?.id,selectedStreamer:admin?.role==='streamer_admin'?admin.streamerSlug:streamerSlug,selectedStreamerName:state.currentStreamer?.display_name,spaceStreamers:(state.streamers||[]).filter(r=>r.active!==false&&(r.spaceId||'space-001')===(session?.spaceId||state.currentStreamer?.spaceId||'space-001')).map(r=>({slug:r.slug,id:r.id,name:r.display_name})),spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',deviceSessionId:(admin||session)?.sessionId,demo:demo||entryPending||!!(draft&&isAdmin()),role:admin?(admin.role||'super_admin'):'player',recipient:nativeNoticesOff()?null:admin?(isSuperAdmin()?'__super__':'__admin__'):session?.playerId,streamer:admin?(isSuperAdmin()?'__global__':admin.streamerSlug):streamerSlug,streamerName:admin&&isSuperAdmin()?'全部主播':state.currentStreamer?.display_name}),toast,onOpenCategory:category=>category==='message'?chat.open():board.open(),onNavigate:navigateNotice,onUpdate:notices=>{if(notices.some(notice=>notice.type==='achievement'))achievementPanel.load(true).catch(()=>{});if(notices.some(notice=>notice.type==='message'))chat.refresh().catch(()=>{});if(notices.some(notice=>['live','saved','cancel','ready','accepted','completed','credit','status','wish'].includes(notice.type)))syncRecovery.invalidate('notification');}});
 const chat=createChat({api,pushHint:()=>{try{return notifications.pushHint();}catch{return '';}},context:()=>({spaceId:admin?.spaceId||session?.spaceId||state.currentStreamer?.spaceId||'space-001',manager:!!admin,role:admin?.role||'player',accountId:(admin||session)?.accountId,deviceSessionId:(admin||session)?.sessionId,playerId:session?.playerId,streamer:streamerSlug,streamerId:state.currentStreamer?.id,streamerName:hostName(),demo:demo||entryPending||!!draft}),toast,onRead:()=>notifications.refresh().catch(()=>{}),realtimeAvailable:()=>notifications.realtimeAvailable()});
 document.addEventListener('click',e=>{if(e.target.closest('[data-open-chat]'))chat.open().catch(e=>toast(e.message));});

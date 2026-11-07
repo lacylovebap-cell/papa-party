@@ -93,3 +93,5 @@
    Only active when the theme sets cardAlpha below 100 (root data attribute). */
 [data-theme-v2][data-theme-card-alpha] .card{background:transparent;position:relative;isolation:isolate}
 [data-theme-v2][data-theme-card-alpha] .card::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--theme-card-fill);opacity:var(--theme-card-alpha,1);z-index:-1;pointer-events:none}
+/* Toasts (e.g. the draw result) follow the streamer's theme instead of a fixed purple. */
+[data-theme-v2] #toast,[data-theme-v2] #toast[data-overlay-feedback]{background:var(--home-panel);color:var(--home-text);border-color:var(--home-accent)}
