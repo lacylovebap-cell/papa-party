@@ -7578,6 +7578,16 @@ Deno.serve(async (req) => {
       await deliverPush();
       return respond({ ok: true });
     }
+    if (b.op === "songRanking") {
+      if (!isManager(who))
+        throw Error("請先登入主播管理");
+      const period = ["today", "week", "month", "all"].includes(b.period) ? b.period : "week", origin = ["all", "player", "proxy"].includes(b.origin) ? b.origin : "all", key = period + "|" + origin, hit = globalThis.__rankCache?.get(key);
+      if (hit && Date.now() - hit.at < 60000)
+        return respond(hit.value);
+      const value = await api("/rest/v1/rpc/papa_song_ranking", { period, origin, lim: 30 });
+      (globalThis.__rankCache ||= new Map()).set(key, { at: Date.now(), value });
+      return respond(value);
+    }
     if (CATALOG_OPS.has(b.op))
       return respond(await catalogOperation(b, who));
     if (["boardRooms", "boardDirectory", "boardBlocks", "boardUnblock", "boardBlock", "boardList", "boardCreate", "boardChange"].includes(b.op))

@@ -1,5 +1,6 @@
 import {installImeSubmitGuard} from './search-ime.js';
-import {createPracticeZone} from './practice-zone.js?v=11.02-PZ.5';
+import {createPracticeZone} from './practice-zone.js?v=11.08-PZ.6';
+import {createSongRanking} from './song-ranking.js?v=11.08-PZ.6';
 import {createMonthStats} from './month-stats.js?v=11.03-MS.3';
 import {createTutorialCenter} from './tutorial-center.js?v=11.08-IMP.1';
 import {createTutorialHints} from './tutorial-hints.js?v=11.02-TUTORIAL.46';
@@ -761,7 +762,7 @@ function prepareQueue(id,operation){const q=state.queue.find(q=>q.id===id);if(!q
 const adminCount=id=>id==='wishes'?state.wishes.filter(w=>w.status==='收到').length:id==='queue'?state.queue.filter(q=>q.status==='pending'||q.status==='waiting'&&q.awaitingAcknowledgment).length:0;
 const countBadge=n=>n?' <span class="notice-count">'+Math.min(99,n)+'</span>':'';
 function wishRows(rows,manager){const order=w=>w.status==='收到'?0:1,sorted=manager?[...rows].sort((a,b)=>order(a)-order(b)||(timeValue(b.at)||0)-(timeValue(a.at)||0)):rows,p=paginate(sorted,'wishes');return p.rows.map(w=>{const ev=(w.events||[]).slice(-3).map(e=>time(e.at)+' '+h(e.from)+'→'+h(e.to)).join('；'),inCatalog=w.songId&&state.songs.some(x=>x.songId===w.songId);return `<div class="song" data-wish-id="${h(w.id)}"><div class="info"><b>${h(w.title)}－${h(w.artist)}</b><small>${manager?h(playerName(w.playerId))+' · ':''}${time(w.at)} · ${h(w.note)}</small><div class="tag">${h(w.status)}</div>${w.status==='已學會'?'<p class="positive">✨ 願望成真！這首'+h(hostName())+'學會啦～</p>':''}${manager&&inCatalog?'<small class="positive">🎵 已加入曲庫</small>':manager&&w.status==='已學會'?'<small>尚未加入曲庫，按「處理」可加入</small>':''}${manager&&ev?'<small class="muted">'+ev+'</small>':''}${w.url?`<a href="${h(w.url)}" target="_blank" rel="noopener">歌曲連結 ↗</a>`:''}</div>${manager?button('處理','editWish',w.id)+button('刪除','deleteWish',w.id,'tiny danger')+button('時間','recordTime',w.id,'tiny','data-table="wishes"'):''}</div>`;}).join('')+p.nav;}
-const adminTabs=[['queue','🎤 待播'],['songs','🎵 歌本'],['players','👤 玩家'],['ledger','💾 存歌'],['crowns','👑 冠歌'],['cards','🖼️ 卡片'],['wishes','🌟 許願池'],['practice','🎓 待練區'],['stats','📈 統計'],['medals','🏅 勳章管理'],['settings','⚙️ 設定']];
+const adminTabs=[['queue','🎤 待播'],['songs','🎵 歌本'],['players','👤 玩家'],['ledger','💾 存歌'],['crowns','👑 冠歌'],['cards','🖼️ 卡片'],['wishes','🌟 許願池'],['practice','🎓 待練區'],['stats','📈 統計'],['ranking','🏆 熱門榜'],['medals','🏅 勳章管理'],['settings','⚙️ 設定']];
 
 function managementPage(){return route==='admin'&&tab==='platform'||route==='center'&&subtab==='platform';}
 const managementEntry=createManagementEntry({api:b=>api({...b,platformSession:true}),identity:()=>admin||session,changed:()=>{if(managementPage())render();else if(managementEntry.state().ready)header();}});
@@ -777,6 +778,7 @@ async function openPlatformManagement(){if(!admin&&!session)throw Error('請先�
 
 // 操作歷史 was withdrawn on 2026-10-28 (user request); a remembered tab falls back to 待播.
 const monthStats=createMonthStats({title:()=>state.currentStreamer?.display_name||hostName(),scope:()=>String(syncReadIdentity()),today:()=>accountingDay(clock(),accountingRollover(state)),onChange:()=>{if(route==='admin'&&admin&&tab==='stats')render();},fetchMonth:async(m,force)=>{if(demo||draft&&isAdmin()){const days=[],[y,mo]=m.split('-').map(Number),last=new Date(Date.UTC(y,mo,0)).getUTCDate(),today=accountingDay(clock(),accountingRollover(state));for(let d=1;d<=last;d++){const day=m+'-'+String(d).padStart(2,'0');if(day>today)break;const v=stats(state,day+'T'+String(accountingRollover(state)).padStart(2,'0')+':00:00+08:00');days.push({day,received:v.received,sung:v.sung});}return {days};}return (await api({op:'accountingMonth',month:m,refresh:!!force,management:true})).month;}});
+const songRanking=createSongRanking({h,api:b=>api(b),render:()=>render(),toast});
 const practiceZone=createPracticeZone({h,modal,field,select,area,toast,render:()=>render(),
  getItems:()=>state.settings?.practiceZone||[],
  save:items=>dispatch('settings',{practiceZone:items}),
@@ -802,6 +804,7 @@ function renderAdmin(){if(tab==='events')tab='queue';if(tab==='platform'){if(!do
  if(tab==='cards')body=`<div class="toolbar">${button('上傳卡片','editCard')}</div><div class="gallery">${orderedCards(state.cards).map(c=>`<div>${photoHtml(c)}${button('↑','cardMove',c.id,'tiny','data-direction="-1" aria-label="卡片上移"')}${button('↓','cardMove',c.id,'tiny','data-direction="1" aria-label="卡片下移"')}${button('編輯','editCard',c.id)}${button('刪除','deleteCard',c.id,'tiny danger')}</div>`).join('')||blank()}</div>`;
  if(tab==='wishes')body=wishRows(state.wishes,true);
  if(tab==='practice')body=practiceZone.html();
+ if(tab==='ranking')body=songRanking.html();
  if(tab==='activity')body=isSuperAdmin()?'<h2>玩家最近活動</h2><div id="activity-panel">讀取中…</div>':blank('只有 PA Party總裁可查看');
  if(tab==='stats')body=monthStats.html()+`<label>帳務日期<input id="stats-day" type="date" value="${accountingDay(clock(),accountingRollover(state))}"></label><div id="stats-result">${statsHtml(currentAccounting())}</div><p class="muted">依本 Space 設定換場。收到新歌不含分配退回；存歌為本場收到後未分配、未唱掉的首數；已唱包含提歌、現點及已過檔演唱。測試資料不列入。</p>`;
  if(tab==='settings')body=settingsHtml();

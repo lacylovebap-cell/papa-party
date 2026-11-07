@@ -1,82 +1,83 @@
 {
-  "id": "S14",
-  "title": "卡片、許願池與統計",
-  "category": "玩家與活動",
-  "keywords": [
-    "卡片",
-    "許願池",
-    "統計",
-    "帳務日期",
-    "勳章"
-  ],
-  "audience": "streamer",
-  "status": "published",
-  "file": "S14.json",
-  "version": "11.02-TUTORIAL.5",
-  "missing": "",
-  "intro": "管理展示牆卡片、看玩家許的願，並查看當天統計。",
-  "reviewedAt": "2026-11-02",
-  "reviewedBy": "總裁確認上線",
-  "steps": [
-    {
-      "id": "cards",
-      "title": "卡片管理",
-      "text": "「更多 → 卡片」可以上傳卡片，玩家首頁的展示牆會顯示。",
-      "buttons": [
-        [
-          "上傳卡片",
-          "新增一張卡片。"
-        ]
-      ],
-      "notes": [
-        "卡片會公開展示，請確認內容。"
-      ],
-      "marks": [],
-      "image": "images/s15-cards.webp",
-      "width": 585,
-      "height": 1050,
-      "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
-      "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
-    },
-    {
-      "id": "wish",
-      "title": "許願池",
-      "text": "「許願池」列出玩家投的願望，可翻頁與跳頁。",
-      "buttons": [
-        [
-          "上一頁／下一頁／跳頁",
-          "翻頁。"
-        ]
-      ],
-      "notes": [
-        "可以參考願望決定要練哪些歌。"
-      ],
-      "marks": [],
-      "image": "images/s15-wish.webp",
-      "width": 585,
-      "height": 1050,
-      "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
-      "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
-    },
-    {
-      "id": "stats",
-      "title": "統計",
-      "text": "「統計」選帳務日期，會顯示當天收到新歌、存歌與已唱首數。",
-      "buttons": [
-        [
-          "帳務日期",
-          "選要看的那一天。"
-        ]
-      ],
-      "notes": [
-        "收到新歌不含分配退回；存歌是當天收到後未分配、未唱掉的首數。"
-      ],
-      "marks": [],
-      "image": "images/s15-stats.webp",
-      "width": 585,
-      "height": 1050,
-      "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
-      "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
-    }
-  ]
+ "id": "S14",
+ "title": "卡片、許願池與統計",
+ "category": "玩家與活動",
+ "keywords": [
+  "卡片",
+  "許願池",
+  "統計",
+  "帳務日期",
+  "勳章"
+ ],
+ "audience": "streamer",
+ "status": "published",
+ "file": "S14.json",
+ "version": "11.02-TUTORIAL.5",
+ "missing": "",
+ "intro": "管理展示牆卡片、看玩家許的願，並查看當天統計。",
+ "reviewedAt": "2026-11-02",
+ "reviewedBy": "總裁確認上線",
+ "steps": [
+  {
+   "id": "cards",
+   "title": "卡片管理",
+   "text": "「更多 → 卡片」可以上傳卡片，玩家首頁的展示牆會顯示。",
+   "buttons": [
+    [
+     "上傳卡片",
+     "新增一張卡片。"
+    ]
+   ],
+   "notes": [
+    "卡片會公開展示，請確認內容。"
+   ],
+   "marks": [],
+   "image": "images/s15-cards.webp",
+   "width": 585,
+   "height": 1050,
+   "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
+   "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
+  },
+  {
+   "id": "wish",
+   "title": "許願池",
+   "text": "「許願池」列出玩家投的願望，可翻頁與跳頁。",
+   "buttons": [
+    [
+     "上一頁／下一頁／跳頁",
+     "翻頁。"
+    ]
+   ],
+   "notes": [
+    "可以參考願望決定要練哪些歌。"
+   ],
+   "marks": [],
+   "image": "images/s15-wish.webp",
+   "width": 585,
+   "height": 1050,
+   "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
+   "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
+  },
+  {
+   "id": "stats",
+   "title": "統計",
+   "text": "「統計」選帳務日期，會顯示當天收到新歌、存歌與已唱首數。",
+   "buttons": [
+    [
+     "帳務日期",
+     "選要看的那一天。"
+    ]
+   ],
+   "notes": [
+    "收到新歌不含分配退回；存歌是當天收到後未分配、未唱掉的首數。",
+    "🏆 熱門榜：後台新增「熱門榜」分頁，整個 PA Party 一起算今日、近 7 天、本月、累計最常被點的歌（同一首歌、同版本，不論哪位主播收到都合併）。只算已完成演唱的有效點歌，可分開看玩家自點和主播代點，並顯示和上一期相比的名次變化。"
+   ],
+   "marks": [],
+   "image": "images/s15-stats.webp",
+   "width": 585,
+   "height": 1050,
+   "alt": "PA Party 示範環境畫面，使用虛構玩家與歌曲",
+   "caption": "示範環境（虛構資料）· 11.02-TUTORIAL.5 · 2026-11-02"
+  }
+ ]
 }
