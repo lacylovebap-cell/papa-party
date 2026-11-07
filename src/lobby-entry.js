@@ -90,4 +90,4 @@ document.querySelector('header .header-inner')?.insertAdjacentHTML('beforeend',a
 updateAppStart(null,new URL('lobby.html',mountUrl).href,{source:{v:1,kind:'hall',spaceId:scope.spaceId,streamerId:null},name:scope.name,spaceName:scope.name});
 }
 // Searchable dropdowns everywhere (loaded on its own so a failure never blocks the page).
-import('./select-search.js?v=11.08-VER.1').then(m=>m.installSelectSearch(document)).catch(()=>{});
+import('./select-search.js?v=11.08-DICE.1').then(m=>m.installSelectSearch(document)).catch(()=>{});
