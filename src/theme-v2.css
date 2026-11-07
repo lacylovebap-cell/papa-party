@@ -113,3 +113,7 @@
 .common-rank-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .common-rank-list li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--home-line,var(--line,#fff1))}
 .common-rank-no{text-align:center}.common-rank-song{min-width:0;display:grid}.common-rank-song b,.common-rank-song small{overflow-wrap:anywhere}.common-rank-n{font-size:12px;opacity:.8;white-space:nowrap}
+/* Queue tab: add / hide-management / add-deposit buttons share one row. */
+.queue-add-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;max-width:100%}
+.queue-add-row>button,.queue-add-row .hint-button{flex:0 0 auto}
+.queue-ledger-add{min-height:30px;padding:5px 12px;font-size:12px}
