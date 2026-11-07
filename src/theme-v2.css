@@ -99,13 +99,19 @@
 .import-hit{margin-top:8px;padding:10px;border:1px solid var(--home-accent,#9c75b5);border-radius:10px;background:var(--home-panel,#211b27);display:grid;gap:6px;min-width:0}
 .import-hit label{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0;min-width:0}.import-hit select,.import-hit input[type=text],.import-hit input:not([type]){max-width:100%;min-width:0}
 .import-hit-title{color:var(--home-accent,#b88adf);font-size:12px}
-/* Hide-management panel (queue tab): small button + compact list, theme-aware. */
+/* Hide-management panel (queue tab): compact, theme-aware. */
 .hide-mgr-open{min-height:30px;padding:5px 12px;font-size:12px}
-.hide-mgr-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.hide-mgr-list{display:grid;gap:6px;margin:8px 0;max-height:min(52dvh,420px);overflow:auto}
-.hide-mgr-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:10px;border:1px solid var(--home-line,var(--line,#fff2));background:var(--home-panel,#ffffff08);min-width:0}
-.hide-mgr-row.is-hidden{opacity:.85}.hide-mgr-info{min-width:0;display:grid;gap:2px}.hide-mgr-info b,.hide-mgr-info small{overflow-wrap:anywhere}
-.hide-mgr-btn{flex:none;min-height:40px;min-width:76px;padding:6px 12px}
+#hide-mgr{display:grid;gap:8px;min-width:0}
+#hide-mgr input[type=search]{margin:0}
+.hide-mgr-tabs{display:flex;gap:6px;margin:0}.hide-mgr-tabs button{flex:1 1 0;min-width:0;min-height:34px}
+.hide-mgr-list{display:grid;gap:0;max-height:min(46dvh,340px);overflow:auto;border-radius:10px;border:1px solid var(--home-line,var(--line,#fff2))}
+.hide-mgr-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 10px;min-width:0;border-bottom:1px solid var(--home-line,var(--line,#fff1))}
+.hide-mgr-row:last-child{border-bottom:0}.hide-mgr-pick{cursor:pointer;justify-content:flex-start}.hide-mgr-pick input{width:20px;height:20px;margin:0;flex:none}
+.hide-mgr-info{min-width:0;display:grid;gap:1px}.hide-mgr-info b,.hide-mgr-info small{overflow-wrap:anywhere}.hide-mgr-info small{opacity:.75}
+.hide-mgr-ver{font-size:11px;font-weight:400;padding:0 6px;border-radius:99px;border:1px solid var(--home-line,var(--line,#fff3));opacity:.85}
+.hide-mgr-btn{flex:none;min-height:36px;min-width:64px;padding:4px 12px}
+.hide-mgr-bar{display:flex;gap:8px;justify-content:space-between}.hide-mgr-bar button{min-height:38px}
+.hide-mgr-empty{text-align:center;margin:6px 0}
 .undo-bar{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 28px);padding:10px 14px;border-radius:12px;background:var(--home-panel,#211b27);color:var(--home-text,#fff);border:1px solid var(--home-accent,#9a74d1);font-size:13px}
 /* Common songbook: small "大家常聽" ranking, theme-aware. */
 .common-rank{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid var(--home-line,var(--line,#fff2));background:var(--home-panel,#ffffff08);min-width:0}
