@@ -95,3 +95,7 @@
 [data-theme-v2][data-theme-card-alpha] .card::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--theme-card-fill);opacity:var(--theme-card-alpha,1);z-index:-1;pointer-events:none}
 /* Toasts (e.g. the draw result) follow the streamer's theme instead of a fixed purple. */
 [data-theme-v2] #toast,[data-theme-v2] #toast[data-overlay-feedback]{background:var(--home-panel);color:var(--home-text);border-color:var(--home-accent)}
+/* Batch-import: catalog similarity hint follows the streamer theme. */
+.import-hit{margin-top:8px;padding:10px;border:1px solid var(--home-accent,#9c75b5);border-radius:10px;background:var(--home-panel,#211b27);display:grid;gap:6px;min-width:0}
+.import-hit label{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0;min-width:0}.import-hit select,.import-hit input[type=text],.import-hit input:not([type]){max-width:100%;min-width:0}
+.import-hit-title{color:var(--home-accent,#b88adf);font-size:12px}

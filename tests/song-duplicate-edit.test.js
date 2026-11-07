@@ -19,3 +19,11 @@ test('same title and artist with a different version can coexist',()=>{
  assert.equal(s.songs.length,2);
  assert.throws(()=>mutate(s,{type:'song',data:{title:'時光走散',artist:'怕怕',version:'dj版'}},admin,t),/同版本/);
 });
+import {previewImport,applyImport} from '../src/core.js';
+test('import: a version column makes a same-title row a separate song, not a duplicate',()=>{
+ let s=empty();s=mutate(s,{type:'song',data:{title:'時光走散',artist:'怕怕'}},admin,t);
+ const plain=previewImport(s,'songs','時光走散｜怕怕');assert.ok(plain[0].match||plain[0].matches?.length);
+ const rows=previewImport(s,'songs','時光走散｜怕怕｜華語｜女歌手｜｜｜｜DJ版');
+ const m=rows[0].match??(rows[0].matches||[])[0];assert.ok(!m);
+ const n=applyImport(s,'songs',rows,['add'],admin,t);assert.equal(n.songs.length,2);assert.equal(n.songs[1].version,'DJ版');
+});
