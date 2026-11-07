@@ -107,3 +107,9 @@
 .hide-mgr-row.is-hidden{opacity:.85}.hide-mgr-info{min-width:0;display:grid;gap:2px}.hide-mgr-info b,.hide-mgr-info small{overflow-wrap:anywhere}
 .hide-mgr-btn{flex:none;min-height:40px;min-width:76px;padding:6px 12px}
 .undo-bar{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 28px);padding:10px 14px;border-radius:12px;background:var(--home-panel,#211b27);color:var(--home-text,#fff);border:1px solid var(--home-accent,#9a74d1);font-size:13px}
+/* Common songbook: small "大家常聽" ranking, theme-aware. */
+.common-rank{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid var(--home-line,var(--line,#fff2));background:var(--home-panel,#ffffff08);min-width:0}
+.common-rank summary{cursor:pointer;font-weight:700}.common-rank .tabs{display:flex;gap:6px;margin:8px 0}
+.common-rank-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.common-rank-list li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--home-line,var(--line,#fff1))}
+.common-rank-no{text-align:center}.common-rank-song{min-width:0;display:grid}.common-rank-song b,.common-rank-song small{overflow-wrap:anywhere}.common-rank-n{font-size:12px;opacity:.8;white-space:nowrap}
