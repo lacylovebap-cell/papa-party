@@ -12,3 +12,10 @@ test('an existing same-name song stays editable, but a rename into a duplicate i
  assert.throws(()=>mutate(s,{type:'song',data:{...s.songs[2],title:'時光走散',artist:'怕怕'}},admin,t),/同名同歌手/);
  assert.throws(()=>mutate(empty(),{type:'song',data:{title:'a',artist:'b'}},admin,t)&&mutate(mutate(empty(),{type:'song',data:{title:'a',artist:'b'}},admin,t),{type:'song',data:{title:'a',artist:'b'}},admin,t),/同名同歌手/);
 });
+test('same title and artist with a different version can coexist',()=>{
+ let s=empty();
+ s=mutate(s,{type:'song',data:{title:'時光走散',artist:'怕怕'}},admin,t);
+ s=mutate(s,{type:'song',data:{title:'時光走散',artist:'怕怕',version:'DJ版'}},admin,t);
+ assert.equal(s.songs.length,2);
+ assert.throws(()=>mutate(s,{type:'song',data:{title:'時光走散',artist:'怕怕',version:'dj版'}},admin,t),/同版本/);
+});
