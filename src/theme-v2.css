@@ -99,3 +99,11 @@
 .import-hit{margin-top:8px;padding:10px;border:1px solid var(--home-accent,#9c75b5);border-radius:10px;background:var(--home-panel,#211b27);display:grid;gap:6px;min-width:0}
 .import-hit label{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0;min-width:0}.import-hit select,.import-hit input[type=text],.import-hit input:not([type]){max-width:100%;min-width:0}
 .import-hit-title{color:var(--home-accent,#b88adf);font-size:12px}
+/* Hide-management panel (queue tab): small button + compact list, theme-aware. */
+.hide-mgr-open{min-height:30px;padding:5px 12px;font-size:12px}
+.hide-mgr-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.hide-mgr-list{display:grid;gap:6px;margin:8px 0;max-height:min(52dvh,420px);overflow:auto}
+.hide-mgr-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:10px;border:1px solid var(--home-line,var(--line,#fff2));background:var(--home-panel,#ffffff08);min-width:0}
+.hide-mgr-row.is-hidden{opacity:.85}.hide-mgr-info{min-width:0;display:grid;gap:2px}.hide-mgr-info b,.hide-mgr-info small{overflow-wrap:anywhere}
+.hide-mgr-btn{flex:none;min-height:40px;min-width:76px;padding:6px 12px}
+.undo-bar{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 28px);padding:10px 14px;border-radius:12px;background:var(--home-panel,#211b27);color:var(--home-text,#fff);border:1px solid var(--home-accent,#9a74d1);font-size:13px}
