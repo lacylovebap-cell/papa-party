@@ -1591,7 +1591,7 @@ async function loadCatalogReview(){
   }
   if(section==='approved'){catalogView.filterOptions=response.filters||{};catalogView.languageFacets={scope:languageScope,at:Date.now(),filters:catalogView.filterOptions};}
   if(section==='templates')catalogView.templates=response;
-  else{catalogView.groups=section==='duplicates'?response.items||[]:[];catalogView.items=section==='duplicates'?catalogView.groups.flatMap(g=>g.rows||[]):response.items||[];catalogView.counts=response.counts||catalogView.counts;catalogPendingSet(catalogView.counts);catalogPending.at=Date.now();catalogView.total=response.total||0;catalogView.hasMore=!!response.hasMore;}
+  else{catalogView.groups=section==='duplicates'?response.items||[]:[];catalogView.items=section==='duplicates'?catalogView.groups.flatMap(g=>g.rows||[]):response.items||[];catalogView.counts=response.counts||catalogView.counts;if(typeof catalogPendingSet==="function"){catalogPendingSet(catalogView.counts);catalogPending.at=Date.now();}catalogView.total=response.total||0;catalogView.hasMore=!!response.hasMore;}
   catalogView.loaded=true;
  }catch(err){if(current()){catalogView.error=err.message;catalogView.loaded=true;}}finally{catalogView.loading=false;if(tab==='catalog')render();}
 }
