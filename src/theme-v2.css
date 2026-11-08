@@ -139,4 +139,4 @@ dialog .action-help:hover,dialog .action-help:focus-visible{background:var(--hom
 
 
 
-.catalog-pending-dot{display:inline-block;width:8px;height:8px;min-width:8px;padding:0;margin-left:4px;border-radius:50%;vertical-align:middle;font-size:0}
+html #app .catalog-pending-dot{display:inline-block;width:7px;height:7px;min-width:7px;min-height:0;padding:0;margin:0 0 0 4px;border-radius:50%;background:#ed718e;vertical-align:top;align-self:flex-start;margin-top:2px;flex:none}

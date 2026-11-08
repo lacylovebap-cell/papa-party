@@ -469,3 +469,4 @@ html #app .queue-shortcuts{display:flex!important;flex-wrap:wrap;justify-content
 html #app .queue-shortcuts button.qs-btn{flex:0 0 auto;min-height:26px!important;height:auto!important;padding:3px 11px!important;font-size:11px!important;line-height:1.4!important;font-weight:600!important;margin:0!important;white-space:nowrap;background:color-mix(in srgb,currentColor 8%,transparent)!important;background-image:none!important;border:1px solid color-mix(in srgb,currentColor 22%,transparent)!important;box-shadow:none!important;color:inherit!important;border-radius:10px}
 html #app .queue-shortcuts button.qs-btn:hover{background:color-mix(in srgb,currentColor 16%,transparent)!important}
 html #app .queue-summary{margin-bottom:0}
+html #app .catalog-pending-dot{display:inline-block;width:7px;height:7px;min-width:7px;min-height:0;padding:0;margin:0 0 0 4px;border-radius:50%;background:#ed718e;vertical-align:top;align-self:flex-start;margin-top:2px;flex:none}
