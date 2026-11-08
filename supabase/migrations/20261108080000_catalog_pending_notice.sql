@@ -1,4 +1,4 @@
--- 11.08-CATN.2: 共同曲庫有新待審 → 通知總裁號（不出聲；前端對 entity_id='catalog-review' 不播音效）
+-- 11.08-CATN.3: 共同曲庫有新待審 → 通知總裁號（不出聲；前端對 entity_id='catalog-review' 不播音效）
 -- 同一批新增只會有一則通知；10 分鐘內仍未讀就合併成同一則（更新數字），避免洗版。
 create or replace function public.papa_catalog_pending_notice() returns trigger
 language plpgsql security definer set search_path=pg_catalog,public as $$
