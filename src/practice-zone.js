@@ -17,10 +17,10 @@ const CSS=`
 .pz-primary{background:linear-gradient(135deg,var(--pz-accent),color-mix(in srgb,var(--pz-accent) 55%,#000))!important;color:#fff!important;border-color:transparent!important;font-weight:700}
 .pz-chips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:8px 0 10px}
 .pz-chips::-webkit-scrollbar{display:none}
-.pz-chip{min-width:0;justify-content:center;display:inline-flex;align-items:center;gap:3px;padding:6px 3px;border-radius:999px;font-size:clamp(10.5px,3vw,12.5px);border:1px solid var(--home-line,var(--line,#fff2));background:#ffffff08;white-space:nowrap}
-.pz-chip b{font-size:11px;min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:9px;background:#ffffff18;font-weight:600}
+.pz-chip{min-width:0;justify-content:center;display:inline-flex;align-items:center;gap:3px;padding:6px 3px;border-radius:999px;font-size:clamp(8.5px,2.2vw,10.5px)!important;white-space:nowrap;overflow:hidden;border:1px solid var(--home-line,var(--line,#fff2));background:#ffffff08;white-space:nowrap}
+.pz-chip b{font-size:9.5px;min-width:15px;height:15px;line-height:15px;text-align:center;border-radius:9px;background:#ffffff18;font-weight:600}
 .pz-chip b{flex:none}
-@media(max-width:430px){.pz-chip .pz-ic{display:none}.pz-chip{gap:4px}}
+@media(max-width:620px){.pz-chip .pz-ic{display:none}.pz-chip{gap:4px}}
 .pz-chip.on{background:color-mix(in srgb,var(--pz-accent) 32%,transparent);border-color:var(--pz-accent)}
 .pz-list{display:grid;gap:10px}
 .pz-card{position:relative;padding:13px 13px 12px 16px;border-radius:14px;border:1px solid var(--home-line,var(--line,#fff2));background:linear-gradient(180deg,#ffffff0b,#ffffff04);overflow:hidden}
