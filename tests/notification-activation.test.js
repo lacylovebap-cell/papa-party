@@ -237,3 +237,19 @@ test('legacy false stays false without guessing user intent',async t=>{
  assert.equal(h.requests.some(x=>x.op==='pushSubscribe'||x.op==='noticePreferences'),false);
  assert.match(h.healthTarget.innerHTML,/帳號未允許推播/);
 });
+
+test('a stale refresh cannot overwrite the push checkbox after a successful save',async t=>{
+ const pending=deferred();let firstRead=true;
+ const h=harness(t,{permission:'denied',apiHook:body=>{
+  if(body.op==='notifications'&&firstRead){firstRead=false;return pending.promise;}
+ }});
+ await h.settings();
+ const refreshing=h.notices.refresh();
+ h.changePush();await h.submit();
+ await h.settings();
+ assert.match(h.dialog.innerHTML,/name="pushEnabled" checked/);
+ pending.resolve({rows:[],unread:{},preferences:{pushEnabled:false}});
+ await refreshing;
+ await h.settings();
+ assert.match(h.dialog.innerHTML,/name="pushEnabled" checked/);
+});
