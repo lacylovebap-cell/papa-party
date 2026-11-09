@@ -172,3 +172,19 @@ dialog#dialog .dialog-form-body{display:flex;flex-direction:column;overflow:hidd
 .catalog-language-selection-row .catalog-selection-row button{font-size:11px!important;padding:6px!important}
 .catalog-language-selection-row .catalog-selection-row small{font-size:10px}
 #modal-form > #dialog-error { flex: 0 0 auto; margin: 0; padding: 8px 14px; }
+
+
+/* Keep candidate metadata readable when review controls wrap on narrow screens. */
+.song.catalog-review-source {
+ display: grid;
+ grid-template-columns: auto minmax(0, 1fr) auto;
+ align-items: start;
+ gap: 8px 12px;
+}
+.catalog-review-source .info { min-width: 0; }
+.catalog-review-source .info b, .catalog-review-source .info small { overflow-wrap: anywhere; }
+.catalog-review-source .catalog-review-source-actions { justify-content: flex-start; flex-wrap: wrap; margin: 0; }
+@media (max-width: 850px) {
+ .song.catalog-review-source { grid-template-columns: auto minmax(0, 1fr); }
+ .catalog-review-source .catalog-review-source-actions { grid-column: 1 / -1; }
+}

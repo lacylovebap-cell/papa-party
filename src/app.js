@@ -1389,11 +1389,14 @@ function catalogPreviousVariantHtml(row){
  return '<small>已關聯資料變更 · 原關聯 '+h(summary)+'</small>'
   +(differences.length?'<ul>'+differences.map(([key,label])=>'<li>'+h(label+' '+(original[key]||'未填')+' → '+(row[key]||'未填'))+'</li>').join('')+'</ul>':'');
 }
-function catalogPageRowActions(row){
+function catalogPageRowStatus(row){
  const choice=catalogPageChoice(row);
  const labels={default:'預設通過',manual:'人工調整：已暫存',independent:'人工調整：獨立新增',review:'需要人工確認',later:'暫緩'};
- return catalogPreviousVariantHtml(row)+'<small>'+h(labels[choice])+'</small>'
-  +button('稍後處理','catalogPageChoice',row.id,'tiny','data-choice="later"')
+ return catalogPreviousVariantHtml(row)+'<small>'+h(labels[choice])+'</small>';
+}
+function catalogPageRowActions(row){
+ const choice=catalogPageChoice(row);
+ return button('稍後處理','catalogPageChoice',row.id,'tiny','data-choice="later"')
   +(choice==='later'||choice==='independent'||choice==='manual'?button('恢復建議','catalogPageChoice',row.id,'tiny','data-choice=""'):'');
 }
 function catalogMatchPercent(score){return Number(score)===1?100:Math.min(99,Math.round(Number(score)*100));}
@@ -1520,7 +1523,20 @@ function catalogReviewHtml(){
  if(status==='templates')return tabs+catalogTemplateHtml();
  if(status==='confirmed')return tabs+button('查看／管理已確認歌曲','catalogConfirmed','','primary');
  const room=id=>state.streamers.find(r=>r.id===id)?.display_name||id||'';
- const rowHtml=(row,group)=>catalogPageCompleted.has(row.id)?'':'<div class="song catalog-row"><label class="catalog-check"><input type="checkbox" data-catalog-review="'+h(row.id)+'" '+(catalogView.selected.has(row.id)?'checked':'')+' aria-label="選取 '+h(row.title)+'"></label><div class="info"><b>'+h(row.title)+'｜'+h(row.artist)+'</b><small>'+h([room(row.streamerId),row.language,row.performerType,row.versionLabel||(status==='duplicates'?'版本未標示':'')].filter(Boolean).join(' · '))+'</small>'+(row.preferredFamily?'<small>主播指定：同一首，但不同版本</small>':'')+'</div>'+button('編輯','catalogCandidateEdit',row.id,'tiny')+button(row.preferredFamily?'指定共同作品／版本':'關聯既有共同歌曲／版本','catalogVersionSource',row.id,'tiny')+(status==='duplicates'?catalogPageRowActions(row):'')+'</div>';
+ const rowHtml=row=>{
+  if(catalogPageCompleted.has(row.id))return '';
+  const duplicate=status==='duplicates';
+  const checked=catalogView.selected.has(row.id)?'checked':'';
+  const metadata=[room(row.streamerId),row.language,row.performerType,row.versionLabel||(duplicate?'版本未標示':'')].filter(Boolean).join(' · ');
+  return '<div class="song catalog-row catalog-review-source">'
+   +'<label class="catalog-check"><input type="checkbox" data-catalog-review="'+h(row.id)+'" '+checked+' aria-label="選取 '+h(row.title)+'"></label>'
+   +'<div class="info"><b>'+h(row.title)+'｜'+h(row.artist)+'</b><small>'+h(metadata)+'</small>'
+   +(row.preferredFamily?'<small>主播指定：同一首，但不同版本</small>':'')
+   +(duplicate?catalogPageRowStatus(row):'')+'</div>'
+   +'<div class="actions catalog-review-source-actions">'+button('編輯','catalogCandidateEdit',row.id,'tiny')
+   +button(row.preferredFamily?'指定共同作品／版本':'關聯既有共同歌曲／版本','catalogVersionSource',row.id,'tiny')
+   +(duplicate?catalogPageRowActions(row):'')+'</div></div>';
+ };
  let entries='',actions='';
  if(status==='singles'){
   entries=catalogView.items.map(row=>'<section class="catalog-single-candidate">'+rowHtml(row)+'</section>').join('');
@@ -1529,7 +1545,7 @@ function catalogReviewHtml(){
   entries=(catalogView.groups||[]).map(group=>{const picked=[...catalogView.selectedRows.values()].filter(row=>row?.groupId===group.id).length;return '<section class="catalog-candidate-group"><h3><label class="catalog-check"><input type="checkbox" data-catalog-group="'+h(group.id)+'" '+(picked>=group.total?'checked':'')+' aria-label="全選本組" aria-checked="'+(picked&&picked<group.total?'mixed':picked>=group.total?'true':'false')+'"> '+h(group.rows?.[0]?.title||'候選群組')+' · '+group.total+' 筆</label></h3><div class="actions">'+(group.rows.filter(row=>!catalogPageCompleted.has(row.id)).length>=2
    ?button('合併為同一首','catalogGroupDecision',group.id,'tiny','data-decision="confirm_same" '+(picked<2?'disabled':''))
     +button('同一首，但不同版本','catalogGroupDecision',group.id,'tiny','data-decision="different_versions" '+(picked<2?'disabled':''))
-   :'')+'</div>'+catalogGroupMatches(group)+(group.total>8?'<details><summary>展開候選</summary>':'')+(group.rows||[]).map(row=>catalogPageCompleted.has(row.id)?'':rowHtml(row,group)).join('')+(group.rows.length<group.total?button('載入更多候選','catalogGroupMore',group.id,'tiny'):'')+(group.total>8?'</details>':'')+'</section>';}).join('');
+   :'')+'</div>'+catalogGroupMatches(group)+(group.total>8?'<details><summary>展開候選</summary>':'')+(group.rows||[]).map(row=>catalogPageCompleted.has(row.id)?'':rowHtml(row)).join('')+(group.rows.length<group.total?button('載入更多候選','catalogGroupMore',group.id,'tiny'):'')+(group.total>8?'</details>':'')+'</section>';}).join('');
  }else if(status==='approved'){
   actions=button('選取本頁','relationSelectPage','','tiny')+button('取消選取','relationClear','','tiny')+button('批量加入歌本','relationAdd','','tiny primary',catalogView.versionSelected?.size?'':'disabled')+button('加入待練','relationPractice','','tiny',catalogView.versionSelected?.size?'':'disabled')+'<small>已選 '+(catalogView.versionSelected?.size||0)+' 首</small>';
   entries=catalogView.items.map(f=>'<section class="catalog-candidate-group catalog-family"><h3>《'+h(f.title)+'》</h3>'+(f.variants||[]).map(v=>'<div class="song catalog-variant-row"><label class="catalog-check"><input type="checkbox" data-relation-select="'+h(v.id)+'" '+(v.alreadyAdded?'disabled':catalogView.versionSelected?.has(v.id)?'checked':'')+' aria-label="選取 '+h(f.title)+' '+h(v.versionLabel||'原版')+'"></label><div class="info"><b>'+h(v.versionLabel||({cover:'翻唱',original:'原版',live:'現場版',remix:'混音版',dj:'DJ版'})[v.versionKind]||v.versionKind||'原版')+'</b><small>'+h([v.artist,v.performerDetail,v.language,v.performerType,v.versionNote].filter(Boolean).join(' · '))+'</small>'+(v.alreadyAdded?'<small>已在我的歌本</small>':'')+'</div><div class="rel-col"><div class="rel-side">'+(isSuperAdmin()?button('編輯','relationEdit',v.id,'tiny'):'')+(v.streamerCount>0&&!(v.streamerCount===1&&v.alreadyAdded)?button('查看主播（'+v.streamerCount+'）','relationRooms',v.id,'tiny'):'')+'</div><details class="rel-more"><summary>更多</summary><div class="rel-more-pop">'+(isSuperAdmin()?button('拆版本','relationSplit',v.id,'tiny')+button('解除關係','relationUnlink',v.id,'tiny')+button('刪除','relationDelete',v.id,'tiny danger'):'')+button('回報問題','catalogReport',v.id,'tiny')+(isSuperAdmin()?button(v.hasSharedLyrics?'查看／編輯共同歌詞':'建立共同歌詞','catalogSharedLyrics',v.id,'tiny')+(v.lyricProposalCount?button('有可採用歌詞（'+v.lyricProposalCount+'）','catalogLyricProposals',v.id,'tiny'):''):'')+'</div></details></div></div>').join('')+'</section>').join('');
@@ -1861,7 +1877,7 @@ function installSongAutocomplete(){
  const scope=()=>JSON.stringify([admin?.accountId,admin?.role,admin?.streamer_id,admin?.spaceId,state.currentStreamer?.spaceId,state.currentStreamer?.id,streamerSlug,!!demo,!!draft]),identity=scope(),current=()=>!closed&&form.isConnected&&identity===scope();
  const models=Object.fromEntries(['missing','added'].map(key=>[key,{q:'',page:0,rows:[],total:0,loaded:false,loading:false,error:'',generation:0}]));
  form.querySelector('[type=submit]').textContent='新增為全新歌曲';
- const label=input.closest('label'),row=document.createElement('div');row.className='full song-title-row';label.replaceWith(row);row.append(label);row.insertAdjacentHTML('beforeend','<div class="song-title-actions">'+button('從共同曲庫選歌（批量）','catalogBrowse','','tiny')+'<small>輸入至少 2 個字，搜尋共同曲庫。</small></div>');
+ const label=input.closest('label'),row=document.createElement('div');row.className='full song-title-row';label.replaceWith(row);row.append(label);row.insertAdjacentHTML('beforeend','<div class="song-title-actions">'+button('從共同曲庫選歌（批量）','catalogBrowse','','tiny')+'<small>輸入至少 2 個字搜尋。找到既有歌曲時，按該筆「加入我的歌本」即可直接綁定；下方「新增為全新歌曲」會送審。</small></div>');
  const render=()=>{if(!current())return;const view=models[membership],pages=Math.max(1,Math.ceil(view.total/10));
   const tabs='<div class="catalog-membership-tabs">'+[['missing','尚未加入'],['added','已在我的歌本']].map(([key,text])=>'<button type="button" data-song-catalog-membership="'+key+'" class="tiny '+(membership===key?'active':'')+'">'+text+'</button>').join('')+'</div>';
   const rows=view.loading?'<small>搜尋中…</small>':view.error?'<small class="error">'+h(view.error)+'</small><button type="button" data-song-catalog-retry>重新讀取</button>':view.rows.map(r=>'<div class="song"><div class="info"><b>'+h(r.title)+'</b><small>'+h([r.artist,r.language,r.performerType,r.versionLabel||'原版'].filter(Boolean).join(' · '))+'</small></div><div class="actions"><button type="button" data-add-variant="'+h(r.variantId)+'" '+(r.alreadyAdded?'disabled':'')+'>'+(r.alreadyAdded?'已在我的歌本':'加入我的歌本')+'</button><button type="button" data-new-version="'+h(r.variantId)+'">這是同一首，但我的版本不同</button></div></div>').join('')||'<small>沒有符合的共同歌曲，可新增為全新歌曲。</small>';
@@ -1879,6 +1895,12 @@ function installSongAutocomplete(){
  const cleanup=()=>{closed=true;clearTimeout(timer);for(const view of Object.values(models))view.generation++;};$('#dialog').addEventListener('close',cleanup,{once:true});
  const schedule=()=>{if(!current())return;clearTimeout(timer);const q=input.value.trim();form.querySelector('[name=catalogCandidateFamily]').value='';form.querySelector('[type=submit]').textContent='新增為全新歌曲';for(const view of Object.values(models)){view.generation++;view.q=q;view.page=0;view.rows=[];view.total=0;view.loaded=false;view.loading=false;view.error='';}if(q.length<2){box.innerHTML='';return;}render();timer=setTimeout(()=>read(membership,0),400);};
  input.addEventListener('input',e=>{if(!e.isComposing)schedule();});input.addEventListener('compositionend',schedule);
+ input.addEventListener('keydown',event=>{
+  if(event.key!=='Enter'||event.isComposing||event.keyCode===229||composingInputs.has(input))return;
+  event.preventDefault();
+  clearTimeout(timer);
+  void read(membership,0);
+ });
  box.onclick=async e=>{const b=e.target.closest('[data-song-catalog-membership],[data-song-catalog-page],[data-song-catalog-retry],[data-add-variant],[data-new-version]');if(!b||b.disabled||!current())return;
   if(b.dataset.songCatalogMembership){const key=b.dataset.songCatalogMembership;if(!models[key])return;membership=key;render();return read(membership,models[membership].page);}
   if(b.hasAttribute('data-song-catalog-page')){const page=Number(b.dataset.songCatalogPage);if(Number.isSafeInteger(page)&&page>=0&&page<Math.max(1,Math.ceil(models[membership].total/10)))return read(membership,page);return;}
