@@ -35,7 +35,8 @@ self.addEventListener('push',event=>{event.waitUntil((async()=>{
  const target=data.link==null?null:noticeTarget(data.link);if(data.link!=null&&!target)return;
  const url=boundedNoticeUrl(target?noticeTargetPath(target):data.url||'./');if(!url)return;
  const existing=await self.registration.getNotifications({tag:data.id});if(existing.length)return;
- await self.registration.showNotification(typeof data.title==='string'?data.title.slice(0,160):'PA Party',{body:data.body,tag:data.id,data:{url},icon:'./assets/app-icon-192.png',badge:'./assets/app-icon-192.png'});
+ const cancelled=target?.entityType==='cancel'||new URL(url).searchParams.get('entityType')==='cancel';
+ await self.registration.showNotification(typeof data.title==='string'?data.title.slice(0,160):'PA Party',{body:data.body,tag:data.id,data:{url},icon:'./assets/app-icon-192.png',badge:'./assets/app-icon-192.png',...(cancelled?{silent:true}:{})});
 })());});
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{
  const url=boundedNoticeUrl(event.notification.data?.url||'./');if(!url)return;

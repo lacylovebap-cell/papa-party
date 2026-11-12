@@ -21,6 +21,16 @@ test('push upgrades the existing abbreviated URL with canonical entity identity 
  assert.equal(w.shown[0].options.icon,'./assets/app-icon-192.png');
  assert.equal(w.fetches(),0);
 });
+
+test('cancelled songs request silent system notifications for canonical and legacy payloads',async()=>{
+ const w=worker();
+ await w.push({id:'cancel',body:'歌曲取消',link:{...link,entityType:'cancel'}});
+ await w.push({id:'legacy-cancel',body:'歌曲取消',url:'./?streamer=papa&entityType=cancel#admin'});
+ await w.push({id:'live',body:'現點歌曲',link:{...link,entityType:'live'}});
+ assert.equal(w.shown[0].options.silent,true);
+ assert.equal(w.shown[1].options.silent,true);
+ assert.equal(w.shown[2].options.silent,undefined);
+});
 test('classic worker serializer stays in parity for every notice type and nullable legacy field',async()=>{
  for(const entityType of Object.keys(NOTICE_TYPES))for(const nullable of [false,true]){
   const target={...link,section:entityType==='live'?'admin':'center',entityType,...(nullable?{spaceId:null,entityId:null,notificationId:null}:{})};

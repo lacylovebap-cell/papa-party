@@ -1,7 +1,7 @@
 export const NOTICE_TYPES={
  live:['玩家現點',2],saved:['玩家提歌',2],cancel:['取消點歌／提歌',2],ready:['準備好了／即將演唱',2],call:['主播呼叫',2],accepted:['提歌成功／已收到／準備時間',2],completed:['完成演唱',1],credit:['存歌異動',1],status:['操作狀態修改',1],failed:['提歌額度已滿',1],message:['私人訊息',2],comment:['公開留言／回覆',1],announcement:['公告',1],achievement:['取得勳章',1],wish:['許願收到／處理結果',2],system:['系統異常',2],delivery:['推播傳送失敗',1]
 };
-export function cleanNoticePrefs(input={}){const v={muteAll:input.muteAll===true,muteSound:input.muteSound===true,pushEnabled:input.pushEnabled===true,types:{}};for(const [type,[,level]] of Object.entries(NOTICE_TYPES)){const src=input.types?.[type]||{};v.types[type]=Object.fromEntries(['center','popup','sound','push','badge'].map(k=>[k,typeof src[k]==='boolean'?src[k]:['center','badge'].includes(k)||level===2]));}return v;}
+export function cleanNoticePrefs(input={}){const v={muteAll:input.muteAll===true,muteSound:input.muteSound===true,pushEnabled:input.pushEnabled===true,types:{}};for(const [type,[,level]] of Object.entries(NOTICE_TYPES)){const src=input.types?.[type]||{};v.types[type]=Object.fromEntries(['center','popup','sound','push','badge'].map(k=>[k,type==='cancel'&&k==='sound'?false:typeof src[k]==='boolean'?src[k]:['center','badge'].includes(k)||level===2]));}return v;}
 export function noticeChannels(prefs,type){const p=cleanNoticePrefs(prefs),v={...(p.types[type]||p.types.system)};v.sound=v.sound&&!p.muteSound&&!p.muteAll;v.popup=v.popup&&!p.muteAll;v.push=v.push&&p.pushEnabled&&!p.muteAll;return v;}
 // Recheck delayed push retries against the current queue, never against a stale
 // notification payload. This does not remove the historical inbox entry.
