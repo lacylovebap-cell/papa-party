@@ -1704,9 +1704,10 @@ async function editStreamerLyrics(songId){
  let data={linked:false,body:chosen.lyrics||'',mode:'own',privateNote:''};
  if(!demo&&!draft)try{data=await api({op:'catalogLyrics',streamerSongId:songId,management:true});}catch(err){if(!chosen.lyrics)throw err;}
  const linked=!!data.linked,mode=data.mode||'shared';
- modal('歌詞／演唱註記 · '+chosen.title,`${linked?nativeSelect('mode','歌詞來源',[['shared','跟隨共同歌詞'],['copy','複製後自行修改'],['own','使用本主播歌詞']],mode):'<p class="muted">這首尚未關聯共同曲庫，歌詞只屬於本主播。</p>'}${area('body','歌詞',data.body??data.lyrics??chosen.lyrics??'')}${linked?area('privateNote','只屬於本主播的演唱註記',data.privateNote||''):''}`,async f=>{
-  if(linked){await api({op:'catalogLyricChoice',streamerSongId:songId,mode:f.get('mode'),body:f.get('mode')==='shared'?undefined:f.get('body'),privateNote:f.get('privateNote'),management:true});}
-  else await dispatch('song',{...chosen,lyrics:f.get('body')});
+ modal('歌詞／演唱註記 · '+chosen.title,`${linked?nativeSelect('mode','歌詞來源',[['shared','跟隨共同歌詞'],['copy','複製後自行修改'],['own','使用本主播歌詞']],mode):'<p class="muted">這首尚未關聯共同曲庫，歌詞只屬於本主播。</p>'}${area('body','歌詞',data.body??data.lyrics??chosen.lyrics??'')}${field('hostNote','📝 主播註記（被點時會彈窗提醒、顯示在待播；只有主播看得到）',chosen.hostNote||'','text','maxlength="60" placeholder="例：升3KEY"')}${linked?area('privateNote','只屬於本主播的演唱註記',data.privateNote||''):''}`,async f=>{
+  const hostNote=String(f.get('hostNote')||'').trim(),noteChanged=hostNote!==String(chosen.hostNote||'');
+  if(linked){await api({op:'catalogLyricChoice',streamerSongId:songId,mode:f.get('mode'),body:f.get('mode')==='shared'?undefined:f.get('body'),privateNote:f.get('privateNote'),management:true});if(noteChanged)await dispatch('song',{...chosen,hostNote});}
+  else await dispatch('song',{...chosen,lyrics:f.get('body'),hostNote});
   await refresh(true);toast('歌詞設定已儲存');
  });
  if(linked){const select=$('#modal-form [name=mode]'),body=$('#modal-form [name=body]');const sync=()=>{body.readOnly=select.value==='shared';body.title=body.readOnly?'跟隨共同歌詞；切換成自訂後才可編輯':'';};select.addEventListener('change',async()=>{if(['shared','copy'].includes(select.value)){const shared=await api({op:'catalogLyrics',streamerSongId:songId,sharedOnly:true,management:true});if(body.isConnected){body.value=shared.body||'';sync();}}else sync();});sync();}
