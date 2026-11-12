@@ -7,7 +7,12 @@ const catalogActor=(who:any)=>who?.accountId?'verified:'+JSON.stringify({account
 const CATALOG_COMMON_FIELDS=['title','artist','cat','artistType','version','catalogVariantId'];
 function catalogMetadataView(view:any,rows:any[],management=false){
  const byId=new Map(rows.map((r:any)=>[r.songId,r]));
- return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries([...CATALOG_COMMON_FIELDS,'hasLyrics','lyricsMode',...(management?['catalogStatus','catalogFamilyId','otherStreamerCount']:[])].filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;})};
+ const track=(item:any)=>{
+  const common=byId.get(item.songId);
+  return common?{...item,...Object.fromEntries(['title','artist','version'].filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:item;
+ };
+ return {...view,songs:view.songs.map((song:any)=>{const common=byId.get(song.songId);return common?{...song,...Object.fromEntries([...CATALOG_COMMON_FIELDS,'hasLyrics','lyricsMode',...(management?['catalogStatus','catalogFamilyId','otherStreamerCount']:[])].filter(k=>common[k]!=null).map(k=>[k,common[k]]))}:song;}),
+  ...(view.queue?{queue:view.queue.map((q:any)=>({...(q.items?.length>1?q:track(q)),...(Array.isArray(q.items)?{items:q.items.map(track)}:{})}))}:{})};
 }
 // A local tag/note edit must not persist the displayed shared metadata into the
 // original song. Explicitly changed common fields still become new candidates.
