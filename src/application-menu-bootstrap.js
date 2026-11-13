@@ -27,7 +27,7 @@ if(header){
    button.replaceWith(link);
   }
   for(const link of menu.querySelectorAll('a[data-streamer-admin]'))link.textContent=managerSignedIn?'主播後台':'主播登入';
-  const style=document.getElementById('compact-menu-styles'),href=new URL('./application-menu.css?v=1023-menu-1',import.meta.url).href;
+  const style=document.getElementById('compact-menu-styles'),href=new URL('./application-menu.css?v=11.13-UI.1',import.meta.url).href;
   if(style&&style.href!==href)style.href=href;
  };
  const observer=new MutationObserver(decorate);

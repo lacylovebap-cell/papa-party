@@ -13,7 +13,7 @@ test('independent entry restores menus rebuilt by an older cached app, without o
   installCompactMenu({route}){assert.equal(route,'home');compact=true;menu.dataset.layoutRevision='1023';calls++;}};
  vm.runInNewContext(source,context);
  assert.equal(calls,1);assert.equal(observed.target,header);assert.deepEqual({...observed.options},{childList:true});
- assert.equal(style.href,'https://paparty.app/src/application-menu.css?v=1023-menu-1');
+ assert.equal(style.href,'https://paparty.app/src/application-menu.css?v=11.13-UI.1');
  callback();assert.equal(calls,1,'already decorated headers are not reinstalled');
  compact=false;delete menu.dataset.layoutRevision;callback();assert.equal(calls,2,'legacy header replacement is decorated');
 });
