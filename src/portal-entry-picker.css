@@ -1,23 +1,23 @@
 #portal-login-dialog{width:min(440px,calc(100vw - 32px));max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);padding:0;border:1px solid #635071;border-radius:20px;background:#19141f;color:#f2edf6;box-sizing:border-box;overflow:auto}
 #portal-login-dialog::backdrop{background:#08060dbb;backdrop-filter:blur(4px)}
 #portal-login-dialog .entry-heading{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #3f334b;gap:12px}
-#portal-login-dialog h2{font-size:20px;line-height:1.4;margin:0}
+#portal-login-dialog h2{font-size:var(--fs-2xl);line-height:1.4;margin:0}
 #portal-login-dialog [data-entry-close]{width:36px;height:36px;flex-shrink:0;border:1px solid #635071;border-radius:10px;background:transparent;color:inherit;font:inherit;cursor:pointer}
 #portal-login-dialog form{padding:24px;display:grid;gap:18px}
-#portal-login-dialog label{display:grid;gap:8px;font-size:14px;color:#c6b9d0;min-width:0}
-#portal-login-dialog select{width:100%;min-width:0;min-height:48px;padding:10px 12px;border:1px solid #55435f;border-radius:12px;background:#110e17;color:#f2edf6;font:inherit;box-sizing:border-box}
+#portal-login-dialog label{display:grid;gap:8px;font-size:var(--fs-md);color:#c6b9d0;min-width:0}
+#portal-login-dialog select{width:100%;min-width:0;min-height:var(--ctl-h);padding:10px 12px;border:1px solid #55435f;border-radius:12px;background:#110e17;color:#f2edf6;font:inherit;box-sizing:border-box}
 #portal-login-dialog select:focus-visible,#portal-login-dialog button:focus-visible{outline:2px solid #c29bdc;outline-offset:3px}
-#portal-login-dialog [data-entry-hint]{margin:0;min-height:40px;font-size:13px;line-height:1.7;color:#b9a8c7}
-#portal-login-dialog [type=submit]{border:1px solid #9471ac;border-radius:12px;min-height:46px;background:#79528f;color:#fff;font:inherit;cursor:pointer}
+#portal-login-dialog [data-entry-hint]{margin:0;min-height:var(--ctl-h);font-size:var(--fs-sm);line-height:1.7;color:#b9a8c7}
+#portal-login-dialog [type=submit]{border:1px solid #9471ac;border-radius:12px;min-height:var(--ctl-h-lg);background:#79528f;color:#fff;font:inherit;cursor:pointer}
 #portal-login-dialog :disabled{opacity:.5;cursor:default}
 /* select-search.js panel (same rules as theme.css; this page does not load theme.css) */
 .ss-panel{position:fixed;z-index:1000;display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--home-line,var(--line,#3a2f45));border-radius:12px;background:var(--home-panel,#1b1622);color:var(--home-text,#eee);box-shadow:0 10px 28px #0008;box-sizing:border-box}
-.ss-panel .ss-search{width:100%;min-height:34px;border-radius:999px;padding:5px 12px;font-size:14px;box-sizing:border-box}
+.ss-panel .ss-search{width:100%;min-height:var(--ctl-h);border-radius:999px;padding:5px 12px;font-size:var(--fs-md);box-sizing:border-box}
 .ss-panel .ss-options{overflow:auto;display:flex;flex-direction:column;gap:2px;min-height:0}
-.ss-panel .ss-option{display:block;width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:8px 10px;min-height:34px;border-radius:8px;font-size:14px;white-space:normal}
+.ss-panel .ss-option{display:block;width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:8px 10px;min-height:var(--ctl-h);border-radius:8px;font-size:var(--fs-md);white-space:normal}
 .ss-panel .ss-option:hover,.ss-panel .ss-option:focus{background:color-mix(in srgb,var(--home-accent,#9b6bc0) 22%,transparent);outline:none}
 .ss-panel .ss-option.selected{background:var(--home-button,#7a4f9b);color:var(--home-buttonText,#fff);font-weight:700}
-.ss-panel .ss-empty{margin:6px 4px;font-size:13px;opacity:.7}
+.ss-panel .ss-empty{margin:6px 4px;font-size:var(--fs-sm);opacity:.7}
 .ss-panel .ss-search{background:#110d17;color:#f2edf6;border:1px solid #635071}
 .ss-panel .ss-option{color:#f2edf6}
 .ss-panel .ss-option:hover,.ss-panel .ss-option:focus{background:#3a2f45;outline:none}
