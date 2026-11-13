@@ -226,7 +226,7 @@ html #app .queue-row .queue-primary button:not(.action-help){padding:4px 10px!im
 html #app .queue-row .queue-controls{gap:4px}
 html #app .queue-row .queue-action-hint{gap:2px}
 html #app .action-help{font-size:0!important;position:relative}
-html #app .action-help::before{content:"i";font:700 12px/1 Georgia,"Times New Roman",serif;display:block;text-align:center}
+html #app .action-help::before{content:"?";font:700 var(--fs-xs)/1 system-ui,sans-serif;display:block;text-align:center}
 html #app .queue-row .action-help{min-width:var(--help-d)!important;max-width:var(--help-d);min-height:var(--help-d)!important;padding:0!important;margin:0!important;flex:0 0 var(--help-d)!important;display:inline-grid!important;place-items:center;border-radius:50%!important;box-sizing:border-box}
 html #app .queue-row .action-help::before{font-size:var(--fs-micro)}
 [data-theme-v2] button.action-help{background:var(--theme-button-solid);border:1px solid var(--theme-button-solid);color:var(--home-buttonText);box-shadow:none}
@@ -376,7 +376,7 @@ html #app .queue-compact .queue-controls .queue-call{min-height:var(--ctl-h-icon
 @media(max-width:650px){.queue-row .queue-more[open]>.queue-more-content{position:fixed;left:8px;right:8px;bottom:8px;top:auto;width:auto;max-width:none;max-height:55dvh;z-index:2147483000;flex-direction:row;flex-wrap:wrap;align-items:center;box-shadow:0 -8px 32px #000a}.queue-row .queue-more[open]>.queue-more-content .queue-more-group{flex-wrap:wrap}}
 /* 全站說明圖示統一：18px 小圓，與 ? 同格式 (11.02-TUTORIAL.13) */
 html #app .action-help,html #app .queue-row .action-help,html #app .queue-compact .queue-primary .action-help,[data-theme-v2] button.action-help{box-sizing:border-box;min-width:var(--help-d)!important;min-height:var(--help-d)!important;max-width:var(--help-d)!important;padding:0!important;margin:0 0 0 4px!important;flex:0 0 var(--help-d)!important;aspect-ratio:1;display:inline-flex!important;align-items:center;justify-content:center;border-radius:50%!important;border:1px solid var(--home-accent,#9b7bff)!important;background:transparent!important;color:var(--home-accent,#9b7bff)!important;box-shadow:none!important;font-size:0!important;vertical-align:middle}
-html #app .action-help::before,html #app .queue-row .action-help::before{content:"!";font:600 11px/1 system-ui,sans-serif;display:block;text-align:center}
+html #app .action-help::before,html #app .queue-row .action-help::before{content:"?";font:700 var(--fs-xs)/1 system-ui,sans-serif;display:block;text-align:center}
 html #app .action-help:hover,html #app .action-help:focus-visible{background:var(--home-accent,#9b7bff)!important;color:var(--home-panel,#1c1626)!important}
 /* ! 說明彈窗：與 ? 彈窗同樣式（✕ 關閉、點旁邊關閉） */
 .action-hint-popup{padding:12px 34px 12px 12px!important;border-radius:12px!important;border:1px solid var(--home-line,#6d50a3)!important;background:var(--home-panel,#2a2236)!important;color:var(--home-text,#f4eefc)!important;font-size:var(--fs-sm);line-height:1.6;box-shadow:0 8px 24px #0009!important}
@@ -447,7 +447,7 @@ html #app .queue-add-row button:not(.action-help),html #app .queue-live-tools bu
 html #app .queue-live-tools{gap:6px!important}
 /* Help "!" buttons inside dialogs (outside #app) keep their glyph. */
 dialog .action-help{font-size:0!important;position:relative;box-sizing:border-box;min-width:var(--help-d);min-height:var(--help-d);max-width:var(--help-d);padding:0;margin:0 0 0 4px;border-radius:50%;display:inline-grid;place-items:center;border:1px solid var(--home-accent,#9b7bff);background:transparent;color:var(--home-accent,#9b7bff);flex:0 0 var(--help-d);aspect-ratio:1}
-dialog .action-help::before{content:"!";font:600 11px/1 system-ui,sans-serif;display:block;text-align:center}
+dialog .action-help::before{content:"?";font:700 var(--fs-xs)/1 system-ui,sans-serif;display:block;text-align:center}
 dialog .action-help:hover,dialog .action-help:focus-visible{background:var(--home-accent,#9b7bff);color:var(--home-panel,#1c1626)}
 .undo-bar{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 28px);padding:10px 14px;border-radius:12px;background:var(--home-panel,#211b27);color:var(--home-text,#fff);border:1px solid var(--home-accent,#9a74d1);font-size:var(--fs-sm)}
 /* Common songbook: small "大家常聽" ranking, theme-aware. */

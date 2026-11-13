@@ -121,7 +121,7 @@ html #app .queue-add-row button:not(.action-help),html #app .queue-live-tools bu
 html #app .queue-live-tools{gap:6px!important}
 /* Help "!" buttons inside dialogs (outside #app) keep their glyph. */
 dialog .action-help{font-size:0!important;position:relative;box-sizing:border-box;min-width:var(--help-d);min-height:var(--help-d);max-width:var(--help-d);padding:0;margin:0 0 0 4px;border-radius:50%;display:inline-grid;place-items:center;border:1px solid var(--home-accent,#9b7bff);background:transparent;color:var(--home-accent,#9b7bff);flex:0 0 var(--help-d);aspect-ratio:1}
-dialog .action-help::before{content:"!";font:600 11px/1 system-ui,sans-serif;display:block;text-align:center}
+dialog .action-help::before{content:"?";font:700 var(--fs-xs)/1 system-ui,sans-serif;display:block;text-align:center}
 dialog .action-help:hover,dialog .action-help:focus-visible{background:var(--home-accent,#9b7bff);color:var(--home-panel,#1c1626)}
 .undo-bar{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 28px);padding:10px 14px;border-radius:12px;background:var(--home-panel,#211b27);color:var(--home-text,#fff);border:1px solid var(--home-accent,#9a74d1);font-size:var(--fs-sm)}
 /* Common songbook: small "大家常聽" ranking, theme-aware. */
