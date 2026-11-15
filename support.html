@@ -1,0 +1,80 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#171222"><title>PA Party｜平台營運支持</title><meta name="description" content="PA Party 平台營運支持：自願贊助協助維持伺服器、資料庫與功能維護。"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="src/style.css?v=11.15-SUPPORT.1"><link rel="stylesheet" href="src/theme.css?v=11.15-SUPPORT.1"><link rel="stylesheet" href="src/support-page.css?v=11.15-SUPPORT.1"><link rel="stylesheet" href="src/site-footer.css?v=11.15-SUPPORT.1"></head><body>
+<main class="support-main">
+<a class="support-back" href="index.html">← 回 PA Party</a>
+<section class="support-hero">
+ <p class="eyebrow">PLATFORM SUPPORT</p>
+ <h1>讓喜歡的聲音，繼續被聽見。</h1>
+ <p>PA Party 希望打造一個讓聲音表演者與聽眾能夠自由交流、分享音樂的平台。</p>
+ <p>從歌曲管理、點歌系統到各項功能維護，每一項服務都需要持續投入伺服器、資料庫及開發成本。</p>
+ <p>如果你喜歡 PA Party，也願意支持這個平台繼續成長，歡迎透過自願贊助，協助我們維持服務與持續改善功能。</p>
+ <p>每一份支持，都是讓 PA Party 繼續前進的力量。</p>
+</section>
+
+<section class="card support-goal">
+ <h2><span id="support-month">本月</span>營運目標</h2>
+ <div id="support-progress" role="progressbar" aria-label="本月贊助達成比例" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+  <div class="support-bar" id="support-bar"><span></span></div>
+ </div>
+ <dl class="support-figures">
+  <div class="support-figure"><dt>本月預計營運成本</dt><dd data-figure="goal">NT$0</dd></div>
+  <div class="support-figure" data-accent="gold"><dt>本月已確認贊助</dt><dd data-figure="received">NT$0</dd></div>
+  <div class="support-figure"><dt>達成比例</dt><dd data-figure="percent">0%</dd></div>
+  <div class="support-figure"><dt>本月實際營運支出</dt><dd data-figure="expenses">NT$0</dd></div>
+  <div class="support-figure"><dt>本月剩餘款項</dt><dd data-figure="remaining">NT$0</dd></div>
+ </dl>
+ <p class="support-note">只有後端確認成功的交易才會計入贊助總額。待付款、付款失敗、取消、逾時及退款都不計入。目前沒有資料時顯示 0。</p>
+</section>
+
+<section class="card support-amounts">
+ <h2>選擇支持金額</h2>
+ <form id="support-form">
+  <div class="support-choices">
+   <button type="button" class="support-choice" data-preset="100" aria-pressed="false">NT$100</button>
+   <button type="button" class="support-choice" data-preset="300" aria-pressed="true">NT$300</button>
+   <button type="button" class="support-choice" data-preset="500" aria-pressed="false">NT$500</button>
+  </div>
+  <div class="support-custom">
+   <label for="support-custom-input">自訂金額</label>
+   <input id="support-custom-input" type="text" inputmode="numeric" autocomplete="off" placeholder="例如 1000">
+  </div>
+  <label class="support-anon"><input id="support-anon" type="checkbox"><span>匿名支持（不公開顯示我的身分；後台仍保留對帳與退款所需的交易紀錄）</span></label>
+  <div class="support-nickname" id="support-nickname">
+   <input id="support-nickname-input" type="text" maxlength="24" autocomplete="off" placeholder="公開顯示的暱稱（可留空）">
+  </div>
+  <button type="submit" class="primary support-submit" id="support-submit" disabled>金流審核中，尚未開放付款</button>
+  <p class="support-status" id="support-status" role="status" data-tone="plain"></p>
+ </form>
+</section>
+
+<section class="card support-ledger">
+ <h2><span>本月收支摘要</span></h2>
+ <table>
+  <tbody>
+   <tr><th scope="row">本月收到贊助</th><td data-figure="lreceived">NT$0</td></tr>
+   <tr><th scope="row">本月金流手續費</th><td data-figure="lfees">NT$0</td></tr>
+   <tr><th scope="row">本月實際可用金額</th><td data-figure="lusable">NT$0</td></tr>
+   <tr><th scope="row">本月系統支出</th><td data-figure="lexpenses">NT$0</td></tr>
+   <tr><th scope="row">本月結餘</th><td data-figure="lremaining">NT$0</td></tr>
+  </tbody>
+ </table>
+ <p class="support-note">公開資料只顯示彙總金額，不會揭露任何個別贊助者的交易或個人資料。</p>
+</section>
+
+<section class="card support-terms">
+ <h2>支持說明</h2>
+ <ul>
+  <li>贊助用途為 PA Party 平台營運、伺服器、資料庫及功能維護。</li>
+  <li>贊助為自願性質。</li>
+  <li>不會因為沒有贊助而限制原有免費功能。</li>
+  <li>不提供股權、利息或任何投資收益。</li>
+  <li>採單次贊助，不會自動產生定期扣款，也不會在未經同意的情況下再次扣款。</li>
+  <li>付款及退款依適用的金流規則及相關法令處理。</li>
+  <li>本頁為平台營運支持，非公益募款或慈善捐款。</li>
+ </ul>
+</section>
+</main>
+<footer id="site-footer" class="site-footer" aria-label="網站資訊"></footer>
+<script type="module" src="src/support-page.js?v=11.15-SUPPORT.1"></script>
+<script type="module" src="src/site-footer.js?v=10.20-WEB.1"></script>
+<script type="module" src="src/support-widget.js?v=11.15-SUPPORT.1"></script>
+</body></html>

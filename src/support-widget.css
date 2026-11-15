@@ -1,0 +1,51 @@
+/* 全站共用浮動贊助入口。只新增一個右下角元件，不改任何既有版面。
+   層級 70：在 #toast(30) 與 .undo-bar(60) 之上，在 .notice-first-setup(80)、
+   待播底部面板(2147483000) 與 overlay-feedback(2147483647) 之下，
+   所以既有操作面板永遠蓋得過它。 */
+.pa-support-dock{position:fixed;right:12px;bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:70;display:flex;align-items:center;gap:6px;max-width:calc(100vw - 24px);box-sizing:border-box;pointer-events:none}
+.pa-support-dock>*{pointer-events:auto}
+.pa-support-dock[hidden]{display:none!important}
+
+/* 膠囊主鈕：高級黑、深紫、薰衣草紫，香檳金細邊與珍珠白字 */
+.pa-support-open{display:inline-flex;align-items:center;gap:7px;min-height:var(--ctl-h,38px);padding:0 14px;border-radius:999px;
+ border:1px solid #c9a86333;background:linear-gradient(135deg,#1b1424f2,#2a1d3af2 55%,#171022f2);color:#f5f1ea;
+ font:600 var(--fs-sm,12px)/1 system-ui,'Microsoft JhengHei',sans-serif;letter-spacing:.3px;white-space:nowrap;cursor:pointer;
+ box-shadow:0 6px 22px #0007,inset 0 1px 0 #ffffff14;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+ text-decoration:none;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.pa-support-open:hover,.pa-support-open:focus-visible{border-color:#c9a86366;box-shadow:0 8px 26px #0008,0 0 0 1px #a886cc33,inset 0 1px 0 #ffffff1f;transform:translateY(-1px)}
+.pa-support-open .pa-support-heart{font-size:var(--fs-md,13px);line-height:1;color:#d9b8e8}
+.pa-support-open .pa-support-label{overflow:hidden;text-overflow:ellipsis}
+
+/* 收合鈕 */
+.pa-support-collapse{display:inline-flex;align-items:center;justify-content:center;width:var(--help-d,24px);height:var(--help-d,24px);
+ padding:0;min-height:0;border-radius:999px;border:1px solid #ffffff1f;background:#13101ae6;color:#bdb2cc;
+ font:700 var(--fs-xs,11px)/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px #0006;backdrop-filter:blur(8px)}
+.pa-support-collapse:hover{color:#f5f1ea;border-color:#c9a86355}
+
+/* 收合後只留小愛心 */
+.pa-support-dock[data-collapsed=true] .pa-support-open .pa-support-label,
+.pa-support-dock[data-collapsed=true] .pa-support-collapse{display:none}
+.pa-support-dock[data-collapsed=true] .pa-support-open{min-width:var(--ctl-h,38px);justify-content:center;padding:0;gap:0}
+
+/* 極輕微呼吸光暈；不閃爍，且尊重系統減少動態設定 */
+@media(prefers-reduced-motion:no-preference){
+ .pa-support-open{animation:pa-support-breathe 6s ease-in-out infinite}
+ @keyframes pa-support-breathe{
+  0%,100%{box-shadow:0 6px 22px #0007,0 0 0 0 #a886cc00,inset 0 1px 0 #ffffff14}
+  50%{box-shadow:0 6px 22px #0007,0 0 18px 2px #a886cc24,inset 0 1px 0 #ffffff14}}
+ .pa-support-open:hover{animation:none}
+}
+
+@media(max-width:700px){
+ .pa-support-dock{right:10px;bottom:max(12px,env(safe-area-inset-bottom,0px))}
+ .pa-support-open{font-size:var(--fs-xs,11px);padding:0 12px}
+}
+/* 極窄畫面只留愛心，避免擋到操作 */
+@media(max-width:360px){
+ .pa-support-dock .pa-support-open .pa-support-label{display:none}
+ .pa-support-dock .pa-support-open{min-width:var(--ctl-h-sm,32px);justify-content:center;padding:0;gap:0}
+}
+/* 淺色主題（無 theme.css 時） */
+@media(prefers-color-scheme:light){
+ :root:not([data-theme=dark]) .pa-support-open{background:linear-gradient(135deg,#2a1d3af2,#3b2a50f2);color:#f7f3ec}
+}

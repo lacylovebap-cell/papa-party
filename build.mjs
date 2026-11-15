@@ -14,5 +14,5 @@ fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({version:'11.13-SO
 console.log('Build 11.13-SONG.1 complete: static site in dist');
 
 fs.copyFileSync(path.join(root,'lobby.html'),path.join(out,'lobby.html'));
-for(const file of ['app.html','404.html','sw.js','manifest.webmanifest','CNAME'])fs.copyFileSync(path.join(root,file),path.join(out,file));
+for(const file of ['app.html','support.html','404.html','sw.js','manifest.webmanifest','CNAME'])fs.copyFileSync(path.join(root,file),path.join(out,file));
 
