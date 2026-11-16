@@ -35,7 +35,7 @@ test('one scoped server aggregate combines sound/radio, separates streamers, mer
 test('progress is visible in cards/details, secret conditions stay hidden, radio scope has an empty placeholder only',()=>{
  const row={code:'sung50',name:'50首兵郎',scope:'streamer',emoji:'✴',visibility:'public',progress:{current:25,target:50,unit:'首'},qualified:false};
  assert.match(achievementPanelHtml([row]),/25\/50/);assert.match(achievementPanelHtml([{...row,progress:{current:25.5,target:50}}]),/25\.5\/50/);assert.match(achievementDetailsHtml(row),/25\/50/);
- for(const hidden of [{...row,visibility:'after_award'},{...row,visibility:'condition_hidden'}])assert.doesNotMatch(achievementPanelHtml([hidden]),/25\/50/);
+ for(const hidden of [{...row,visibility:'after_award'},{...row,visibility:'condition_hidden'},{...row,badgeId:'H02',recorded:true}])assert.doesNotMatch(achievementPanelHtml([hidden]),/25\/50/);
  const radio=achievementPanelHtml([row],{scope:'radio'});assert.match(radio,/電台勳章內容待補充/);assert.doesNotMatch(radio,/class="medal-row/);
  assert.match(medalGrantHtml({...row,lifetime:'24h'}),/data-medal-grant/);
  assert.doesNotMatch(medalGrantHtml({...row,scope:'global',lifetime:'permanent',manualAllowed:false}),/data-medal-grant/);
