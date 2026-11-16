@@ -15,20 +15,21 @@ const CSS=`
 @media(prefers-reduced-motion:reduce){.medal-pop,.medal-pop-card,.medal-pop-ico,.medal-pop-card i{animation:none!important}.medal-pop-card i{display:none}}
 `;
 export function medalNameFromBody(body){const m=String(body||'').match(/「([^」]+)」/);return m?m[1]:String(body||'').replace(/^.*?｜/,'');}
+export const MEDAL_EMOJI={"first_mic": "🥇", "sung100": "🌟", "sung500": "🤯", "repeat_show": "😖", "seventh": "7️⃣", "insomnia": "👹", "destiny": "🧿", "coincidence": "🎯", "reunion": "😝", "same10": "😮", "majority": "😎", "last_light": "🕯️", "lucky": "🍀", "legend": "🦄", "chosen": "🎁", "first_live": "🔥", "night": "🌙", "no_sleep": "🍻", "big_requester": "🚩", "house": "🏠", "triple": "⚡", "categories": "💯", "sad3": "💔", "cold30": "🧊", "popular_show": "🔥", "same_song_show": "🤝", "dice20": "🎰", "dice_repeat": "🪃", "streak7": "📆", "fan15": "👼", "every_hour": "🛋️", "love10": "🔁", "dna30": "🧬", "explorer": "🗺️", "cleaner": "🧹", "cold90": "🪦", "moods": "🎭", "all_tags": "🌈", "comeback": "🧨", "attendance30": "📅", "regular": "🧱", "popular_history": "🧲", "same_artist_show": "🐑", "five_players": "🧯", "eighth": "🥉", "saved50": "📤", "saved100": "🚅", "saved500": "🚚", "saved10": "⚓", "failure1": "😭", "failure10": "🚪", "failure50": "🫠", "after_failure": "🥰", "stock50": "💾", "stock100": "🗃️", "stock500": "🛎", "stock1000": "🏛️", "saved_success": "💖", "saved_failure": "⛔", "sung50": "✴"};
 const queue=[];let showing=false;
-export function showMedalCelebration(body,doc=document){
- queue.push(body);if(!showing)next(doc);
+export function medalInfo(n){return {streamer:String(n.streamer_name||String(n.body||'').split('｜')[0]||'').trim(),name:medalNameFromBody(n.body),emoji:MEDAL_EMOJI[n.entity_id]||'🏅'};}
+export function showMedalCelebration(n,doc=document){
+ queue.push(medalInfo(n));if(!showing)next(doc);
 }
 function next(doc){
- const body=queue.shift();if(body===undefined){showing=false;return;}
+ const info=queue.shift();if(info===undefined){showing=false;return;}
  showing=true;
  if(!doc.getElementById(STYLE_ID)){const st=doc.createElement('style');st.id=STYLE_ID;st.textContent=CSS;doc.head.append(st);}
  const wrap=doc.createElement('div');wrap.className='medal-pop';wrap.setAttribute('role','alertdialog');wrap.setAttribute('aria-label','取得勳章');
- const name=medalNameFromBody(body);
  const card=doc.createElement('div');card.className='medal-pop-card';
- const ico=doc.createElement('span');ico.className='medal-pop-ico';ico.setAttribute('aria-hidden','true');ico.textContent='🏅';
- const s=doc.createElement('small');s.textContent='🎉 恭喜取得勳章';
- const b=doc.createElement('b');b.textContent=name;
+ const ico=doc.createElement('span');ico.className='medal-pop-ico';ico.setAttribute('aria-hidden','true');ico.textContent=info.emoji;
+ const s=doc.createElement('small');s.textContent=info.streamer?'🎉 恭喜取得「'+info.streamer+'」的勳章':'🎉 恭喜取得勳章';
+ const b=doc.createElement('b');b.textContent=info.name;
  const p=doc.createElement('p');p.textContent='點一下關閉';
  for(let i=0;i<6;i++){const sp=doc.createElement('i');sp.style.left=(8+i*15)+'%';sp.style.top=(10+(i%3)*22)+'%';sp.style.animationDelay=(i*0.25)+'s';card.append(sp);}
  card.append(ico,s,b,p);wrap.append(card);doc.body.append(wrap);
