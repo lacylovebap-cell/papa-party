@@ -30,7 +30,7 @@ test('only management catalog exposes policies; global and H/L remain locked',()
  for(const opts of [{publicControl:true},{manager:true}])assert.doesNotMatch(achievementPanelHtml(rows,opts),/data-achievement-code|data-medal-public-code/);
  const html=achievementPanelHtml(rows,{manager:true,managementCatalog:true});
  assert.equal((html.match(/data-achievement-code=/g)||[]).length,1);assert.match(html,/data-achievement-code="sung50"/);
- assert.doesNotMatch(achievementDetailsHtml({...rows[2],visibility:'condition_hidden',condition:'SECRET'}),/SECRET/);
+ assert.doesNotMatch(achievementDetailsHtml({...rows[2],qualified:false,visibility:'condition_hidden',condition:'SECRET'}),/SECRET/);
  assert.match(achievementDetailsHtml({...rows[2],visibility:'condition_hidden',condition:'SECRET'},{manager:true}),/SECRET/);
 });
 
