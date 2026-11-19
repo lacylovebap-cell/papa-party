@@ -3,7 +3,7 @@ import {createNotificationDevicePreferences} from './notification-device-prefere
 import {messageCenterHtml,messageCenterSettingsHtml} from './message-center-view.js?v=10.31-NOTICE.4';
 import {createMessageCenter,MESSAGE_CATEGORIES} from './message-center.js?v=10.31-NOTICE.4';
 import {canReplaceSound,isSuper} from './access-policy.js?v=10.28-CANCEL.1';
-import {showMedalCelebration} from './medal-celebrate.js?v=11.20-ACH.9';
+import {showMedalCelebration} from './medal-celebrate.js?v=11.20-ACH.10';
 import {communicationIdentity} from './communication-context.js?v=10.19-WEB.1';
 import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=11.13-SONG.1';
 import {createWebNotificationHealth} from './web-notification-health.js?v=10.19-WEB.1';
@@ -62,7 +62,7 @@ export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpe
  document.addEventListener('keydown',e=>{if(!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey)restoreAudio();},{passive:true});
  const medalTrace=[];let medalSent=false;function medalLog(x){if(medalTrace.length<12)medalTrace.push(x+'@'+Math.round(performance.now()/100)/10);}
  medalLog('init'+(/entityType=achievement/.test(location.search)?'A':'')+(document.hidden?'H':''));
- setTimeout(()=>{if(medalSent||!medalTrace.some(x=>/initA|hit|show/.test(x)))return;medalSent=true;api({op:'pushDiagnostic',diagnostic:{error:medalTrace.join(' ').slice(0,80),app:'MEDAL-ACH9'}}).catch(()=>{});},12000);
+ function medalSend(){if(medalSent||!medalTrace.some(x=>/initA|hit|show/.test(x)))return;medalSent=true;api({op:'pushDiagnostic',diagnostic:{error:medalTrace.join(' ').slice(0,80),app:'MEDAL-ACH10'}}).catch(()=>{});}setTimeout(medalSend,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)medalSend();});
  async function pendingMedal(){try{if(!globalThis.caches)return;const c=await caches.open('pa-medal'),r=await c.match('/__pending-medal');medalLog(r?'hit':'miss');if(!r)return;const d=await r.json();setTimeout(()=>c.delete('/__pending-medal').catch(()=>{}),2000);if(d&&Date.now()-d.at<180000&&d.body)celebrateMedals([{id:d.id,body:d.body,entity_id:d.entity_id,created_at:new Date(d.at).toISOString()}]);}catch{}}
  pendingMedal();document.addEventListener('visibilitychange',()=>{if(!document.hidden)pendingMedal();});window.addEventListener('focus',()=>pendingMedal());
  let medalList=[],medalPopupOn=false;function celebrateNow(){if(document.hidden||!medalPopupOn)return;const fresh=medalList.filter(n=>Date.now()-Date.parse(n.created_at)<864e5);if(fresh.length)celebrateMedals(fresh);}
