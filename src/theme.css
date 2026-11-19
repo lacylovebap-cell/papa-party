@@ -474,3 +474,17 @@ html #app .catalog-pending-dot{display:inline-block;width:7px;height:7px;min-wid
 .host-note-alert .host-note-text{font-size:1.25em;font-weight:700;margin:6px 0 12px}
 html #app .admin-section-tabs>button[data-id=catalog]{position:relative;display:inline-flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap}
 html #app .admin-section-tabs>button[data-id=catalog] .catalog-pending-dot{position:absolute;top:6px;right:6px;margin:0;align-self:auto}
+
+dialog.alloc-confirm{width:min(360px,calc(100vw - 24px));max-width:100%;box-sizing:border-box;padding:18px;border-radius:18px;border:1px solid var(--line,#3a3150);background:var(--panel,#1b1722);color:inherit}
+dialog.alloc-confirm::backdrop{background:#000a}
+dialog.alloc-confirm h3{margin:0 0 4px;font-size:17px}
+dialog.alloc-confirm .alloc-confirm-sub{margin:0 0 12px;font-size:12px;color:var(--muted,#aaa2b6)}
+dialog.alloc-confirm .alloc-confirm-tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid color-mix(in srgb,#7fd1a0 60%,transparent);color:#7fd1a0;background:color-mix(in srgb,#7fd1a0 12%,transparent)}
+dialog.alloc-confirm .alloc-confirm-tag.warn{border-color:color-mix(in srgb,#f0b86e 60%,transparent);color:#f0b86e;background:color-mix(in srgb,#f0b86e 12%,transparent)}
+dialog.alloc-confirm .alloc-confirm-box{margin:12px 0;border:1px solid var(--line,#3a3150);border-radius:12px;overflow:hidden}
+dialog.alloc-confirm .alloc-confirm-box>div{display:flex;justify-content:space-between;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line,#3a3150);font-size:14px}
+dialog.alloc-confirm .alloc-confirm-box>div:last-child{border-bottom:0}
+dialog.alloc-confirm .alloc-confirm-box>div.hl{background:color-mix(in srgb,var(--blue,#a886cc) 14%,transparent)}
+dialog.alloc-confirm .alloc-confirm-def{margin:10px 0 14px;padding-left:18px;font-size:12.5px;color:var(--muted,#aaa2b6)}
+dialog.alloc-confirm .alloc-confirm-actions{display:flex;gap:10px}
+dialog.alloc-confirm .alloc-confirm-actions button{flex:1;min-width:0;padding:11px 8px;border-radius:12px;font-weight:700}
