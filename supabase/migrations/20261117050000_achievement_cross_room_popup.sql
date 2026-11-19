@@ -1,5 +1,5 @@
 -- 玩家在任何主播頁都能收到「取得勳章」動畫彈窗：
--- 1) papa_notice_inbox 額外回傳 crossAchievements（同玩家其他房間、10 分鐘內、未讀的勳章通知，最多 5 筆）。
+-- 1) papa_notice_inbox 額外回傳 crossAchievements（同玩家其他房間、24 小時內、未讀的勳章通知，最多 5 筆）。
 -- 2) papa_notice_wakeup 對玩家的「取得勳章」通知，也對該玩家其他房間的即時頻道發訊號。
 create or replace function public.papa_notice_inbox(room text, owner_id text, page_number integer default 0)
  returns jsonb language plpgsql security definer set search_path to 'public' as $function$
@@ -10,7 +10,7 @@ begin
  select coalesce(jsonb_agg(to_jsonb(n)),'[]') into result from (select * from papa_notifications where recipient=owner_id and (streamer_id=room or (room='__global__' and owner_id='__super__')) order by created_at desc,id desc limit 51 offset greatest(0,page_number)*50) n;
  select coalesce(jsonb_object_agg(type,n),'{}') into unread from (select type,count(*) n from papa_notifications where recipient=owner_id and (streamer_id=room or (room='__global__' and owner_id='__super__')) and read_at is null group by type) c;
  if left(owner_id,2)<>'__' and page_number=0 then
-  select coalesce(jsonb_agg(to_jsonb(x)),'[]') into cross_rows from (select id,streamer_id,streamer_name,type,body,entity_id,created_at from papa_notifications where recipient=owner_id and type='achievement' and streamer_id<>room and read_at is null and created_at>now()-interval '10 minutes' order by created_at desc limit 5) x;
+  select coalesce(jsonb_agg(to_jsonb(x)),'[]') into cross_rows from (select id,streamer_id,streamer_name,type,body,entity_id,created_at from papa_notifications where recipient=owner_id and type='achievement' and streamer_id<>room and read_at is null and created_at>now()-interval '24 hours' order by created_at desc limit 5) x;
  else cross_rows='[]'::jsonb; end if;
  return jsonb_build_object('rows',result,'preferences',pref,'unread',unread,'topic',ch,'crossAchievements',cross_rows);
 end $function$;
