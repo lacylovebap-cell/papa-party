@@ -11,7 +11,7 @@ export function installOverlayFeedback({document,window,duration=4500}={document
  if(!element.isConnected)document.body.append(element);
  if(!document.getElementById('overlay-feedback-styles')){
   const link=document.createElement('link');link.id='overlay-feedback-styles';link.rel='stylesheet';
-  link.href=new URL('./overlay-feedback.css?v=11.20-ACH.6',import.meta.url).href;document.head.append(link);
+  link.href=new URL('./overlay-feedback.css?v=11.20-ACH.7',import.meta.url).href;document.head.append(link);
  }
  let disposed=false,visible=false,timer=null,sequence=0,promotedFor=null;
  const openOrder=[];

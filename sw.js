@@ -39,7 +39,7 @@ self.addEventListener('push',event=>{event.waitUntil((async()=>{
  await self.registration.showNotification(typeof data.title==='string'?data.title.slice(0,160):'PA Party',{body:data.body,tag:data.id,data:{url,medalBody:target?.entityType==='achievement'||new URL(url).searchParams.get('entityType')==='achievement'?data.body.slice(0,200):''},icon:'./assets/app-icon-192.png',badge:'./assets/app-icon-192.png',...(cancelled?{silent:true}:{})});
 })());});
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{
- const url=boundedNoticeUrl(event.notification.data?.url||'./');if(!url)return;const mb=event.notification.data?.medalBody;let openUrl=url;if(mb){const u=new URL(url);u.searchParams.set('medalBody',mb);openUrl=u.href;}
+ const url=boundedNoticeUrl(event.notification.data?.url||'./');if(!url)return;const mb=event.notification.data?.medalBody;let openUrl=url;if(mb){const u=new URL(url);u.searchParams.set('medalBody',mb);openUrl=u.href;}if(mb){try{const q=new URL(url).searchParams,c=await caches.open('pa-medal');await c.put('/__pending-medal',new Response(JSON.stringify({id:q.get('notificationId')||String(Date.now()),body:mb,entity_id:q.get('entityId')||'',at:Date.now()})));}catch{}}
  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true}),tab=clients.find(client=>client.url===url);
  if(tab){await tab.focus();return;}await self.clients.openWindow(openUrl);
 })());});

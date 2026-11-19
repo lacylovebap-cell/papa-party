@@ -3,7 +3,7 @@ import {createNotificationDevicePreferences} from './notification-device-prefere
 import {messageCenterHtml,messageCenterSettingsHtml} from './message-center-view.js?v=10.31-NOTICE.4';
 import {createMessageCenter,MESSAGE_CATEGORIES} from './message-center.js?v=10.31-NOTICE.4';
 import {canReplaceSound,isSuper} from './access-policy.js?v=10.28-CANCEL.1';
-import {showMedalCelebration} from './medal-celebrate.js?v=11.20-ACH.6';
+import {showMedalCelebration} from './medal-celebrate.js?v=11.20-ACH.7';
 import {communicationIdentity} from './communication-context.js?v=10.19-WEB.1';
 import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=11.13-SONG.1';
 import {createWebNotificationHealth} from './web-notification-health.js?v=10.19-WEB.1';
@@ -60,6 +60,8 @@ export function createNotifications({api,context,toast,onUpdate,onNavigate,onOpe
  const restoreAudio=()=>{if(!unlocked&&devicePrefs.soundEnabled())void unlock();};
  document.addEventListener('pointerdown',restoreAudio,{passive:true});
  document.addEventListener('keydown',e=>{if(!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey)restoreAudio();},{passive:true});
+ async function pendingMedal(){try{if(!globalThis.caches)return;const c=await caches.open('pa-medal'),r=await c.match('/__pending-medal');if(!r)return;const d=await r.json();await c.delete('/__pending-medal');if(d&&Date.now()-d.at<180000&&d.body)celebrateMedals([{id:d.id,body:d.body,entity_id:d.entity_id,created_at:new Date(d.at).toISOString()}]);}catch{}}
+ pendingMedal();document.addEventListener('visibilitychange',()=>{if(!document.hidden)pendingMedal();});window.addEventListener('focus',()=>pendingMedal());
  let medalList=[],medalPopupOn=false;function celebrateNow(){if(document.hidden||!medalPopupOn)return;const fresh=medalList.filter(n=>Date.now()-Date.parse(n.created_at)<864e5);if(fresh.length)celebrateMedals(fresh);}
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)celebrateNow();});window.addEventListener('focus',celebrateNow);window.addEventListener('pageshow',celebrateNow);
  function celebrateMedals(list){let ids=[];const key='pa-medal-celebrated';try{ids=JSON.parse(localStorage.getItem(key)||'[]');}catch{}let changed=false;const todo=[];for(const n of list){if(!n?.id||ids.includes(n.id))continue;ids.push(n.id);changed=true;todo.push(n);}todo.sort((x,y)=>Date.parse(x.created_at)-Date.parse(y.created_at));for(const n of todo.slice(-3))showMedalCelebration(n);if(changed)try{localStorage.setItem(key,JSON.stringify(ids.slice(-60)));}catch{}}
