@@ -3,7 +3,7 @@ import {createNotificationDevicePreferences} from './notification-device-prefere
 import {messageCenterHtml,messageCenterSettingsHtml} from './message-center-view.js?v=10.31-NOTICE.4';
 import {createMessageCenter,MESSAGE_CATEGORIES} from './message-center.js?v=10.31-NOTICE.4';
 import {canReplaceSound,isSuper} from './access-policy.js?v=10.28-CANCEL.1';
-import {showMedalCelebration} from './medal-celebrate.js?v=11.20-ACH.10';
+import {showMedalCelebration} from './medal-celebrate.js?v=11.20-LINK.1';
 import {communicationIdentity} from './communication-context.js?v=10.19-WEB.1';
 import {NOTICE_TYPES,cleanNoticePrefs,noticeChannels,deriveNotices} from './notification-rules.js?v=11.13-SONG.1';
 import {createWebNotificationHealth} from './web-notification-health.js?v=10.19-WEB.1';

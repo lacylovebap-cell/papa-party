@@ -27,7 +27,7 @@ export function queuePreparation(q,t=stamp()){if(q.awaitingAcknowledgment)return
 export function timeValue(x){if(typeof x==='number')return x;if(!x)return NaN; if(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}[ T]\d/.test(x)&&!/(Z|[+-]\d\d:\d\d)$/.test(x)){const m=x.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);return Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]-8,+m[5],+(m[6]||0));}return Date.parse(x);}
 export const hourKey=t=>Math.floor(timeValue(t)/3600000);
 export const queueCrossedHour=(q,at)=>Number.isFinite(timeValue(q.quota_original_at||q.at))&&hourKey(at)>hourKey(q.quota_original_at||q.at);
-export const queueUsesQuota=q=>!q.voided_at&&(q.kind==='saved'||q.kind==='live'&&q.status==='completed'&&q.quota_carried===true);
+export const queueUsesQuota=q=>!q.voided_at&&!q.quota_exempt&&(q.kind==='saved'||q.kind==='live'&&q.status==='completed'&&q.quota_carried===true);
 function carryQueueQuota(q,at,carry,t,historyCorrection=false){
  requireThat(typeof carry==='boolean','請選擇是否過檔');
  requireThat(!carry||['saved','live'].includes(q.kind)&&queueCrossedHour(q,at),'只有跨小時的提歌或現點可以過檔');
@@ -93,15 +93,19 @@ function voidReceiptAllocation(s,source,t){
 // 連動：把已存在的現點歌（待播或已完成）接到同玩家的一筆收歌／存歌紀錄上。
 // 未唱的變成該筆的分配保留；已唱的用「現點→提歌」更正補一筆扣款，並記下連動來源。
 const receiptLinkedCost=(s,r)=>s.queue.filter(q=>!['cancelled','stored'].includes(q.status)&&!q.voided_at&&(q.source_transaction_id===r.id||q.linked_receipt_id===r.id)).reduce((n,q)=>n+queueCost(q),0);
+// 同一個整點小時內收到的存歌＝現點：提歌可連動到同小時的存歌，照扣存歌但不佔提歌額度。
+export const linkSameHour=(q,r)=>hourKey(quotaTime(q))===hourKey(r.effective_at||r.at);
 function linkRowsToReceipt(s,receipt,ids,t,at,group=uid()){
  const rows=ids.map(id=>s.queue.find(x=>x.id===id));
- requireThat(rows.length&&rows.every(q=>q&&q.playerId===receipt.playerId&&q.kind==='live'&&['pending','waiting','completed'].includes(q.status)&&!q.allocation_id&&!q.source_transaction_id&&!q.linked_receipt_id&&!q.voided_at),'所選歌曲不符或已連動');
+ requireThat(rows.every(q=>!q||q.kind!=='saved'||linkSameHour(q,receipt)),'提歌只能連動同一個整點小時內收到的存歌');
+ requireThat(rows.length&&rows.every(q=>q&&q.playerId===receipt.playerId&&(q.kind==='live'||q.kind==='saved')&&['pending','waiting','completed'].includes(q.status)&&!q.allocation_id&&!q.source_transaction_id&&!q.linked_receipt_id&&!q.voided_at),'所選歌曲不符或已連動');
  requireThat(receipt.amount>0&&!receipt.queueId&&!receipt.conversion&&!receipt.voided_at&&!receipt.allocation_id,'請選此玩家可連動的存歌紀錄');
  const cost=rows.reduce((n,q)=>n+queueCost(q),0),quantity=Number(receipt.receipt_quantity??receipt.amount),pool=venuePolicyLedgerPool(receipt);
  requireThat(receiptLinkedCost(s,receipt)+cost<=quantity,'連動的首數超過這筆存歌的剩餘首數');
  receipt.accounting_kind='receipt';receipt.receipt_quantity??=receipt.amount;
  for(const q of rows){
-  if(q.status==='completed'){changeQueueKind(s,q,'saved',t);q.linked_receipt_id=receipt.id;q.link_group=group;}
+  if(q.kind==='saved'){q.linked_receipt_id=receipt.id;q.link_group=group;q.quota_exempt={at:t,receiptId:receipt.id};q.linked_existing_at=t;continue;}
+  if(q.status==='completed'){changeQueueKind(s,q,'saved',t);q.linked_receipt_id=receipt.id;q.link_group=group;if(linkSameHour(q,receipt))q.quota_exempt={at:t,receiptId:receipt.id};}
   else{requireThat(venuePolicyAvailableCredits(s,q.playerId,pool)>=queueCost(q),'可用存歌不足');
    q.status='waiting';q.giftConfirmed=true;q.awaitingAcknowledgment=false;q.awaitingPreparation=q.awaitingPreparation??true;if(!q.acceptedAt)q.acceptedAt=at;
    q.allocation_id=group;q.allocation_model='reservation-v1';q.source_transaction_id=receipt.id;q.allocation_storage_pool=pool;q.receivedCreditCost=queueCost(q);q.openingBalance=!!receipt.openingBalance;}
@@ -142,6 +146,7 @@ function deleteQueue(s,q,t,via='delete'){
 // debit; the difference is settled with linked correction rows so the player's
 // stored-song balance ends exactly where the right choice would have left it.
 function changeQueueKind(s,q,kind,t){
+ requireThat(!q.linked_receipt_id,'已連動存歌的歌不能再改點歌方式');
  requireThat(['saved','live'].includes(kind),'請選擇提歌或現點');
  requireThat(['saved','live'].includes(q.kind),'主播自帶的歌不能改');
  requireThat(q.kind!==kind,kind==='live'?'這首已經是現點':'這首已經是提歌');
