@@ -502,3 +502,8 @@ dialog.alloc-confirm .alloc-confirm-actions button{flex:1;min-width:0;padding:11
 details.tag-management .chips>button{min-height:0!important;height:auto!important;padding:3px 11px;min-height:0;height:auto;border-radius:999px;font-size:var(--fs-sm);line-height:1.5;background:transparent;border:1px solid color-mix(in srgb,var(--border,#56446b) 65%,transparent);color:var(--muted,#aaa2b6);box-shadow:none}
 details.tag-management .chips>button:hover:not(:disabled){border-color:var(--accent,#b78bd8);color:var(--text,#f1eaf7);filter:none}
 .tag{padding:2px 9px;border-radius:999px;background:color-mix(in srgb,var(--accent,#b78bd8) 12%,transparent);border:1px solid color-mix(in srgb,var(--border,#56446b) 55%,transparent);color:var(--muted,#cfbade);letter-spacing:.02em}
+
+/* 11.22-TAGS.2 歌本「無標籤」篩選小按鈕 */
+.list-sort-rail{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+html #app .list-sort-rail button.untagged-toggle{padding:2px 11px;min-height:0;height:auto;width:auto;border-radius:999px;font-size:var(--fs-sm);line-height:1.5;background:transparent;background-image:none;color:var(--muted,#aaa2b6);border:1px solid color-mix(in srgb,var(--border,#56446b) 65%,transparent);box-shadow:none}
+html #app .list-sort-rail button.untagged-toggle.active{background:color-mix(in srgb,var(--accent,#b78bd8) 24%,transparent);border-color:var(--accent,#b78bd8);color:var(--text,#fff)}
