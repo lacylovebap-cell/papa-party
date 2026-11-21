@@ -489,12 +489,16 @@ dialog.alloc-confirm .alloc-confirm-def{margin:10px 0 14px;padding-left:18px;fon
 dialog.alloc-confirm .alloc-confirm-actions{display:flex;gap:10px}
 dialog.alloc-confirm .alloc-confirm-actions button{flex:1;min-width:0;padding:11px 8px;border-radius:12px;font-weight:700}
 
-/* 11.22-TAGS.1 標籤篩選：膠囊式小標籤，選中亮主題色（隱藏原生勾選框） */
-.search-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding-top:8px}
-.search-tags label{position:relative;display:inline-flex;align-items:center;margin:0;padding:3px 11px;min-height:0;height:auto;border-radius:999px;border:1px solid color-mix(in srgb,var(--border,#56446b) 65%,transparent);background:transparent;color:var(--muted,#aaa2b6);font-size:var(--fs-sm);line-height:1.5;letter-spacing:.02em;cursor:pointer;user-select:none;transition:background .15s,border-color .15s,color .15s}
-.search-tags label>input{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
-.search-tags label:hover{border-color:var(--accent,#b78bd8);color:var(--text,#f1eaf7)}
-.search-tags label:has(>input:checked){background:color-mix(in srgb,var(--accent,#b78bd8) 24%,transparent);border-color:var(--accent,#b78bd8);color:var(--text,#fff);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent,#b78bd8) 35%,transparent) inset}
-.search-tags label:has(>input:focus-visible){outline:2px solid var(--accent,#b78bd8);outline-offset:1px}
+/* 11.22-TAGS.1 標籤統一樣式：篩選／編輯／批次／抽歌／管理／歌曲上的標籤都用膠囊，選中亮主題色（隱藏原生勾選框） */
+:is(.search-tags,.song-tag-options,.batch-tag-options,.proxy-draw-tags .chips){display:flex;flex-wrap:wrap;gap:6px}
+.search-tags{margin:0 0 12px;padding-top:8px}
+:is(.search-tags,.song-tag-options,.batch-tag-options,.proxy-draw-tags .chips) label{position:relative;display:inline-flex;align-items:center;width:auto;margin:0;padding:3px 11px;min-height:0;height:auto;border-radius:999px;border:1px solid color-mix(in srgb,var(--border,#56446b) 65%,transparent);background:transparent;color:var(--muted,#aaa2b6);font-size:var(--fs-sm);line-height:1.5;letter-spacing:.02em;cursor:pointer;user-select:none;transition:background .15s,border-color .15s,color .15s}
+:is(.search-tags,.song-tag-options,.batch-tag-options,.proxy-draw-tags .chips) label>input{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
+:is(.search-tags,.song-tag-options,.batch-tag-options,.proxy-draw-tags .chips) label:hover{border-color:var(--accent,#b78bd8);color:var(--text,#f1eaf7)}
+:is(.search-tags,.song-tag-options,.batch-tag-options,.proxy-draw-tags .chips) label:has(>input:checked){background:color-mix(in srgb,var(--accent,#b78bd8) 24%,transparent);border-color:var(--accent,#b78bd8);color:var(--text,#fff);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent,#b78bd8) 35%,transparent) inset}
+:is(.search-tags,.song-tag-options,.batch-tag-options,.proxy-draw-tags .chips) label:has(>input:focus-visible){outline:2px solid var(--accent,#b78bd8);outline-offset:1px}
 .search-tags small{flex-basis:100%;padding:2px 2px 0;font-size:var(--fs-xs);opacity:.7}
 [data-tag-search]{margin:6px 0 2px;padding:6px 12px;min-height:0;height:auto;font-size:var(--fs-sm);border-radius:999px}
+details.tag-management .chips>button{min-height:0!important;height:auto!important;padding:3px 11px;min-height:0;height:auto;border-radius:999px;font-size:var(--fs-sm);line-height:1.5;background:transparent;border:1px solid color-mix(in srgb,var(--border,#56446b) 65%,transparent);color:var(--muted,#aaa2b6);box-shadow:none}
+details.tag-management .chips>button:hover:not(:disabled){border-color:var(--accent,#b78bd8);color:var(--text,#f1eaf7);filter:none}
+.tag{padding:2px 9px;border-radius:999px;background:color-mix(in srgb,var(--accent,#b78bd8) 12%,transparent);border:1px solid color-mix(in srgb,var(--border,#56446b) 55%,transparent);color:var(--muted,#cfbade);letter-spacing:.02em}
