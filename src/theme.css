@@ -488,3 +488,13 @@ dialog.alloc-confirm .alloc-confirm-box>div.hl{background:color-mix(in srgb,var(
 dialog.alloc-confirm .alloc-confirm-def{margin:10px 0 14px;padding-left:18px;font-size:12.5px;color:var(--muted,#aaa2b6)}
 dialog.alloc-confirm .alloc-confirm-actions{display:flex;gap:10px}
 dialog.alloc-confirm .alloc-confirm-actions button{flex:1;min-width:0;padding:11px 8px;border-radius:12px;font-weight:700}
+
+/* 11.22-TAGS.1 標籤篩選：膠囊式小標籤，選中亮主題色（隱藏原生勾選框） */
+.search-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding-top:8px}
+.search-tags label{position:relative;display:inline-flex;align-items:center;margin:0;padding:3px 11px;min-height:0;height:auto;border-radius:999px;border:1px solid color-mix(in srgb,var(--border,#56446b) 65%,transparent);background:transparent;color:var(--muted,#aaa2b6);font-size:var(--fs-sm);line-height:1.5;letter-spacing:.02em;cursor:pointer;user-select:none;transition:background .15s,border-color .15s,color .15s}
+.search-tags label>input{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
+.search-tags label:hover{border-color:var(--accent,#b78bd8);color:var(--text,#f1eaf7)}
+.search-tags label:has(>input:checked){background:color-mix(in srgb,var(--accent,#b78bd8) 24%,transparent);border-color:var(--accent,#b78bd8);color:var(--text,#fff);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent,#b78bd8) 35%,transparent) inset}
+.search-tags label:has(>input:focus-visible){outline:2px solid var(--accent,#b78bd8);outline-offset:1px}
+.search-tags small{flex-basis:100%;padding:2px 2px 0;font-size:var(--fs-xs);opacity:.7}
+[data-tag-search]{margin:6px 0 2px;padding:6px 12px;min-height:0;height:auto;font-size:var(--fs-sm);border-radius:999px}
